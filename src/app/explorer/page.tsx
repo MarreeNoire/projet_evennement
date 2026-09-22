@@ -1,0 +1,123 @@
+import type { Metadata } from "next";
+
+import { EventGrid } from "@/components/events/event-card";
+import { ExploreFiltersBar } from "@/components/events/explore-filters";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { ButtonLink } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/states";
+import { getCategoryLabel } from "@/lib/constants";
+import { getEventCities, searchPublishedEvents, type ExploreFilters } from "@/lib/events/queries";
+
+export const metadata: Metadata = { title: "Explorer les événements" };
+
+const SORT_VALUES = ["date_asc", "popular", "price_asc", "price_desc", "recent"] as const;
+type SortValue = (typeof SORT_VALUES)[number];
+
+function toSort(value: string | undefined): SortValue {
+  return (SORT_VALUES as readonly string[]).includes(value ?? "")
+    ? (value as SortValue)
+    : "date_asc";
+}
+
+/* Explorer : recherche + filtres + pagination via l'URL. */
+
+export default async function ExplorePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+
+  const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+
+  const filters: ExploreFilters = {
+    query: first(params.q),
+    category: first(params.categorie),
+    city: first(params.ville),
+    freeOnly: first(params.gratuit) === "1",
+    sort: toSort(first(params.tri)),
+    page: Math.max(Number(first(params.page) ?? 1) || 1, 1),
+    pageSize: 12,
+  };
+
+  let result: Awaited<ReturnType<typeof searchPublishedEvents>> | null = null;
+  let cities: string[] = [];
+  let loadError = false;
+
+  try {
+    [result, cities] = await Promise.all([searchPublishedEvents(filters), getEventCities()]);
+  } catch {
+    loadError = true;
+  }
+
+  const events = result?.events ?? [];
+  const total = result?.total ?? 0;
+  const page = result?.page ?? 1;
+  const totalPages = result?.totalPages ?? 1;
+
+  const pageHref = (p: number) => {
+    const next = new URLSearchParams();
+    if (filters.query) next.set("q", filters.query);
+    if (filters.category) next.set("categorie", filters.category);
+    if (filters.city) next.set("ville", filters.city);
+    if (filters.sort && filters.sort !== "date_asc") next.set("tri", filters.sort);
+    if (filters.freeOnly) next.set("gratuit", "1");
+    if (p > 1) next.set("page", String(p));
+    const query = next.toString();
+    return query ? `/explorer?${query}` : "/explorer";
+  };
+
+  return (
+    <div className="flex min-h-dvh flex-col">
+      <SiteHeader />
+      <main id="contenu" className="container-page flex flex-col gap-6 py-8">
+        <div>
+          <h1 className="font-display text-2xl font-bold md:text-3xl">Explorer</h1>
+          <p className="mt-1 text-sm text-fg-muted">
+            {filters.category
+              ? `Catégorie : ${getCategoryLabel(filters.category)}`
+              : "Tous les événements à venir."}
+          </p>
+        </div>
+
+        <ExploreFiltersBar cities={cities} total={total} />
+
+        {loadError ? (
+          <EmptyState
+            title="Recherche momentanément indisponible"
+            description="Réessaie dans un instant."
+          />
+        ) : events.length === 0 ? (
+          <EmptyState
+            title="Aucun événement trouvé"
+            description="Essaie d'autres mots-clés ou réinitialise les filtres."
+            action={<ButtonLink href="/explorer">Voir tous les événements</ButtonLink>}
+          />
+        ) : (
+          <>
+            <EventGrid events={events} />
+            {totalPages > 1 ? (
+              <nav aria-label="Pagination" className="flex items-center justify-center gap-2 pt-2">
+                {page > 1 ? (
+                  <ButtonLink href={pageHref(page - 1)} variant="secondary" size="sm">
+                    ← Page précédente
+                  </ButtonLink>
+                ) : null}
+                <span className="text-sm text-fg-muted" role="status">
+                  Page {page} sur {totalPages}
+                </span>
+                {page < totalPages ? (
+                  <ButtonLink href={pageHref(page + 1)} variant="secondary" size="sm">
+                    Page suivante →
+                  </ButtonLink>
+                ) : null}
+              </nav>
+            ) : null}
+          </>
+        )}
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
