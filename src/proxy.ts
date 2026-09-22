@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 /* =============================================================================
-   Middleware de session Supabase
+   Proxy de session Supabase (convention Next.js 16 : `src/proxy.ts`)
    --------------------------------------------------------------------------
    * Rafraîchit les cookies de session à chaque requête (obligatoire avec
      @supabase/ssr, sinon la session expire côté serveur).
@@ -11,7 +11,7 @@ import { createServerClient } from "@supabase/ssr";
      clairs et des pages publiques ultra-rapides.
    ========================================================================== */
 
-export async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

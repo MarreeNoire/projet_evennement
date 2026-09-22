@@ -1,22 +1,24 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/skeleton";
 import { CATEGORIES, EVENT_SORTS } from "@/lib/constants";
 
 /* Barre de recherche + filtres de l'explorer : met à jour l'URL (?q=&categorie=…). */
 
-export function ExploreFiltersBar({
+function ExploreFiltersInner({
   cities,
   total,
+  onNavigate,
 }: {
   cities: string[];
   total: number;
+  onNavigate: (href: string) => void;
 }) {
-  const router = useRouter();
   const params = useSearchParams();
   const [pending, startTransition] = useTransition();
 
@@ -34,7 +36,8 @@ export function ExploreFiltersBar({
     if (city) next.set("ville", city);
     if (sort && sort !== "date_asc") next.set("tri", sort);
     if (freeOnly) next.set("gratuit", "1");
-    startTransition(() => router.push(`/explorer?${next.toString()}`));
+    const serialized = next.toString();
+    startTransition(() => onNavigate(serialized ? `/explorer?${serialized}` : "/explorer"));
   }
 
   function reset() {
@@ -43,7 +46,7 @@ export function ExploreFiltersBar({
     setCity("");
     setSort("date_asc");
     setFreeOnly(false);
-    startTransition(() => router.push("/explorer"));
+    startTransition(() => onNavigate("/explorer"));
   }
 
   return (
@@ -132,4 +135,19 @@ export function ExploreFiltersBar({
       </div>
     </form>
   );
+}
+
+/* Point d'entrée : isole useSearchParams + navigation sous Suspense (build statique). */
+
+export function ExploreFiltersBar({ cities, total }: { cities: string[]; total: number }) {
+  return (
+    <Suspense fallback={<Spinner label="Chargement des filtres…" />}>
+      <ExploreFiltersWithRouter cities={cities} total={total} />
+    </Suspense>
+  );
+}
+
+function ExploreFiltersWithRouter({ cities, total }: { cities: string[]; total: number }) {
+  const router = useRouter();
+  return <ExploreFiltersInner cities={cities} total={total} onNavigate={(href) => router.push(href)} />;
 }
