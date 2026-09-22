@@ -1,0 +1,505 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* =============================================================================
+   DESIGN SYSTEM — « Kora »
+   Direction artistique : premium, moderne, chaleureuse (Abidjan / Afrique de
+   l'Ouest). Base neutre *stone*, accent *teal*, highlight *ambre* réservé aux
+   badges / VIP / CTA chauds.
+
+   Architecture : PRIMITIFS (échelle brute) -> SÉMANTIQUES (rôle) -> @theme
+   (utilitaires Tailwind). Les composants n'utilisent QUE les sémantiques.
+
+   Contrastes WCAG 2.2 AA vérifiés :
+     primary   #0f766e sur blanc ....... 5.55:1  (texte courant OK)
+     blanc     sur primary   #0f766e ... 5.55:1  (texte de bouton OK)
+     accent    #b45309 sur blanc ....... 5.01:1
+     success   #15803d sur blanc ....... 5.02:1
+     danger    #b91c1c sur blanc ....... 6.47:1
+     info      #0369a1 sur blanc ....... 5.94:1
+     primary   #2dd4bf sur fond sombre . 10.6:1
+     accent-solid #fbbf24 sur stone-950  8.9:1
+   ========================================================================== */
+
+/* Dark mode piloté par une classe (next-themes) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* ---------- PRIMITIFS : marque (teal) ---------- */
+  --brand-50: #f0fdfa;
+  --brand-100: #ccfbf1;
+  --brand-200: #99f6e4;
+  --brand-300: #5eead4;
+  --brand-400: #2dd4bf;
+  --brand-500: #14b8a6;
+  --brand-600: #0d9488;
+  --brand-700: #0f766e;
+  --brand-800: #115e59;
+  --brand-900: #134e4a;
+  --brand-950: #042f2e;
+
+  /* ---------- PRIMITIFS : accent (ambre / VIP) ---------- */
+  --gold-100: #fef3c7;
+  --gold-300: #fcd34d;
+  --gold-400: #fbbf24;
+  --gold-500: #f59e0b;
+  --gold-600: #d97706;
+  --gold-700: #b45309;
+
+  /* ---------- PRIMITIFS : neutres (stone) ---------- */
+  --stone-50: #fafaf9;
+  --stone-100: #f5f5f4;
+  --stone-200: #e7e5e4;
+  --stone-300: #d6d3d1;
+  --stone-400: #a8a29e;
+  --stone-500: #78716c;
+  --stone-600: #57534e;
+  --stone-700: #44403c;
+  --stone-800: #292524;
+  --stone-900: #1c1917;
+  --stone-950: #0c0a09;
+
+  /* ---------- PRIMITIFS : feedback ---------- */
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+  --red-900: #7f1d1d;
+  --blue-600: #0284c7;
+  --blue-700: #0369a1;
+
+  /* ================= SÉMANTIQUES — THÈME CLAIR ================= */
+  /* Surfaces */
+  --bg: #ffffff;
+  --bg-subtle: var(--stone-50);
+  --bg-muted: var(--stone-100);
+  --bg-inverted: var(--stone-900);
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: var(--stone-50);
+  --surface-overlay: #ffffff;
+
+  /* Textes */
+  --fg: var(--stone-900);
+  --fg-muted: var(--stone-600);
+  --fg-subtle: var(--stone-500);
+  --fg-inverted: #ffffff;
+
+  /* Bordures */
+  --border: var(--stone-200);
+  --border-strong: var(--stone-300);
+  --border-focus: var(--brand-600);
+
+  /* Marque */
+  --primary: var(--brand-700);
+  --primary-hover: var(--brand-800);
+  --primary-active: var(--brand-900);
+  --primary-solid: var(--brand-700);
+  --primary-solid-hover: var(--brand-800);
+  --primary-solid-fg: #ffffff;
+  --primary-subtle: var(--brand-50);
+  --primary-subtle-fg: var(--brand-900);
+
+  /* Accent (VIP / CTA chaud) */
+  --accent: var(--gold-700);
+  --accent-solid: var(--gold-400);
+  --accent-solid-fg: var(--stone-900);
+  --accent-subtle: #fffbeb;
+  --accent-subtle-fg: var(--gold-700);
+
+  /* Feedback */
+  --success: var(--green-700);
+  --success-solid: var(--green-700);
+  --success-subtle: #f0fdf4;
+  --warning: var(--gold-700);
+  --warning-subtle: #fffbeb;
+  --danger: var(--red-700);
+  --danger-solid: var(--red-700);
+  --danger-solid-hover: var(--red-900);
+  --danger-subtle: #fef2f2;
+  --info: var(--blue-700);
+  --info-subtle: #f0f9ff;
+}
+
+/* ================= SÉMANTIQUES — THÈME SOMBRE ================= */
+/* Le teal 400 (#2dd4bf) offre 10.6:1 sur le fond sombre : lisible ET vibrant. */
+.dark {
+  --bg: #0b0e11;
+  --bg-subtle: #12161a;
+  --bg-muted: #1a1f24;
+  --bg-inverted: var(--stone-50);
+  --surface: #12161a;
+  --surface-raised: #1a1f24;
+  --surface-sunken: #0b0e11;
+  --surface-overlay: #1a1f24;
+
+  --fg: #f5f5f4;
+  --fg-muted: #b8b3ad;
+  --fg-subtle: #928c85;
+  --fg-inverted: var(--stone-950);
+
+  --border: #262c33;
+  --border-strong: #363d45;
+  --border-focus: var(--brand-400);
+
+  --primary: var(--brand-400);
+  --primary-hover: var(--brand-300);
+  --primary-active: var(--brand-200);
+  --primary-solid: var(--brand-500);
+  --primary-solid-hover: var(--brand-400);
+  --primary-solid-fg: var(--brand-950);
+  --primary-subtle: rgb(45 212 191 / 0.12);
+  --primary-subtle-fg: var(--brand-300);
+
+  --accent: var(--gold-400);
+  --accent-solid: var(--gold-400);
+  --accent-solid-fg: var(--stone-950);
+  --accent-subtle: rgb(251 191 36 / 0.12);
+  --accent-subtle-fg: var(--gold-300);
+
+  --success: #4ade80;
+  --success-solid: var(--green-600);
+  --success-subtle: rgb(22 163 74 / 0.14);
+  --warning: var(--gold-400);
+  --warning-subtle: rgb(245 158 11 / 0.14);
+  --danger: #f87171;
+  --danger-solid: var(--red-600);
+  --danger-solid-hover: var(--red-700);
+  --danger-subtle: rgb(220 38 38 / 0.14);
+  --info: #38bdf8;
+  --info-subtle: rgb(2 132 199 / 0.16);
+}
+/* =============================================================================
+   TOKENS EXPOSÉS À TAILWIND (utilitaires : bg-*, text-*, border-*, ring-*)
+   ========================================================================== */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-muted: var(--bg-muted);
+  --color-bg-inverted: var(--bg-inverted);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-overlay: var(--surface-overlay);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-fg-inverted: var(--fg-inverted);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-focus: var(--border-focus);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-solid: var(--primary-solid);
+  --color-primary-solid-hover: var(--primary-solid-hover);
+  --color-primary-solid-fg: var(--primary-solid-fg);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-fg: var(--primary-subtle-fg);
+
+  --color-accent: var(--accent);
+  --color-accent-solid: var(--accent-solid);
+  --color-accent-solid-fg: var(--accent-solid-fg);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-subtle-fg: var(--accent-subtle-fg);
+
+  --color-success: var(--success);
+  --color-success-solid: var(--success-solid);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-danger: var(--danger);
+  --color-danger-solid: var(--danger-solid);
+  --color-danger-solid-hover: var(--danger-solid-hover);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-info: var(--info);
+  --color-info-subtle: var(--info-subtle);
+
+  /* Palettes brutes : accents décoratifs uniquement */
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+
+  --color-gold-100: var(--gold-100);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+  --color-gold-700: var(--gold-700);
+
+  --color-stone-50: var(--stone-50);
+  --color-stone-100: var(--stone-100);
+  --color-stone-200: var(--stone-200);
+  --color-stone-300: var(--stone-300);
+  --color-stone-400: var(--stone-400);
+  --color-stone-500: var(--stone-500);
+  --color-stone-600: var(--stone-600);
+  --color-stone-700: var(--stone-700);
+  --color-stone-800: var(--stone-800);
+  --color-stone-900: var(--stone-900);
+  --color-stone-950: var(--stone-950);
+
+  /* Typographie : 2 familles maximum */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, sans-serif;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-display: clamp(2rem, 4vw + 1rem, 3.5rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.03em;
+
+  /* Rayons : une seule échelle */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.75rem;
+
+  /* Élévation : un seul système */
+  --shadow-xs: 0 1px 2px 0 rgb(28 25 23 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(28 25 23 / 0.08), 0 1px 2px -1px rgb(28 25 23 / 0.06);
+  --shadow-md: 0 4px 12px -2px rgb(28 25 23 / 0.09), 0 2px 6px -2px rgb(28 25 23 / 0.05);
+  --shadow-lg: 0 12px 28px -6px rgb(28 25 23 / 0.12), 0 4px 10px -4px rgb(28 25 23 / 0.07);
+  --shadow-xl: 0 24px 48px -12px rgb(28 25 23 / 0.18);
+
+  /* Mouvement : feedback UI sous 200 ms */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --breakpoint-xs: 26rem;
+}
+
+/* =============================================================================
+   COUCHE BASE — styles globaux et robustesse
+   ========================================================================== */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--border);
+  }
+
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Anneau de focus unique et visible sur tous les fonds (WCAG 2.4.11) */
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::selection {
+    background-color: var(--brand-200);
+    color: var(--brand-950);
+  }
+
+  .dark ::selection {
+    background-color: var(--brand-800);
+    color: var(--brand-50);
+  }
+
+  ::placeholder {
+    color: var(--fg-subtle);
+    opacity: 1;
+  }
+
+  /* Champs : fond lisible, pas de zoom iOS (< 16px provoque un zoom) */
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+  }
+
+  input,
+  textarea,
+  select {
+    background-color: var(--surface);
+    color: var(--fg);
+  }
+
+  @media (max-width: 26rem) {
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
+
+  /* Barre de défilement discrète */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--stone-400);
+  }
+
+  /* Images : jamais de débordement */
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Retire les animations pour les utilisateurs qui le demandent */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Mode contraste élevé forcé (Windows High Contrast) */
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline: 2px solid CanvasText;
+    }
+
+    .forced-color-safe {
+      border: 1px solid CanvasText;
+    }
+  }
+
+  /* Contraste renforcé si l'OS le demande */
+  @media (prefers-contrast: more) {
+    :root {
+      --fg-muted: var(--stone-700);
+      --fg-subtle: var(--stone-600);
+      --border: var(--stone-400);
+    }
+
+    .dark {
+      --fg-muted: #d6d1ca;
+      --fg-subtle: #b8b3ad;
+      --border: #4a525a;
+    }
+  }
+}
+
+/* =============================================================================
+   UTILITAIRES MÉTIER
+   ========================================================================== */
+@utility container-page {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 80rem;
+  padding-inline: 1rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+
+  @media (width >= 64rem) {
+    padding-inline: 2rem;
+  }
+}
+
+/* Lien d'évitement (accessibilité clavier) */
+@utility skip-link {
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  inset-block-start: -100%;
+  z-index: 100;
+  border-radius: var(--radius-md);
+  background-color: var(--primary-solid);
+  color: var(--primary-solid-fg);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: inset-block-start 150ms var(--ease-out-soft);
+
+  &:focus-visible {
+    inset-block-start: 0.5rem;
+  }
+}
+
+/* Masque visuellement sans casser les lecteurs d'écran */
+@utility sr-only-focusable {
+  &:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}

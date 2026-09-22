@@ -1,0 +1,43 @@
+# Dépendances
+node_modules/
+.pnp
+.pnp.js
+
+# Build Next.js
+.next/
+out/
+build/
+dist/
+.swc/
+
+# Environnement (JAMAIS committé)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Tests
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.nyc_output/
+
+# Vercel / Supabase
+.vercel
+.supabase
+
+# Divers
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
