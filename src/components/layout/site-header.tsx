@@ -1,4 +1,7 @@
-import { HeaderShell, type HeaderUser } from "./header-shell";
+import { HeaderShell } from "./header-shell";
+import type { HeaderUser } from "./header-types";
+
+export type { HeaderUser };
 
 import { env, isSupabaseConfigured } from "@/lib/env";
 import { getCurrentProfile, createSupabaseServerClient } from "@/lib/supabase/server";
