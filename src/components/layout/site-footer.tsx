@@ -13,7 +13,7 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t border-border bg-bg-subtle">
+    <footer className="mt-auto overflow-hidden border-t border-border bg-bg-subtle">
       <div className="container-page py-12">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div className="flex flex-col gap-4">
@@ -27,7 +27,7 @@ export function SiteFooter() {
                 {["Wave", "Orange Money", "MTN MoMo", "Moov", "Visa", "Mastercard"].map((method) => (
                   <li
                     key={method}
-                    className="rounded-md border border-border bg-surface px-2 py-1 text-xs text-fg-muted"
+                    className="rounded-sm border border-border-strong px-2 py-1 text-xs font-medium text-fg-muted"
                   >
                     {method}
                   </li>
@@ -40,7 +40,7 @@ export function SiteFooter() {
             <nav key={section.title} aria-labelledby={`footer-${section.title}`}>
               <h2
                 id={`footer-${section.title}`}
-                className="mb-3 font-display text-sm font-semibold text-fg"
+                className="eyebrow mb-3"
               >
                 {section.title}
               </h2>
@@ -68,6 +68,13 @@ export function SiteFooter() {
             Montants en {CURRENCY_LABEL} · Abidjan, Côte d&apos;Ivoire
           </p>
         </div>
+      </div>
+
+      {/* Signature : nom de la marque en très grand, rogné en bas comme sur une affiche */}
+      <div aria-hidden="true" className="container-page select-none">
+        <p className="-mb-[0.14em] font-display text-[clamp(4.5rem,19vw,15rem)] leading-[0.8] font-semibold tracking-tighter text-fg italic">
+          {APP_NAME}
+        </p>
       </div>
     </footer>
   );

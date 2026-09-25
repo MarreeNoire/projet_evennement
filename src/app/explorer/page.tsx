@@ -71,10 +71,13 @@ export default async function ExplorePage({
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
-      <main id="contenu" className="container-page flex flex-col gap-6 py-8">
-        <div>
-          <h1 className="font-display text-2xl font-bold md:text-3xl">Explorer</h1>
-          <p className="mt-1 text-sm text-fg-muted">
+      <main id="contenu" className="container-page flex flex-col gap-8 py-10">
+        <div className="border-t border-border pt-4">
+          <p className="eyebrow">Agenda</p>
+          <h1 className="mt-2 font-display text-4xl leading-[1.02] font-semibold md:text-5xl">
+            Explorer
+          </h1>
+          <p className="mt-2 text-sm text-fg-muted">
             {filters.category
               ? `Catégorie : ${getCategoryLabel(filters.category)}`
               : "Tous les événements à venir."}

@@ -10,6 +10,10 @@ import type { Database } from "@/types/database";
  */
 export async function createSupabaseServerClient() {
   if (!env.supabase.url || !env.supabase.anonKey) {
+    console.error("Supabase not configured in server:", {
+      url: env.supabase.url,
+      anonKey: env.supabase.anonKey,
+    });
     throw new Error(
       "Supabase n'est pas configuré. Renseigne NEXT_PUBLIC_SUPABASE_URL et " +
         "NEXT_PUBLIC_SUPABASE_ANON_KEY dans .env.local.",
@@ -53,7 +57,8 @@ export async function getCurrentUser() {
     } = await supabase.auth.getUser();
 
     return user ?? null;
-  } catch {
+  } catch (error) {
+    console.error("Error in getCurrentUser:", error);
     return null;
   }
 }
@@ -65,15 +70,24 @@ export async function getCurrentProfile() {
 
   const supabase = await createSupabaseServerClient();
 
-  const [{ data: profile }, { data: roles }] = await Promise.all([
+  const [{ data: profile }, { data: roles }, { data: ownedOrgs }, { data: memberOrgs }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     supabase.from("user_roles").select("role").eq("user_id", user.id),
+    supabase.from("organizations").select("id").eq("owner_id", user.id).limit(1),
+    supabase.from("organization_members").select("id").eq("user_id", user.id).limit(1),
   ]);
 
   if (!profile) return null;
 
+  const rolesList = (roles ?? []).map((row) => row.role);
+  const hasOrg = (ownedOrgs && ownedOrgs.length > 0) || (memberOrgs && memberOrgs.length > 0);
+
+  if (hasOrg && !rolesList.includes("organizer")) {
+    rolesList.push("organizer");
+  }
+
   return {
     ...profile,
-    roles: (roles ?? []).map((row) => row.role),
+    roles: rolesList,
   };
 }

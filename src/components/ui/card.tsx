@@ -3,9 +3,9 @@ import { cn } from "@/lib/utils";
 /* =============================================================================
    Carte
    --------------------------------------------------------------------------
-   Brique de base des listes et des tableaux de bord. Une seule élévation par
-   défaut : `shadow-xs` + bordure, pour éviter l'empilement de 5 niveaux
-   d'ombres qui trahit une interface non maîtrisée.
+   Brique de base des listes et des tableaux de bord. Filet fin sur papier, pas
+   d'ombre : la hiérarchie vient de la typographie et de l'espacement, pas de
+   l'empilement d'élévations.
    ========================================================================== */
 
 export function Card({
@@ -16,9 +16,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-surface",
+        "rounded-lg border border-border bg-surface",
         interactive &&
-          "transition-[box-shadow,border-color,transform] duration-150 ease-[var(--ease-out-soft)] hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md focus-within:border-border-focus",
+          "transition-[border-color,background-color] duration-150 ease-[var(--ease-out-soft)] hover:border-border hover:bg-surface-raised focus-within:border-border-focus",
         className,
       )}
       {...props}

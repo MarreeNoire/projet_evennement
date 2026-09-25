@@ -63,8 +63,8 @@ export default async function PaymentReturnPage({
       <main id="contenu" className="container-page flex max-w-xl flex-col gap-6 py-12 text-center">
         {status === "paid" ? (
           <>
-            <p className="font-display text-5xl" aria-hidden="true">🎉</p>
-            <h1 className="font-display text-2xl font-bold">Paiement confirmé !</h1>
+            <p className="eyebrow">Commande {order.reference}</p>
+            <h1 className="font-display text-4xl leading-[1.02] font-semibold">Paiement confirmé.</h1>
             <Alert tone="success" title={`Commande ${order.reference} payée`}>
               Tes billets sont disponibles. Présente leur QR code à l'entrée.
             </Alert>
@@ -77,8 +77,8 @@ export default async function PaymentReturnPage({
           </>
         ) : status === "failed" || statut === "refused" ? (
           <>
-            <p className="font-display text-5xl" aria-hidden="true">😞</p>
-            <h1 className="font-display text-2xl font-bold">Paiement refusé</h1>
+            <p className="eyebrow">Commande {order.reference}</p>
+            <h1 className="font-display text-4xl leading-[1.02] font-semibold">Paiement refusé.</h1>
             <Alert tone="danger" title="La transaction n'a pas abouti">
               Aucun montant n'a été débité. Tu peux réessayer avec un autre moyen de paiement.
             </Alert>
@@ -90,8 +90,8 @@ export default async function PaymentReturnPage({
           </>
         ) : (
           <>
-            <p className="font-display text-5xl" aria-hidden="true">⏳</p>
-            <h1 className="font-display text-2xl font-bold">Paiement en cours…</h1>
+            <p className="eyebrow">Commande {order.reference}</p>
+            <h1 className="font-display text-4xl leading-[1.02] font-semibold">Paiement en cours…</h1>
             <Alert tone="info" title="Confirmation en attente">
               {statut === "cancelled"
                 ? "Tu as annulé le paiement. Ta commande reste en attente."

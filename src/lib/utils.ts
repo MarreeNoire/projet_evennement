@@ -156,6 +156,20 @@ export function isPast(date: Date | string): boolean {
   return toDate(date).getTime() < Date.now();
 }
 
+/**
+ * Valeur attendue par `<input type="datetime-local">` (heure locale, sans `Z`).
+ * Ex : « 2026-11-15T19:00 ».
+ */
+export function toDateTimeLocalValue(date: Date | string): string {
+  const value = toDate(date);
+  if (Number.isNaN(value.getTime())) return "";
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return (
+    `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}` +
+    `T${pad(value.getHours())}:${pad(value.getMinutes())}`
+  );
+}
+
 /** Vérifie qu'une chaîne est une URL absolue exploitable. */
 export function isAbsoluteUrl(value: string): boolean {
   try {

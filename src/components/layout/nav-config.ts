@@ -21,7 +21,7 @@ export interface NavItem {
 export const PUBLIC_NAV: NavItem[] = [
   { href: ROUTES.explore, label: "Explorer" },
   { href: "/organisateurs", label: "Organisateurs" },
-  { href: "/comment-ca-marche", label: "Comment ça marche" },
+  { href: "/#principe", label: "Comment ça marche" },
 ];
 
 /** Navigation de l'application (utilisateur connecté). */
@@ -32,6 +32,21 @@ export const APP_NAV: NavItem[] = [
   { href: ROUTES.mySalons, label: "Mes salons", authenticated: true },
   { href: ROUTES.connections, label: "Connexions", authenticated: true },
 ];
+
+export function getNavItems(user: { isOrganizer?: boolean } | null): NavItem[] {
+  if (!user) return PUBLIC_NAV;
+  const items: NavItem[] = [
+    { href: ROUTES.home, label: "Accueil" },
+    { href: ROUTES.explore, label: "Explorer" },
+    { href: ROUTES.myTickets, label: "Mes billets", authenticated: true },
+    { href: ROUTES.mySalons, label: "Mes salons", authenticated: true },
+    { href: ROUTES.connections, label: "Connexions", authenticated: true },
+  ];
+  if (user.isOrganizer) {
+    items.push({ href: ROUTES.orgDashboard, label: "Espace Organisateur", organizerOnly: true });
+  }
+  return items;
+}
 
 /** Navigation de l'espace organisateur. */
 export const ORG_NAV: NavItem[] = [
@@ -62,9 +77,8 @@ export const FOOTER_SECTIONS = [
     title: "Découvrir",
     links: [
       { href: ROUTES.explore, label: "Tous les événements" },
-      { href: "/categories", label: "Catégories" },
       { href: "/organisateurs", label: "Organisateurs" },
-      { href: "/comment-ca-marche", label: "Comment ça marche" },
+      { href: "/#principe", label: "Comment ça marche" },
     ],
   },
   {
@@ -72,7 +86,7 @@ export const FOOTER_SECTIONS = [
     links: [
       { href: "/devenir-organisateur", label: "Devenir organisateur" },
       { href: `${ROUTES.orgDashboard}/evenements/nouveau`, label: "Créer un événement" },
-      { href: "/tarifs", label: "Tarifs et commission" },
+      { href: "/devenir-organisateur#formules", label: "Tarifs et commission" },
     ],
   },
   {

@@ -9,15 +9,18 @@ export default function EventNotFound() {
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
-      <main id="contenu" className="container-page flex flex-col items-center gap-4 py-20 text-center">
-        <p className="font-display text-5xl" aria-hidden="true">
-          🎟️
-        </p>
-        <h1 className="font-display text-2xl font-bold">Événement introuvable</h1>
+      <main id="contenu" className="container-page flex flex-col items-start gap-4 py-20">
+        <p className="eyebrow">Erreur 404</p>
+        <h1 className="font-display text-5xl leading-[1.02] font-semibold md:text-7xl">
+          Événement <span className="font-normal text-primary italic">introuvable.</span>
+        </h1>
         <p className="max-w-md text-sm text-fg-muted">
           Cet événement n'existe pas, n'est plus publié ou le lien est incorrect.
         </p>
-        <Link href="/explorer" className="text-sm font-medium text-primary hover:underline">
+        <Link
+          href="/explorer"
+          className="text-sm font-semibold text-primary underline underline-offset-4 hover:decoration-2"
+        >
           Explorer les événements
         </Link>
       </main>

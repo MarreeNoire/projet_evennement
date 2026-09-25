@@ -40,11 +40,11 @@ export async function createOrder(input: CheckoutInput): Promise<CreateOrderResu
   // Événement publié + organisation (montants jamais issus du client).
   const { data: event } = await supabase
     .from("events")
-    .select("id, organization_id, status, currency")
+    .select("id, organization_id, status, currency, end_at")
     .eq("id", values.eventId)
     .maybeSingle();
 
-  if (!event || event.status !== "published") {
+  if (!event || event.status !== "published" || new Date(event.end_at) < new Date()) {
     throw new Error("Cet événement n'est plus disponible à la vente.");
   }
 
@@ -76,14 +76,34 @@ export async function createOrder(input: CheckoutInput): Promise<CreateOrderResu
   let promoDiscount = 0;
   const promoCode = values.promoCode?.trim().toUpperCase();
   if (promoCode) {
+    const now = new Date();
     const { data: promo } = await supabase
       .from("promo_codes")
       .select("*")
       .eq("code", promoCode)
       .eq("is_active", true)
       .maybeSingle();
-    if (promo && (!promo.event_id || promo.event_id === values.eventId)) {
+
+    if (
+      promo &&
+      (!promo.event_id || promo.event_id === values.eventId) &&
+      (!promo.starts_at || new Date(promo.starts_at) <= now) &&
+      (!promo.expires_at || new Date(promo.expires_at) >= now) &&
+      (promo.max_uses === null || promo.used_count < promo.max_uses)
+    ) {
       promoId = promo.id;
+      const subtotalBeforeDiscount = values.items.reduce((sum, item) => {
+        const type = ticketTypes.find((t) => t.id === item.ticketTypeId);
+        return sum + (type ? type.price * item.quantity : 0);
+      }, 0);
+
+      if (subtotalBeforeDiscount >= (promo.min_order_amount ?? 0)) {
+        if (promo.discount_kind === "percentage") {
+          promoDiscount = Math.round((subtotalBeforeDiscount * promo.discount_value) / 100);
+        } else {
+          promoDiscount = Math.min(promo.discount_value, subtotalBeforeDiscount);
+        }
+      }
     }
   }
 

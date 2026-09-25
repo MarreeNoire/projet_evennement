@@ -11,7 +11,7 @@ import type { Database } from "@/types/database";
 export function createSupabaseBrowserClient() {
   if (!env.supabase.url || !env.supabase.anonKey) {
     throw new Error(
-      "Supabase n'est pas configuré. Renseigne NEXT_PUBLIC_SUPABASE_URL et " +
+      "Supabase n'est pas configuré. URL: '" + env.supabase.url + "', Anon Key: '" + env.supabase.anonKey + "'. Renseigne NEXT_PUBLIC_SUPABASE_URL et " +
         "NEXT_PUBLIC_SUPABASE_ANON_KEY dans .env.local.",
     );
   }

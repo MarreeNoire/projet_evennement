@@ -18,9 +18,10 @@ export default async function LoginPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-12">
-      <div className="text-center">
-        <h1 className="font-display text-2xl font-bold">Bon retour 👋</h1>
-        <p className="mt-1.5 text-sm text-fg-muted">
+      <div className="border-t border-border pt-4">
+        <p className="eyebrow">Connexion</p>
+        <h1 className="mt-2 font-display text-4xl leading-[1.02] font-semibold">Bon retour.</h1>
+        <p className="mt-2 text-sm text-fg-muted">
           Connecte-toi pour retrouver tes billets et tes salons {APP_NAME}.
         </p>
       </div>

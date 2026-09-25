@@ -1,12 +1,13 @@
-import { Ticket, Users } from "lucide-react";
-
 import { ButtonLink } from "@/components/ui/button";
 import { AccessLevelBadge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/utils";
 import type { TicketTypeRow, PublishedEventView } from "@/types/database";
 
-/* Billetterie : liste des types de billets disponibles. */
+/* =============================================================================
+   Billetterie : chaque type de billet est présenté comme un billet.
+   Informations à gauche, perforation en pointillés, prix et action à droite.
+   ========================================================================== */
 
 export function TicketPicker({ ticketTypes, slug }: { ticketTypes: TicketTypeRow[]; slug: string }) {
   const available = ticketTypes.filter((t) => t.is_active && t.sold_count < t.quantity);
@@ -15,7 +16,7 @@ export function TicketPicker({ ticketTypes, slug }: { ticketTypes: TicketTypeRow
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Billetterie</CardTitle>
+          <CardTitle className="font-display">Billetterie</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-fg-muted">
@@ -27,42 +28,53 @@ export function TicketPicker({ ticketTypes, slug }: { ticketTypes: TicketTypeRow
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Ticket className="size-5" aria-hidden="true" />
+    <section aria-labelledby="billetterie" className="flex flex-col gap-4">
+      <div className="border-t border-border pt-4">
+        <p className="eyebrow">Billetterie</p>
+        <h2 id="billetterie" className="mt-2 font-display text-2xl font-semibold">
           Choisir mes billets
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+        </h2>
+      </div>
+
+      <ul className="flex flex-col gap-3">
         {available.map((type) => {
           const remaining = type.quantity - type.sold_count;
           return (
-            <div key={type.id} className="flex items-center gap-4 rounded-xl border border-border p-4">
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <p className="flex flex-wrap items-center gap-2 font-medium">
+            <li
+              key={type.id}
+              className="flex overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-150 hover:border-border"
+            >
+              <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-4">
+                <p className="flex flex-wrap items-center gap-2 font-semibold">
                   {type.name}
                   <AccessLevelBadge level={type.access_level} />
                 </p>
                 {type.description ? (
-                  <p className="truncate text-sm text-fg-muted">{type.description}</p>
+                  <p className="line-clamp-2 text-sm text-fg-muted">{type.description}</p>
                 ) : null}
-                <p className="text-xs text-fg-subtle">
-                  {type.price <= 0 ? "Gratuit" : formatPrice(type.price)}
-                  {remaining <= 20 ? ` · plus que ${remaining} places` : ""}
-                </p>
+                {remaining <= 20 ? (
+                  <p className="text-xs font-medium text-accent">Plus que {remaining} places</p>
+                ) : null}
               </div>
-              <ButtonLink href={`/evenements/${slug}/billets?type=${type.id}`} size="sm">
-                Choisir
-              </ButtonLink>
-            </div>
+
+              {/* Talon : perforation + prix + action */}
+              <div className="flex shrink-0 flex-col items-stretch justify-center gap-2 border-l-2 border-dashed border-border-strong bg-surface-raised px-4 py-3 text-center">
+                <p className="font-display text-lg leading-none font-semibold tabular-nums">
+                  {type.price <= 0 ? "Gratuit" : formatPrice(type.price)}
+                </p>
+                <ButtonLink href={`/evenements/${slug}/billets?type=${type.id}`} size="sm">
+                  Choisir
+                </ButtonLink>
+              </div>
+            </li>
           );
         })}
-        <p className="text-xs text-fg-subtle">
-          Paiement sécurisé par mobile money (Wave, Orange, MTN, Moov) ou carte bancaire.
-        </p>
-      </CardContent>
-    </Card>
+      </ul>
+
+      <p className="text-xs text-fg-subtle">
+        Paiement sécurisé par mobile money (Wave, Orange, MTN, Moov) ou carte bancaire.
+      </p>
+    </section>
   );
 }
 
@@ -83,19 +95,20 @@ export function SalonTeaser({
         : "Salon privé sur invitation.";
 
   return (
-    <Card className="border-primary/25 bg-primary-subtle">
-      <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center">
-        <span className="flex size-11 items-center justify-center rounded-full bg-surface" aria-hidden="true">
-          <Users className="size-5 text-primary" />
-        </span>
-        <div className="flex-1">
-          <p className="font-semibold text-primary-subtle-fg">Le salon de l'événement</p>
-          <p className="text-sm text-fg-muted">{label} Présente-toi, pose tes questions.</p>
-        </div>
-        <ButtonLink href={`/evenements/${slug}/salon`} variant="secondary">
-          Découvrir le salon
-        </ButtonLink>
-      </CardContent>
-    </Card>
+    <aside
+      aria-labelledby="salon-titre"
+      className="flex flex-col gap-4 border-y border-border py-6 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div className="flex flex-col gap-1.5">
+        <p className="eyebrow">Avant, pendant, après</p>
+        <h2 id="salon-titre" className="font-display text-2xl font-semibold">
+          Le salon de l&apos;événement
+        </h2>
+        <p className="max-w-md text-sm text-fg-muted">{label} Présente-toi, pose tes questions.</p>
+      </div>
+      <ButtonLink href={`/evenements/${slug}/salon`} variant="secondary" className="shrink-0">
+        Découvrir le salon
+      </ButtonLink>
+    </aside>
   );
 }

@@ -456,6 +456,7 @@ export type PublishedEventView = {
   slug: string;
   summary: string | null;
   cover_url: string | null;
+  gallery: string[];
   category: string;
   tags: string[];
   venue_name: string | null;
@@ -625,6 +626,7 @@ export type DatabaseFunctions = {
       message: string | null;
     }[];
   };
+  become_organizer: { Args: { p_org_name: string }; Returns: OrganizationRow };
 };
 
 export type Database = {

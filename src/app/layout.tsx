@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { APP_NAME } from "@/lib/constants";
@@ -8,24 +8,17 @@ import { env } from "@/lib/env";
 import "./globals.css";
 
 /* =============================================================================
-   Polices — deux familles, chargées par next/font (auto-hébergées, sans
-   requête vers Google au runtime, donc sans décalage de rendu ni fuite de
-   données utilisateur).
+   Police — une seule famille sans-serif, chargée par next/font (auto-hébergée,
+   sans requête vers Google au runtime, donc sans décalage de rendu ni fuite
+   de données utilisateur).
 
-   * Inter : texte courant, excellente lisibilité aux petites tailles.
-   * Sora  : titres et chiffres clés, personnalité géométrique affirmée.
+   * Inter : la sans-serif de référence des interfaces sociales, très lisible
+     aux petites tailles et neutre à souhait.
    ========================================================================== */
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
-});
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  weight: ["500", "600", "700"],
   display: "swap",
 });
 
@@ -76,8 +69,8 @@ export const viewport: Viewport = {
   // Le zoom reste autorisé : le bloquer nuit à l'accessibilité.
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0e11" },
+    { media: "(prefers-color-scheme: light)", color: "#f0f2f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#18191a" },
   ],
 };
 
@@ -85,7 +78,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     // suppressHydrationWarning : next-themes écrit la classe de thème sur <html>
     // avant l'hydratation, ce qui est attendu et non une erreur.
-    <html lang="fr" suppressHydrationWarning className={`${inter.variable} ${sora.variable}`}>
+    <html
+      lang="fr"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+      className={inter.variable}
+    >
+      <head>
+      </head>
       <body className="min-h-dvh antialiased">
         <a href="#contenu" className="skip-link">
           Aller au contenu principal

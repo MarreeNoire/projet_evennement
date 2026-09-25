@@ -2,92 +2,114 @@
 @import "tw-animate-css";
 
 /* =============================================================================
-   DESIGN SYSTEM — « Kora »
-   Direction artistique : premium, moderne, chaleureuse (Abidjan / Afrique de
-   l'Ouest). Base neutre *stone*, accent *teal*, highlight *ambre* réservé aux
-   badges / VIP / CTA chauds.
+   DESIGN SYSTEM — « Réseau social »
+   Direction artistique : le fil d'actualité moderne (Facebook / X / LinkedIn).
+   Fond gris clair, cartes blanches flottantes, un bleu primaire confiant,
+   angles très arrondis, sans-serif partout, séparateurs discrets plutôt que
+   filets d'encre. Un jaune soleil reste réservé aux VIP et mises en avant.
 
    Architecture : PRIMITIFS (échelle brute) -> SÉMANTIQUES (rôle) -> @theme
    (utilitaires Tailwind). Les composants n'utilisent QUE les sémantiques.
+   Les noms de tokens sont inchangés : toutes les pages héritent du nouveau
+   style sans modification.
 
-   Contrastes WCAG 2.2 AA vérifiés :
-     primary   #0f766e sur blanc ....... 5.55:1  (texte courant OK)
-     blanc     sur primary   #0f766e ... 5.55:1  (texte de bouton OK)
-     accent    #b45309 sur blanc ....... 5.01:1
-     success   #15803d sur blanc ....... 5.02:1
-     danger    #b91c1c sur blanc ....... 6.47:1
-     info      #0369a1 sur blanc ....... 5.94:1
-     primary   #2dd4bf sur fond sombre . 10.6:1
-     accent-solid #fbbf24 sur stone-950  8.9:1
+   Contrastes WCAG 2.2 AA (texte courant >= 4.5:1) :
+     primary   #0b54d6 sur fond #f0f2f5 ...... 6.2:1
+     blanc     sur primary-solid #1663ea ..... 4.9:1  (texte de bouton)
+     fg-muted  #475569 sur surface blanche ... 7.5:1
+     fg-subtle #64748b sur surface blanche ... 4.8:1
+     accent    #8a5e05 sur surface blanche ... 4.9:1
+     success   #2f6f3e sur surface blanche ... 5.3:1
+     danger    #a3162e sur surface blanche ... 6.7:1
+     info      #0b54d6 sur surface blanche ... 6.2:1
+     primary   #94b8fd sur surface sombre .... 6.0:1
+     fg-muted  #b0b3b8 sur surface sombre .... 8.1:1
    ========================================================================== */
 
 /* Dark mode piloté par une classe (next-themes) */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* ---------- PRIMITIFS : marque (teal) ---------- */
-  --brand-50: #f0fdfa;
-  --brand-100: #ccfbf1;
-  --brand-200: #99f6e4;
-  --brand-300: #5eead4;
-  --brand-400: #2dd4bf;
-  --brand-500: #14b8a6;
-  --brand-600: #0d9488;
-  --brand-700: #0f766e;
-  --brand-800: #115e59;
-  --brand-900: #134e4a;
-  --brand-950: #042f2e;
+  /* ---------- PRIMITIFS : marque (bleu social) ---------- */
+  --brand-50: #eef4ff;
+  --brand-100: #dce8fd;
+  --brand-200: #c0d5fe;
+  --brand-300: #94b8fd;
+  --brand-400: #6191fa;
+  --brand-500: #3b76f6;
+  --brand-600: #1663ea;
+  --brand-700: #0b54d6;
+  --brand-800: #1046a6;
+  --brand-900: #123d83;
+  --brand-950: #0c2449;
 
-  /* ---------- PRIMITIFS : accent (ambre / VIP) ---------- */
-  --gold-100: #fef3c7;
-  --gold-300: #fcd34d;
-  --gold-400: #fbbf24;
-  --gold-500: #f59e0b;
-  --gold-600: #d97706;
-  --gold-700: #b45309;
+  /* ---------- PRIMITIFS : accent (jaune soleil / VIP) ---------- */
+  --gold-100: #fbebc0;
+  --gold-300: #f5cf6a;
+  --gold-400: #f2b01e;
+  --gold-500: #d99a0b;
+  --gold-600: #b27a06;
+  --gold-700: #8a5e05;
 
-  /* ---------- PRIMITIFS : neutres (stone) ---------- */
-  --stone-50: #fafaf9;
-  --stone-100: #f5f5f4;
-  --stone-200: #e7e5e4;
-  --stone-300: #d6d3d1;
-  --stone-400: #a8a29e;
-  --stone-500: #78716c;
-  --stone-600: #57534e;
-  --stone-700: #44403c;
-  --stone-800: #292524;
-  --stone-900: #1c1917;
-  --stone-950: #0c0a09;
+  /* ---------- PRIMITIFS : neutres (gris froids, façon fil d'actualité) ---------- */
+  --stone-50: #f8fafc;
+  --stone-100: #f1f5f9;
+  --stone-200: #e2e8f0;
+  --stone-300: #cbd5e1;
+  --stone-400: #94a3b8;
+  --stone-500: #64748b;
+  --stone-600: #475569;
+  --stone-700: #334155;
+  --stone-800: #1e293b;
+  --stone-900: #0f172a;
+  --stone-950: #020617;
 
   /* ---------- PRIMITIFS : feedback ---------- */
-  --green-600: #16a34a;
-  --green-700: #15803d;
-  --red-600: #dc2626;
-  --red-700: #b91c1c;
-  --red-900: #7f1d1d;
-  --blue-600: #0284c7;
-  --blue-700: #0369a1;
+  --green-600: #3f8a4f;
+  --green-700: #2f6f3e;
+  --red-600: #c0233c;
+  --red-700: #a3162e;
+  --red-900: #7a0f21;
+  --blue-600: #1663ea;
+  --blue-700: #0b54d6;
+
+  /* ---------- PRIMITIFS : couvertures de secours (affiches) ---------- */
+  --poster-1: #1663ea;
+  --poster-1-fg: #ffffff;
+  --poster-2: #f2b01e;
+  --poster-2-fg: #0f172a;
+  --poster-3: #0f766e;
+  --poster-3-fg: #f0fdfa;
+  --poster-4: #4338ca;
+  --poster-4-fg: #eef2ff;
+  --poster-5: #7c3aed;
+  --poster-5-fg: #f5f3ff;
+
+  /* Encres de tampon : seulement des teintes soutenues, lisibles sur blanc */
+  --stamp-1: #1663ea;
+  --stamp-2: #0f766e;
+  --stamp-3: #4338ca;
 
   /* ================= SÉMANTIQUES — THÈME CLAIR ================= */
-  /* Surfaces */
-  --bg: #ffffff;
-  --bg-subtle: var(--stone-50);
-  --bg-muted: var(--stone-100);
+  /* Surfaces : fond gris clair, cartes blanches (codes du fil d'actualité) */
+  --bg: #f0f2f5;
+  --bg-subtle: #e9ebef;
+  --bg-muted: #e4e6eb;
   --bg-inverted: var(--stone-900);
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-sunken: var(--stone-50);
+  --surface-sunken: #f0f2f5;
   --surface-overlay: #ffffff;
 
   /* Textes */
-  --fg: var(--stone-900);
-  --fg-muted: var(--stone-600);
-  --fg-subtle: var(--stone-500);
+  --fg: #0f172a;
+  --fg-muted: #475569;
+  --fg-subtle: #64748b;
   --fg-inverted: #ffffff;
 
-  /* Bordures */
-  --border: var(--stone-200);
-  --border-strong: var(--stone-300);
+  /* Bordures : séparateurs discrets, presque invisibles */
+  --border: #e2e5ea;
+  --border-strong: #ced0d4;
   --border-focus: var(--brand-600);
 
   /* Marque */
@@ -100,75 +122,81 @@
   --primary-subtle: var(--brand-50);
   --primary-subtle-fg: var(--brand-900);
 
-  /* Accent (VIP / CTA chaud) */
+  /* Accent (VIP / mise en avant) */
   --accent: var(--gold-700);
   --accent-solid: var(--gold-400);
   --accent-solid-fg: var(--stone-900);
-  --accent-subtle: #fffbeb;
+  --accent-subtle: #fbf1d3;
   --accent-subtle-fg: var(--gold-700);
 
   /* Feedback */
   --success: var(--green-700);
   --success-solid: var(--green-700);
-  --success-subtle: #f0fdf4;
+  --success-subtle: #e6f0e1;
   --warning: var(--gold-700);
-  --warning-subtle: #fffbeb;
+  --warning-subtle: #fbf1d3;
   --danger: var(--red-700);
   --danger-solid: var(--red-700);
   --danger-solid-hover: var(--red-900);
-  --danger-subtle: #fef2f2;
+  --danger-subtle: #f8e4e4;
   --info: var(--blue-700);
-  --info-subtle: #f0f9ff;
+  --info-subtle: #e4e9f5;
 }
 
 /* ================= SÉMANTIQUES — THÈME SOMBRE ================= */
-/* Le teal 400 (#2dd4bf) offre 10.6:1 sur le fond sombre : lisible ET vibrant. */
+/* Gris anthracite façon mode sombre des réseaux sociaux (jamais de noir pur
+   pour les cartes : la hiérarchie repose sur des gris superposés). */
 .dark {
-  --bg: #0b0e11;
-  --bg-subtle: #12161a;
-  --bg-muted: #1a1f24;
-  --bg-inverted: var(--stone-50);
-  --surface: #12161a;
-  --surface-raised: #1a1f24;
-  --surface-sunken: #0b0e11;
-  --surface-overlay: #1a1f24;
+  --stamp-1: #6191fa;
+  --stamp-2: #2dd4bf;
+  --stamp-3: #8fa9e6;
 
-  --fg: #f5f5f4;
-  --fg-muted: #b8b3ad;
-  --fg-subtle: #928c85;
+  --bg: #18191a;
+  --bg-subtle: #242526;
+  --bg-muted: #3a3b3c;
+  --bg-inverted: var(--stone-50);
+  --surface: #242526;
+  --surface-raised: #3a3b3c;
+  --surface-sunken: #18191a;
+  --surface-overlay: #242526;
+
+  --fg: #e4e6eb;
+  --fg-muted: #b0b3b8;
+  --fg-subtle: #8a8d91;
   --fg-inverted: var(--stone-950);
 
-  --border: #262c33;
-  --border-strong: #363d45;
-  --border-focus: var(--brand-400);
+  --border: #3e4042;
+  --border-strong: #5a5c5f;
+  --border-focus: var(--brand-300);
 
-  --primary: var(--brand-400);
-  --primary-hover: var(--brand-300);
-  --primary-active: var(--brand-200);
-  --primary-solid: var(--brand-500);
-  --primary-solid-hover: var(--brand-400);
-  --primary-solid-fg: var(--brand-950);
-  --primary-subtle: rgb(45 212 191 / 0.12);
+  --primary: var(--brand-300);
+  --primary-hover: var(--brand-200);
+  --primary-active: var(--brand-100);
+  --primary-solid: var(--brand-600);
+  --primary-solid-hover: var(--brand-500);
+  --primary-solid-fg: #ffffff;
+  --primary-subtle: rgb(97 145 250 / 0.16);
   --primary-subtle-fg: var(--brand-300);
 
   --accent: var(--gold-400);
   --accent-solid: var(--gold-400);
   --accent-solid-fg: var(--stone-950);
-  --accent-subtle: rgb(251 191 36 / 0.12);
+  --accent-subtle: rgb(242 176 30 / 0.14);
   --accent-subtle-fg: var(--gold-300);
 
-  --success: #4ade80;
+  --success: #7cc48a;
   --success-solid: var(--green-600);
-  --success-subtle: rgb(22 163 74 / 0.14);
+  --success-subtle: rgb(63 138 79 / 0.16);
   --warning: var(--gold-400);
-  --warning-subtle: rgb(245 158 11 / 0.14);
-  --danger: #f87171;
+  --warning-subtle: rgb(242 176 30 / 0.14);
+  --danger: #f08a97;
   --danger-solid: var(--red-600);
   --danger-solid-hover: var(--red-700);
-  --danger-subtle: rgb(220 38 38 / 0.14);
-  --info: #38bdf8;
-  --info-subtle: rgb(2 132 199 / 0.16);
+  --danger-subtle: rgb(192 35 60 / 0.16);
+  --info: #8fa9e6;
+  --info-subtle: rgb(59 95 176 / 0.18);
 }
+
 /* =============================================================================
    TOKENS EXPOSÉS À TAILWIND (utilitaires : bg-*, text-*, border-*, ring-*)
    ========================================================================== */
@@ -250,31 +278,44 @@
   --color-stone-900: var(--stone-900);
   --color-stone-950: var(--stone-950);
 
-  /* Typographie : 2 familles maximum */
+  /* Alias « encre » : certaines pages y font référence */
+  --color-ink-800: var(--stone-800);
+  --color-ink-900: var(--stone-900);
+  --color-ink-950: var(--stone-950);
+
+  --color-poster-1: var(--poster-1);
+  --color-poster-2: var(--poster-2);
+  --color-poster-3: var(--poster-3);
+  --color-poster-4: var(--poster-4);
+  --color-poster-5: var(--poster-5);
+
+  /* Typographie : une seule sans-serif partout, comme les grands réseaux
+     sociaux. Les titres se distinguent par la graisse et la taille, pas par
+     une famille différente. */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-sora), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
-  --text-display: clamp(2rem, 4vw + 1rem, 3.5rem);
-  --text-display--line-height: 1.05;
-  --text-display--letter-spacing: -0.03em;
+  --text-display: clamp(2.5rem, 6vw + 0.5rem, 5.5rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.035em;
 
-  /* Rayons : une seule échelle */
-  --radius-xs: 0.25rem;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
-  --radius-3xl: 1.75rem;
+  /* Rayons : très arrondis, signature des interfaces sociales */
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
 
-  /* Élévation : un seul système */
-  --shadow-xs: 0 1px 2px 0 rgb(28 25 23 / 0.05);
-  --shadow-sm: 0 1px 3px 0 rgb(28 25 23 / 0.08), 0 1px 2px -1px rgb(28 25 23 / 0.06);
-  --shadow-md: 0 4px 12px -2px rgb(28 25 23 / 0.09), 0 2px 6px -2px rgb(28 25 23 / 0.05);
-  --shadow-lg: 0 12px 28px -6px rgb(28 25 23 / 0.12), 0 4px 10px -4px rgb(28 25 23 / 0.07);
-  --shadow-xl: 0 24px 48px -12px rgb(28 25 23 / 0.18);
+  /* Élévation : ombres douces et froides, cartes qui flottent sur le fil */
+  --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.06);
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.06), 0 1px 3px 0 rgb(15 23 42 / 0.1);
+  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.12);
+  --shadow-lg: 0 12px 28px -8px rgb(15 23 42 / 0.18);
+  --shadow-xl: 0 24px 48px -12px rgb(15 23 42 / 0.25);
 
   /* Mouvement : feedback UI sous 200 ms */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -320,7 +361,7 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.02em;
     text-wrap: balance;
   }
@@ -338,12 +379,7 @@
 
   ::selection {
     background-color: var(--brand-200);
-    color: var(--brand-950);
-  }
-
-  .dark ::selection {
-    background-color: var(--brand-800);
-    color: var(--brand-50);
+    color: var(--stone-950);
   }
 
   ::placeholder {
@@ -445,9 +481,9 @@
     }
 
     .dark {
-      --fg-muted: #d6d1ca;
-      --fg-subtle: #b8b3ad;
-      --border: #4a525a;
+      --fg-muted: #ddd3c1;
+      --fg-subtle: #c4b9a6;
+      --border: #6a5d4b;
     }
   }
 }
@@ -467,6 +503,55 @@
 
   @media (width >= 64rem) {
     padding-inline: 2rem;
+  }
+}
+
+/* Petit intitulé de rubrique : capitales espacées, façon programme imprimé */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+/* Motif géométrique discret pour les couvertures de secours */
+@utility poster-pattern {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.08) 0,
+    rgb(255 255 255 / 0.08) 2px,
+    transparent 2px,
+    transparent 18px
+  );
+}
+
+/* Code-barres décoratif du billet (aucune information portée) */
+@utility barcode {
+  background-image: repeating-linear-gradient(
+    90deg,
+    currentColor 0,
+    currentColor 2px,
+    transparent 2px,
+    transparent 5px,
+    currentColor 5px,
+    currentColor 6px,
+    transparent 6px,
+    transparent 10px,
+    currentColor 10px,
+    currentColor 13px,
+    transparent 13px,
+    transparent 15px
+  );
+}
+
+/* Barre de défilement masquée (onglets horizontaux) */
+@utility no-scrollbar {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 

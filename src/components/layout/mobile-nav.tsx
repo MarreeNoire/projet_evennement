@@ -13,7 +13,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 import type { HeaderUser } from "./header-types";
-import { APP_NAV, PUBLIC_NAV } from "./nav-config";
+import { APP_NAV, PUBLIC_NAV, getNavItems } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
 
 /* =============================================================================
@@ -56,7 +56,7 @@ export function MobileNav({
 
   if (!open) return null;
 
-  const navItems = user ? APP_NAV : PUBLIC_NAV;
+  const navItems = getNavItems(user);
 
   async function handleSignOut() {
     if (isSupabaseConfigured) {

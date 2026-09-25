@@ -83,9 +83,13 @@ export async function searchPublishedEvents(filters: ExploreFilters = {}): Promi
   if (error) throw new Error(`Recherche des événements impossible : ${error.message}`);
 
   const total = count ?? 0;
+  const events = (data ?? []).map((event) => ({
+    ...event,
+    gallery: Array.isArray(event.gallery) ? event.gallery : [],
+  })) as PublishedEventView[];
 
   return {
-    events: (data ?? []) as PublishedEventView[],
+    events,
     total,
     page,
     pageSize,
@@ -106,7 +110,10 @@ export async function getPublishedEventBySlug(slug: string) {
   if (error) throw new Error(`Événement introuvable : ${error.message}`);
   if (!event) return null;
 
-  const typed = event as PublishedEventView;
+  const typed = {
+    ...event,
+    gallery: Array.isArray(event.gallery) ? event.gallery : [],
+  } as PublishedEventView;
 
   // Description longue : la vue publique ne l'expose pas (charge utile réduite),
   // on la lit directement avec RLS (même règle : publié ou gestionnaire).
@@ -153,4 +160,279 @@ export async function getEventCities(): Promise<string[]> {
   return [...new Set(data.map((row) => (row as { city: string }).city).filter(Boolean))].sort(
     (a, b) => a.localeCompare(b, "fr"),
   );
+}
+
+/* -----------------------------------------------------------------------------
+   Annuaire des organisateurs
+   -----------------------------------------------------------------------------
+   Il n'existe pas (encore) de vue publique dédiée : on déduit les
+   organisateurs des événements publiés à venir. Un organisateur sans
+   événement à venir n'apparaît donc pas, ce qui évite d'afficher des
+   organisations inactives ou en brouillon.
+   -------------------------------------------------------------------------- */
+
+export interface PublicOrganizer {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  verified: boolean;
+  eventCount: number;
+  cities: string[];
+  nextEvent: { title: string; slug: string; startAt: string };
+}
+
+type OrganizerSourceRow = Pick<
+  PublishedEventView,
+  | "organization_id"
+  | "organizer_name"
+  | "organizer_slug"
+  | "organizer_logo_url"
+  | "organizer_verified"
+  | "city"
+  | "title"
+  | "slug"
+  | "start_at"
+>;
+
+/** Organisateurs ayant au moins un événement publié à venir. */
+export async function getPublicOrganizers(): Promise<PublicOrganizer[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("published_events")
+    .select(
+      "organization_id, organizer_name, organizer_slug, organizer_logo_url, organizer_verified, city, title, slug, start_at",
+    )
+    .order("start_at", { ascending: true })
+    .limit(500);
+
+  if (error) throw new Error(`Chargement des organisateurs impossible : ${error.message}`);
+
+  const organizers = new Map<string, PublicOrganizer>();
+
+  // Les lignes arrivent triées par date : la première rencontrée est le prochain événement.
+  for (const row of (data ?? []) as unknown as OrganizerSourceRow[]) {
+    const existing = organizers.get(row.organization_id);
+
+    if (existing) {
+      existing.eventCount += 1;
+      if (row.city && !existing.cities.includes(row.city)) existing.cities.push(row.city);
+      continue;
+    }
+
+    organizers.set(row.organization_id, {
+      id: row.organization_id,
+      name: row.organizer_name,
+      slug: row.organizer_slug,
+      logoUrl: row.organizer_logo_url,
+      verified: row.organizer_verified,
+      eventCount: 1,
+      cities: row.city ? [row.city] : [],
+      nextEvent: { title: row.title, slug: row.slug, startAt: row.start_at },
+    });
+  }
+
+  return [...organizers.values()].sort(
+    (a, b) =>
+      Number(b.verified) - Number(a.verified) ||
+      b.eventCount - a.eventCount ||
+      a.name.localeCompare(b.name, "fr"),
+  );
+}
+
+/** Événements (brouillons et publiés) gérés par l'utilisateur connecté. */
+export async function getOrganizerEvents() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
+    // Organisations possédées ET organisations dont l'utilisateur est membre
+    // actif : un événement créé sous l'une ou l'autre doit rester visible ici.
+    const [{ data: ownedOrgs }, { data: memberOrgs }] = await Promise.all([
+      supabase.from("organizations").select("id").eq("owner_id", user.id),
+      supabase
+        .from("organization_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .eq("status", "active"),
+    ]);
+
+    const orgIds = [
+      ...new Set([
+        ...(ownedOrgs ?? []).map((org) => org.id),
+        ...(memberOrgs ?? []).map((member) => member.organization_id),
+      ]),
+    ];
+
+    if (orgIds.length === 0) return [];
+
+    const { data: events } = await supabase
+      .from("events")
+      .select("*")
+      .in("organization_id", orgIds)
+      .order("created_at", { ascending: false });
+
+    return events ?? [];
+  } catch (error) {
+    console.error("Error in getOrganizerEvents:", error);
+    return [];
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Supervision (super admin) : derniers événements lisibles
+   --------------------------------------------------------------------------
+   La politique `events_select_authenticated` (cf. 0022) n'expose que les
+   événements publiés et ceux que l'utilisateur gère : cette liste reflète donc
+   exactement ce que le compte courant a le droit de voir, sans jamais afficher
+   de données fictives.
+   -------------------------------------------------------------------------- */
+
+export interface AdminEventListItem {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  start_at: string;
+  end_at: string;
+  organizationName: string;
+}
+
+/** Derniers événements lisibles par l'utilisateur connecté (supervision admin). */
+export async function getRecentEvents(limit = 20): Promise<AdminEventListItem[]> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: events, error } = await supabase
+      .from("events")
+      .select("id, title, slug, status, start_at, end_at, organization_id")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error("Error in getRecentEvents:", error);
+      return [];
+    }
+
+    if (!events || events.length === 0) return [];
+
+    // Les jointures ne sont pas typées dans `Database` : on résout les noms
+    // d'organisation par une seconde requête, comme pour l'annuaire public.
+    const orgIds = [...new Set(events.map((event) => event.organization_id))];
+    const { data: orgs } = await supabase.from("organizations").select("id, name").in("id", orgIds);
+    const names = new Map((orgs ?? []).map((org) => [org.id, org.name]));
+
+    return events.map((event) => ({
+      id: event.id,
+      title: event.title,
+      slug: event.slug,
+      status: event.status,
+      start_at: event.start_at,
+      end_at: event.end_at,
+      organizationName: names.get(event.organization_id) ?? "Organisation inconnue",
+    }));
+  } catch (error) {
+    console.error("Error in getRecentEvents:", error);
+    return [];
+  }
+}
+
+
+
+export async function getOrganizerTicketTypes() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
+    const [{ data: ownedOrgs }, { data: memberOrgs }] = await Promise.all([
+      supabase.from("organizations").select("id").eq("owner_id", user.id),
+      supabase
+        .from("organization_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .eq("status", "active"),
+    ]);
+
+    const orgIds = [
+      ...new Set([
+        ...(ownedOrgs ?? []).map((org) => org.id),
+        ...(memberOrgs ?? []).map((member) => member.organization_id),
+      ]),
+    ];
+
+    if (orgIds.length === 0) return [];
+
+    const { data: events } = await supabase
+      .from("events")
+      .select("id, title")
+      .in("organization_id", orgIds);
+
+    if (!events || events.length === 0) return [];
+
+    const eventIds = events.map((e) => e.id);
+    const eventTitles = new Map(events.map((e) => [e.id, e.title]));
+
+    const { data: tickets, error } = await supabase
+      .from("ticket_types")
+      .select("id, event_id, name, description, price, quantity, access_level, is_active")
+      .in("event_id", eventIds)
+      .order("position", { ascending: true });
+
+    if (error || !tickets) return [];
+
+    return tickets.map((t) => ({
+      id: t.id,
+      eventId: t.event_id,
+      eventName: eventTitles.get(t.event_id) ?? "Événement",
+      name: t.name,
+      description: t.description,
+      price: t.price,
+      quantity: t.quantity,
+      accessLevel: (t.access_level || "standard") as "standard" | "vip" | "vvip",
+      isActive: t.is_active,
+    }));
+  } catch (error) {
+    console.error("Error in getOrganizerTicketTypes:", error);
+    return [];
+  }
+}
+
+export async function getOrganizerEventTicketTypes(eventId: string) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
+    const { data: tickets, error } = await supabase
+      .from("ticket_types")
+      .select("id, event_id, name, description, price, quantity, access_level, is_active")
+      .eq("event_id", eventId)
+      .order("position", { ascending: true });
+
+    if (error || !tickets) return [];
+
+    return tickets.map((t) => ({
+      id: t.id,
+      eventId: t.event_id,
+      name: t.name,
+      description: t.description,
+      price: t.price,
+      quantity: t.quantity,
+      accessLevel: (t.access_level || "standard") as "standard" | "vip" | "vvip",
+      isActive: t.is_active,
+    }));
+  } catch (error) {
+    console.error("Error in getOrganizerEventTicketTypes:", error);
+    return [];
+  }
 }

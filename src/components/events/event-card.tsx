@@ -1,9 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 import { AccessLevelBadge, Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { CURRENCY_LABEL, getCategoryLabel } from "@/lib/constants";
 import { formatDate, formatNumber } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
@@ -12,8 +10,11 @@ import type { PublishedEventView } from "@/types/database";
    Carte d'événement
    --------------------------------------------------------------------------
    Une seule source de vérité visuelle, réutilisée sur l'accueil, l'explorer et
-   les salons. L'information prix/date/lieu est en texte (jamais couleur seule),
-   l'image a un repli élégant si absente.
+   les salons. Le prix, la date et le lieu sont toujours en texte (jamais la
+   couleur seule). Sans image de couverture, on génère une « affiche » :
+   aplat de couleur, motif géométrique et initiale en serif. La couleur est
+   choisie de façon déterministe à partir du titre : deux rechargements
+   donnent le même résultat, et la grille reste variée.
    ========================================================================== */
 
 export function priceLabel(event: Pick<PublishedEventView, "min_price" | "max_price">): string {
@@ -22,70 +23,120 @@ export function priceLabel(event: Pick<PublishedEventView, "min_price" | "max_pr
   return `dès ${formatNumber(event.min_price)} ${CURRENCY_LABEL}`;
 }
 
+/* ------------------------------ Bloc de date ------------------------------ */
+
+function dateParts(value: string) {
+  const date = new Date(value);
+  const options = { timeZone: "Africa/Abidjan" } as const;
+
+  return {
+    day: new Intl.DateTimeFormat("fr-FR", { ...options, day: "2-digit" }).format(date),
+    month: new Intl.DateTimeFormat("fr-FR", { ...options, month: "short" })
+      .format(date)
+      .replace(".", ""),
+    year: new Intl.DateTimeFormat("fr-FR", { ...options, year: "numeric" }).format(date),
+  };
+}
+
+/* --------------------------------- Carte ---------------------------------- */
+
 export function EventCard({ event }: { event: PublishedEventView }) {
+  const { day, month, year } = dateParts(event.start_at);
+  const gallery = Array.isArray(event.gallery) ? event.gallery : [];
+  const imageUrl = event.cover_url ?? gallery[0] ?? null;
+
   return (
     <Link
       href={`/evenements/${event.slug}`}
-      className="group block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="group block h-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2"
       aria-label={`${event.title} — ${formatDate(event.start_at)} à ${event.city}`}
     >
-      <Card interactive className="h-full overflow-hidden">
-        <div className="relative aspect-16/9 overflow-hidden bg-bg-muted">
-          {event.cover_url ? (
-            <Image
-              src={event.cover_url}
+      <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-xs transition-all duration-200 group-hover:-translate-y-1 group-hover:border-border-strong group-hover:shadow-md">
+        <div className="relative aspect-16/10 overflow-hidden bg-bg-muted">
+          {imageUrl ? (
+            // Les images Supabase sont servies directement pour éviter le proxy Next.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
               alt=""
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="size-full object-cover transition-transform duration-500 ease-[var(--ease-out-soft)] group-hover:scale-105"
             />
           ) : (
-            <div
-              aria-hidden="true"
-              className="flex size-full items-center justify-center bg-gradient-to-br from-brand-600 via-brand-800 to-ink-900"
-            >
-              <span className="font-display text-4xl font-bold text-white/80">
-                {event.title.charAt(0).toUpperCase()}
-              </span>
+            <div className="flex size-full items-center justify-center text-sm text-fg-subtle">
+              Aucune image
             </div>
           )}
+
+          {/* Badges en superposition */}
           <div className="absolute top-3 left-3 flex gap-1.5">
-            <Badge variant="overlay">{getCategoryLabel(event.category)}</Badge>
+            <span className="rounded-full bg-black/60 px-2.5 py-1 text-2xs font-semibold text-white backdrop-blur-md">
+              {getCategoryLabel(event.category)}
+            </span>
           </div>
-          {event.min_price <= 0 ? (
-            <div className="absolute top-3 right-3">
-              <Badge variant="overlay">Gratuit</Badge>
-            </div>
-          ) : null}
+
+          <div className="absolute top-3 right-3 flex items-center gap-1.5">
+            {event.min_price <= 0 ? (
+              <span className="rounded-full bg-emerald-600/90 px-2.5 py-1 text-2xs font-bold text-white backdrop-blur-md">
+                Gratuit
+              </span>
+            ) : null}
+          </div>
+
+          {/* Date pill façon Stories/Réseau social */}
+          <div
+            aria-hidden="true"
+            className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-surface/90 px-3 py-1 text-xs font-semibold text-fg shadow-sm backdrop-blur-md"
+          >
+            <span className="text-primary font-bold uppercase">{month}</span>
+            <span className="tabular-nums font-bold">{day}</span>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-2 p-5">
-          <p className="flex items-center gap-1.5 text-xs font-medium text-primary">
-            <CalendarDays className="size-3.5" aria-hidden="true" />
-            {formatDate(event.start_at)}
-          </p>
-          <h3 className="line-clamp-2 font-display text-base font-semibold leading-snug group-hover:text-primary">
+        <div className="flex flex-1 flex-col gap-2.5 p-4 sm:p-5">
+          <h3 className="line-clamp-2 text-base sm:text-lg leading-snug font-bold text-fg group-hover:text-primary transition-colors">
             {event.title}
           </h3>
-          <p className="flex items-center gap-1.5 text-sm text-fg-muted">
-            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+
+          {/* Gallery preview */}
+          {gallery.length > 0 && (
+            <div className="flex gap-1 mb-2">
+              {gallery.slice(0, 3).map((url, index) => (
+                <img
+                  key={`${event.id}-gallery-${index}`}
+                  src={url}
+                  alt={`Gallery ${index + 1}`}
+                  width={40}
+                  height={40}
+                  className="rounded-md object-cover border border-border/50 bg-bg-muted"
+                  style={{ flexShrink: 0 }}
+                />
+              ))}
+            </div>
+          )}
+
+          <p className="flex items-center gap-1.5 text-xs text-fg-muted">
+            <MapPin className="size-3.5 shrink-0 text-fg-subtle" aria-hidden="true" />
             <span className="truncate">
               {event.venue_name ? `${event.venue_name} · ` : ""}
               {event.city}
             </span>
           </p>
-          <div className="mt-1 flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold tabular-nums">{priceLabel(event)}</p>
-            {event.organizer_verified ? (
-              <span className="text-xs text-fg-subtle" title="Organisateur vérifié">
-                ✓ {event.organizer_name}
-              </span>
-            ) : (
-              <span className="truncate text-xs text-fg-subtle">{event.organizer_name}</span>
-            )}
+
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-border/50 pt-3">
+            <span className="text-sm font-bold text-fg tabular-nums">
+              {priceLabel(event)}
+            </span>
+            <span className="flex items-center gap-1 text-xs text-fg-subtle truncate max-w-[140px]">
+              {event.organizer_verified ? (
+                <span className="inline-flex size-3.5 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary shrink-0">
+                  ✓
+                </span>
+              ) : null}
+              <span className="truncate">{event.organizer_name}</span>
+            </span>
           </div>
         </div>
-      </Card>
+      </article>
     </Link>
   );
 }
@@ -94,7 +145,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
 
 export function EventGrid({ events }: { events: PublishedEventView[] }) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
       {events.map((event) => (
         <EventCard key={event.id} event={event} />
       ))}

@@ -51,7 +51,39 @@ const rawEnvSchema = z.object({
 export type RawEnv = z.infer<typeof rawEnvSchema>;
 
 function readRawEnv(): RawEnv {
-  const parsed = rawEnvSchema.safeParse(process.env);
+  // IMPORTANT : Next.js n'inline les variables NEXT_PUBLIC_* dans le bundle
+  // navigateur que par remplacement textuel statique de `process.env.NEXT_PUBLIC_X`.
+  // Passer l'objet `process.env` entier (ex. à un .safeParse()) empêche ce
+  // remplacement : ça fonctionne côté serveur (vrai process.env Node) mais
+  // renvoie des valeurs vides côté navigateur. Chaque variable doit donc être
+  // référencée individuellement, en accès statique, ci-dessous.
+  const parsed = rawEnvSchema.safeParse({
+    NODE_ENV: process.env.NODE_ENV,
+
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
+    NEXT_PUBLIC_CURRENCY: process.env.NEXT_PUBLIC_CURRENCY,
+    PLATFORM_COMMISSION_RATE: process.env.PLATFORM_COMMISSION_RATE,
+
+    PAYMENT_PROVIDER: process.env.PAYMENT_PROVIDER,
+    EMAIL_PROVIDER: process.env.EMAIL_PROVIDER,
+
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO,
+
+    CINETPAY_API_KEY: process.env.CINETPAY_API_KEY,
+    CINETPAY_SITE_ID: process.env.CINETPAY_SITE_ID,
+    CINETPAY_SECRET_KEY: process.env.CINETPAY_SECRET_KEY,
+    CINETPAY_BASE_URL: process.env.CINETPAY_BASE_URL,
+    CINETPAY_CHANNELS: process.env.CINETPAY_CHANNELS,
+
+    CRON_SECRET: process.env.CRON_SECRET,
+  });
 
   if (!parsed.success) {
     const details = parsed.error.issues

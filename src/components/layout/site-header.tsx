@@ -1,3 +1,4 @@
+import { BottomNav } from "./bottom-nav";
 import { HeaderShell } from "./header-shell";
 import type { HeaderUser } from "./header-types";
 
@@ -57,6 +58,7 @@ export async function SiteHeader() {
         </div>
       ) : null}
       <HeaderShell user={user} unreadCount={unreadCount} />
+      <BottomNav user={user} />
     </>
   );
 }

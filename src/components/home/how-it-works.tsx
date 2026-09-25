@@ -1,40 +1,53 @@
-import { CalendarCheck, MessagesSquare, Search } from "lucide-react";
+/* =============================================================================
+   Le principe en trois temps : Découvrir → Réserver → Rencontrer.
+   Liste numérotée éditoriale (chiffres italiques + filet d'encre), pas trois
+   cartes identiques avec une icône dans un rond.
+   ========================================================================== */
 
-/* Les 3 étapes du parcours : Découvrir → Réserver → Rencontrer. */
+const STEPS = [
+  {
+    number: "01",
+    title: "Découvre",
+    text: "Explore les événements : concerts, conférences, formations, networking.",
+  },
+  {
+    number: "02",
+    title: "Réserve",
+    text: "Paie en mobile money (Wave, Orange, MTN, Moov) ou carte, reçois ton billet QR.",
+  },
+  {
+    number: "03",
+    title: "Rencontre",
+    text: "Rejoins le salon : discute, networke et revois tes contacts après.",
+  },
+] as const;
 
 export function HowItWorks() {
-  const steps = [
-    {
-      icon: <Search className="size-5" aria-hidden="true" />,
-      title: "1. Découvre",
-      text: "Explore les événements : concerts, conférences, formations, networking.",
-    },
-    {
-      icon: <CalendarCheck className="size-5" aria-hidden="true" />,
-      title: "2. Réserve",
-      text: "Paie en mobile money (Wave, Orange, MTN, Moov) ou carte, reçois ton billet QR.",
-    },
-    {
-      icon: <MessagesSquare className="size-5" aria-hidden="true" />,
-      title: "3. Rencontre",
-      text: "Rejoins le salon : discute, networke et revois tes contacts après.",
-    },
-  ];
-
   return (
-    <section className="container-page grid gap-4 py-12 md:grid-cols-3">
-      {steps.map((step) => (
-        <div key={step.title} className="rounded-2xl border border-border bg-surface p-6">
-          <span
-            className="flex size-10 items-center justify-center rounded-full bg-primary-subtle text-primary"
-            aria-hidden="true"
+    <section aria-labelledby="principe" className="container-page py-14 md:py-20">
+      <div className="grid gap-10 lg:grid-cols-[1fr_2.2fr] lg:gap-16">
+        <div>
+          <p className="eyebrow">Le principe</p>
+          <h2
+            id="principe"
+            className="mt-3 font-display text-3xl leading-[1.05] font-semibold md:text-4xl"
           >
-            {step.icon}
-          </span>
-          <h2 className="mt-4 font-display text-base font-semibold">{step.title}</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-fg-muted">{step.text}</p>
+            Trois temps, un seul billet.
+          </h2>
         </div>
-      ))}
+
+        <ol className="grid gap-8 sm:grid-cols-3 sm:gap-6">
+          {STEPS.map((step) => (
+            <li key={step.number} className="border-t border-border pt-4">
+              <span className="font-display text-5xl font-light text-primary italic tabular-nums">
+                {step.number}
+              </span>
+              <h3 className="mt-4 font-display text-xl font-semibold">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-fg-muted">{step.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   );
 }

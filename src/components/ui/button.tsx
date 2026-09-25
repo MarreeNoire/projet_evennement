@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 export const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 whitespace-nowrap",
-    "font-medium tracking-tight",
-    "rounded-lg border border-transparent",
+    "font-semibold",
+    "rounded-full border border-transparent",
     "transition-[background-color,border-color,color,box-shadow,transform] duration-150",
     "ease-[var(--ease-out-soft)]",
     "select-none",
@@ -32,18 +32,18 @@ export const buttonVariants = cva(
       variant: {
         // Action principale : contraste 5.55:1 dans les deux thèmes
         primary:
-          "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover shadow-xs",
-        // Action secondaire : surface + bordure
+          "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover",
+        // Action secondaire : pilule grise discrète, façon réseau social
         secondary:
-          "bg-surface text-fg border-border hover:bg-bg-muted hover:border-border-strong",
+          "bg-bg-muted text-fg hover:bg-border",
         // Action discrète
         ghost: "text-fg hover:bg-bg-muted",
         // Lien textuel
-        link: "text-primary underline-offset-4 hover:underline px-0",
+        link: "text-primary underline underline-offset-4 decoration-1 hover:decoration-2 px-0",
         // Action destructive (annulation, suppression)
-        danger: "bg-danger-solid text-white hover:bg-danger-solid-hover shadow-xs",
+        danger: "bg-danger-solid text-white hover:bg-danger-solid-hover",
         // Accent chaud : réservé aux mises en avant (VIP, CTA promotionnel)
-        accent: "bg-accent-solid text-accent-solid-fg hover:brightness-95 shadow-xs",
+        accent: "bg-accent-solid text-accent-solid-fg hover:brightness-95",
         // Sur photo de couverture (fond sombre garantissant le contraste)
         overlay:
           "bg-black/55 text-white backdrop-blur-sm hover:bg-black/70 border-white/15",

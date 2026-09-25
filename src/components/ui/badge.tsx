@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
    ========================================================================== */
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
+  "inline-flex items-center gap-1 rounded-sm border font-semibold tracking-[0.08em] uppercase whitespace-nowrap",
   {
     variants: {
       variant: {
@@ -27,9 +27,9 @@ const badgeVariants = cva(
         overlay: "border-white/20 bg-black/60 text-white backdrop-blur-sm",
       },
       size: {
-        sm: "px-2 py-0 text-2xs",
-        md: "px-2.5 py-0.5 text-xs",
-        lg: "px-3 py-1 text-sm",
+        sm: "px-1.5 py-0 text-2xs",
+        md: "px-2 py-0.5 text-2xs",
+        lg: "px-2.5 py-1 text-xs",
       },
     },
     defaultVariants: { variant: "neutral", size: "md" },
@@ -72,7 +72,7 @@ export function AccessLevelBadge({
     return (
       <span
         className={cn(
-          "inline-flex items-center rounded-full bg-accent-solid px-2.5 py-0.5 text-xs font-bold text-accent-solid-fg",
+          "inline-flex items-center rounded-sm bg-accent-solid px-2 py-0.5 text-2xs font-bold tracking-[0.08em] text-accent-solid-fg uppercase",
           className,
         )}
       >
