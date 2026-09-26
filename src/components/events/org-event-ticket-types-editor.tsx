@@ -150,8 +150,8 @@ export function OrgEventTicketTypesEditor({
                 accessLevel: editAccessLevel,
                 description: editDescription.trim() || null,
               }
-            : t
-        )
+            : t,
+        ),
       );
 
       setEditingId(null);
@@ -170,7 +170,10 @@ export function OrgEventTicketTypesEditor({
     startTransition(async () => {
       const res = await deleteTicketTypeAction(ticketId);
       if (!res.ok) {
-        setError(res.error || "Impossible de supprimer la formule (des billets ont peut-être déjà été émis).");
+        setError(
+          res.error ||
+            "Impossible de supprimer la formule (des billets ont peut-être déjà été émis).",
+        );
         return;
       }
 
@@ -183,8 +186,8 @@ export function OrgEventTicketTypesEditor({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Ticket className="size-5 text-primary" /> Formules de Billetterie
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Ticket className="text-primary size-5" /> Formules de Billetterie
           </CardTitle>
           <CardDescription>
             Gérez les tarifs, quotas et privilèges d&apos;accès spécifiques à cet événement.
@@ -211,24 +214,27 @@ export function OrgEventTicketTypesEditor({
         ) : null}
 
         {showAddForm && (
-          <form onSubmit={handleCreateTicket} className="p-4 rounded-lg border border-primary/40 bg-surface space-y-3">
-            <p className="font-medium text-sm text-fg">Nouvelle formule de billet</p>
+          <form
+            onSubmit={handleCreateTicket}
+            className="border-primary/40 bg-surface space-y-3 rounded-lg border p-4"
+          >
+            <p className="text-fg text-sm font-medium">Nouvelle formule de billet</p>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1 sm:col-span-2">
-                <label className="text-xs font-semibold text-fg">Nom de la formule *</label>
+                <label className="text-fg text-xs font-semibold">Nom de la formule *</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="ex: Pass VIP, Accès Early Bird"
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-1.5 text-sm focus:border-border-focus focus:outline-none"
+                  className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1.5 text-sm focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-fg">Tarif (FCFA) *</label>
+                <label className="text-fg text-xs font-semibold">Tarif (FCFA) *</label>
                 <input
                   type="number"
                   min={0}
@@ -236,28 +242,28 @@ export function OrgEventTicketTypesEditor({
                   required
                   value={price}
                   onChange={(e) => setPrice(Number(e.target.value))}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-1.5 text-sm focus:border-border-focus focus:outline-none"
+                  className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1.5 text-sm focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-fg">Quota de places *</label>
+                <label className="text-fg text-xs font-semibold">Quota de places *</label>
                 <input
                   type="number"
                   min={1}
                   required
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-1.5 text-sm focus:border-border-focus focus:outline-none"
+                  className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1.5 text-sm focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1 sm:col-span-2">
-                <label className="text-xs font-semibold text-fg">Niveau d&apos;Accès</label>
+                <label className="text-fg text-xs font-semibold">Niveau d&apos;Accès</label>
                 <select
                   value={accessLevel}
                   onChange={(e) => setAccessLevel(e.target.value as any)}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-1.5 text-sm focus:border-border-focus focus:outline-none"
+                  className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1.5 text-sm focus:outline-none"
                 >
                   <option value="standard">Standard (Accès général)</option>
                   <option value="vip">VIP (Accès privilégié / salon)</option>
@@ -266,19 +272,24 @@ export function OrgEventTicketTypesEditor({
               </div>
 
               <div className="space-y-1 sm:col-span-2">
-                <label className="text-xs font-semibold text-fg">Description & Avantages</label>
+                <label className="text-fg text-xs font-semibold">Description & Avantages</label>
                 <input
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="ex: Cocktail de bienvenue, coupe-file"
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-1.5 text-sm focus:border-border-focus focus:outline-none"
+                  className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1.5 text-sm focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" size="sm" variant="secondary" onClick={() => setShowAddForm(false)}>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => setShowAddForm(false)}
+              >
                 Annuler
               </Button>
               <Button type="submit" size="sm" loading={isPending} loadingLabel="Enregistrement...">
@@ -290,9 +301,9 @@ export function OrgEventTicketTypesEditor({
 
         {tickets.length === 0 ? (
           <EmptyState
-            icon={<Ticket className="size-6 text-fg-muted" />}
+            icon={<Ticket className="text-fg-muted size-6" />}
             title="Aucune formule configurée pour cet événement"
-            description="Créez des formules pour permettre aux participants d&apos;acheter ou réserver leurs places."
+            description="Créez des formules pour permettre aux participants d'acheter ou réserver leurs places."
             action={
               <Button size="sm" onClick={() => setShowAddForm(true)}>
                 <Plus className="mr-1 size-4" /> Créer une formule
@@ -300,24 +311,27 @@ export function OrgEventTicketTypesEditor({
             }
           />
         ) : (
-          <div className="divide-y divide-border border rounded-lg overflow-hidden">
+          <div className="divide-border divide-y overflow-hidden rounded-lg border">
             {tickets.map((t) => (
-              <div key={t.id} className="p-3 sm:p-4 bg-surface hover:bg-surface-elevated/40 transition-colors">
+              <div
+                key={t.id}
+                className="bg-surface hover:bg-surface-elevated/40 p-3 transition-colors sm:p-4"
+              >
                 {editingId === t.id ? (
                   <div className="space-y-3">
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-1 sm:col-span-2">
-                        <label className="text-xs font-semibold text-fg">Nom de la formule *</label>
+                        <label className="text-fg text-xs font-semibold">Nom de la formule *</label>
                         <input
                           type="text"
                           required
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm focus:border-border-focus focus:outline-none"
+                          className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1 text-sm focus:outline-none"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-fg">Tarif (FCFA) *</label>
+                        <label className="text-fg text-xs font-semibold">Tarif (FCFA) *</label>
                         <input
                           type="number"
                           min={0}
@@ -325,26 +339,26 @@ export function OrgEventTicketTypesEditor({
                           required
                           value={editPrice}
                           onChange={(e) => setEditPrice(Number(e.target.value))}
-                          className="w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm focus:border-border-focus focus:outline-none"
+                          className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1 text-sm focus:outline-none"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-fg">Quota *</label>
+                        <label className="text-fg text-xs font-semibold">Quota *</label>
                         <input
                           type="number"
                           min={1}
                           required
                           value={editQuantity}
                           onChange={(e) => setEditQuantity(Number(e.target.value))}
-                          className="w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm focus:border-border-focus focus:outline-none"
+                          className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1 text-sm focus:outline-none"
                         />
                       </div>
                       <div className="space-y-1 sm:col-span-2">
-                        <label className="text-xs font-semibold text-fg">Niveau d&apos;Accès</label>
+                        <label className="text-fg text-xs font-semibold">Niveau d&apos;Accès</label>
                         <select
                           value={editAccessLevel}
                           onChange={(e) => setEditAccessLevel(e.target.value as any)}
-                          className="w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm focus:border-border-focus focus:outline-none"
+                          className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1 text-sm focus:outline-none"
                         >
                           <option value="standard">Standard</option>
                           <option value="vip">VIP</option>
@@ -352,12 +366,12 @@ export function OrgEventTicketTypesEditor({
                         </select>
                       </div>
                       <div className="space-y-1 sm:col-span-2">
-                        <label className="text-xs font-semibold text-fg">Description</label>
+                        <label className="text-fg text-xs font-semibold">Description</label>
                         <input
                           type="text"
                           value={editDescription}
                           onChange={(e) => setEditDescription(e.target.value)}
-                          className="w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm focus:border-border-focus focus:outline-none"
+                          className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-1 text-sm focus:outline-none"
                         />
                       </div>
                     </div>
@@ -371,30 +385,33 @@ export function OrgEventTicketTypesEditor({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-fg text-sm">{t.name}</span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-fg text-sm font-semibold">{t.name}</span>
                         <AccessLevelBadge level={t.accessLevel} />
-                        <span className="font-bold text-fg text-sm ml-1">{formatPrice(t.price)}</span>
+                        <span className="text-fg ml-1 text-sm font-bold">
+                          {formatPrice(t.price)}
+                        </span>
                       </div>
-                      {t.description && (
-                        <p className="text-xs text-fg-muted">{t.description}</p>
-                      )}
-                      <p className="text-xs text-fg-subtle">
+                      {t.description && <p className="text-fg-muted text-xs">{t.description}</p>}
+                      <p className="text-fg-subtle text-xs">
                         Quota : <strong>{t.quantity} places</strong>
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2 self-end sm:self-center">
                       <Button size="sm" variant="secondary" onClick={() => startEdit(t)}>
-                        <Edit2 className="size-3.5 mr-1" /> Modifier
+                        <Edit2 className="mr-1 size-3.5" /> Modifier
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
+                        loading={isPending}
+                        loadingLabel="Suppression…"
                         className="text-danger hover:text-danger hover:bg-danger/10"
                         onClick={() => handleDeleteTicket(t.id)}
+                        aria-label={isPending ? "Suppression de la formule" : `Supprimer ${t.name}`}
                       >
                         <Trash2 className="size-3.5" />
                       </Button>

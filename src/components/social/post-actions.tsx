@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, MessageCircle, Send, Share2 } from "lucide-react";
+import { Heart, LoaderCircle, MessageCircle, Send, Share2 } from "lucide-react";
 
 import { createComment, toggleReaction } from "@/lib/salons/actions";
 import { cn } from "@/lib/utils";
@@ -78,36 +78,45 @@ export function PostActions({
 
   return (
     <div className="mt-3 pt-2">
-      <div className="flex items-center justify-between border-t border-border/40 pt-2 text-sm">
+      <div className="border-border/40 flex items-center justify-between border-t pt-2 text-sm">
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={toggleLike}
+            disabled={pending}
             aria-pressed={reacted}
+            aria-busy={pending}
             className={cn(
-              "group inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95",
+              "group inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:cursor-progress disabled:opacity-70",
               reacted
                 ? "bg-danger-subtle text-danger"
                 : "text-fg-muted hover:bg-bg-muted hover:text-fg",
             )}
           >
-            <Heart
-              className={cn(
-                "size-4 transition-transform duration-200 group-hover:scale-110",
-                reacted && "fill-current scale-110",
-              )}
-              aria-hidden="true"
-            />
-            <span>{count > 0 ? count : "J'aime"}</span>
+            {pending ? (
+              <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Heart
+                className={cn(
+                  "size-4 transition-transform duration-200 group-hover:scale-110",
+                  reacted && "scale-110 fill-current",
+                )}
+                aria-hidden="true"
+              />
+            )}
+            <span>{pending ? "En cours…" : count > 0 ? count : "J'aime"}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setReplyOpen((open) => !open)}
             aria-expanded={replyOpen}
-            className="group inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-fg-muted transition-all duration-150 hover:bg-bg-muted hover:text-fg active:scale-95"
+            className="group text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95"
           >
-            <MessageCircle className="size-4 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
+            <MessageCircle
+              className="size-4 transition-transform duration-200 group-hover:scale-110"
+              aria-hidden="true"
+            />
             <span>{commentCount > 0 ? commentCount : "Commenter"}</span>
           </button>
         </div>
@@ -115,7 +124,7 @@ export function PostActions({
         <button
           type="button"
           onClick={handleShare}
-          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-fg-muted transition-all hover:bg-bg-muted hover:text-fg"
+          className="text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all"
           title="Copier le lien"
         >
           <Share2 className="size-3.5" aria-hidden="true" />
@@ -135,20 +144,26 @@ export function PostActions({
             rows={2}
             maxLength={2000}
             placeholder="Écrire un commentaire..."
-            className="min-h-10 w-full resize-none rounded-xl border border-border bg-surface-raised px-3.5 py-2 text-sm placeholder:text-fg-subtle focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+            className="border-border bg-surface-raised placeholder:text-fg-subtle focus:border-primary focus:ring-primary min-h-10 w-full resize-none rounded-xl border px-3.5 py-2 text-sm focus:ring-1 focus:outline-none"
           />
           <button
             type="submit"
             disabled={pending || reply.trim().length === 0}
-            className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-sm transition-all hover:bg-primary-hover active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={pending ? "Envoi de la réponse" : "Envoyer la réponse"}
+            aria-busy={pending}
+            className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex h-11 min-w-11 shrink-0 items-center justify-center rounded-sm px-4 text-xs font-semibold transition-colors disabled:cursor-progress disabled:opacity-60"
           >
-            <Send className="size-3.5" aria-hidden="true" />
+            {pending ? (
+              <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Send className="size-3.5" aria-hidden="true" />
+            )}
           </button>
         </form>
       ) : null}
 
       {error ? (
-        <p role="alert" className="mt-2 text-xs font-medium text-danger">
+        <p role="alert" className="text-danger mt-2 text-xs font-medium">
           {error}
         </p>
       ) : null}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { UserPlus, Check } from "lucide-react";
+import { UserPlus, Check, LoaderCircle } from "lucide-react";
 
 import { requestConnection } from "@/lib/connections/actions";
 import { cn } from "@/lib/utils";
@@ -13,7 +13,7 @@ export function RequestConnectionButton({ profileId }: { profileId: string }) {
 
   if (state === "sent") {
     return (
-      <span className="inline-flex h-10 items-center gap-2 rounded-md border border-success px-4 text-sm font-semibold text-success">
+      <span className="border-success text-success inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-semibold">
         <Check className="size-4" aria-hidden="true" />
         Demande envoyée
       </span>
@@ -25,6 +25,7 @@ export function RequestConnectionButton({ profileId }: { profileId: string }) {
       <button
         type="button"
         disabled={pending}
+        aria-busy={pending}
         onClick={() =>
           startTransition(async () => {
             const result = await requestConnection(profileId);
@@ -36,14 +37,18 @@ export function RequestConnectionButton({ profileId }: { profileId: string }) {
           })
         }
         className={cn(
-          "inline-flex h-10 items-center gap-2 rounded-md bg-primary-solid px-4 text-sm font-semibold text-primary-solid-fg transition-colors hover:bg-primary-solid-hover disabled:opacity-50",
+          "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-11 items-center gap-2 rounded-sm px-4 text-sm font-semibold transition-colors disabled:cursor-progress disabled:opacity-60",
         )}
       >
-        <UserPlus className="size-4" aria-hidden="true" />
-        Se connecter
+        {pending ? (
+          <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <UserPlus className="size-4" aria-hidden="true" />
+        )}
+        {pending ? "Envoi…" : "Se connecter"}
       </button>
       {state === "error" && error ? (
-        <p role="alert" className="text-xs font-medium text-danger">
+        <p role="alert" className="text-danger text-xs font-medium">
           {error}
         </p>
       ) : null}

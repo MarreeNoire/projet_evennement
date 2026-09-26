@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCheck } from "lucide-react";
+import { CheckCheck, LoaderCircle } from "lucide-react";
 
 import { markAllNotificationsRead } from "@/lib/notifications/actions";
 
@@ -14,16 +14,21 @@ export function MarkAllReadButton() {
     <button
       type="button"
       disabled={pending}
+      aria-busy={pending}
       onClick={() =>
         startTransition(async () => {
           await markAllNotificationsRead();
           router.refresh();
         })
       }
-      className="inline-flex h-10 items-center gap-2 rounded-md border border-border px-4 text-sm font-semibold transition-colors hover:bg-fg hover:text-fg-inverted disabled:opacity-50"
+      className="border-border hover:bg-fg hover:text-fg-inverted inline-flex min-h-11 items-center gap-2 rounded-sm border px-4 text-sm font-semibold transition-colors disabled:cursor-progress disabled:opacity-60"
     >
-      <CheckCheck className="size-4" aria-hidden="true" />
-      Tout marquer comme lu
+      {pending ? (
+        <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+      ) : (
+        <CheckCheck className="size-4" aria-hidden="true" />
+      )}
+      {pending ? "Mise à jour…" : "Tout marquer comme lu"}
     </button>
   );
 }

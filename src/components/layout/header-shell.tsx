@@ -1,9 +1,9 @@
 "use client";
 
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, LoaderCircle, Menu, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Logo } from "@/components/brand/logo";
 import { ButtonLink } from "@/components/ui/button";
@@ -30,10 +30,84 @@ export function HeaderShell({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navigating, setNavigating] = useState(false);
   const navItems = getNavItems(user);
 
+  useEffect(() => {
+    setNavigating(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    let resetTimer: ReturnType<typeof setTimeout> | undefined;
+    const startNavigationFeedback = () => {
+      setNavigating(true);
+      if (resetTimer) clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => setNavigating(false), 8000);
+    };
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      )
+        return;
+
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const link = target.closest<HTMLAnchorElement>("a[href]");
+      if (!link || link.target || link.hasAttribute("download")) return;
+
+      const destination = new URL(link.href, window.location.href);
+      if (destination.origin !== window.location.origin) return;
+      if (
+        destination.pathname === window.location.pathname &&
+        destination.search === window.location.search
+      )
+        return;
+
+      startNavigationFeedback();
+    };
+
+    const handleFormSubmit = (event: SubmitEvent) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement) || form.method.toLowerCase() !== "get" || form.target)
+        return;
+      if (!form.hasAttribute("action")) return;
+
+      const destination = new URL(form.action, window.location.href);
+      if (destination.origin === window.location.origin) startNavigationFeedback();
+    };
+
+    document.addEventListener("click", handleDocumentClick, true);
+    document.addEventListener("submit", handleFormSubmit, true);
+    return () => {
+      document.removeEventListener("click", handleDocumentClick, true);
+      document.removeEventListener("submit", handleFormSubmit, true);
+      if (resetTimer) clearTimeout(resetTimer);
+    };
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border-strong bg-surface">
+    <header className="border-border-strong bg-surface sticky top-0 z-40 border-b">
+      {navigating ? (
+        <>
+          <div aria-hidden="true" className="navigation-progress-track">
+            <span className="navigation-progress-indicator" />
+          </div>
+          <div
+            role="status"
+            aria-live="polite"
+            className="border-border bg-surface text-primary fixed top-20 right-3 z-[60] inline-flex size-11 items-center justify-center border shadow-sm sm:right-4"
+          >
+            <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
+            <span className="sr-only">Chargement de la page</span>
+          </div>
+        </>
+      ) : null}
       <div className="container-page flex h-[4.5rem] items-center gap-4">
         <Link href={ROUTES.home} className="shrink-0" aria-label="Accueil">
           <Logo />
@@ -73,7 +147,7 @@ export function HeaderShell({
             </label>
             <div className="relative">
               <Search
-                className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-fg-subtle"
+                className="text-fg-subtle pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2"
                 aria-hidden="true"
               />
               <input
@@ -81,7 +155,7 @@ export function HeaderShell({
                 name="q"
                 type="search"
                 placeholder="Rechercher des événements, salons…"
-                className="h-10 w-48 rounded-sm border border-border bg-bg pr-4 pl-9 text-sm transition-[width] duration-200 placeholder:text-fg-subtle focus:w-64 focus:border-border-focus focus:bg-surface focus:outline-none"
+                className="border-border bg-bg placeholder:text-fg-subtle focus:border-border-focus focus:bg-surface h-10 w-48 rounded-sm border pr-4 pl-9 text-sm transition-[width] duration-200 focus:w-64 focus:outline-none"
               />
             </div>
           </form>
@@ -92,7 +166,7 @@ export function HeaderShell({
             <>
               <Link
                 href={ROUTES.notifications}
-                className="relative inline-flex size-10 items-center justify-center rounded-sm border border-transparent text-fg-muted hover:border-border hover:bg-bg-muted hover:text-fg"
+                className="text-fg-muted hover:border-border hover:bg-bg-muted hover:text-fg relative inline-flex size-10 items-center justify-center rounded-sm border border-transparent"
                 aria-label={
                   unreadCount > 0
                     ? `Notifications, ${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
@@ -103,7 +177,7 @@ export function HeaderShell({
                 {unreadCount > 0 ? (
                   <span
                     aria-hidden="true"
-                    className="absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-sm bg-danger-solid px-1 text-2xs font-bold text-white ring-2 ring-bg"
+                    className="bg-danger-solid text-2xs ring-bg absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-sm px-1 font-bold text-white ring-2"
                   >
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
@@ -133,7 +207,7 @@ export function HeaderShell({
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="inline-flex size-10 items-center justify-center rounded-sm border border-transparent text-fg-muted hover:border-border hover:bg-bg-muted lg:hidden"
+            className="text-fg-muted hover:border-border hover:bg-bg-muted inline-flex size-10 items-center justify-center rounded-sm border border-transparent lg:hidden"
             aria-expanded={mobileOpen}
             aria-controls="menu-mobile"
           >

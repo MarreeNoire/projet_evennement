@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Send } from "lucide-react";
+import { ImageIcon, LoaderCircle, Send } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Alert } from "@/components/ui/states";
@@ -85,7 +85,11 @@ export function SalonPostForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border-border bg-surface mb-6 rounded-sm border p-4">
+    <form
+      onSubmit={handleSubmit}
+      aria-busy={pending}
+      className="border-border bg-surface mb-6 rounded-sm border p-3 sm:p-4"
+    >
       {error ? (
         <div className="mb-4">
           <Alert tone="danger" title="Publication impossible">
@@ -157,10 +161,15 @@ export function SalonPostForm({
               <button
                 type="submit"
                 disabled={pending || content.trim().length === 0}
-                className="bg-primary hover:bg-primary-hover inline-flex h-9 items-center gap-2 rounded-md px-5 text-xs font-semibold text-white shadow-sm transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-busy={pending}
+                className="bg-primary-solid hover:bg-primary-solid-hover text-primary-solid-fg inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-4 text-xs font-semibold transition-colors disabled:cursor-progress disabled:opacity-60 sm:px-5"
               >
+                {pending ? (
+                  <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Send className="size-3.5" aria-hidden="true" />
+                )}
                 {pending ? "Publication…" : "Publier"}
-                <Send className="size-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>
