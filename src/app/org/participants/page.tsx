@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge, AccessLevelBadge } from "@/components/ui/badge";
 
 export const metadata = {
-  title: "Liste des Participants | Espace Organisateur | Rassemble",
+  title: "Liste des Participants | Espace Organisateur | Event",
   description: "Consultation et export des personnes inscrites à vos événements.",
 };
 

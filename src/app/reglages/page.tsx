@@ -6,7 +6,7 @@ import { getCurrentProfile } from "@/lib/supabase/server";
 import { UserSettingsForm } from "@/components/auth/user-settings-form";
 
 export const metadata = {
-  title: "Réglages & Paramètres | Rassemble",
+  title: "Réglages & Paramètres | Event",
   description: "Configure tes préférences de confidentialité et de notification.",
 };
 

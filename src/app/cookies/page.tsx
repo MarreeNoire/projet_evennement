@@ -5,8 +5,8 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { Card } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Gestion des Cookies | Rassemble",
-  description: "Information sur l'utilisation des témoins de connexion (cookies) sur Rassemble.",
+  title: "Gestion des Cookies | Event",
+  description: "Information sur l'utilisation des témoins de connexion (cookies) sur Event.",
 };
 
 export default async function CookiesPage() {

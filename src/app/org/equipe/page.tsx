@@ -1,7 +1,7 @@
 import { OrgTeamManager } from "@/components/events/org-team-manager";
 
 export const metadata = {
-  title: "Gestion de l'Équipe | Espace Organisateur | Rassemble",
+  title: "Gestion de l'Équipe | Espace Organisateur | Event",
   description: "Gérez les collaborateurs et leurs rôles d'accès.",
 };
 

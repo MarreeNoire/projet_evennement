@@ -16,9 +16,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-lg border border-border bg-surface",
+        "rounded-md border border-border bg-surface",
         interactive &&
-          "transition-[border-color,background-color] duration-150 ease-[var(--ease-out-soft)] hover:border-border hover:bg-surface-raised focus-within:border-border-focus",
+          "transition-[border-color,background-color] duration-150 ease-[var(--ease-out-soft)] hover:border-primary hover:bg-surface-raised focus-within:border-border-focus",
         className,
       )}
       {...props}
@@ -88,7 +88,7 @@ export function StatCard({
           </span>
         ) : null}
       </div>
-      <p className="mt-2 font-display text-2xl font-semibold tracking-tight tabular-nums">{value}</p>
+      <p className="mt-2 font-display text-2xl font-bold tracking-tight tabular-nums md:text-3xl">{value}</p>
       {(hint || trend) && (
         <p className="mt-1 flex items-center gap-1.5 text-xs">
           {trend ? (

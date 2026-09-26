@@ -61,7 +61,7 @@ export function PostCard({
             ) : null}
             <span className="text-xs text-fg-subtle">· {formatRelative(post.created_at)}</span>
             {post.is_pinned ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-2xs font-bold text-primary">
+              <span className="inline-flex items-center gap-1 rounded-sm bg-primary/10 px-2 py-0.5 text-2xs font-bold text-primary">
                 Épinglé
               </span>
             ) : null}

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Guide du Check-in & Contrôle d'Accès | Rassemble",
+  title: "Guide du Check-in & Contrôle d'Accès | Event",
   description: "Guide complet d'utilisation du scanner de billets pour agents et organisateurs.",
 };
 

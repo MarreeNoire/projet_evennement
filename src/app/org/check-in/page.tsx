@@ -1,7 +1,7 @@
 import { OrgCheckInScanner } from "@/components/events/org-check-in-scanner";
 
 export const metadata = {
-  title: "Contrôle d'accès & Check-in | Rassemble",
+  title: "Contrôle d'accès & Check-in | Event",
   description: "Outil de validation et contrôle des billets à l'entrée des événements.",
 };
 

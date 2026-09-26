@@ -10,7 +10,7 @@ import { getOrganizerEventTicketTypes } from "@/lib/events/queries";
 import { formatNumber, formatPercent, formatPrice, toDateTimeLocalValue } from "@/lib/utils";
 
 export const metadata = {
-  title: "Gérer l'Événement | Rassemble",
+  title: "Gérer l'Événement | Event",
   description: "Détails et modifications de votre événement",
 };
 
@@ -106,7 +106,7 @@ export default async function OrgEvenementDetailPage({
         <Card className="p-4 text-center">
           <p className="text-xs text-fg-muted font-medium">Taux de Remplissage</p>
           <p className="text-2xl font-bold text-primary mt-1">
-            {fillRate === null ? "—" : formatPercent(fillRate)}
+            {fillRate === null ? "Indisponible" : formatPercent(fillRate)}
           </p>
           <p className="text-xs text-fg-subtle mt-0.5">billets / capacité</p>
         </Card>

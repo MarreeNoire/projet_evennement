@@ -16,7 +16,7 @@ export const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 whitespace-nowrap",
     "font-semibold",
-    "rounded-full border border-transparent",
+    "rounded-sm border border-transparent",
     "transition-[background-color,border-color,color,box-shadow,transform] duration-150",
     "ease-[var(--ease-out-soft)]",
     "select-none",
@@ -33,7 +33,7 @@ export const buttonVariants = cva(
         // Action principale : contraste 5.55:1 dans les deux thèmes
         primary:
           "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover",
-        // Action secondaire : pilule grise discrète, façon réseau social
+        // Action secondaire
         secondary:
           "bg-bg-muted text-fg hover:bg-border",
         // Action discrète
@@ -44,9 +44,9 @@ export const buttonVariants = cva(
         danger: "bg-danger-solid text-white hover:bg-danger-solid-hover",
         // Accent chaud : réservé aux mises en avant (VIP, CTA promotionnel)
         accent: "bg-accent-solid text-accent-solid-fg hover:brightness-95",
-        // Sur photo de couverture (fond sombre garantissant le contraste)
+        // Sur photo de couverture
         overlay:
-          "bg-black/55 text-white backdrop-blur-sm hover:bg-black/70 border-white/15",
+          "border-white/30 bg-black/85 text-white hover:bg-black",
       },
       size: {
         sm: "h-9 px-3 text-sm [&_svg]:size-4",

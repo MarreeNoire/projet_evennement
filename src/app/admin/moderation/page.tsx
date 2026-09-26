@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/states";
 
 export const metadata = {
-  title: "Centre de Modération | Super Admin | Rassemble",
+  title: "Centre de Modération | Super Admin | Event",
   description: "Gestion des signalements de contenus ou commentaires inappropriés.",
 };
 
@@ -22,7 +22,7 @@ export default async function AdminModerationPage() {
 
       <EmptyState
         title="Aucun signalement en attente"
-        description="Bravo ! La communauté Rassemble respecte la charte de convivialité."
+        description="Bravo ! La communauté Event respecte la charte de convivialité."
       />
     </div>
   );

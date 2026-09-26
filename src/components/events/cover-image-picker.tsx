@@ -89,7 +89,7 @@ export function CoverImagePicker({
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-black/55 px-3.5 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+                className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-white/30 bg-black/80 px-3.5 text-xs font-semibold text-white transition-colors hover:bg-black"
               >
                 <RefreshCw className="size-3.5" aria-hidden="true" />
                 Remplacer
@@ -97,7 +97,7 @@ export function CoverImagePicker({
               <button
                 type="button"
                 onClick={onClear}
-                className="inline-flex h-9 items-center gap-1.5 rounded-full bg-black/55 px-3.5 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-danger-solid"
+                className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-white/30 bg-black/80 px-3.5 text-xs font-semibold text-white transition-colors hover:bg-danger-solid"
               >
                 <Trash2 className="size-3.5" aria-hidden="true" />
                 Retirer
@@ -120,7 +120,7 @@ export function CoverImagePicker({
           <span className="text-sm font-semibold">
             {uploading ? "Envoi de l'image…" : "Ajouter une image de couverture"}
           </span>
-          <span className="text-xs">JPG, PNG, WebP ou AVIF — 5 Mo max — format paysage conseillé</span>
+          <span className="text-xs">JPG, PNG, WebP ou AVIF, 5 Mo maximum. Format paysage conseillé.</span>
         </button>
       )}
 

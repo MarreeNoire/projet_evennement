@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { CreateEventForm } from "@/components/events/create-event-form";
 
 export const metadata = {
-  title: "Créer un Événement | Espace Organisateur | Rassemble",
+  title: "Créer un Événement | Espace Organisateur | Event",
   description: "Formulaire de création d'un nouvel événement.",
 };
 

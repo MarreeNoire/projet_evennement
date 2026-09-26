@@ -58,7 +58,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
               <AccessLevelBadge level={ticket.access_level} />
             </p>
             <p className="text-center text-xs text-fg-subtle">
-              Présente ce QR à l'entrée. Personnel et à usage unique — ne le partage pas.
+              Présente ce QR à l'entrée. Il est personnel et à usage unique. Ne le partage pas.
               {ticket.checked_in_at ? ` Scanné le ${formatDateTime(ticket.checked_in_at)}.` : ""}
             </p>
           </CardContent>

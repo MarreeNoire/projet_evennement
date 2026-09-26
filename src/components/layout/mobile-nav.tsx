@@ -79,7 +79,7 @@ export function MobileNav({
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex size-10 items-center justify-center rounded-full text-fg-muted hover:bg-bg-muted"
+          className="inline-flex size-10 items-center justify-center rounded-sm border border-border text-fg-muted hover:bg-bg-muted"
         >
           <X className="size-5" aria-hidden="true" />
           <span className="sr-only">Fermer le menu</span>
@@ -96,7 +96,7 @@ export function MobileNav({
             name="q"
             type="search"
             placeholder="Rechercher un événement…"
-            className="h-12 w-full rounded-xl border border-border bg-bg-muted px-4 text-base placeholder:text-fg-subtle focus:border-border-focus focus:bg-surface focus:outline-none"
+            className="h-12 w-full rounded-sm border border-border-strong bg-surface px-4 text-base placeholder:text-fg-subtle focus:border-border-focus focus:outline-none"
           />
         </form>
 
@@ -113,7 +113,7 @@ export function MobileNav({
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-12 items-center rounded-xl px-4 text-base font-medium",
+                    "flex h-12 items-center border-b border-border px-4 text-base font-medium",
                     active
                       ? "bg-primary-subtle text-primary-subtle-fg"
                       : "text-fg hover:bg-bg-muted",
@@ -142,7 +142,7 @@ export function MobileNav({
               <Bell className="size-5" aria-hidden="true" />
               Notifications
               {unreadCount > 0 ? (
-                <span className="ml-auto rounded-full bg-danger-solid px-2 py-0.5 text-2xs font-bold text-white">
+                <span className="ml-auto rounded-sm bg-danger-solid px-2 py-0.5 text-2xs font-bold text-white">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               ) : null}

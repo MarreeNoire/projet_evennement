@@ -2,7 +2,7 @@ import { OrgTicketTypesManager } from "@/components/events/org-ticket-types-mana
 import { getOrganizerTicketTypes } from "@/lib/events/queries";
 
 export const metadata = {
-  title: "Billetterie & Tarifs | Espace Organisateur | Rassemble",
+  title: "Billetterie & Tarifs | Espace Organisateur | Event",
   description: "Configurez vos types de billets (Standard, VIP, VVIP) et quotas.",
 };
 

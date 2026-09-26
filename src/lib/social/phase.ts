@@ -1,7 +1,7 @@
 /* =============================================================================
    Phases d'un événement : Avant · Sur place · Après
    --------------------------------------------------------------------------
-   Toute la vie sociale de Rassemble s'organise autour de ces trois moments :
+   Toute la vie sociale de Event s'organise autour de ces trois moments :
    un salon s'ouvre avant l'événement, vit pendant, et garde la mémoire après.
    Chaque publication est rattachée à la phase dans laquelle elle a été écrite.
    ========================================================================== */

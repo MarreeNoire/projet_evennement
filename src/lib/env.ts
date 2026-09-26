@@ -109,7 +109,7 @@ export const env = {
   nodeEnv: raw.NODE_ENV,
   isProduction,
   appUrl: APP_URL,
-  appName: raw.NEXT_PUBLIC_APP_NAME ?? "Rassemble",
+  appName: "Event",
   currency: raw.NEXT_PUBLIC_CURRENCY ?? "XOF",
   commissionRate: raw.PLATFORM_COMMISSION_RATE,
 
@@ -128,7 +128,7 @@ export const env = {
     provider: raw.EMAIL_PROVIDER,
     resend: {
       apiKey: raw.RESEND_API_KEY ?? "",
-      from: raw.EMAIL_FROM ?? "Rassemble <onboarding@resend.dev>",
+      from: raw.EMAIL_FROM ?? "Event <onboarding@resend.dev>",
       replyTo: raw.EMAIL_REPLY_TO ?? "",
     },
   },

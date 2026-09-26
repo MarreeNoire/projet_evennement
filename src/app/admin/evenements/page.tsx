@@ -8,7 +8,7 @@ import { getRecentEvents } from "@/lib/events/queries";
 import { formatDateRange, isPast } from "@/lib/utils";
 
 export const metadata = {
-  title: "Modération des Événements | Super Admin | Rassemble",
+  title: "Modération des Événements | Super Admin | Event",
   description: "Validation et mise en avant des événements sur la plateforme.",
 };
 

@@ -63,7 +63,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="flex items-center gap-1 rounded-full p-0.5 hover:bg-bg-muted"
+        className="flex items-center gap-1 border border-transparent p-1 hover:border-border hover:bg-bg-muted"
       >
         <Avatar src={user.avatarUrl} name={user.displayName} size="sm" />
         <ChevronDown className="size-4 text-fg-subtle" aria-hidden="true" />
@@ -73,7 +73,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-64 overflow-hidden rounded-xl border border-border bg-surface-overlay shadow-lg"
+          className="absolute right-0 mt-2 w-64 overflow-hidden rounded-md border border-border bg-surface-overlay shadow-md"
         >
           <div className="border-b border-border px-4 py-3">
             <p className="truncate text-sm font-semibold">{user.displayName}</p>
@@ -107,7 +107,7 @@ export function UserMenu({ user }: { user: HeaderUser }) {
               type="button"
               role="menuitem"
               onClick={handleSignOut}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-fg hover:bg-bg-muted"
+              className="flex w-full items-center gap-2.5 rounded-sm px-3 py-2 text-sm text-fg hover:bg-bg-muted"
             >
               <LogOut className="size-4 text-fg-subtle" aria-hidden="true" />
               Se déconnecter

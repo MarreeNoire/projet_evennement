@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Gestion des Utilisateurs | Super Admin | Rassemble",
+  title: "Gestion des Utilisateurs | Super Admin | Event",
   description: "Liste complète des utilisateurs et gestion des accès.",
 };
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { CalendarDays, MapPin } from "lucide-react";
 
-import { AccessLevelBadge, Badge } from "@/components/ui/badge";
+import { AccessLevelBadge } from "@/components/ui/badge";
 import { CURRENCY_LABEL, getCategoryLabel } from "@/lib/constants";
 import { formatDate, formatNumber } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
@@ -48,18 +48,18 @@ export function EventCard({ event }: { event: PublishedEventView }) {
   return (
     <Link
       href={`/evenements/${event.slug}`}
-      className="group block h-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2"
-      aria-label={`${event.title} — ${formatDate(event.start_at)} à ${event.city}`}
+      className="group block h-full focus-visible:outline-2 focus-visible:outline-offset-2"
+      aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
     >
-      <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-xs transition-all duration-200 group-hover:-translate-y-1 group-hover:border-border-strong group-hover:shadow-md">
-        <div className="relative aspect-16/10 overflow-hidden bg-bg-muted">
+      <article className="flex h-full flex-col overflow-hidden border border-border bg-surface transition-colors duration-150 group-hover:border-primary">
+        <div className="relative aspect-16/10 overflow-hidden border-b border-border bg-bg-muted">
           {imageUrl ? (
             // Les images Supabase sont servies directement pour éviter le proxy Next.
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={imageUrl}
               alt=""
-              className="size-full object-cover transition-transform duration-500 ease-[var(--ease-out-soft)] group-hover:scale-105"
+              className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-[1.02]"
             />
           ) : (
             <div className="flex size-full items-center justify-center text-sm text-fg-subtle">
@@ -69,30 +69,14 @@ export function EventCard({ event }: { event: PublishedEventView }) {
 
           {/* Badges en superposition */}
           <div className="absolute top-3 left-3 flex gap-1.5">
-            <span className="rounded-full bg-black/60 px-2.5 py-1 text-2xs font-semibold text-white backdrop-blur-md">
+            <span className="border border-border bg-surface px-2 py-1 text-2xs font-semibold tracking-wide text-fg uppercase">
               {getCategoryLabel(event.category)}
             </span>
           </div>
 
-          <div className="absolute top-3 right-3 flex items-center gap-1.5">
-            {event.min_price <= 0 ? (
-              <span className="rounded-full bg-emerald-600/90 px-2.5 py-1 text-2xs font-bold text-white backdrop-blur-md">
-                Gratuit
-              </span>
-            ) : null}
-          </div>
-
-          {/* Date pill façon Stories/Réseau social */}
-          <div
-            aria-hidden="true"
-            className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-surface/90 px-3 py-1 text-xs font-semibold text-fg shadow-sm backdrop-blur-md"
-          >
-            <span className="text-primary font-bold uppercase">{month}</span>
-            <span className="tabular-nums font-bold">{day}</span>
-          </div>
         </div>
 
-        <div className="flex flex-1 flex-col gap-2.5 p-4 sm:p-5">
+        <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
           <h3 className="line-clamp-2 text-base sm:text-lg leading-snug font-bold text-fg group-hover:text-primary transition-colors">
             {event.title}
           </h3>
@@ -114,15 +98,16 @@ export function EventCard({ event }: { event: PublishedEventView }) {
             </div>
           )}
 
-          <p className="flex items-center gap-1.5 text-xs text-fg-muted">
-            <MapPin className="size-3.5 shrink-0 text-fg-subtle" aria-hidden="true" />
-            <span className="truncate">
-              {event.venue_name ? `${event.venue_name} · ` : ""}
-              {event.city}
-            </span>
+          <p className="flex items-center gap-2 text-xs text-fg-muted">
+            <CalendarDays className="size-4 shrink-0 text-primary" aria-hidden="true" />
+            <span>{`${day} ${month} ${year}`}</span>
+          </p>
+          <p className="flex items-center gap-2 text-xs text-fg-muted">
+            <MapPin className="size-4 shrink-0 text-primary" aria-hidden="true" />
+            <span className="truncate">{event.venue_name ? `${event.venue_name}, ` : ""}{event.city}</span>
           </p>
 
-          <div className="mt-auto flex items-center justify-between gap-3 border-t border-border/50 pt-3">
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-3">
             <span className="text-sm font-bold text-fg tabular-nums">
               {priceLabel(event)}
             </span>

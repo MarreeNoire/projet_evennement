@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Logo } from "@/components/brand/logo";
 import { APP_NAME, CURRENCY_LABEL } from "@/lib/constants";
 import { FOOTER_SECTIONS } from "./nav-config";
@@ -13,34 +15,24 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto overflow-hidden border-t border-border bg-bg-subtle">
-      <div className="container-page py-12">
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
+    <footer className="mt-auto border-t-2 border-fg bg-bg-subtle">
+      <div className="container-page py-10 md:py-12">
+        <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(4,1fr)]">
           <div className="flex flex-col gap-4">
             <Logo />
             <p className="max-w-xs text-sm leading-relaxed text-fg-muted">
               Découvre un événement, participe, et rencontre sa communauté avant, pendant et après.
             </p>
-            <div className="flex flex-col gap-2 text-sm">
-              <span className="font-medium text-fg">Moyens de paiement</span>
-              <ul className="flex flex-wrap gap-1.5">
-                {["Wave", "Orange Money", "MTN MoMo", "Moov", "Visa", "Mastercard"].map((method) => (
-                  <li
-                    key={method}
-                    className="rounded-sm border border-border-strong px-2 py-1 text-xs font-medium text-fg-muted"
-                  >
-                    {method}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Link href="/explorer" className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary hover:underline">
+              Parcourir les événements
+            </Link>
           </div>
 
           {FOOTER_SECTIONS.map((section) => (
             <nav key={section.title} aria-labelledby={`footer-${section.title}`}>
               <h2
                 id={`footer-${section.title}`}
-                className="eyebrow mb-3"
+                className="mb-3 text-xs font-bold tracking-[0.12em] text-fg uppercase"
               >
                 {section.title}
               </h2>
@@ -49,7 +41,7 @@ export function SiteFooter() {
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="text-sm text-fg-muted underline-offset-4 hover:text-fg hover:underline"
+                      className="text-sm text-fg-muted underline-offset-4 transition-colors hover:text-primary hover:underline"
                     >
                       {link.label}
                     </a>
@@ -60,7 +52,7 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 text-xs text-fg-subtle sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-3 border-t border-border-strong pt-5 text-xs text-fg-subtle sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {year} {APP_NAME}. Tous droits réservés.
           </p>
@@ -70,12 +62,6 @@ export function SiteFooter() {
         </div>
       </div>
 
-      {/* Signature : nom de la marque en très grand, rogné en bas comme sur une affiche */}
-      <div aria-hidden="true" className="container-page select-none">
-        <p className="-mb-[0.14em] font-display text-[clamp(4.5rem,19vw,15rem)] leading-[0.8] font-semibold tracking-tighter text-fg italic">
-          {APP_NAME}
-        </p>
-      </div>
     </footer>
   );
 }

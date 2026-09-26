@@ -7,7 +7,7 @@ import { APP_NAME, CURRENCY_LABEL, PLATFORM_COMMISSION_RATE, ROUTES } from "@/li
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { BecomeOrganizerForm } from "@/components/auth/become-organizer-form";
 
-export const metadata: Metadata = { title: "Devenir organisateur | Rassemble" };
+export const metadata: Metadata = { title: "Devenir organisateur | Event" };
 
 const BENEFITS = [
   {

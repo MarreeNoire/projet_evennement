@@ -33,8 +33,8 @@ export function HeaderShell({
   const navItems = getNavItems(user);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur-md">
-      <div className="container-page flex h-16 items-center gap-4">
+    <header className="sticky top-0 z-40 border-b border-border-strong bg-surface">
+      <div className="container-page flex h-[4.5rem] items-center gap-4">
         <Link href={ROUTES.home} className="shrink-0" aria-label="Accueil">
           <Logo />
         </Link>
@@ -49,9 +49,9 @@ export function HeaderShell({
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-full px-3.5 py-2 text-sm font-semibold transition-colors duration-150",
+                  "rounded-none border-b-2 border-transparent px-2 py-3 text-sm font-semibold transition-colors duration-150",
                   active
-                    ? "bg-primary-subtle text-primary"
+                    ? "border-primary text-primary"
                     : "text-fg-muted hover:bg-bg-muted hover:text-fg",
                 )}
               >
@@ -81,7 +81,7 @@ export function HeaderShell({
                 name="q"
                 type="search"
                 placeholder="Rechercher des événements, salons…"
-                className="h-10 w-48 rounded-full border border-transparent bg-bg-muted pr-4 pl-9 text-sm transition-[width] duration-200 placeholder:text-fg-subtle focus:w-64 focus:border-border-focus focus:bg-surface focus:outline-none"
+                className="h-10 w-48 rounded-sm border border-border bg-bg pr-4 pl-9 text-sm transition-[width] duration-200 placeholder:text-fg-subtle focus:w-64 focus:border-border-focus focus:bg-surface focus:outline-none"
               />
             </div>
           </form>
@@ -92,7 +92,7 @@ export function HeaderShell({
             <>
               <Link
                 href={ROUTES.notifications}
-                className="relative inline-flex size-10 items-center justify-center rounded-full text-fg-muted hover:bg-bg-muted hover:text-fg"
+                className="relative inline-flex size-10 items-center justify-center rounded-sm border border-transparent text-fg-muted hover:border-border hover:bg-bg-muted hover:text-fg"
                 aria-label={
                   unreadCount > 0
                     ? `Notifications, ${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
@@ -103,7 +103,7 @@ export function HeaderShell({
                 {unreadCount > 0 ? (
                   <span
                     aria-hidden="true"
-                    className="absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-full bg-danger-solid px-1 text-2xs font-bold text-white ring-2 ring-bg"
+                    className="absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-sm bg-danger-solid px-1 text-2xs font-bold text-white ring-2 ring-bg"
                   >
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
@@ -131,7 +131,7 @@ export function HeaderShell({
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="inline-flex size-10 items-center justify-center rounded-full text-fg-muted hover:bg-bg-muted lg:hidden"
+            className="inline-flex size-10 items-center justify-center rounded-sm border border-transparent text-fg-muted hover:border-border hover:bg-bg-muted lg:hidden"
             aria-expanded={mobileOpen}
             aria-controls="menu-mobile"
           >

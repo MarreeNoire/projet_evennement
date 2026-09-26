@@ -85,7 +85,7 @@ export function PostActions({
             onClick={toggleLike}
             aria-pressed={reacted}
             className={cn(
-              "group inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95",
+              "group inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95",
               reacted
                 ? "bg-danger-subtle text-danger"
                 : "text-fg-muted hover:bg-bg-muted hover:text-fg",
@@ -105,7 +105,7 @@ export function PostActions({
             type="button"
             onClick={() => setReplyOpen((open) => !open)}
             aria-expanded={replyOpen}
-            className="group inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-fg-muted transition-all duration-150 hover:bg-bg-muted hover:text-fg active:scale-95"
+            className="group inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-fg-muted transition-all duration-150 hover:bg-bg-muted hover:text-fg active:scale-95"
           >
             <MessageCircle className="size-4 transition-transform duration-200 group-hover:scale-110" aria-hidden="true" />
             <span>{commentCount > 0 ? commentCount : "Commenter"}</span>
@@ -115,7 +115,7 @@ export function PostActions({
         <button
           type="button"
           onClick={handleShare}
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-fg-muted transition-all hover:bg-bg-muted hover:text-fg"
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-fg-muted transition-all hover:bg-bg-muted hover:text-fg"
           title="Copier le lien"
         >
           <Share2 className="size-3.5" aria-hidden="true" />
@@ -155,4 +155,3 @@ export function PostActions({
     </div>
   );
 }
-

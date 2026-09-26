@@ -57,7 +57,7 @@ export default async function CheckoutPage({
         <div>
           <h1 className="font-display text-2xl font-bold md:text-3xl">Commander des billets</h1>
           <p className="mt-1 text-sm text-fg-muted">
-            {data.event.title} — choisis tes billets puis règle en mobile money ou carte.
+            {data.event.title}. Consulte les moyens de paiement proposés avant de confirmer.
           </p>
         </div>
 

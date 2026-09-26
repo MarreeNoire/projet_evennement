@@ -2,8 +2,8 @@
    Constantes métier — source unique de vérité (cf. cahier des charges)
    ========================================================================== */
 
-/** Nom de la plateforme (surchargé par NEXT_PUBLIC_APP_NAME). */
-export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? "Rassemble";
+/** Nom de la plateforme. */
+export const APP_NAME = "Event";
 
 /** Devise unique de la plateforme. */
 export const CURRENCY = "XOF" as const;

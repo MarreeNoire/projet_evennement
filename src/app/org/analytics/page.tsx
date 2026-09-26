@@ -1,81 +1,91 @@
-import Link from "next/link";
-import { BarChart3, TrendingUp, DollarSign, Users, Calendar } from "lucide-react";
+import { BarChart3, CalendarDays, TicketCheck, Wallet } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle, StatCard } from "@/components/ui/card";
-import { formatPrice } from "@/lib/utils";
+import { StatCard } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/states";
+import { getOrganizerEvents } from "@/lib/events/queries";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { formatNumber, formatPrice, formatPercent } from "@/lib/utils";
 
 export const metadata = {
-  title: "Statistiques & Analytics | Rassemble",
-  description: "Rapports de ventes et analyse des performances d'événements.",
+  title: "Statistiques | Event",
+  description: "Ventes et fréquentation de vos événements.",
 };
 
+interface EventStatsRow {
+  tickets_sold: number;
+  gross_revenue: number;
+  checked_in: number;
+  capacity: number | null;
+}
+
 export default async function OrgAnalyticsPage() {
+  const events = await getOrganizerEvents();
+  let stats: EventStatsRow[] = [];
+
+  if (events.length > 0) {
+    try {
+      const supabase = await createSupabaseServerClient();
+      const { data } = await supabase
+        .from("event_stats")
+        .select("tickets_sold, gross_revenue, checked_in, capacity")
+        .in("event_id", events.map((event) => event.id));
+      stats = (data as EventStatsRow[] | null) ?? [];
+    } catch {
+      stats = [];
+    }
+  }
+
+  const ticketsSold = stats.reduce((sum, item) => sum + item.tickets_sold, 0);
+  const grossRevenue = stats.reduce((sum, item) => sum + item.gross_revenue, 0);
+  const checkedIn = stats.reduce((sum, item) => sum + item.checked_in, 0);
+  const capacity = stats.reduce((sum, item) => sum + (item.capacity ?? 0), 0);
+  const occupancy = capacity > 0 ? formatPercent(ticketsSold / capacity) : "Non renseigné";
+
   return (
-    <div className="space-y-6">
-      <div className="border-b border-border pb-4">
-        <h1 className="font-display text-2xl font-bold tracking-tight">Statistiques & Performance</h1>
-        <p className="text-sm text-fg-muted">
-          Suivi des ventes, heures de pointe d&apos;achat et profil de vos participants.
+    <div className="space-y-8">
+      <header className="border-b border-border-strong pb-5">
+        <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Statistiques</h1>
+        <p className="mt-2 text-sm text-fg-muted">
+          Ventes et entrées enregistrées pour les événements que vous gérez.
         </p>
-      </div>
+      </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          label="Chiffre d'Affaires Cumulé"
-          value={formatPrice(2450000)}
-          hint="Revenus bruts générés"
-          icon={<DollarSign className="size-5" />}
+      {stats.length === 0 ? (
+        <EmptyState
+          icon={<BarChart3 />}
+          title="Aucune statistique disponible"
+          description="Les données de vente apparaîtront ici lorsqu’un événement sera créé et que des billets seront enregistrés."
         />
-        <StatCard
-          label="Prix Moyen du Billet"
-          value={formatPrice(5051)}
-          hint="Calculé sur 485 ventes"
-          icon={<TrendingUp className="size-5" />}
-        />
-        <StatCard
-          label="Taux de Remplissage Moyen"
-          value="82 %"
-          hint="Sur vos 3 événements actifs"
-          icon={<Users className="size-5" />}
-        />
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Répartition par Moyen de Paiement</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs font-semibold">
-              <span>Wave Money</span>
-              <span>45 % (1 102 500 FCFA)</span>
-            </div>
-            <div className="h-2 w-full bg-bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-primary w-[45%]" />
-            </div>
+      ) : (
+        <>
+          <p className="text-xs font-medium text-fg-subtle">
+            {formatNumber(stats.length)} événement{stats.length > 1 ? "s" : ""} avec des données
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Revenus bruts"
+              value={formatPrice(grossRevenue)}
+              icon={<Wallet className="size-5" />}
+            />
+            <StatCard
+              label="Billets vendus"
+              value={formatNumber(ticketsSold)}
+              icon={<TicketCheck className="size-5" />}
+            />
+            <StatCard
+              label="Entrées contrôlées"
+              value={formatNumber(checkedIn)}
+              icon={<CalendarDays className="size-5" />}
+            />
+            <StatCard
+              label="Remplissage"
+              value={occupancy}
+              hint={capacity > 0 ? `${formatNumber(ticketsSold)} sur ${formatNumber(capacity)} places` : undefined}
+              icon={<BarChart3 className="size-5" />}
+            />
           </div>
-
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs font-semibold">
-              <span>Orange Money</span>
-              <span>30 % (735 000 FCFA)</span>
-            </div>
-            <div className="h-2 w-full bg-bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-warning w-[30%]" />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs font-semibold">
-              <span>MTN MoMo & Moov</span>
-              <span>15 % (367 500 FCFA)</span>
-            </div>
-            <div className="h-2 w-full bg-bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-accent w-[15%]" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </>
+      )}
     </div>
   );
 }

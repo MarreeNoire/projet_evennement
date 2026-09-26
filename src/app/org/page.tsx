@@ -8,7 +8,7 @@ import { getOrganizerEvents } from "@/lib/events/queries";
 import { formatDateRange, isPast } from "@/lib/utils";
 
 export const metadata = {
-  title: "Tableau de Bord Organisateur | Rassemble",
+  title: "Tableau de Bord Organisateur | Event",
   description: "Vue d'ensemble de vos événements, ventes et revenus.",
 };
 

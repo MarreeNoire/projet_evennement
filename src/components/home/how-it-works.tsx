@@ -13,7 +13,7 @@ const STEPS = [
   {
     number: "02",
     title: "Réserve",
-    text: "Paie en mobile money (Wave, Orange, MTN, Moov) ou carte, reçois ton billet QR.",
+    text: "Vérifie les tarifs et les options affichées, puis retrouve ton billet dans ton compte après confirmation.",
   },
   {
     number: "03",

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ButtonLink } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Centre d'Aide & FAQ | Rassemble",
+  title: "Centre d'Aide & FAQ | Event",
   description: "Trouve toutes les réponses à tes questions sur la billetterie et les salons.",
 };
 

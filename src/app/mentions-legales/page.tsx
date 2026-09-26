@@ -5,8 +5,8 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { Card } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Mentions Légales | Rassemble",
-  description: "Informations légales concernant l'éditeur et l'hébergeur de Rassemble.",
+  title: "Mentions Légales | Event",
+  description: "Informations légales concernant l'éditeur et l'hébergeur de Event.",
 };
 
 export default async function MentionsLegalesPage() {
@@ -23,7 +23,7 @@ export default async function MentionsLegalesPage() {
           <section className="space-y-2">
             <h2 className="text-base font-bold text-fg">Éditeur du site</h2>
             <p>
-              Plateforme <strong>Rassemble</strong><br />
+              Plateforme <strong>Event</strong><br />
               Société de technologie événementielle<br />
               Abidjan, Côte d&apos;Ivoire<br />
               Email : contact@rassemble.ci

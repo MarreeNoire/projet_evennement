@@ -39,7 +39,7 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
   const isOrganizer = profile.roles.includes("organizer");
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg-subtle/50">
+    <div className="flex min-h-dvh flex-col bg-bg">
       <SiteHeader />
       <div className="container-page flex-1 py-8">
         {!isOrganizer ? (
@@ -56,8 +56,8 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
           <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
             {/* Navigation latérale Organisateur */}
             <aside className="space-y-6">
-              <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
-                <div className="mb-4 border-b border-border pb-3">
+              <div className="border-t-2 border-fg bg-surface p-4">
+                <div className="mb-4 border-b border-border-strong pb-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">
                     Espace Organisateur
                   </p>
@@ -73,7 +73,7 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
                       <Link
                         key={item.href}
                         href={item.href}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-fg-muted hover:bg-bg-muted hover:text-fg transition-colors"
+                        className="flex items-center gap-3 border-l-2 border-transparent px-3 py-2.5 text-sm font-medium text-fg-muted transition-colors hover:border-primary hover:bg-bg-muted hover:text-fg"
                       >
                         <Icon className="size-4 text-fg-subtle" />
                         <span>{item.label}</span>

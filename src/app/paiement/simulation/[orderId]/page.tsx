@@ -47,7 +47,7 @@ export default async function MockPayPage({
         <div>
           <h1 className="font-display text-2xl font-bold">Paiement de {formatPrice(order.total)}</h1>
           <p className="mt-1 text-sm text-fg-muted">
-            Commande {order.reference} — montant {montant ? formatPrice(Number(montant)) : formatPrice(order.total)}.
+            Commande {order.reference}, montant {montant ? formatPrice(Number(montant)) : formatPrice(order.total)}.
           </p>
         </div>
         {!tx ? (

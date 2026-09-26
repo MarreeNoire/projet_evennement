@@ -1,7 +1,7 @@
 import { OrgSettingsForm } from "@/components/events/org-settings-form";
 
 export const metadata = {
-  title: "Paramètres de l'Organisation | Rassemble",
+  title: "Paramètres de l'Organisation | Event",
   description: "Configuration du profil organisateur et des coordonnées de virement.",
 };
 

@@ -8,7 +8,7 @@ import { getRecentEvents } from "@/lib/events/queries";
 import { formatDate, isPast } from "@/lib/utils";
 
 export const metadata = {
-  title: "Super Admin Dashboard | Rassemble",
+  title: "Super Admin Dashboard | Event",
   description: "Vue d'ensemble et contrôle de la plateforme.",
 };
 

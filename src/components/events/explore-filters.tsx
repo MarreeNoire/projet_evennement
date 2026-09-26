@@ -54,7 +54,7 @@ function ExploreFiltersInner({
       onSubmit={apply}
       role="search"
       aria-label="Rechercher des événements"
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4"
+      className="flex flex-col gap-3 border border-border-strong bg-surface p-4 md:p-5"
     >
       <div className="grid gap-3 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
         <div>

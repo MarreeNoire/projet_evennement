@@ -25,11 +25,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl),
   title: {
-    default: `${APP_NAME} — Découvrir, participer, rencontrer`,
+    default: `${APP_NAME} · Événements et billetterie`,
     template: `%s · ${APP_NAME}`,
   },
   description:
-    "Découvre des événements, réserve ta place et rejoins la communauté de chaque événement avant, pendant et après.",
+    "Recherche des événements en Côte d’Ivoire, consulte les détails et réserve ta place en ligne.",
   applicationName: APP_NAME,
   keywords: [
     "événements",
@@ -44,13 +44,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_CI",
     siteName: APP_NAME,
-    title: `${APP_NAME} — Découvrir, participer, rencontrer`,
+    title: `${APP_NAME} · Événements et billetterie`,
     description:
-      "Chaque événement devient une communauté : billetterie, salon d'échange et networking réunis.",
+      "Consulte les événements publiés et les informations de réservation sur Event.",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${APP_NAME} — Découvrir, participer, rencontrer`,
+    title: `${APP_NAME} · Événements et billetterie`,
   },
   robots: {
     index: true,
@@ -69,8 +69,8 @@ export const viewport: Viewport = {
   // Le zoom reste autorisé : le bloquer nuit à l'accessibilité.
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f0f2f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#18191a" },
+    { media: "(prefers-color-scheme: light)", color: "#e6e9ea" },
+    { media: "(prefers-color-scheme: dark)", color: "#191e21" },
   ],
 };
 

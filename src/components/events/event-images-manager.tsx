@@ -242,7 +242,7 @@ export function EventImagesManager({
             >
               {pending ? <Loader2 className="size-5 animate-spin" aria-hidden="true" /> : <ImagePlus className="size-5" aria-hidden="true" />}
               Ajouter une image de couverture
-              <span className="text-xs text-fg-subtle">JPG, PNG, WebP ou AVIF — 5 Mo max</span>
+              <span className="text-xs text-fg-subtle">JPG, PNG, WebP ou AVIF, 5 Mo maximum</span>
             </button>
           )}
           <input
@@ -290,7 +290,7 @@ export function EventImagesManager({
                         onClick={() => promoteToCover(url)}
                         disabled={pending}
                         title="Définir comme couverture"
-                        className="inline-flex size-7 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/30"
+                        className="inline-flex size-7 items-center justify-center rounded-sm bg-white/15 text-white hover:bg-white/30"
                       >
                         <Star className="size-3.5" aria-hidden="true" />
                         <span className="sr-only">Définir comme couverture</span>
@@ -309,7 +309,7 @@ export function EventImagesManager({
                       }}
                       disabled={pending}
                       title="Retirer"
-                      className="inline-flex size-7 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/30"
+                      className="inline-flex size-7 items-center justify-center rounded-sm bg-white/15 text-white hover:bg-white/30"
                     >
                       <X className="size-3.5" aria-hidden="true" />
                       <span className="sr-only">Retirer cette image</span>
@@ -336,4 +336,3 @@ export function EventImagesManager({
     </Card>
   );
 }
-

@@ -1,68 +1,57 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 
 import { APP_NAME, CATEGORIES } from "@/lib/constants";
 
-/* =============================================================================
-   Hero de l'accueil
-   --------------------------------------------------------------------------
-   Composition asymétrique : gros titre éditorial aligné à gauche, recherche
-   soulignée façon champ de formulaire papier, et un billet illustré à droite.
-   Le billet est purement décoratif (aria-hidden) : aucune information n'y est
-   portée.
-   ========================================================================== */
-
 export function HomeHero() {
   return (
-    <section className="border-b border-border">
-      <div className="container-page grid gap-14 py-12 md:py-20 lg:grid-cols-[1.3fr_1fr] lg:items-center lg:gap-20">
-        <div className="flex flex-col gap-8">
-          <p className="eyebrow">Billetterie mobile money · Salons · Networking</p>
-
-          <h1 className="font-display text-display font-semibold">
-            <span className="block">Sors.</span>
-            <span className="block font-normal text-primary italic">Rencontre.</span>
-            <span className="block">Reste en contact.</span>
+    <section className="border-b border-border bg-bg-subtle">
+      <div className="container-page grid gap-6 py-8 md:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] lg:items-center lg:gap-8 xl:gap-12">
+        <div className="flex flex-col gap-3">
+          <h1 className="max-w-3xl font-display text-3xl font-bold md:text-4xl">
+            Le fil des événements et des rencontres
           </h1>
-
-          <p className="max-w-xl text-base leading-relaxed text-fg-muted md:text-lg">
-            {APP_NAME} réunit billetterie mobile money, salon d&apos;échange et networking :
-            échange avant l&apos;événement, vis-le ensemble, garde le lien après.
+          <p className="max-w-2xl text-sm leading-relaxed text-fg-muted md:text-base">
+            Suis les échanges dans les salons et découvre les événements publiés sur {APP_NAME}.
           </p>
+        </div>
 
-          <form
-            action="/explorer"
-            method="get"
-            role="search"
-            className="flex w-full max-w-xl items-stretch border-b-2 border-border focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-border-focus"
-          >
-            <label htmlFor="home-search" className="sr-only">
+        <TicketArtwork />
+
+        <div className="rounded-lg border border-border bg-surface p-4 sm:p-5">
+          <form action="/explorer" method="get" role="search" className="flex flex-col gap-2">
+            <label htmlFor="home-search" className="text-sm font-semibold text-fg">
               Rechercher un événement
             </label>
-            <input
-              id="home-search"
-              name="q"
-              type="search"
-              placeholder="Concert, conférence, Abidjan…"
-              className="h-14 min-w-0 flex-1 bg-transparent text-lg placeholder:text-fg-subtle focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="inline-flex shrink-0 items-center gap-2 pl-4 font-semibold text-primary hover:text-primary-hover"
-            >
-              Explorer
-              <ArrowRight className="size-5" aria-hidden="true" />
-            </button>
+            <div className="flex min-h-12 items-stretch rounded-md border border-border-strong bg-bg">
+              <Search className="my-auto ml-3 size-5 shrink-0 text-fg-subtle" aria-hidden="true" />
+              <input
+                id="home-search"
+                name="q"
+                type="search"
+                placeholder="Nom d’un événement ou d’une ville"
+                className="min-w-0 flex-1 bg-transparent px-3 text-base text-fg placeholder:text-fg-subtle focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="my-1.5 mr-1.5 inline-flex items-center justify-center gap-2 rounded-sm bg-primary-solid px-4 text-sm font-bold text-primary-solid-fg transition-colors hover:bg-primary-solid-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-border-focus"
+              >
+                Rechercher
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </button>
+            </div>
           </form>
 
-          <nav aria-label="Catégories" className="flex flex-col gap-3">
-            <p className="eyebrow">Parcourir par genre</p>
-            <ul className="flex flex-wrap gap-x-5 gap-y-2">
+          <nav aria-label="Catégories d’événements" className="mt-4">
+            <h2 className="mb-2 text-xs font-semibold text-fg-muted">
+              Catégories
+            </h2>
+            <ul className="flex flex-wrap gap-x-4 gap-y-2">
               {CATEGORIES.slice(0, 8).map((category) => (
                 <li key={category.slug}>
                   <Link
                     href={`/explorer?categorie=${category.slug}`}
-                    className="text-[15px] underline decoration-border-strong decoration-1 underline-offset-4 hover:text-primary hover:decoration-primary"
+                    className="text-sm text-fg-muted underline decoration-border-strong underline-offset-4 transition-colors hover:text-primary hover:decoration-primary"
                   >
                     {category.label}
                   </Link>
@@ -71,49 +60,33 @@ export function HomeHero() {
             </ul>
           </nav>
         </div>
-
-        <TicketIllustration />
       </div>
     </section>
   );
 }
 
-/* Billet décoratif : partie principale + talon détachable. */
-
-function TicketIllustration() {
+function TicketArtwork() {
   return (
-    <div aria-hidden="true" className="relative mx-auto w-full max-w-sm -rotate-2 lg:max-w-none">
-      <div className="overflow-hidden rounded-lg">
-        {/* Partie principale */}
-        <div className="poster-pattern flex min-h-64 flex-col justify-between gap-10 bg-primary-solid p-7 text-primary-solid-fg sm:p-9">
-          <p className="text-2xs font-semibold tracking-[0.14em] uppercase opacity-85">
-            {APP_NAME} — Billet d&apos;entrée
-          </p>
-          <p className="font-display text-4xl leading-[1.02] font-medium sm:text-5xl">
-            Ta place
-            <br />
-            <span className="font-normal italic">t&apos;attend.</span>
-          </p>
-          <p className="text-xs font-medium opacity-85">Wave · Orange Money · MTN MoMo · Moov</p>
-        </div>
+    <div className="mx-auto w-full max-w-xs lg:max-w-none" aria-hidden="true">
+      <svg viewBox="0 0 360 270" className="h-auto w-full" fill="none">
+        <circle cx="181" cy="133" r="116" fill="#dce7e9" />
+        <circle cx="181" cy="133" r="92" stroke="#9ab7be" strokeWidth="1.5" strokeDasharray="3 8" />
+        <path d="M65 219 90 194M266 64l25-25M72 67 51 46" stroke="#72959f" strokeWidth="3" />
+        <circle cx="294" cy="206" r="7" fill="#d0bf89" />
+        <circle cx="76" cy="177" r="5" fill="#76524b" />
 
-        {/* Perforation + encoches */}
-        <div className="relative h-0 border-t-2 border-dashed border-border-strong bg-surface-raised">
-          <span className="absolute -top-3 -left-3 size-6 rounded-full bg-bg" />
-          <span className="absolute -top-3 -right-3 size-6 rounded-full bg-bg" />
-        </div>
-
-        {/* Talon */}
-        <div className="flex items-center justify-between gap-6 bg-surface-raised px-7 py-5 text-fg sm:px-9">
-          <div className="barcode h-12 flex-1 opacity-90" />
-          <p className="font-display text-sm font-medium tracking-wide tabular-nums">TCK-0001</p>
-        </div>
-      </div>
-
-      {/* Pastille « imprimée » */}
-      <div className="absolute -top-5 -right-2 flex size-24 rotate-12 items-center justify-center rounded-full bg-accent-solid p-3 text-center font-display text-sm leading-tight font-semibold text-accent-solid-fg sm:-right-6">
-        Paie en mobile money
-      </div>
+        <g transform="rotate(8 180 135)">
+          <path d="M67 59h226v45c-21 1-21 29 0 30v78H67v-43c21-1 21-29 0-30V59Z" fill="#d0bf89" />
+          <path d="M59 48h226v45c-21 1-21 29 0 30v78H59v-43c21-1 21-29 0-30V48Z" fill="#3d5c67" />
+          <path d="M235 96v105" stroke="#dce7e9" strokeOpacity=".56" strokeDasharray="3 6" strokeWidth="2" />
+          <circle cx="147" cy="113" r="21" stroke="#c0d2d6" strokeWidth="2" />
+          <path d="M147 101v12l8 5M110 151h68M110 161h51" stroke="#f4f5f3" strokeLinecap="round" strokeWidth="3" />
+          <text x="94" y="84" fill="#e5e9e8" fontFamily="Inter, sans-serif" fontSize="10" fontWeight="700" letterSpacing="2">EVENT</text>
+          <text x="255" y="122" fill="#e5e9e8" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" letterSpacing="1.5" transform="rotate(90 255 122)">BILLET</text>
+          <path d="M256 164h14m-14 8h9m-9 8h14" stroke="#c0d2d6" strokeLinecap="round" strokeWidth="2" />
+          <circle cx="263" cy="84" r="3" fill="#d0bf89" />
+        </g>
+      </svg>
     </div>
   );
 }

@@ -99,7 +99,7 @@ function NotificationRow({ notification }: { notification: MyNotificationView })
       ) : (
         <span
           aria-hidden="true"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-strong text-fg-muted"
+          className="flex size-10 shrink-0 items-center justify-center rounded-sm border border-border-strong text-fg-muted"
         >
           <Icon className="size-[18px]" />
         </span>

@@ -56,7 +56,7 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
       orderReference: order.reference,
       amount: order.total,
       currency: env.currency,
-      description: `Billets — ${event?.title ?? "événement"}`,
+      description: `Billets pour ${event?.title ?? "l’événement"}`,
       customer: {
         name: parsed.data.buyerName,
         email: parsed.data.buyerEmail || undefined,

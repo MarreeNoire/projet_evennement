@@ -105,7 +105,7 @@ export function SalonPostForm({
               <button
                 type="submit"
                 disabled={pending || content.trim().length === 0}
-                className="inline-flex h-9 items-center gap-2 rounded-full bg-primary px-5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-primary-hover active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-primary-hover active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {pending ? "Publication…" : "Publier"}
                 <Send className="size-3.5" aria-hidden="true" />

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Moyens de Paiement | Rassemble",
+  title: "Moyens de Paiement | Event",
   description: "Explications sur les paiements Mobile Money (Wave, Orange, MTN, Moov) et Carte bancaire.",
 };
 

@@ -5,7 +5,7 @@ import { getOrganizerEvents } from "@/lib/events/queries";
 import { OrgEventsList } from "@/components/events/org-events-list";
 
 export const metadata = {
-  title: "Mes Événements | Espace Organisateur | Rassemble",
+  title: "Mes Événements | Espace Organisateur | Event",
   description: "Gestion de vos événements publiés et brouillons.",
 };
 

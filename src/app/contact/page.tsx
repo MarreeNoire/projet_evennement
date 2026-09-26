@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Nous Contacter | Rassemble",
-  description: "Contacte l'équipe Rassemble pour toute question ou demande de partenariat.",
+  title: "Nous Contacter | Event",
+  description: "Contacte l'équipe Event pour toute question ou demande de partenariat.",
 };
 
 export default async function ContactPage() {

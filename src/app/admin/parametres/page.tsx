@@ -1,7 +1,7 @@
 import { AdminSettingsForm } from "@/components/admin/admin-settings-form";
 
 export const metadata = {
-  title: "Paramètres Plateforme | Super Admin | Rassemble",
+  title: "Paramètres Plateforme | Super Admin | Event",
   description: "Configuration générale des règles métier et taux de commission.",
 };
 
