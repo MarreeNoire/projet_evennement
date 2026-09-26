@@ -4,6 +4,7 @@
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ReactionType } from "@/types/database";
+import { STORAGE_BUCKETS } from "@/lib/constants";
 
 const NOT_SIGNED_IN = "Connecte-toi pour participer.";
 
@@ -24,11 +25,22 @@ async function getUserId(
 export async function createPost(
   salonId: string,
   content: string,
-  media: { url: string; kind: "image" | "video"; thumbnail_url?: string | null }[] = []
+  media: { storage_path: string; size_bytes: number }[] = [],
 ): Promise<{ success: boolean; postId?: string; error?: string }> {
   const supabase = await createSupabaseServerClient();
   const userId = await getUserId(supabase);
   if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  if (media.length > 4 || media.some((item) => !item.storage_path.startsWith(`${salonId}/`))) {
+    return { success: false, error: "Les photos sélectionnées ne sont pas valides." };
+  }
+
+  const { data: salon, error: salonError } = await supabase
+    .from("salons")
+    .select("event_id")
+    .eq("id", salonId)
+    .single();
+  if (salonError || !salon) return { success: false, error: "Ce salon est introuvable." };
 
   const { data, error } = await supabase
     .from("posts")
@@ -36,7 +48,7 @@ export async function createPost(
       salon_id: salonId,
       author_id: userId,
       content: content.trim(),
-      media: media as any,
+      media: [],
       kind: "post" as const,
     })
     .select("id")
@@ -44,6 +56,30 @@ export async function createPost(
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  if (media.length > 0) {
+    const { error: mediaError } = await supabase.from("media").insert(
+      media.map((item) => ({
+        salon_id: salonId,
+        event_id: salon.event_id,
+        post_id: data.id,
+        uploader_id: userId,
+        kind: "image" as const,
+        storage_path: item.storage_path,
+        url: item.storage_path,
+        size_bytes: item.size_bytes,
+      })),
+    );
+    if (mediaError) {
+      await supabase.from("posts").delete().eq("id", data.id);
+      return {
+        success: false,
+        error: mediaError.message.includes("row-level security")
+          ? "L’envoi de photos est désactivé pour cet événement."
+          : "Le message est prêt, mais les photos n’ont pas pu être enregistrées.",
+      };
+    }
   }
   return { success: true, postId: data.id };
 }
@@ -55,7 +91,7 @@ export async function createPost(
 export async function createComment(
   postId: string,
   content: string,
-  parentId?: string
+  parentId?: string,
 ): Promise<{ success: boolean; commentId?: string; error?: string }> {
   const supabase = await createSupabaseServerClient();
   const userId = await getUserId(supabase);
@@ -85,7 +121,7 @@ export async function createComment(
 export async function toggleReaction(
   target: "post" | "comment",
   targetId: string,
-  reaction: ReactionType
+  reaction: ReactionType,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createSupabaseServerClient();
   const userId = await getUserId(supabase);
@@ -136,7 +172,9 @@ export async function toggleReaction(
 /**
  * Met à jour last_read_at du membre dans le salon → marque comme lu.
  */
-export async function markSalonRead(salonId: string): Promise<{ success: boolean; error?: string }> {
+export async function markSalonRead(
+  salonId: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from("salon_members")
@@ -220,14 +258,12 @@ export async function joinSalon(salonId: string): Promise<{ success: boolean; er
   } else {
     // Nouvelle adhésion
     // Utiliser le rôle par défaut 'manager' (selon la définition de la table)
-    const { error: insertError } = await supabase
-      .from("salon_members")
-      .insert({
-        salon_id: salonId,
-        user_id: userId,
-        role: "manager",
-        joined_at: new Date().toISOString(),
-      });
+    const { error: insertError } = await supabase.from("salon_members").insert({
+      salon_id: salonId,
+      user_id: userId,
+      role: "manager",
+      joined_at: new Date().toISOString(),
+    });
 
     if (insertError) return { success: false, error: insertError.message };
   }

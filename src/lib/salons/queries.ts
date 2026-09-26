@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { SalonRow, ReactionType } from "@/types/database";
+import { STORAGE_BUCKETS } from "@/lib/constants";
 import type {
   PostWithAuthor,
   CommentWithAuthor,
@@ -26,7 +27,7 @@ export async function getSalonPosts(
       `
       *,
       author:profiles!posts_author_id_fkey ( id, display_name, avatar_url, is_verified ),
-      media:media!media_post_id_fkey ( url, thumbnail_url, kind ),
+      media:media!media_post_id_fkey ( url, thumbnail_url, kind, storage_path ),
       reaction_count,
       comment_count,
       is_pinned,
@@ -47,6 +48,23 @@ export async function getSalonPosts(
   }
 
   const postList = posts ?? [];
+
+  const paths = [
+    ...new Set(
+      postList.flatMap((post: any) =>
+        (post.media ?? []).map((item: any) => item.storage_path).filter(Boolean),
+      ),
+    ),
+  ];
+  const signed = new Map<string, string>();
+  if (paths.length) {
+    const { data: signedUrls } = await supabase.storage
+      .from(STORAGE_BUCKETS.SALON_PHOTOS)
+      .createSignedUrls(paths, 3600);
+    for (const item of signedUrls ?? []) {
+      if (item.path && item.signedUrl) signed.set(item.path, item.signedUrl);
+    }
+  }
 
   // Mes réactions uniquement (la policy de lecture expose celles de tout le salon)
   const postIds = postList.map((p: any) => p.id);
@@ -70,9 +88,42 @@ export async function getSalonPosts(
 
   return postList.map((post: any) => ({
     ...post,
+    media: (post.media ?? [])
+      .map((item: any) => ({
+        ...item,
+        url: item.storage_path ? (signed.get(item.storage_path) ?? "") : item.url,
+      }))
+      .filter((item: any) => item.url),
     my_reaction: post.id && reactionMap.has(post.id) ? (reactionMap.get(post.id) ?? null) : null,
     has_reacted: post.id ? reactionMap.has(post.id) : false,
   })) as PostWithAuthor[];
+}
+
+/** Photos visibles du salon, avec une URL temporaire vers le bucket privé. */
+export async function getSalonMedia(salonId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("media")
+    .select("id, storage_path, caption, created_at, uploader_id")
+    .eq("salon_id", salonId)
+    .eq("kind", "image")
+    .eq("is_hidden", false)
+    .order("created_at", { ascending: false })
+    .limit(60);
+  if (error || !data?.length) return [];
+
+  const { data: signedUrls } = await supabase.storage
+    .from(STORAGE_BUCKETS.SALON_PHOTOS)
+    .createSignedUrls([...new Set(data.map((item) => item.storage_path))], 3600);
+  const signed = new Map(
+    (signedUrls ?? []).flatMap((item) =>
+      item.path && item.signedUrl ? [[item.path, item.signedUrl] as const] : [],
+    ),
+  );
+  return data.flatMap((item) => {
+    const url = signed.get(item.storage_path);
+    return url ? [{ ...item, url }] : [];
+  });
 }
 
 /**
@@ -466,6 +517,7 @@ export interface SalonEventInfo {
   city: string;
   venue_name: string | null;
   cover_url: string | null;
+  allow_media_upload: boolean;
 }
 
 export async function getEventsByIds(ids: string[]): Promise<Map<string, SalonEventInfo>> {
@@ -476,7 +528,7 @@ export async function getEventsByIds(ids: string[]): Promise<Map<string, SalonEv
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("events")
-    .select("id, title, slug, start_at, end_at, city, venue_name, cover_url")
+    .select("id, title, slug, start_at, end_at, city, venue_name, cover_url, allow_media_upload")
     .in("id", unique);
 
   if (error) {

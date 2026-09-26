@@ -15,6 +15,7 @@ import {
   getEventsByIds,
   getSalonById,
   getSalonMembers,
+  getSalonMedia,
   getSalonPosts,
   type SalonEventInfo,
 } from "@/lib/salons/queries";
@@ -57,13 +58,14 @@ export default async function SalonDetailPage({
   const salon = await getSalonById(id);
   if (!salon) notFound();
 
-  const [posts, members, profile, events] = await Promise.all([
+  const [posts, members, profile, events, photos] = await Promise.all([
     getSalonPosts(id),
     getSalonMembers(id, 40),
     getCurrentProfile(),
     salon.event_id
       ? getEventsByIds([salon.event_id])
       : Promise.resolve(new Map<string, SalonEventInfo>()),
+    activeTab === "photos" ? getSalonMedia(id) : Promise.resolve([]),
   ]);
 
   const event = salon.event_id ? (events.get(salon.event_id) ?? null) : null;
@@ -161,6 +163,7 @@ export default async function SalonDetailPage({
               event={event}
               profile={profile}
               phase={phase}
+              allowMedia={event?.allow_media_upload ?? true}
             />
           ) : null}
 
@@ -227,10 +230,29 @@ export default async function SalonDetailPage({
           ) : null}
 
           {activeTab === "photos" ? (
-            <EmptyState
-              title="Pas encore de photos"
-              description="L'album du salon arrive bientôt : les souvenirs de l'événement s'afficheront ici."
-            />
+            photos.length === 0 ? (
+              <EmptyState
+                title="Pas encore de photos"
+                description="Les photos publiées dans la discussion apparaîtront ici."
+              />
+            ) : (
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {photos.map((photo) => (
+                  <li
+                    key={photo.id}
+                    className="border-border bg-bg-muted relative aspect-square overflow-hidden border"
+                  >
+                    {/* URL signée vers le bucket privé du salon. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photo.url}
+                      alt={photo.caption || "Photo partagée dans le salon"}
+                      className="size-full object-cover"
+                    />
+                  </li>
+                ))}
+              </ul>
+            )
           ) : null}
 
           {activeTab === "programme" ? (
@@ -304,6 +326,7 @@ function Discussion({
   event,
   profile,
   phase,
+  allowMedia,
 }: {
   salonId: string;
   posts: PostWithAuthor[];
@@ -311,6 +334,7 @@ function Discussion({
   event: SalonEventInfo | null;
   profile: Awaited<ReturnType<typeof getCurrentProfile>>;
   phase: EventPhase | null;
+  allowMedia: boolean;
 }) {
   const pinned = posts.filter((post) => post.is_pinned);
   const regular = posts.filter((post) => !post.is_pinned);
@@ -329,6 +353,7 @@ function Discussion({
           salonId={salonId}
           author={{ name: profile.display_name, avatarUrl: profile.avatar_url }}
           phase={phase ?? undefined}
+          allowMedia={allowMedia}
         />
       ) : (
         <div className="border-border flex flex-col gap-3 border-y py-6 sm:flex-row sm:items-center sm:justify-between">

@@ -69,7 +69,7 @@ export default async function MesSalonsPage() {
             action={<ButtonLink href={ROUTES.explore}>Trouver un événement</ButtonLink>}
           />
         ) : (
-          <ul className="flex flex-col gap-4">
+          <ul className="grid gap-5 sm:grid-cols-2">
             {entries.map(({ salon, event }) => (
               <li key={salon.id}>
                 <SalonStub salon={salon} event={event} now={now} />
@@ -98,47 +98,57 @@ function SalonStub({
   return (
     <Link
       href={`/salons/${salon.id}`}
-      className="group border-border bg-surface hover:border-border flex overflow-hidden rounded-lg border transition-colors duration-150"
+      className="group border-border bg-surface hover:border-primary/50 flex min-h-64 flex-col overflow-hidden border transition-colors duration-150"
     >
-      {/* Talon de date */}
-      <div className="bg-bg-muted relative flex min-h-28 w-24 shrink-0 items-center justify-center overflow-hidden sm:w-28">
+      <div className="bg-bg-muted border-border relative h-36 overflow-hidden border-b">
         {event?.cover_url ? (
           // Les couvertures Supabase sont servies directement, sans proxy Next.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={event.cover_url} alt="" className="size-full object-cover" />
+          <img
+            src={event.cover_url}
+            alt=""
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
         ) : date ? (
-          <time dateTime={event?.start_at} className="text-fg-muted flex flex-col items-center">
-            <span className="text-2xs font-bold tracking-[0.14em] uppercase">{date.month}</span>
-            <span className="font-display text-4xl leading-none font-semibold tabular-nums">
-              {date.day}
-            </span>
-            <span className="text-2xs mt-1 tabular-nums">{date.year}</span>
-          </time>
+          <div className="flex size-full items-center justify-between px-6">
+            <time dateTime={event?.start_at} className="text-fg-muted flex items-baseline gap-2">
+              <span className="font-display text-5xl leading-none font-semibold tabular-nums">
+                {date.day}
+              </span>
+              <span className="text-xs font-bold tracking-[0.14em] uppercase">
+                {date.month} {date.year}
+              </span>
+            </time>
+            <span className="bg-primary/10 h-full w-1/3" aria-hidden="true" />
+          </div>
         ) : (
-          <span className="text-fg-subtle text-xs">Aucune image</span>
+          <span className="text-fg-subtle flex size-full items-center px-6 text-sm">
+            Salon communautaire
+          </span>
         )}
-      </div>
-
-      {/* Corps */}
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4 sm:p-5">
         {event && phase ? (
-          <div>
+          <div className="absolute bottom-3 left-4">
             <PhaseTag phase={phase} label={phaseStatus(event.start_at, event.end_at, now)} />
           </div>
         ) : null}
-        <h2 className="font-display group-hover:text-primary truncate text-xl leading-tight font-semibold sm:text-2xl">
-          {salon.name}
-        </h2>
-        <p className="text-fg-muted truncate text-sm">
-          {event ? `${event.title} · ${event.city}` : "Salon communautaire"}
-          {" · "}
-          {members} participant{members > 1 ? "s" : ""}
-        </p>
       </div>
 
-      {/* Talon d'accès, après la perforation */}
-      <div className="border-border-strong bg-surface-raised text-primary hidden items-center border-l-2 border-dashed px-6 text-sm font-semibold sm:flex">
-        Ouvrir →
+      <div className="flex min-w-0 flex-1 flex-col p-5">
+        <p className="text-fg-subtle text-xs font-semibold tracking-[0.12em] uppercase">
+          {event ? `${event.title} · ${event.city}` : "Salon communautaire"}
+        </p>
+        <h2 className="font-display group-hover:text-primary mt-2 truncate text-2xl leading-tight font-semibold">
+          {salon.name}
+        </h2>
+        <div className="text-fg-muted border-border mt-auto flex items-center justify-between gap-3 border-t pt-4 text-sm">
+          <span>
+            {members} participant{members > 1 ? "s" : ""}
+          </span>
+          <span>
+            {salon.post_count} publication{salon.post_count === 1 ? "" : "s"}
+          </span>
+          <span className="text-primary font-semibold">Ouvrir →</span>
+        </div>
       </div>
     </Link>
   );
