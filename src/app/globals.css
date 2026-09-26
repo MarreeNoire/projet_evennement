@@ -317,6 +317,16 @@
     border-color: var(--border);
   }
 
+  /* Les grilles commencent sur une colonne qui peut réellement se réduire.
+     Les utilitaires grid-cols-* reprennent la main aux breakpoints prévus. */
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .grid > * {
+    min-inline-size: 0;
+  }
+
   html {
     color-scheme: light;
     -webkit-text-size-adjust: 100%;
@@ -340,6 +350,11 @@
     min-height: 100dvh;
     font-size: 1rem;
     line-height: 1.55;
+  }
+
+  /* Garde le dernier contenu lisible au-dessus de la navigation fixe mobile. */
+  body:has(nav[aria-label="Navigation mobile"]) {
+    padding-block-end: calc(3.5rem + env(safe-area-inset-bottom));
   }
 
   h1,
@@ -390,6 +405,15 @@
 
   @media (max-width: 26rem) {
     input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
+
+  /* Les contrôles de formulaire restent lisibles sans zoom automatique sur iOS. */
+  @media (pointer: coarse) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
     textarea,
     select {
       font-size: 16px;

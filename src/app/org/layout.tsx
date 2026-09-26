@@ -53,36 +53,36 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
             <BecomeOrganizerForm user={{ displayName: profile.display_name }} />
           </div>
         ) : (
-          <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+          <div className="grid min-w-0 gap-5 lg:gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
             {/* Navigation latérale Organisateur */}
-            <aside className="space-y-6">
-              <div className="border-t-2 border-fg bg-surface p-4">
-                <div className="mb-4 border-b border-border-strong pb-4">
+            <aside className="min-w-0">
+              <div className="-mx-4 border-y-2 border-fg bg-surface px-4 py-2 lg:mx-0 lg:border-x-0 lg:border-b-0 lg:p-4">
+                <div className="mb-2 flex min-w-0 items-center justify-between gap-2 border-b border-border-strong pb-2 lg:mb-4 lg:block lg:pb-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">
                     Espace Organisateur
                   </p>
-                  <p className="font-display text-sm font-bold text-fg truncate">
+                  <p className="hidden truncate font-display text-sm font-bold text-fg lg:block">
                     {profile.display_name}
                   </p>
                 </div>
 
-                <nav className="flex flex-col gap-1">
+                <nav aria-label="Navigation organisateur" className="no-scrollbar -mx-4 flex min-w-0 gap-1 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
                   {ORG_MENU_ITEMS.map((item) => {
                     const Icon = item.icon;
                     return (
                       <Link
                         key={item.href}
                         href={item.href}
-                        className="flex items-center gap-3 border-l-2 border-transparent px-3 py-2.5 text-sm font-medium text-fg-muted transition-colors hover:border-primary hover:bg-bg-muted hover:text-fg"
+                        className="flex min-h-11 shrink-0 items-center gap-2 border-b-2 border-transparent px-3 text-sm font-medium text-fg-muted transition-colors hover:border-primary hover:bg-bg-muted hover:text-fg lg:min-h-0 lg:gap-3 lg:border-b-0 lg:border-l-2 lg:py-2.5"
                       >
-                        <Icon className="size-4 text-fg-subtle" />
+                        <Icon className="size-4 shrink-0 text-fg-subtle" aria-hidden="true" />
                         <span>{item.label}</span>
                       </Link>
                     );
                   })}
                 </nav>
 
-                <div className="mt-6 border-t border-border pt-4">
+                <div className="mt-2 hidden border-t border-border pt-4 lg:mt-6 lg:block">
                   <Link
                     href="/"
                     className="flex items-center gap-2 text-xs font-medium text-fg-subtle hover:text-fg"

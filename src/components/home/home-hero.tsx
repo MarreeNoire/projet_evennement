@@ -65,7 +65,7 @@ export function HomeHero() {
 
 function TicketArtwork() {
   return (
-    <div className="mx-auto w-full max-w-xs lg:max-w-none" aria-hidden="true">
+    <div className="mx-auto w-full max-w-48 sm:max-w-xs lg:max-w-none" aria-hidden="true">
       <svg viewBox="0 0 360 270" className="h-auto w-full" fill="none">
         <circle cx="181" cy="133" r="116" fill="var(--primary-subtle)" />
         <circle

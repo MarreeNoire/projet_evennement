@@ -39,7 +39,7 @@ export function EventHero({ event }: { event: PublishedEventView }) {
           </p>
           <h1
             id="titre-evenement"
-            className="font-display text-4xl leading-[1.02] font-semibold md:text-5xl lg:text-6xl"
+            className="font-display break-words text-3xl leading-[1.08] font-semibold sm:text-4xl md:text-5xl lg:text-6xl"
           >
             {event.title}
           </h1>

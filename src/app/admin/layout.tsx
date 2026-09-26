@@ -32,39 +32,39 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="flex min-h-dvh flex-col bg-bg">
       <SiteHeader />
       <div className="container-page flex-1 py-8">
-        <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+        <div className="grid min-w-0 gap-5 lg:gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
           {/* Navigation latérale Admin */}
-          <aside className="space-y-6">
-            <div className="border-t-2 border-danger bg-surface p-4">
-              <div className="mb-4 border-b border-border pb-3 flex items-center justify-between">
+          <aside className="min-w-0">
+            <div className="-mx-4 border-y-2 border-danger bg-surface px-4 py-2 lg:mx-0 lg:border-x-0 lg:border-b-0 lg:p-4">
+              <div className="mb-2 flex items-center justify-between gap-2 border-b border-border pb-2 lg:mb-4 lg:pb-3">
                 <div>
                   <p className="text-2xs font-bold uppercase tracking-wider text-danger">
                     Administration
                   </p>
-                  <p className="font-display text-sm font-bold text-fg truncate">
+                  <p className="hidden truncate font-display text-sm font-bold text-fg lg:block">
                     Super Admin
                   </p>
                 </div>
                 <ShieldAlert className="size-5 text-danger" />
               </div>
 
-              <nav className="flex flex-col gap-1">
+              <nav aria-label="Navigation administration" className="no-scrollbar -mx-4 flex min-w-0 gap-1 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
                 {ADMIN_MENU_ITEMS.map((item) => {
                   const Icon = item.icon;
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center gap-3 border-l-2 border-transparent px-3 py-2.5 text-sm font-medium text-fg-muted transition-colors hover:border-danger hover:bg-bg-muted hover:text-fg"
+                      className="flex min-h-11 shrink-0 items-center gap-2 border-b-2 border-transparent px-3 text-sm font-medium text-fg-muted transition-colors hover:border-danger hover:bg-bg-muted hover:text-fg lg:min-h-0 lg:gap-3 lg:border-b-0 lg:border-l-2 lg:py-2.5"
                     >
-                      <Icon className="size-4 text-fg-subtle" />
+                      <Icon className="size-4 shrink-0 text-fg-subtle" aria-hidden="true" />
                       <span>{item.label}</span>
                     </Link>
                   );
                 })}
               </nav>
 
-              <div className="mt-6 border-t border-border pt-4">
+              <div className="mt-2 hidden border-t border-border pt-4 lg:mt-6 lg:block">
                 <Link
                   href="/"
                   className="flex items-center gap-2 text-xs font-medium text-fg-subtle hover:text-fg"

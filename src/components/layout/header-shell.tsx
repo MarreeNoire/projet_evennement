@@ -110,7 +110,9 @@ export function HeaderShell({
                 ) : null}
               </Link>
 
-              <UserMenu user={user} />
+              <div className="hidden md:block">
+                <UserMenu user={user} />
+              </div>
             </>
           ) : (
             <div className="flex items-center gap-2">
@@ -122,7 +124,7 @@ export function HeaderShell({
               >
                 Connexion
               </ButtonLink>
-              <ButtonLink href={ROUTES.register} size="sm">
+              <ButtonLink href={ROUTES.register} size="sm" className="hidden sm:inline-flex">
                 Créer un compte
               </ButtonLink>
             </div>

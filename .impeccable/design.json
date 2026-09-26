@@ -63,6 +63,30 @@
           "#e9e0ce",
           "#eee5cf"
         ]
+      },
+      "rust-highlight": {
+        "role": "accent",
+        "displayName": "Muted terracotta highlight",
+        "canonical": "#a26350",
+        "tonalRamp": ["#3b2420", "#60352c", "#874d3d", "#a26350", "#bd8068", "#d4a18b", "#e9d0c2", "#f3e9e2"]
+      },
+      "page-paper": {
+        "role": "background",
+        "displayName": "Muted page paper",
+        "canonical": "#e4ddd1",
+        "tonalRamp": ["#302c28", "#443e38", "#685e50", "#a09080", "#c4b7a7", "#e4ddd1", "#eee8de", "#f4eee4"]
+      },
+      "raised-ink": {
+        "role": "surface",
+        "displayName": "Raised charcoal surface",
+        "canonical": "#292723",
+        "tonalRamp": ["#171615", "#201f1d", "#292723", "#34312c", "#484239", "#685e50", "#b5a99a", "#eee7dc"]
+      },
+      "moss": {
+        "role": "semantic",
+        "displayName": "Muted moss status",
+        "canonical": "#3d5c47",
+        "tonalRamp": ["#20352a", "#2e4737", "#3d5c47", "#55745e", "#78917d", "#a6b6a8", "#d0d9d1", "#edf1ed"]
       }
     },
     "typographyMeta": {
@@ -141,7 +165,8 @@
       "Warm, reduced-glare surfaces in both themes.",
       "Event listings use organizer supplied media and a clear date stamp.",
       "Salon posts read as notes attached to an event, not floating timeline cards.",
-      "Product details and states come from application data."
+      "Product details and states come from application data.",
+      "Layouts adapt from narrow phones to desktop without horizontal scrolling; mobile navigation stays reachable and opaque."
     ],
     "rules": [
       {

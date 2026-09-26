@@ -36,12 +36,12 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main id="contenu" className="container-page flex flex-col gap-8 py-8">
-        <nav aria-label="Fil d'Ariane" className="text-sm text-fg-muted">
+        <nav aria-label="Fil d'Ariane" className="min-w-0 text-sm text-fg-muted">
           <Link href="/explorer" className="hover:text-fg hover:underline">
             Explorer
           </Link>
           {" / "}
-          <span aria-current="page" className="text-fg">
+          <span aria-current="page" className="break-words text-fg">
             {event.title}
           </span>
         </nav>
