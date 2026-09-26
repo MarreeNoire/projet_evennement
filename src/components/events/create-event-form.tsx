@@ -52,9 +52,9 @@ export function CreateEventForm() {
   const [uploadState, setUploadState] = useState<string | null>(null);
 
   const [error, setError] = useState<string | null>(null);
+  const [recoveryHref, setRecoveryHref] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [warning, setWarning] = useState<string | null>(null);
 
   /**
    * Par défaut l'événement est publié : c'est la seule façon de le voir
@@ -101,6 +101,50 @@ export function CreateEventForm() {
       router.push("/org/evenements");
       router.refresh();
     }, delay);
+  }
+
+  async function savePendingImages(eventId: string): Promise<string | null> {
+    if (!pendingCover && pendingGallery.length === 0) return null;
+
+    setUploadState("Envoi des images…");
+    try {
+      let coverUrl: string | null = null;
+      const galleryUrls: string[] = [];
+
+      if (pendingCover) {
+        const upload = await uploadEventCover(pendingCover.file, eventId);
+        if (!upload.ok || !upload.url) {
+          return upload.error ?? "L’image de couverture n’a pas pu être envoyée.";
+        }
+        coverUrl = upload.url;
+      }
+
+      for (const item of pendingGallery) {
+        const upload = await uploadEventCover(item.file, eventId);
+        if (!upload.ok || !upload.url) {
+          return upload.error ?? "Une image de la galerie n’a pas pu être envoyée.";
+        }
+        galleryUrls.push(upload.url);
+      }
+
+      if (coverUrl) {
+        const result = await updateEventCoverAction(eventId, coverUrl);
+        if (!result.ok) return result.error ?? "La couverture n’a pas pu être associée à l’événement.";
+      }
+
+      if (galleryUrls.length > 0) {
+        const result = await updateEventGalleryAction(eventId, galleryUrls);
+        if (!result.ok) return result.error ?? "La galerie n’a pas pu être associée à l’événement.";
+      }
+
+      return null;
+    } catch (uploadError: unknown) {
+      return uploadError instanceof Error
+        ? uploadError.message
+        : "Les images n’ont pas pu être enregistrées.";
+    } finally {
+      setUploadState(null);
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -171,35 +215,12 @@ export function CreateEventForm() {
         });
 
         if (res.ok) {
-          // 2. Images : l'événement existe désormais, on envoie vers Storage
-          //    puis on associe les URL (couverture + galerie).
           if (res.eventId) {
-            try {
-              if (pendingCover) {
-                setUploadState("Envoi de l'image de couverture…");
-                const upload = await uploadEventCover(pendingCover.file, res.eventId);
-                if (upload.ok && upload.url) {
-                  await updateEventCoverAction(res.eventId, upload.url);
-                } else if (upload.error) {
-                  setWarning(upload.error);
-                }
-              }
-              if (pendingGallery.length > 0) {
-                setUploadState("Envoi de la galerie…");
-                const urls: string[] = [];
-                for (const item of pendingGallery) {
-                  const upload = await uploadEventCover(item.file, res.eventId);
-                  if (upload.ok && upload.url) urls.push(upload.url);
-                }
-                if (urls.length > 0) {
-                  const galleryResult = await updateEventGalleryAction(res.eventId, urls);
-                  if (!galleryResult.ok && galleryResult.error) setWarning(galleryResult.error);
-                }
-              }
-            } catch (uploadError: any) {
-              setWarning(uploadError?.message ?? "Images non envoyées : ajoutez-les depuis la fiche.");
-            } finally {
-              setUploadState(null);
+            const imageError = await savePendingImages(res.eventId);
+            if (imageError) {
+              setRecoveryHref(`/org/evenements/${res.eventId}`);
+              setError(`L’événement a été enregistré en brouillon, mais les images n’ont pas été sauvegardées : ${imageError}`);
+              return;
             }
           }
 
@@ -284,8 +305,8 @@ export function CreateEventForm() {
                 description: description.trim() || null,
                 start_at: startAtIso,
                 end_at: endAtIso,
-                status: publishNow ? "published" : "draft",
-                published_at: publishNow ? new Date().toISOString() : null,
+                status: "draft",
+                published_at: null,
                 salon_privacy: "members",
                 currency: "XOF",
                 min_price: 0,
@@ -309,6 +330,22 @@ export function CreateEventForm() {
               }));
 
               await supabase.from("ticket_types").insert(ticketRows as any);
+
+              const imageError = await savePendingImages(createdEvent.id);
+              if (imageError) {
+                setRecoveryHref(`/org/evenements/${createdEvent.id}`);
+                setError(`L’événement a été enregistré en brouillon, mais les images n’ont pas été sauvegardées : ${imageError}`);
+                return;
+              }
+
+              if (publishNow) {
+                const publish = await setEventStatusAction(createdEvent.id, "published");
+                if (!publish.ok) {
+                  setRecoveryHref(`/org/evenements/${createdEvent.id}`);
+                  setError(`Les images sont enregistrées, mais la publication a échoué : ${publish.error ?? "raison inconnue"}`);
+                  return;
+                }
+              }
 
               setSuccess(
                 publishNow
@@ -353,7 +390,14 @@ export function CreateEventForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {error ? (
         <Alert tone="danger" title="Erreur de validation">
-          {error}
+          <div className="space-y-2">
+            <p>{error}</p>
+            {recoveryHref ? (
+              <ButtonLink href={recoveryHref} variant="secondary" size="sm">
+                Ouvrir la fiche de l’événement
+              </ButtonLink>
+            ) : null}
+          </div>
         </Alert>
       ) : null}
 
@@ -363,12 +407,6 @@ export function CreateEventForm() {
             <CheckCircle2 className="size-4 text-success" />
             <span>{success} Redirection…</span>
           </div>
-        </Alert>
-      ) : null}
-
-      {warning ? (
-        <Alert tone="warning" title="Images à vérifier">
-          {warning}
         </Alert>
       ) : null}
 
@@ -654,7 +692,7 @@ export function CreateEventForm() {
           type="submit"
           loading={pending}
           loadingLabel="Enregistrement..."
-          disabled={Boolean(success)}
+          disabled={Boolean(success || recoveryHref)}
         >
           <Save className="mr-2 size-4" />
           {publishNow ? "Créer l'événement et sa billetterie" : "Enregistrer le brouillon"}

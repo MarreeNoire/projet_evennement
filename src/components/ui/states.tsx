@@ -22,20 +22,20 @@ export function EmptyState({ icon, title, description, action, className }: Empt
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-lg border border-dashed border-border-strong bg-surface px-6 py-14 text-center",
+        "border-border-strong bg-surface flex flex-col items-center justify-center rounded-lg border border-dashed px-6 py-14 text-center",
         className,
       )}
     >
       {icon ? (
         <span
-          className="mb-4 flex size-12 items-center justify-center rounded-md border border-border-strong text-fg-muted [&_svg]:size-6"
+          className="border-border-strong text-fg-muted mb-4 flex size-12 items-center justify-center rounded-md border [&_svg]:size-6"
           aria-hidden="true"
         >
           {icon}
         </span>
       ) : null}
       <p className="font-display text-2xl font-semibold">{title}</p>
-      {description ? <p className="mt-2 max-w-md text-sm text-fg-muted">{description}</p> : null}
+      {description ? <p className="text-fg-muted mt-2 max-w-md text-sm">{description}</p> : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );
@@ -60,11 +60,11 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        "flex flex-col items-center justify-center rounded-2xl border border-danger/30 bg-danger-subtle px-6 py-12 text-center",
+        "border-danger/30 bg-danger-subtle flex flex-col items-center justify-center rounded-sm border px-6 py-12 text-center",
         className,
       )}
     >
-      <span className="mb-3 text-danger" aria-hidden="true">
+      <span className="text-danger mb-3" aria-hidden="true">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -79,13 +79,13 @@ export function ErrorState({
           />
         </svg>
       </span>
-      <p className="font-display text-base font-semibold text-fg">{title}</p>
-      <p className="mt-1.5 max-w-md text-sm text-fg-muted">{description}</p>
+      <p className="font-display text-fg text-base font-semibold">{title}</p>
+      <p className="text-fg-muted mt-1.5 max-w-md text-sm">{description}</p>
       {onRetry ? (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-5 inline-flex h-10 items-center rounded-lg border border-border bg-surface px-4 text-sm font-medium hover:bg-bg-muted"
+          className="border-border bg-surface hover:bg-bg-muted mt-5 inline-flex h-10 items-center rounded-lg border px-4 text-sm font-medium"
         >
           {retryLabel}
         </button>
@@ -158,7 +158,7 @@ export function DemoModeBanner({
   return (
     <div
       role="status"
-      className="border-b border-warning/30 bg-warning-subtle px-4 py-2 text-center text-xs font-medium text-warning"
+      className="border-warning/30 bg-warning-subtle text-warning border-b px-4 py-2 text-center text-xs font-medium"
     >
       Mode démonstration : {parts.join(" · ")}. Renseigne les clés pour passer en réel.
     </div>

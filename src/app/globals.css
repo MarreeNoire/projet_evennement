@@ -2,28 +2,11 @@
 @import "tw-animate-css";
 
 /* =============================================================================
-   DESIGN SYSTEM — « Réseau social »
-   Direction artistique : le fil d'actualité moderne (Facebook / X / LinkedIn).
-   Fond gris clair, cartes blanches flottantes, un bleu primaire confiant,
-   angles très arrondis, sans-serif partout, séparateurs discrets plutôt que
-   filets d'encre. Un jaune soleil reste réservé aux VIP et mises en avant.
-
-   Architecture : PRIMITIFS (échelle brute) -> SÉMANTIQUES (rôle) -> @theme
-   (utilitaires Tailwind). Les composants n'utilisent QUE les sémantiques.
-   Les noms de tokens sont inchangés : toutes les pages héritent du nouveau
-   style sans modification.
-
-   Contrastes WCAG 2.2 AA (texte courant >= 4.5:1) :
-     primary   #0b54d6 sur fond #f0f2f5 ...... 6.2:1
-     blanc     sur primary-solid #1663ea ..... 4.9:1  (texte de bouton)
-     fg-muted  #475569 sur surface blanche ... 7.5:1
-     fg-subtle #64748b sur surface blanche ... 4.8:1
-     accent    #8a5e05 sur surface blanche ... 4.9:1
-     success   #2f6f3e sur surface blanche ... 5.3:1
-     danger    #a3162e sur surface blanche ... 6.7:1
-     info      #0b54d6 sur surface blanche ... 6.2:1
-     primary   #94b8fd sur surface sombre .... 6.0:1
-     fg-muted  #b0b3b8 sur surface sombre .... 8.1:1
+   EVENT — le carnet des sorties
+   Un réseau construit autour des moments à vivre : encre pétrole, papier
+   chaud et terre cuite désaturée. Les compositions éditoriales, les dates
+   détachées et la marque inspirée du billet distinguent Event d'un fil social
+   générique. Les tokens sémantiques gardent les parcours métier cohérents.
    ========================================================================== */
 
 /* Dark mode piloté par une classe (next-themes) */
@@ -31,85 +14,85 @@
 
 :root {
   /* ---------- PRIMITIFS : marque (bleu social) ---------- */
-  --brand-50: #edf3f4;
-  --brand-100: #dce7e9;
-  --brand-200: #c0d2d6;
-  --brand-300: #9ab7be;
-  --brand-400: #72959f;
-  --brand-500: #587985;
-  --brand-600: #496a76;
-  --brand-700: #3d5c67;
-  --brand-800: #344c55;
-  --brand-900: #2d4048;
-  --brand-950: #1b292f;
+  --brand-50: #f3e9e2;
+  --brand-100: #e4cec0;
+  --brand-200: #cfaa98;
+  --brand-300: #b98470;
+  --brand-400: #a26350;
+  --brand-500: #874d3d;
+  --brand-600: #713e32;
+  --brand-700: #60352c;
+  --brand-800: #4d2c26;
+  --brand-900: #3b2420;
+  --brand-950: #261a18;
 
   /* ---------- PRIMITIFS : accent (jaune soleil / VIP) ---------- */
-  --gold-100: #f9edbd;
-  --gold-300: #e9ce67;
-  --gold-400: #d2ad39;
-  --gold-500: #aa8620;
-  --gold-600: #806414;
-  --gold-700: #5d4a12;
+  --gold-100: #eee5cf;
+  --gold-300: #c9b58c;
+  --gold-400: #aa9165;
+  --gold-500: #85714e;
+  --gold-600: #66583f;
+  --gold-700: #4d4434;
 
-  /* ---------- PRIMITIFS : neutres (gris froids, façon fil d'actualité) ---------- */
-  --stone-50: #fbf9f3;
-  --stone-100: #f1eee5;
-  --stone-200: #e6e1d5;
-  --stone-300: #d2ccbd;
-  --stone-400: #aaa493;
-  --stone-500: #817c70;
-  --stone-600: #625e55;
-  --stone-700: #49463f;
-  --stone-800: #302e29;
-  --stone-900: #201f1b;
-  --stone-950: #151613;
+  /* ---------- PRIMITIFS : neutres papier et charbon ---------- */
+  --stone-50: #f4eee4;
+  --stone-100: #e8dfd1;
+  --stone-200: #d8ccbc;
+  --stone-300: #c3b4a2;
+  --stone-400: #a09080;
+  --stone-500: #7b6e62;
+  --stone-600: #5d544c;
+  --stone-700: #443e38;
+  --stone-800: #302c28;
+  --stone-900: #211f1d;
+  --stone-950: #171615;
 
   /* ---------- PRIMITIFS : feedback ---------- */
-  --green-600: #37815e;
-  --green-700: #286747;
-  --red-600: #c04435;
-  --red-700: #a23227;
-  --red-900: #7b251f;
-  --blue-600: #426e7b;
-  --blue-700: #315967;
+  --green-600: #53725d;
+  --green-700: #3d5c47;
+  --red-600: #a65d4b;
+  --red-700: #874535;
+  --red-900: #63362c;
+  --blue-600: #557078;
+  --blue-700: #405b63;
 
   /* ---------- PRIMITIFS : couvertures de secours (affiches) ---------- */
-  --poster-1: #76524b;
-  --poster-1-fg: #ffffff;
-  --poster-2: #d0bf89;
-  --poster-2-fg: #293035;
-  --poster-3: #526d62;
-  --poster-3-fg: #f3f5f3;
-  --poster-4: #496974;
-  --poster-4-fg: #f2f5f5;
-  --poster-5: #776e59;
-  --poster-5-fg: #f5f3ed;
+  --poster-1: #795346;
+  --poster-1-fg: #f4eee4;
+  --poster-2: #b59b70;
+  --poster-2-fg: #211f1d;
+  --poster-3: #536357;
+  --poster-3-fg: #f4eee4;
+  --poster-4: #4b6569;
+  --poster-4-fg: #f4eee4;
+  --poster-5: #6d6251;
+  --poster-5-fg: #f4eee4;
 
   /* Encres de tampon : seulement des teintes soutenues, lisibles sur blanc */
-  --stamp-1: #76524b;
-  --stamp-2: #526d62;
-  --stamp-3: #496974;
+  --stamp-1: #795346;
+  --stamp-2: #536357;
+  --stamp-3: #4b6569;
 
   /* ================= SÉMANTIQUES — THÈME CLAIR ================= */
-  /* Surfaces : fond gris clair, cartes blanches (codes du fil d'actualité) */
-  --bg: #e6e9ea;
-  --bg-subtle: #dce1e3;
-  --bg-muted: #d2d9dc;
+  /* Papier teinté et panneaux ivoire, sans blanc éclatant. */
+  --bg: #e4ddd1;
+  --bg-subtle: #d9d0c2;
+  --bg-muted: #cec3b4;
   --bg-inverted: var(--stone-900);
-  --surface: #f4f5f3;
-  --surface-raised: #fafbf9;
-  --surface-sunken: #e1e5e6;
-  --surface-overlay: #f4f5f3;
+  --surface: #eee8de;
+  --surface-raised: #f4eee4;
+  --surface-sunken: #d8cec0;
+  --surface-overlay: #eee8de;
 
   /* Textes */
-  --fg: #252d31;
-  --fg-muted: #505b60;
-  --fg-subtle: #667277;
+  --fg: #282622;
+  --fg-muted: #514b43;
+  --fg-subtle: #686056;
   --fg-inverted: #ffffff;
 
   /* Bordures : séparateurs discrets, presque invisibles */
-  --border: #cbd2d4;
-  --border-strong: #aeb9bc;
+  --border: #c9beaf;
+  --border-strong: #a99d8d;
   --border-focus: var(--brand-700);
 
   /* Marque */
@@ -119,82 +102,82 @@
   --primary-solid: var(--brand-700);
   --primary-solid-hover: var(--brand-800);
   --primary-solid-fg: #ffffff;
-  --primary-subtle: #dce7e9;
+  --primary-subtle: #e5d5ca;
   --primary-subtle-fg: var(--brand-900);
 
   /* Accent (VIP / mise en avant) */
   --accent: var(--gold-700);
   --accent-solid: var(--gold-300);
   --accent-solid-fg: var(--stone-900);
-  --accent-subtle: #ece7d7;
+  --accent-subtle: #e9e0ce;
   --accent-subtle-fg: var(--gold-700);
 
   /* Feedback */
   --success: var(--green-700);
   --success-solid: var(--green-700);
-  --success-subtle: #e2eee5;
+  --success-subtle: #e1e8dc;
   --warning: var(--gold-700);
-  --warning-subtle: #f3e9c4;
+  --warning-subtle: #ece3cf;
   --danger: var(--red-700);
   --danger-solid: var(--red-700);
   --danger-solid-hover: var(--red-900);
-  --danger-subtle: #f8e4e4;
+  --danger-subtle: #eeded7;
   --info: var(--blue-700);
-  --info-subtle: #e5eceb;
+  --info-subtle: #dfe6e3;
 }
 
 /* ================= SÉMANTIQUES — THÈME SOMBRE ================= */
 /* Gris anthracite façon mode sombre des réseaux sociaux (jamais de noir pur
    pour les cartes : la hiérarchie repose sur des gris superposés). */
 .dark {
-  --stamp-1: #d0a89c;
-  --stamp-2: #9fbeaa;
-  --stamp-3: #a6c3ca;
+  --stamp-1: #c99e8b;
+  --stamp-2: #a4b49e;
+  --stamp-3: #9db4b2;
 
-  --bg: #191e21;
-  --bg-subtle: #22292d;
-  --bg-muted: #2e373b;
+  --bg: #201f1d;
+  --bg-subtle: #282623;
+  --bg-muted: #34312c;
   --bg-inverted: var(--stone-50);
-  --surface: #232a2e;
-  --surface-raised: #2b3438;
-  --surface-sunken: #171c1f;
-  --surface-overlay: #232a2e;
+  --surface: #292723;
+  --surface-raised: #332f2a;
+  --surface-sunken: #1b1a18;
+  --surface-overlay: #292723;
 
-  --fg: #e5e9e8;
-  --fg-muted: #c0c9ca;
-  --fg-subtle: #a1adaf;
+  --fg: #eee7dc;
+  --fg-muted: #d0c5b7;
+  --fg-subtle: #b5a99a;
   --fg-inverted: var(--stone-950);
 
-  --border: #3d484c;
-  --border-strong: #58666a;
-  --border-focus: #9ab7be;
+  --border: #484239;
+  --border-strong: #685e50;
+  --border-focus: #c99e8b;
 
-  --primary: #a6c3ca;
-  --primary-hover: #c0d6db;
-  --primary-active: #dce7e9;
-  --primary-solid: var(--brand-700);
-  --primary-solid-hover: var(--brand-600);
-  --primary-solid-fg: #ffffff;
-  --primary-subtle: rgb(114 149 159 / 0.2);
-  --primary-subtle-fg: #c0d6db;
+  --primary: #d1a28e;
+  --primary-hover: #dfb5a1;
+  --primary-active: #e8c6b5;
+  --primary-solid: #754536;
+  --primary-solid-hover: #87523f;
+  --primary-solid-fg: #fff9f1;
+  --primary-subtle: rgb(185 132 112 / 0.2);
+  --primary-subtle-fg: #e2b9a6;
 
-  --accent: var(--gold-400);
-  --accent-solid: var(--gold-400);
-  --accent-solid-fg: var(--stone-950);
-  --accent-subtle: rgb(210 173 57 / 0.16);
-  --accent-subtle-fg: #e9ce67;
+  --accent: #c9b58c;
+  --accent-solid: #b49b72;
+  --accent-solid-fg: #211f1d;
+  --accent-subtle: rgb(180 155 114 / 0.16);
+  --accent-subtle-fg: #d8c69f;
 
-  --success: #8ac79c;
-  --success-solid: #286747;
-  --success-subtle: rgb(55 129 94 / 0.18);
-  --warning: #e9ce67;
-  --warning-subtle: rgb(210 173 57 / 0.16);
-  --danger: #f18a78;
-  --danger-solid: #a23227;
-  --danger-solid-hover: #7b251f;
-  --danger-subtle: rgb(192 68 53 / 0.18);
-  --info: #8db6c1;
-  --info-subtle: rgb(66 110 123 / 0.2);
+  --success: #a4c1a7;
+  --success-solid: #3d5c47;
+  --success-subtle: rgb(83 114 93 / 0.2);
+  --warning: #d8c69f;
+  --warning-subtle: rgb(180 155 114 / 0.16);
+  --danger: #d99884;
+  --danger-solid: #874535;
+  --danger-solid-hover: #63362c;
+  --danger-subtle: rgb(166 93 75 / 0.2);
+  --info: #a9c4c3;
+  --info-subtle: rgb(85 112 120 / 0.2);
 }
 
 /* =============================================================================
@@ -355,7 +338,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100dvh;
-    font-size: 0.9375rem;
+    font-size: 1rem;
     line-height: 1.55;
   }
 

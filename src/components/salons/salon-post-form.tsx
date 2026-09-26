@@ -85,10 +85,7 @@ export function SalonPostForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="border-border/80 bg-surface mb-6 rounded-2xl border p-4 shadow-xs"
-    >
+    <form onSubmit={handleSubmit} className="border-border bg-surface mb-6 rounded-sm border p-4">
       {error ? (
         <div className="mb-4">
           <Alert tone="danger" title="Publication impossible">
@@ -110,7 +107,7 @@ export function SalonPostForm({
             maxLength={LIMITS.MAX_POST_LENGTH}
             rows={3}
             placeholder="Quoi de neuf ? Pose une question, partage une info ou un bon plan..."
-            className="placeholder:text-fg-subtle w-full resize-none bg-transparent text-[15px] leading-relaxed focus:outline-none"
+            className="placeholder:text-fg-subtle w-full resize-none bg-transparent text-base leading-relaxed focus:outline-none"
           />
 
           <div className="border-border/60 mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">

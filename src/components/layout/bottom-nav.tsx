@@ -52,7 +52,7 @@ export function BottomNav({ user }: { user: HeaderUser | null }) {
   return (
     <nav
       aria-label="Navigation mobile"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+      className="border-border-strong bg-surface fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <ul className="grid h-14 grid-cols-5 items-stretch">
         {items.map((item) => {
@@ -65,8 +65,8 @@ export function BottomNav({ user }: { user: HeaderUser | null }) {
                 className={cn(
                   "-mt-px flex h-14 flex-col items-center justify-center gap-1 border-t-2",
                   item.active
-                    ? "border-primary font-semibold text-primary"
-                    : "border-transparent text-fg-muted hover:text-fg",
+                    ? "border-primary text-primary font-semibold"
+                    : "text-fg-muted hover:text-fg border-transparent",
                 )}
               >
                 <Icon className="size-5" aria-hidden="true" />

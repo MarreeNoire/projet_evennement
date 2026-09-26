@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Megaphone } from "lucide-react";
+import { BadgeCheck, Megaphone } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import type { CommentWithAuthor, PostWithAuthor } from "@/lib/salons/types";
@@ -29,7 +29,7 @@ export function PostCard({
   );
 
   return (
-    <article className="group border-border/80 bg-surface hover:border-border-strong mb-4 rounded-2xl border p-4 shadow-xs transition-all hover:shadow-sm sm:p-5">
+    <article className="group border-border bg-surface hover:border-border-strong mb-4 border-y px-4 py-5 transition-colors sm:px-5 sm:py-6">
       <div className="flex items-start gap-3">
         {post.author ? (
           <Link
@@ -58,12 +58,7 @@ export function PostCard({
               <span className="text-fg font-semibold">{authorName}</span>
             )}
             {post.author?.is_verified ? (
-              <span
-                className="bg-primary/10 text-primary inline-flex size-4 items-center justify-center rounded-full text-[10px] font-bold"
-                title="Profil vérifié"
-              >
-                ✓
-              </span>
+              <BadgeCheck className="text-primary size-4" aria-label="Profil vérifié" />
             ) : null}
             <span className="text-fg-subtle text-xs">· {formatRelative(post.created_at)}</span>
             {post.is_pinned ? (
@@ -74,7 +69,7 @@ export function PostCard({
           </header>
 
           {isAnnouncement ? (
-            <div className="border-accent/20 bg-accent-subtle/80 mt-3 rounded-xl border p-3.5">
+            <div className="border-accent/30 bg-accent-subtle/70 mt-3 border-y px-3.5 py-3">
               <p className="text-2xs text-accent-subtle-fg flex items-center gap-1.5 font-bold tracking-wider uppercase">
                 <Megaphone className="size-3.5" aria-hidden="true" />
                 Annonce de l&apos;organisateur
@@ -84,14 +79,14 @@ export function PostCard({
               </p>
             </div>
           ) : (
-            <p className="text-fg mt-2 text-[15px] leading-relaxed whitespace-pre-line">
+            <p className="text-fg mt-2 text-base leading-relaxed whitespace-pre-line">
               {post.content}
             </p>
           )}
 
           {images.length > 0 ? (
             <ul
-              className={`mt-3 grid gap-2 overflow-hidden rounded-xl ${images.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}
+              className={`border-border mt-4 grid gap-1 overflow-hidden border ${images.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}
             >
               {images.slice(0, 4).map((image) => (
                 <li key={image.url} className="bg-bg-muted relative aspect-4/3 overflow-hidden">
@@ -115,13 +110,13 @@ export function PostCard({
           />
 
           {comments.length > 0 ? (
-            <ul className="bg-bg-subtle/60 mt-3 flex flex-col gap-2.5 rounded-xl p-3">
+            <ul className="bg-bg-subtle border-border mt-4 flex flex-col gap-2.5 border-y px-3 py-3">
               {comments.map((comment) => {
                 const name = comment.author?.display_name ?? "Membre du salon";
                 return (
                   <li key={comment.id} className="flex gap-2.5">
                     <Avatar src={comment.author?.avatar_url} name={name} size="xs" />
-                    <div className="bg-surface min-w-0 flex-1 rounded-lg px-3 py-2 text-xs shadow-2xs">
+                    <div className="bg-surface border-border min-w-0 flex-1 border px-3 py-2 text-xs">
                       <p className="flex items-center justify-between">
                         <span className="text-fg font-semibold">{name}</span>
                         <span className="text-2xs text-fg-subtle">

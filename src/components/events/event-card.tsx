@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, MapPin } from "lucide-react";
+import { BadgeCheck, MapPin } from "lucide-react";
 
 import { AccessLevelBadge } from "@/components/ui/badge";
 import { CURRENCY_LABEL, getCategoryLabel } from "@/lib/constants";
@@ -19,7 +19,8 @@ import type { PublishedEventView } from "@/types/database";
 
 export function priceLabel(event: Pick<PublishedEventView, "min_price" | "max_price">): string {
   if (event.min_price <= 0 && event.max_price <= 0) return "Gratuit";
-  if (event.min_price === event.max_price) return `${formatNumber(event.min_price)} ${CURRENCY_LABEL}`;
+  if (event.min_price === event.max_price)
+    return `${formatNumber(event.min_price)} ${CURRENCY_LABEL}`;
   return `dès ${formatNumber(event.min_price)} ${CURRENCY_LABEL}`;
 }
 
@@ -51,8 +52,8 @@ export function EventCard({ event }: { event: PublishedEventView }) {
       className="group block h-full focus-visible:outline-2 focus-visible:outline-offset-2"
       aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
     >
-      <article className="flex h-full flex-col overflow-hidden border border-border bg-surface transition-colors duration-150 group-hover:border-primary">
-        <div className="relative aspect-16/10 overflow-hidden border-b border-border bg-bg-muted">
+      <article className="border-border border-t-primary bg-surface group-hover:border-primary flex h-full flex-col overflow-hidden border border-t-2 transition-colors duration-150">
+        <div className="border-border bg-bg-muted relative aspect-16/10 overflow-hidden border-b">
           {imageUrl ? (
             // Les images Supabase sont servies directement pour éviter le proxy Next.
             // eslint-disable-next-line @next/next/no-img-element
@@ -62,28 +63,41 @@ export function EventCard({ event }: { event: PublishedEventView }) {
               className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-[1.02]"
             />
           ) : (
-            <div className="flex size-full items-center justify-center text-sm text-fg-subtle">
+            <div className="text-fg-subtle flex size-full items-center justify-center text-sm">
               Aucune image
             </div>
           )}
 
           {/* Badges en superposition */}
           <div className="absolute top-3 left-3 flex gap-1.5">
-            <span className="border border-border bg-surface px-2 py-1 text-2xs font-semibold tracking-wide text-fg uppercase">
+            <span className="border-border bg-surface text-2xs text-fg border px-2 py-1 font-semibold tracking-wide uppercase">
               {getCategoryLabel(event.category)}
             </span>
           </div>
-
         </div>
 
         <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-          <h3 className="line-clamp-2 text-base sm:text-lg leading-snug font-bold text-fg group-hover:text-primary transition-colors">
-            {event.title}
-          </h3>
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-fg group-hover:text-primary line-clamp-2 min-w-0 flex-1 text-base leading-snug font-bold transition-colors sm:text-lg">
+              {event.title}
+            </h3>
+            <time
+              dateTime={event.start_at}
+              className="border-border-strong flex shrink-0 flex-col border-l pl-3 text-right"
+              aria-label={`${day} ${month} ${year}`}
+            >
+              <span className="font-display text-primary text-xl leading-none font-bold tabular-nums">
+                {day}
+              </span>
+              <span className="text-2xs text-fg-muted mt-1 font-semibold tracking-wide uppercase">
+                {month}
+              </span>
+            </time>
+          </div>
 
           {/* Gallery preview */}
           {gallery.length > 0 && (
-            <div className="flex gap-1 mb-2">
+            <div className="mb-2 flex gap-1">
               {gallery.slice(0, 3).map((url, index) => (
                 <img
                   key={`${event.id}-gallery-${index}`}
@@ -91,31 +105,29 @@ export function EventCard({ event }: { event: PublishedEventView }) {
                   alt={`Gallery ${index + 1}`}
                   width={40}
                   height={40}
-                  className="rounded-md object-cover border border-border/50 bg-bg-muted"
+                  className="border-border/50 bg-bg-muted rounded-md border object-cover"
                   style={{ flexShrink: 0 }}
                 />
               ))}
             </div>
           )}
 
-          <p className="flex items-center gap-2 text-xs text-fg-muted">
-            <CalendarDays className="size-4 shrink-0 text-primary" aria-hidden="true" />
-            <span>{`${day} ${month} ${year}`}</span>
-          </p>
-          <p className="flex items-center gap-2 text-xs text-fg-muted">
-            <MapPin className="size-4 shrink-0 text-primary" aria-hidden="true" />
-            <span className="truncate">{event.venue_name ? `${event.venue_name}, ` : ""}{event.city}</span>
+          <p className="text-fg-muted flex items-center gap-2 text-xs">
+            <MapPin className="text-primary size-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">
+              {event.venue_name ? `${event.venue_name}, ` : ""}
+              {event.city}
+            </span>
           </p>
 
-          <div className="mt-auto flex items-center justify-between gap-3 border-t border-border pt-3">
-            <span className="text-sm font-bold text-fg tabular-nums">
-              {priceLabel(event)}
-            </span>
-            <span className="flex items-center gap-1 text-xs text-fg-subtle truncate max-w-[140px]">
+          <div className="border-border mt-auto flex items-center justify-between gap-3 border-t pt-3">
+            <span className="text-fg text-sm font-bold tabular-nums">{priceLabel(event)}</span>
+            <span className="text-fg-subtle flex max-w-[140px] items-center gap-1 truncate text-xs">
               {event.organizer_verified ? (
-                <span className="inline-flex size-3.5 items-center justify-center rounded-full bg-primary/10 text-[9px] font-bold text-primary shrink-0">
-                  ✓
-                </span>
+                <BadgeCheck
+                  className="text-primary size-4 shrink-0"
+                  aria-label="Organisateur vérifié"
+                />
               ) : null}
               <span className="truncate">{event.organizer_name}</span>
             </span>

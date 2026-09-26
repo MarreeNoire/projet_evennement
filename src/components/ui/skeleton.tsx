@@ -14,7 +14,7 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
   return (
     <div
       aria-hidden="true"
-      className={cn("animate-pulse rounded-md bg-bg-muted", className)}
+      className={cn("bg-bg-muted animate-pulse rounded-md", className)}
       {...props}
     />
   );
@@ -23,7 +23,7 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 /** Squelette de carte d'événement : même gabarit que la carte réelle. */
 export function EventCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+    <div className="border-border bg-surface overflow-hidden rounded-sm border">
       <Skeleton className="aspect-16/9 rounded-none" />
       <div className="flex flex-col gap-3 p-5">
         <Skeleton className="h-3 w-24" />
@@ -53,7 +53,7 @@ export function ListRowsSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div className="flex flex-col gap-3" aria-hidden="true">
       {Array.from({ length: count }, (_, index) => (
-        <div key={index} className="flex items-center gap-3 rounded-xl border border-border p-4">
+        <div key={index} className="border-border flex items-center gap-3 rounded-xl border p-4">
           <Skeleton className="size-10 rounded-full" />
           <div className="flex flex-1 flex-col gap-2">
             <Skeleton className="h-4 w-1/3" />
@@ -70,7 +70,7 @@ export function StatsSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-hidden="true">
       {Array.from({ length: count }, (_, index) => (
-        <div key={index} className="rounded-2xl border border-border bg-surface p-5">
+        <div key={index} className="border-border bg-surface rounded-sm border p-5">
           <Skeleton className="h-3 w-20" />
           <Skeleton className="mt-3 h-7 w-28" />
           <Skeleton className="mt-2 h-3 w-16" />
@@ -91,7 +91,7 @@ export function Spinner({
   return (
     <span
       role="status"
-      className={cn("inline-flex items-center gap-2 text-sm text-fg-muted", className)}
+      className={cn("text-fg-muted inline-flex items-center gap-2 text-sm", className)}
     >
       <Loader2 className="size-4 animate-spin" aria-hidden="true" />
       {label}

@@ -24,7 +24,7 @@ const badgeVariants = cva(
         accent: "border-transparent bg-accent-subtle text-accent-subtle-fg",
         outline: "border-border-strong bg-transparent text-fg",
         // Sur photo de couverture
-        overlay: "border-white/20 bg-black/60 text-white backdrop-blur-sm",
+        overlay: "border-white/20 bg-black/75 text-white",
       },
       size: {
         sm: "px-1.5 py-0 text-2xs",
@@ -59,20 +59,14 @@ const ACCESS_LEVEL_TEXT: Record<string, string> = {
   vvip: "VVIP",
 };
 
-export function AccessLevelBadge({
-  level,
-  className,
-}: {
-  level: string;
-  className?: string;
-}) {
+export function AccessLevelBadge({ level, className }: { level: string; className?: string }) {
   // Le niveau VVIP est distingué par un remplissage plein : la différence
   // ne repose donc pas uniquement sur la teinte.
   if (level === "vvip") {
     return (
       <span
         className={cn(
-          "inline-flex items-center rounded-sm bg-accent-solid px-2 py-0.5 text-2xs font-bold tracking-[0.08em] text-accent-solid-fg uppercase",
+          "bg-accent-solid text-2xs text-accent-solid-fg inline-flex items-center rounded-sm px-2 py-0.5 font-bold tracking-[0.08em] uppercase",
           className,
         )}
       >

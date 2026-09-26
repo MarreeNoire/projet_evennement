@@ -4,39 +4,75 @@
   "title": "Design System: Event",
   "extensions": {
     "colorMeta": {
-      "slate-blue": {
+      "rust-paper": {
         "role": "primary",
-        "displayName": "Muted slate blue",
-        "canonical": "#3d5c67",
-        "tonalRamp": ["#1b292f", "#2d4048", "#344c55", "#3d5c67", "#496a76", "#587985", "#72959f", "#edf3f4"]
+        "displayName": "Terracotta ink",
+        "canonical": "#60352c",
+        "tonalRamp": [
+          "#261a18",
+          "#3b2420",
+          "#4d2c26",
+          "#60352c",
+          "#713e32",
+          "#874d3d",
+          "#a26350",
+          "#f3e9e2"
+        ]
       },
-      "soft-gray": {
-        "role": "neutral",
-        "displayName": "Soft gray",
-        "canonical": "#e6e9ea",
-        "tonalRamp": ["#252d31", "#3d484c", "#505b60", "#667277", "#aeb9bc", "#cbd2d4", "#dce1e3", "#f4f5f3"]
+      "warm-paper": {
+        "role": "surface",
+        "displayName": "Warm event paper",
+        "canonical": "#eee8de",
+        "tonalRamp": [
+          "#211f1d",
+          "#302c28",
+          "#443e38",
+          "#5d544c",
+          "#7b6e62",
+          "#a09080",
+          "#d8ccbc",
+          "#f4eee4"
+        ]
       },
-      "graphite": {
-        "role": "neutral",
-        "displayName": "Graphite",
-        "canonical": "#252d31",
-        "tonalRamp": ["#191e21", "#232a2e", "#2b3438", "#3d484c", "#505b60", "#667277", "#a1adaf", "#e5e9e8"]
+      "night-ink": {
+        "role": "background",
+        "displayName": "Warm charcoal",
+        "canonical": "#201f1d",
+        "tonalRamp": [
+          "#171615",
+          "#201f1d",
+          "#282623",
+          "#34312c",
+          "#484239",
+          "#685e50",
+          "#b5a99a",
+          "#eee7dc"
+        ]
       },
-      "muted-gold": {
+      "ticket-brass": {
         "role": "secondary",
-        "displayName": "Muted ticket gold",
-        "canonical": "#d0bf89",
-        "tonalRamp": ["#5d4a12", "#806414", "#aa8620", "#b9a66e", "#d0bf89", "#dfd3ad", "#ece7d7", "#f7f4e9"]
+        "displayName": "Muted ticket brass",
+        "canonical": "#85714e",
+        "tonalRamp": [
+          "#4d4434",
+          "#66583f",
+          "#85714e",
+          "#aa9165",
+          "#c9b58c",
+          "#d8c69f",
+          "#e9e0ce",
+          "#eee5cf"
+        ]
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Inter display",
-        "purpose": "Social feed, event discovery and page headlines."
+        "purpose": "Event listings, dates, page headlines and ticket information."
       },
       "body": {
         "displayName": "Inter body",
-        "purpose": "Interface copy, labels and event details."
+        "purpose": "Readable social conversation, event details and organizer tasks."
       }
     },
     "shadows": [
@@ -69,67 +105,59 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Main action in the event search, booking and organizer flows.",
+      "description": "Main action in event search, booking and organizer flows.",
       "html": "<button class=\"ds-primary\">Rechercher</button>",
-      "css": ".ds-primary { background: var(--primary-solid); color: var(--primary-solid-fg); border: 1px solid transparent; border-radius: 4px; padding: 0 16px; height: 44px; font: 600 14px/1.2 Inter, ui-sans-serif, system-ui, sans-serif; transition: background-color 150ms ease; } .ds-primary:hover { background: var(--primary-solid-hover); } .ds-primary:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; } .ds-primary:active { transform: translateY(1px); }"
+      "css": ".ds-primary { background: var(--primary-solid); color: var(--primary-solid-fg); border: 1px solid transparent; border-radius: 3px; padding: 0 16px; height: 44px; font: 600 14px/1.2 Inter, ui-sans-serif, system-ui, sans-serif; transition: background-color 150ms ease; } .ds-primary:hover { background: var(--primary-solid-hover); } .ds-primary:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }"
     },
     {
-      "name": "Secondary Button",
-      "kind": "button",
-      "refersTo": "button-secondary",
-      "description": "Secondary action with a clear outline and paper fill.",
-      "html": "<button class=\"ds-secondary\">Voir les événements</button>",
-      "css": ".ds-secondary { background: var(--bg-muted); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; padding: 0 16px; height: 44px; font: 600 14px/1.2 Inter, ui-sans-serif, system-ui, sans-serif; transition: background-color 150ms ease, border-color 150ms ease; } .ds-secondary:hover { background: var(--border); border-color: var(--border-strong); } .ds-secondary:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }"
+      "name": "Event Listing",
+      "kind": "card",
+      "refersTo": "event-card",
+      "description": "Organizer supplied cover, date stamp, venue and real ticket price.",
+      "html": "<article class=\"ds-event\"><img src=\"\" alt=\"\"><div><time>12 JUN</time><h3>Événement</h3><p>Lieu · Tarif publié</p></div></article>",
+      "css": ".ds-event { overflow: hidden; border: 1px solid var(--border); border-top: 2px solid var(--primary); background: var(--surface); color: var(--fg); } .ds-event img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-bottom: 1px solid var(--border); }"
+    },
+    {
+      "name": "Salon Dispatch",
+      "kind": "article",
+      "refersTo": "post-card",
+      "description": "A reading column for conversation attached to an event, separated by calm paper rules.",
+      "html": "<article class=\"ds-dispatch\"><header>Participant · Heure</header><p>Publication</p></article>",
+      "css": ".ds-dispatch { border-block: 1px solid var(--border); background: var(--surface); padding: 20px; }"
     },
     {
       "name": "Search Input",
       "kind": "input",
       "refersTo": "input",
-      "description": "Search field with a visible label and direct rectangular shape.",
+      "description": "Persistent label, warm paper field and visible focus.",
       "html": "<label class=\"ds-search-label\">Rechercher un événement<input class=\"ds-search\" placeholder=\"Nom d’un événement ou d’une ville\"></label>",
-      "css": ".ds-search-label { display: grid; gap: 8px; color: var(--fg); font: 600 14px/1.3 Inter, ui-sans-serif, system-ui, sans-serif; } .ds-search { background: var(--surface); color: var(--fg); border: 1px solid var(--border-strong); border-radius: 4px; padding: 10px 12px; height: 44px; font: 400 14px/1.4 Inter, ui-sans-serif, system-ui, sans-serif; } .ds-search:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }"
-    },
-    {
-      "name": "Event Card",
-      "kind": "card",
-      "refersTo": "event-card",
-      "description": "Organizer-provided cover and event facts in a flat, bordered frame.",
-      "html": "<article class=\"ds-event\"><img src=\"\" alt=\"\"><div class=\"ds-event-copy\"><h3>Événement</h3><p>Date · Lieu</p><strong>Prix du billet</strong></div></article>",
-      "css": ".ds-event { overflow: hidden; border: 1px solid var(--border); background: var(--surface); color: var(--fg); transition: border-color 150ms ease; } .ds-event:hover { border-color: var(--primary); } .ds-event img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-bottom: 1px solid var(--border); } .ds-event-copy { display: grid; gap: 12px; padding: 20px; } .ds-event h3 { margin: 0; font: 700 20px/1.2 Inter, ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.02em; } .ds-event p { margin: 0; color: var(--fg-muted); font: 400 12px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; }"
-    },
-    {
-      "name": "Status Tag",
-      "kind": "chip",
-      "refersTo": "status-tag",
-      "description": "Compact rectangular tag whose text names the status.",
-      "html": "<span class=\"ds-status\">Publié</span>",
-      "css": ".ds-status { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-muted); color: var(--fg); padding: 2px 8px; font: 700 11px/1.4 Inter, ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; }"
+      "css": ".ds-search { background: var(--surface); color: var(--fg); border: 1px solid var(--border-strong); border-radius: 3px; padding: 10px 12px; min-height: 44px; } .ds-search:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }"
     }
   ],
   "narrative": {
-    "northStar": "Le fil des sorties",
-    "overview": "Event feels like a calm, contemporary social network for finding and sharing events. A soft gray canvas, quiet card surfaces, readable graphite type and muted slate-blue actions keep the feed comfortable to scan. Real organizer-supplied covers provide imagery.",
+    "northStar": "Le carnet des sorties",
+    "overview": "Event is an editorial network around real-world events. Warm paper, charcoal ink, muted terracotta actions and ticket inspired date marks separate it from a generic social feed.",
     "keyCharacteristics": [
-      "Soft gray backgrounds with graphite text and muted slate-blue actions.",
-      "Social feed surfaces with compact corners and quiet borders.",
-      "Event details and product states are based on real data.",
-      "Light and dark themes use calm, reduced-glare tones."
+      "Warm, reduced-glare surfaces in both themes.",
+      "Event listings use organizer supplied media and a clear date stamp.",
+      "Salon posts read as notes attached to an event, not floating timeline cards.",
+      "Product details and states come from application data."
     ],
     "rules": [
       {
-        "name": "The Social Feed Rule",
-        "body": "Use alignment, avatars, timestamps and light separators to make posts easy to follow. Keep surfaces calm and avoid decorative effects.",
+        "name": "Event before timeline",
+        "body": "Keep the event, its date and venue visible as context for the people and conversation connected to it.",
         "section": "layout"
       }
     ],
     "dos": [
-      "Use real event details and media supplied by organizers.",
-      "Pair status colors with readable text.",
-      "Keep the participant feed, discovery and social connections prominent."
+      "Use real published event information and organizer supplied imagery.",
+      "Pair semantic colors with readable status text.",
+      "Keep discovery, booking and event conversations easy to reach."
     ],
     "donts": [
-      "Do not use purple gradients or pill-shaped buttons.",
-      "Do not add emoji icons, AI-generated photos, fake testimonials or invented metrics.",
+      "Do not use purple gradients or pill shaped buttons.",
+      "Do not add emoji icons, AI generated photos, fake testimonials or invented metrics.",
       "Do not use glass effects, floating card stacks or vague promotional claims."
     ]
   }

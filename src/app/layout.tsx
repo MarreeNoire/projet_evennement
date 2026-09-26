@@ -45,8 +45,7 @@ export const metadata: Metadata = {
     locale: "fr_CI",
     siteName: APP_NAME,
     title: `${APP_NAME} · Événements et billetterie`,
-    description:
-      "Consulte les événements publiés et les informations de réservation sur Event.",
+    description: "Consulte les événements publiés et les informations de réservation sur Event.",
   },
   twitter: {
     card: "summary_large_image",
@@ -69,8 +68,8 @@ export const viewport: Viewport = {
   // Le zoom reste autorisé : le bloquer nuit à l'accessibilité.
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#e6e9ea" },
-    { media: "(prefers-color-scheme: dark)", color: "#191e21" },
+    { media: "(prefers-color-scheme: light)", color: "#e4ddd1" },
+    { media: "(prefers-color-scheme: dark)", color: "#201f1d" },
   ],
 };
 
@@ -84,8 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       data-scroll-behavior="smooth"
       className={inter.variable}
     >
-      <head>
-      </head>
+      <head></head>
       <body className="min-h-dvh antialiased">
         <a href="#contenu" className="skip-link">
           Aller au contenu principal

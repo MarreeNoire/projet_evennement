@@ -16,7 +16,7 @@ export const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 whitespace-nowrap",
     "font-semibold",
-    "rounded-sm border border-transparent",
+    "rounded-[3px] border border-transparent",
     "transition-[background-color,border-color,color,box-shadow,transform] duration-150",
     "ease-[var(--ease-out-soft)]",
     "select-none",
@@ -31,11 +31,9 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         // Action principale : contraste 5.55:1 dans les deux thèmes
-        primary:
-          "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover",
+        primary: "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover",
         // Action secondaire
-        secondary:
-          "bg-bg-muted text-fg hover:bg-border",
+        secondary: "bg-bg-muted text-fg hover:bg-border",
         // Action discrète
         ghost: "text-fg hover:bg-bg-muted",
         // Lien textuel
@@ -45,8 +43,7 @@ export const buttonVariants = cva(
         // Accent chaud : réservé aux mises en avant (VIP, CTA promotionnel)
         accent: "bg-accent-solid text-accent-solid-fg hover:brightness-95",
         // Sur photo de couverture
-        overlay:
-          "border-white/30 bg-black/85 text-white hover:bg-black",
+        overlay: "border-white/30 bg-black/85 text-white hover:bg-black",
       },
       size: {
         sm: "h-9 px-3 text-sm [&_svg]:size-4",
@@ -68,9 +65,7 @@ export const buttonVariants = cva(
 
 export type ButtonVariants = VariantProps<typeof buttonVariants>;
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    ButtonVariants {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariants {
   /** Affiche un indicateur et bloque les interactions pendant l'action. */
   loading?: boolean;
   /** Texte alternatif pendant le chargement (utile aux lecteurs d'écran). */
@@ -78,7 +73,17 @@ export interface ButtonProps
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant, size, fullWidth, loading = false, loadingLabel, children, disabled, ...props },
+  {
+    className,
+    variant,
+    size,
+    fullWidth,
+    loading = false,
+    loadingLabel,
+    children,
+    disabled,
+    ...props
+  },
   ref,
 ) {
   return (
@@ -106,8 +111,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 --------------------------------------------------------------------------- */
 
 export interface ButtonLinkProps
-  extends React.ComponentPropsWithoutRef<typeof Link>,
-    ButtonVariants {
+  extends React.ComponentPropsWithoutRef<typeof Link>, ButtonVariants {
   className?: string;
 }
 
@@ -120,10 +124,7 @@ export function ButtonLink({
   ...props
 }: ButtonLinkProps) {
   return (
-    <Link
-      className={cn(buttonVariants({ variant, size, fullWidth }), className)}
-      {...props}
-    >
+    <Link className={cn(buttonVariants({ variant, size, fullWidth }), className)} {...props}>
       {children}
     </Link>
   );

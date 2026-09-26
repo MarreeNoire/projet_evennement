@@ -16,9 +16,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-md border border-border bg-surface",
+        "border-border bg-surface rounded-sm border",
         interactive &&
-          "transition-[border-color,background-color] duration-150 ease-[var(--ease-out-soft)] hover:border-primary hover:bg-surface-raised focus-within:border-border-focus",
+          "hover:border-primary hover:bg-surface-raised focus-within:border-border-focus transition-[border-color,background-color] duration-150 ease-[var(--ease-out-soft)]",
         className,
       )}
       {...props}
@@ -34,8 +34,11 @@ export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHead
   return <h3 className={cn("text-lg leading-tight font-semibold", className)} {...props} />;
 }
 
-export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm text-fg-muted", className)} {...props} />;
+export function CardDescription({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={cn("text-fg-muted text-sm", className)} {...props} />;
 }
 
 export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
@@ -45,7 +48,7 @@ export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDi
 export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex items-center gap-3 border-t border-border px-5 py-4", className)}
+      className={cn("border-border flex items-center gap-3 border-t px-5 py-4", className)}
       {...props}
     />
   );
@@ -81,14 +84,16 @@ export function StatCard({
   return (
     <Card className={cn("p-5", className)}>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm font-medium text-fg-muted">{label}</p>
+        <p className="text-fg-muted text-sm font-medium">{label}</p>
         {icon ? (
           <span className="text-fg-subtle" aria-hidden="true">
             {icon}
           </span>
         ) : null}
       </div>
-      <p className="mt-2 font-display text-2xl font-bold tracking-tight tabular-nums md:text-3xl">{value}</p>
+      <p className="font-display mt-2 text-2xl font-bold tracking-tight tabular-nums md:text-3xl">
+        {value}
+      </p>
       {(hint || trend) && (
         <p className="mt-1 flex items-center gap-1.5 text-xs">
           {trend ? (
