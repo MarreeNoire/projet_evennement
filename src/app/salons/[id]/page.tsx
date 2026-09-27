@@ -43,6 +43,12 @@ export const metadata = {
    ========================================================================== */
 
 type TabSlug = (typeof SALON_TABS)[number]["slug"];
+const PHASE_JOURNEY_ORDER: EventPhase[] = ["avant", "live", "apres"];
+const PHASE_TITLES: Record<EventPhase, string> = {
+  avant: "Avant l’événement",
+  live: "Sur place",
+  apres: "Après l’événement",
+};
 
 export default async function SalonDetailPage({
   params,
@@ -364,14 +370,10 @@ function Discussion({
         </div>
       )}
 
-      {posts.length === 0 ? (
+      {posts.length === 0 && !event ? (
         <EmptyState
           title="Le fil est encore vide"
-          description={
-            phase === "avant"
-              ? "Le salon est ouvert avant l'événement : présente-toi et lance la conversation."
-              : "Sois la première personne à écrire dans ce salon."
-          }
+          description="Sois la première personne à écrire dans ce salon."
         />
       ) : (
         <>
@@ -389,30 +391,94 @@ function Discussion({
           ) : null}
 
           {event ? (
-            PHASE_DISPLAY_ORDER.filter((key) => groups[key].length > 0).map((key) => (
-              <section key={key} aria-label={`Publications : ${key}`}>
-                <div className="mb-5 flex items-center gap-3">
-                  <PhaseTag phase={key} />
-                  <span aria-hidden="true" className="bg-border h-px flex-1" />
-                  <span className="text-fg-subtle text-xs tabular-nums">
-                    {groups[key].length} publication{groups[key].length > 1 ? "s" : ""}
-                  </span>
-                </div>
-                {groups[key].map((post) => (
-                  <PostCard key={post.id} post={post} comments={commentsByPost.get(post.id)} />
+            <>
+              <PhaseJourney activePhase={phase} />
+              <div className="flex flex-col gap-8">
+                {PHASE_DISPLAY_ORDER.map((key) => (
+                  <section
+                    key={key}
+                    id={`salon-phase-${key}`}
+                    aria-labelledby={`salon-phase-title-${key}`}
+                    className="scroll-mt-24"
+                  >
+                    <div className="border-border mb-4 flex items-center gap-3 border-t pt-4">
+                      <h2
+                        id={`salon-phase-title-${key}`}
+                        className="font-display text-xl font-semibold"
+                      >
+                        {PHASE_TITLES[key]}
+                      </h2>
+                      <span aria-hidden="true" className="bg-border h-px flex-1" />
+                      {phase === key ? (
+                        <span className="text-primary text-xs font-semibold">Étape actuelle</span>
+                      ) : null}
+                    </div>
+                    {groups[key].length > 0 ? (
+                      groups[key].map((post) => (
+                        <PostCard
+                          key={post.id}
+                          post={post}
+                          comments={commentsByPost.get(post.id)}
+                        />
+                      ))
+                    ) : (
+                      <p className="text-fg-muted border-border border-b py-4 text-sm">
+                        {phase === key
+                          ? "Le salon est ouvert à cette étape. Lance la conversation depuis le formulaire ci-dessus."
+                          : "Aucun échange n’est affiché pour cette étape."}
+                      </p>
+                    )}
+                  </section>
                 ))}
-              </section>
-            ))
-          ) : (
+              </div>
+            </>
+          ) : regular.length > 0 ? (
             <section aria-label="Publications">
               {regular.map((post) => (
                 <PostCard key={post.id} post={post} comments={commentsByPost.get(post.id)} />
               ))}
             </section>
-          )}
+          ) : null}
         </>
       )}
     </div>
+  );
+}
+
+function PhaseJourney({ activePhase }: { activePhase: EventPhase | null }) {
+  return (
+    <nav
+      aria-label="Parcours des échanges autour de l’événement"
+      className="border-border border-y py-4"
+    >
+      <p className="mb-3 text-sm font-semibold">Les échanges suivent l’événement</p>
+      <ol className="grid grid-cols-3 gap-2">
+        {PHASE_JOURNEY_ORDER.map((key) => {
+          const current = activePhase === key;
+          return (
+            <li key={key}>
+              <a
+                href={`#salon-phase-${key}`}
+                aria-current={current ? "step" : undefined}
+                className={cn(
+                  "flex min-h-14 flex-col justify-center border px-2 py-2 text-center transition-colors sm:px-3",
+                  current
+                    ? "border-primary bg-primary-subtle text-fg"
+                    : "border-border bg-surface text-fg-muted hover:border-border-strong hover:text-fg",
+                )}
+              >
+                <span className="text-xs leading-tight font-semibold sm:text-sm">
+                  {PHASE_TITLES[key]}
+                </span>
+                <span className="text-2xs mt-1">
+                  {current ? "Étape actuelle" : "Voir les échanges"}
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }
 

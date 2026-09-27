@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { isDateInput, startOfDayAfter } from "@/lib/events/date-range";
 import type { PublishedEventView } from "@/types/database";
 
 /* =============================================================================
@@ -13,11 +14,13 @@ export interface ExploreFilters {
   query?: string;
   category?: string;
   city?: string;
+  startDate?: string;
+  endDate?: string;
   /** Prix maximum en FCFA. */
   maxPrice?: number;
   /** Uniquement les événements gratuits. */
   freeOnly?: boolean;
-  sort?: "date_asc" | "popular" | "price_asc" | "price_desc" | "recent";
+  sort?: "date_asc" | "date_desc" | "price_asc" | "price_desc";
   page?: number;
   pageSize?: number;
 }
@@ -52,6 +55,12 @@ export async function searchPublishedEvents(filters: ExploreFilters = {}): Promi
 
   if (filters.category) query = query.eq("category", filters.category);
   if (filters.city) query = query.ilike("city", `%${filters.city.trim()}%`);
+  if (isDateInput(filters.startDate)) {
+    query = query.gte("start_at", `${filters.startDate}T00:00:00.000Z`);
+  }
+  if (isDateInput(filters.endDate)) {
+    query = query.lt("start_at", startOfDayAfter(filters.endDate));
+  }
   if (filters.freeOnly) {
     query = query.eq("min_price", 0);
   } else if (typeof filters.maxPrice === "number") {
@@ -65,11 +74,7 @@ export async function searchPublishedEvents(filters: ExploreFilters = {}): Promi
     case "price_desc":
       query = query.order("min_price", { ascending: false }).order("start_at");
       break;
-    case "popular":
-      // Faute de compteur public, les mieux remplis d'abord via prix max.
-      query = query.order("max_price", { ascending: false }).order("start_at");
-      break;
-    case "recent":
+    case "date_desc":
       query = query.order("start_at", { ascending: false });
       break;
     case "date_asc":
@@ -339,8 +344,6 @@ export async function getRecentEvents(limit = 20): Promise<AdminEventListItem[]>
     return [];
   }
 }
-
-
 
 export async function getOrganizerTicketTypes() {
   try {

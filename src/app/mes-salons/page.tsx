@@ -46,6 +46,33 @@ export default async function MesSalonsPage() {
       if (b.event) return 1;
       return a.salon.name.localeCompare(b.salon.name, "fr");
     });
+  const phaseSections = [
+    {
+      key: "live",
+      title: "En ce moment",
+      description: "Les salons des événements qui se déroulent actuellement.",
+      entries: entries.filter(
+        ({ event }) => event && getEventPhase(event.start_at, event.end_at, now) === "live",
+      ),
+    },
+    {
+      key: "avant",
+      title: "À venir",
+      description: "Fais connaissance avec les participants avant le jour de l’événement.",
+      entries: entries.filter(
+        ({ event }) => event && getEventPhase(event.start_at, event.end_at, now) === "avant",
+      ),
+    },
+    {
+      key: "apres",
+      title: "Après l’événement",
+      description: "Retrouve les échanges et les photos partagés après la rencontre.",
+      entries: entries.filter(
+        ({ event }) => event && getEventPhase(event.start_at, event.end_at, now) === "apres",
+      ),
+    },
+  ];
+  const communityEntries = entries.filter(({ event }) => !event);
 
   return (
     <SocialShell active="salons">
@@ -69,13 +96,46 @@ export default async function MesSalonsPage() {
             action={<ButtonLink href={ROUTES.explore}>Trouver un événement</ButtonLink>}
           />
         ) : (
-          <ul className="grid gap-5 sm:grid-cols-2">
-            {entries.map(({ salon, event }) => (
-              <li key={salon.id}>
-                <SalonStub salon={salon} event={event} now={now} />
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col gap-10">
+            {phaseSections.map((section) =>
+              section.entries.length > 0 ? (
+                <section key={section.key} aria-labelledby={`salons-${section.key}`}>
+                  <header className="border-border mb-4 border-t pt-4">
+                    <h2
+                      id={`salons-${section.key}`}
+                      className="font-display text-2xl font-semibold"
+                    >
+                      {section.title}
+                    </h2>
+                    <p className="text-fg-muted mt-1 text-sm">{section.description}</p>
+                  </header>
+                  <ul className="grid gap-5 sm:grid-cols-2">
+                    {section.entries.map(({ salon, event }) => (
+                      <li key={salon.id}>
+                        <SalonStub salon={salon} event={event} now={now} />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null,
+            )}
+            {communityEntries.length > 0 ? (
+              <section aria-labelledby="salons-community">
+                <header className="border-border mb-4 border-t pt-4">
+                  <h2 id="salons-community" className="font-display text-2xl font-semibold">
+                    Autres salons
+                  </h2>
+                </header>
+                <ul className="grid gap-5 sm:grid-cols-2">
+                  {communityEntries.map(({ salon, event }) => (
+                    <li key={salon.id}>
+                      <SalonStub salon={salon} event={event} now={now} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+          </div>
         )}
       </div>
     </SocialShell>

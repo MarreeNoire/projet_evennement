@@ -8,10 +8,11 @@ import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
 import { getCategoryLabel } from "@/lib/constants";
 import { getEventCities, searchPublishedEvents, type ExploreFilters } from "@/lib/events/queries";
+import { isDateInput } from "@/lib/events/date-range";
 
 export const metadata: Metadata = { title: "Explorer les événements" };
 
-const SORT_VALUES = ["date_asc", "popular", "price_asc", "price_desc", "recent"] as const;
+const SORT_VALUES = ["date_asc", "date_desc", "price_asc", "price_desc"] as const;
 type SortValue = (typeof SORT_VALUES)[number];
 
 function toSort(value: string | undefined): SortValue {
@@ -30,11 +31,20 @@ export default async function ExplorePage({
   const params = await searchParams;
 
   const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+  const requestedStartDate = first(params.du);
+  const requestedEndDate = first(params.au);
+  const startDate = isDateInput(requestedStartDate) ? requestedStartDate : undefined;
+  const endDate =
+    isDateInput(requestedEndDate) && (!startDate || requestedEndDate >= startDate)
+      ? requestedEndDate
+      : undefined;
 
   const filters: ExploreFilters = {
     query: first(params.q),
     category: first(params.categorie),
     city: first(params.ville),
+    startDate,
+    endDate,
     freeOnly: first(params.gratuit) === "1",
     sort: toSort(first(params.tri)),
     page: Math.max(Number(first(params.page) ?? 1) || 1, 1),
@@ -61,6 +71,8 @@ export default async function ExplorePage({
     if (filters.query) next.set("q", filters.query);
     if (filters.category) next.set("categorie", filters.category);
     if (filters.city) next.set("ville", filters.city);
+    if (filters.startDate) next.set("du", filters.startDate);
+    if (filters.endDate) next.set("au", filters.endDate);
     if (filters.sort && filters.sort !== "date_asc") next.set("tri", filters.sort);
     if (filters.freeOnly) next.set("gratuit", "1");
     if (p > 1) next.set("page", String(p));
@@ -72,12 +84,12 @@ export default async function ExplorePage({
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main id="contenu" className="container-page flex flex-col gap-8 py-10">
-        <div className="border-t border-border pt-4">
+        <div className="border-border border-t pt-4">
           <p className="eyebrow">Agenda</p>
-          <h1 className="mt-2 font-display text-4xl leading-[1.02] font-semibold md:text-5xl">
+          <h1 className="font-display mt-2 text-4xl leading-[1.02] font-semibold md:text-5xl">
             Explorer
           </h1>
-          <p className="mt-2 text-sm text-fg-muted">
+          <p className="text-fg-muted mt-2 text-sm">
             {filters.category
               ? `Catégorie : ${getCategoryLabel(filters.category)}`
               : "Tous les événements à venir."}
@@ -107,7 +119,7 @@ export default async function ExplorePage({
                     ← Page précédente
                   </ButtonLink>
                 ) : null}
-                <span className="text-sm text-fg-muted" role="status">
+                <span className="text-fg-muted text-sm" role="status">
                   Page {page} sur {totalPages}
                 </span>
                 {page < totalPages ? (

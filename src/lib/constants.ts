@@ -246,11 +246,10 @@ export type SalonTab = (typeof SALON_TABS)[number]["slug"];
 
 /** Tri des listes d'événements. */
 export const EVENT_SORTS = [
-  { value: "date_asc", label: "Date (prochain d'abord)" },
-  { value: "popular", label: "Les plus populaires" },
+  { value: "date_asc", label: "Date (plus proche)" },
+  { value: "date_desc", label: "Date (plus éloignée)" },
   { value: "price_asc", label: "Prix croissant" },
   { value: "price_desc", label: "Prix décroissant" },
-  { value: "recent", label: "Nouveautés" },
 ] as const;
 export type EventSort = (typeof EVENT_SORTS)[number]["value"];
 
