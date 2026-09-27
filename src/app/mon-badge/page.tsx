@@ -31,7 +31,7 @@ export default async function MonBadgePage() {
   const displayName = profile.display_name;
   const requestHeaders = await headers();
   const appOrigin = getRequestOrigin(requestHeaders, env.appUrl, env.isProduction);
-  const badgeUrl = getProfileBadgeUrl(profile.id, appOrigin);
+  const badgeUrl = getProfileBadgeUrl(profile.id, appOrigin, env.supabase.serviceRoleKey);
 
   return (
     <SocialShell active="badge">

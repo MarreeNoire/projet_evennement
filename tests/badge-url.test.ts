@@ -1,17 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { getProfileBadgeUrl, getRequestOrigin } from "@/lib/social/badge-url";
+import {
+  createBadgeSignature,
+  getProfileBadgeUrl,
+  getRequestOrigin,
+  verifyBadgeSignature,
+} from "@/lib/social/badge-url";
 
 describe("participant badge QR destination", () => {
   it("points to the participant profile on the configured app domain", () => {
-    expect(getProfileBadgeUrl("participant-123", "https://event.example/")).toBe(
-      "https://event.example/profil/participant-123",
+    expect(getProfileBadgeUrl("participant-123", "https://event.example/", "test-secret")).toBe(
+      `https://event.example/profil/participant-123?badge=${createBadgeSignature("participant-123", "test-secret")}`,
     );
   });
 
   it("encodes profile IDs before putting them in the QR URL", () => {
-    expect(getProfileBadgeUrl("participant/123", "http://localhost:3000")).toBe(
-      "http://localhost:3000/profil/participant%2F123",
+    expect(getProfileBadgeUrl("participant/123", "http://localhost:3000", "test-secret")).toContain(
+      "http://localhost:3000/profil/participant%2F123?badge=",
     );
   });
 
@@ -36,5 +41,12 @@ describe("participant badge QR destination", () => {
       false,
     );
     expect(origin).toBe("http://localhost:3000");
+  });
+
+  it("validates signed badge links and rejects changes to the profile ID", () => {
+    const signature = createBadgeSignature("participant-123", "test-secret");
+    expect(verifyBadgeSignature("participant-123", signature, "test-secret")).toBe(true);
+    expect(verifyBadgeSignature("participant-456", signature, "test-secret")).toBe(false);
+    expect(verifyBadgeSignature("participant-123", "invalid", "test-secret")).toBe(false);
   });
 });
