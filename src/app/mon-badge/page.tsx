@@ -1,5 +1,6 @@
 import QRCode from "react-qr-code";
 import { Ticket, Users } from "lucide-react";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { Avatar } from "@/components/ui/avatar";
@@ -7,7 +8,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { ROUTES } from "@/lib/constants";
 import { env } from "@/lib/env";
-import { getProfileBadgeUrl } from "@/lib/social/badge-url";
+import { getProfileBadgeUrl, getRequestOrigin } from "@/lib/social/badge-url";
 import { getCurrentProfile } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -28,7 +29,9 @@ export default async function MonBadgePage() {
   if (!profile) redirect(`${ROUTES.login}?redirect=${ROUTES.myBadge}`);
 
   const displayName = profile.display_name;
-  const badgeUrl = getProfileBadgeUrl(profile.id, env.appUrl);
+  const requestHeaders = await headers();
+  const appOrigin = getRequestOrigin(requestHeaders, env.appUrl, env.isProduction);
+  const badgeUrl = getProfileBadgeUrl(profile.id, appOrigin);
 
   return (
     <SocialShell active="badge">
