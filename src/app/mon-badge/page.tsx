@@ -1,10 +1,13 @@
 import QRCode from "react-qr-code";
 import { Ticket, Users } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { Avatar } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { ROUTES } from "@/lib/constants";
+import { env } from "@/lib/env";
+import { getProfileBadgeUrl } from "@/lib/social/badge-url";
 import { getCurrentProfile } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -22,8 +25,10 @@ export const metadata = {
 
 export default async function MonBadgePage() {
   const profile = await getCurrentProfile();
-  const displayName = profile?.display_name ?? "Participant";
-  const badgeUrl = profile ? `https://rassemble.ci/profil/${profile.id}` : "https://rassemble.ci";
+  if (!profile) redirect(`${ROUTES.login}?redirect=${ROUTES.myBadge}`);
+
+  const displayName = profile.display_name;
+  const badgeUrl = getProfileBadgeUrl(profile.id, env.appUrl);
 
   return (
     <SocialShell active="badge">
@@ -40,34 +45,34 @@ export default async function MonBadgePage() {
             {/* Fente d'attache du cordon */}
             <div
               aria-hidden="true"
-              className="absolute inset-x-0 -top-3 z-10 mx-auto flex h-6 w-20 items-center justify-center rounded-full border-2 border-border bg-bg"
+              className="border-border bg-bg absolute inset-x-0 -top-3 z-10 mx-auto flex h-6 w-20 items-center justify-center rounded-full border-2"
             >
-              <span className="h-1.5 w-10 rounded-full bg-fg" />
+              <span className="bg-fg h-1.5 w-10 rounded-full" />
             </div>
 
-            <div className="overflow-hidden rounded-lg border-2 border-border bg-surface-raised pt-6">
+            <div className="border-border bg-surface-raised overflow-hidden rounded-lg border-2 pt-6">
               <div className="flex flex-col items-center gap-3 px-6 pb-6">
                 <Avatar src={profile?.avatar_url} name={displayName} size="xl" />
                 <div className="text-center">
                   <p className="font-display text-2xl leading-tight font-semibold">{displayName}</p>
-                  <p className="eyebrow mt-1 text-primary">
+                  <p className="eyebrow text-primary mt-1">
                     {profile?.roles.includes("organizer") ? "Organisateur" : "Participant"}
                   </p>
                 </div>
-                {profile?.city ? <p className="text-sm text-fg-muted">{profile.city}</p> : null}
+                {profile?.city ? <p className="text-fg-muted text-sm">{profile.city}</p> : null}
               </div>
 
               {/* Perforation */}
-              <div className="relative h-0 border-t-2 border-dashed border-border-strong">
-                <span className="absolute -top-3 -left-3 size-6 rounded-full bg-bg" />
-                <span className="absolute -top-3 -right-3 size-6 rounded-full bg-bg" />
+              <div className="border-border-strong relative h-0 border-t-2 border-dashed">
+                <span className="bg-bg absolute -top-3 -left-3 size-6 rounded-full" />
+                <span className="bg-bg absolute -top-3 -right-3 size-6 rounded-full" />
               </div>
 
-              <div className="flex flex-col items-center gap-3 bg-bg-subtle px-6 py-6">
-                <div className="rounded-md border border-border-strong bg-white p-3">
+              <div className="bg-bg-subtle flex flex-col items-center gap-3 px-6 py-6">
+                <div className="border-border-strong rounded-md border bg-white p-3">
                   <QRCode value={badgeUrl} size={160} aria-label="QR code de mise en réseau" />
                 </div>
-                <p className="text-center text-xs text-fg-subtle">
+                <p className="text-fg-subtle text-center text-xs">
                   Scanne pour ajouter {displayName.split(" ")[0]} à ton réseau.
                 </p>
               </div>
@@ -75,7 +80,7 @@ export default async function MonBadgePage() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-3 border-t border-border pt-6 sm:flex-row sm:justify-center sm:gap-6">
+        <div className="border-border flex flex-col items-center gap-3 border-t pt-6 sm:flex-row sm:justify-center sm:gap-6">
           <ButtonLink href={ROUTES.myTickets} variant="secondary">
             <Ticket className="mr-2 size-4" aria-hidden="true" />
             Mes billets
