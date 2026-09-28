@@ -9,7 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, fieldAriaProps } from "@/components/ui/field";
 import { startCheckout } from "@/lib/orders/checkout-actions";
 import { priceOrder } from "@/lib/orders/pricing";
-import { checkoutSchema, hasContact, type CheckoutInput } from "@/lib/validation/checkout";
+import {
+  checkoutItemsFromQuantities,
+  checkoutSchema,
+  hasContact,
+  type CheckoutInput,
+} from "@/lib/validation/checkout";
 import type { TicketTypeRow } from "@/types/database";
 
 import { QuantityPicker } from "./quantity-picker";
@@ -36,6 +41,7 @@ export function CheckoutForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
@@ -61,10 +67,7 @@ export function CheckoutForm({
 
   const onSubmit = handleSubmit((values) => {
     setServerError(null);
-    const items = selectedLines.map((line) => ({
-      ticketTypeId: line.ticketType.id,
-      quantity: line.quantity,
-    }));
+    const items = values.items;
     if (items.length === 0) {
       setServerError("Choisis au moins un billet.");
       return;
@@ -105,7 +108,14 @@ export function CheckoutForm({
                 ticketType={type}
                 quantity={quantities[type.id] ?? 0}
                 disabled={pending}
-                onChange={(value) => setQuantities((prev) => ({ ...prev, [type.id]: value }))}
+                onChange={(value) => {
+                  const next = { ...quantities, [type.id]: value };
+                  setQuantities(next);
+                  setValue("items", checkoutItemsFromQuantities(ticketTypes, next), {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
               />
             ))}
           </CardContent>

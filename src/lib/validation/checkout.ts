@@ -33,6 +33,16 @@ export const checkoutSchema = z.object({
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 export type CheckoutItemInput = z.infer<typeof checkoutItemSchema>;
 
+/** Builds the exact item array validated and submitted by the checkout form. */
+export function checkoutItemsFromQuantities(
+  ticketTypes: readonly { id: string }[],
+  quantities: Readonly<Record<string, number>>,
+): CheckoutItemInput[] {
+  return ticketTypes
+    .map(({ id }) => ({ ticketTypeId: id, quantity: quantities[id] ?? 0 }))
+    .filter((item) => item.quantity > 0);
+}
+
 /** Confirme qu'au moins un moyen de contact est fourni (email ou téléphone). */
 export function hasContact(input: Pick<CheckoutInput, "buyerEmail" | "buyerPhone">): boolean {
   return Boolean(input.buyerEmail?.trim() || input.buyerPhone?.trim());
