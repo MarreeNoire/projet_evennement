@@ -28,7 +28,7 @@ const rawEnvSchema = z.object({
   NEXT_PUBLIC_CURRENCY: optionalString,
   PLATFORM_COMMISSION_RATE: z.coerce.number().min(0).max(1).default(0.05),
 
-  PAYMENT_PROVIDER: z.enum(["mock", "cinetpay"]).default("mock"),
+  PAYMENT_PROVIDER: z.enum(["mock", "cinetpay", "geniuspay"]).default("mock"),
   EMAIL_PROVIDER: z.enum(["console", "resend"]).default("console"),
 
   NEXT_PUBLIC_SUPABASE_URL: optionalUrl,
@@ -44,6 +44,11 @@ const rawEnvSchema = z.object({
   CINETPAY_SECRET_KEY: optionalString,
   CINETPAY_BASE_URL: optionalUrl,
   CINETPAY_CHANNELS: optionalString,
+
+  GENIUSPAY_API_KEY: optionalString,
+  GENIUSPAY_API_SECRET: optionalString,
+  GENIUSPAY_WEBHOOK_SECRET: optionalString,
+  GENIUSPAY_BASE_URL: optionalUrl,
 
   CRON_SECRET: optionalString,
 });
@@ -81,6 +86,11 @@ function readRawEnv(): RawEnv {
     CINETPAY_SECRET_KEY: process.env.CINETPAY_SECRET_KEY,
     CINETPAY_BASE_URL: process.env.CINETPAY_BASE_URL,
     CINETPAY_CHANNELS: process.env.CINETPAY_CHANNELS,
+
+    GENIUSPAY_API_KEY: process.env.GENIUSPAY_API_KEY,
+    GENIUSPAY_API_SECRET: process.env.GENIUSPAY_API_SECRET,
+    GENIUSPAY_WEBHOOK_SECRET: process.env.GENIUSPAY_WEBHOOK_SECRET,
+    GENIUSPAY_BASE_URL: process.env.GENIUSPAY_BASE_URL,
 
     CRON_SECRET: process.env.CRON_SECRET,
   });
@@ -122,6 +132,15 @@ export const env = {
       baseUrl: (raw.CINETPAY_BASE_URL ?? "https://api-checkout.cinetpay.com").replace(/\/+$/, ""),
       channels: raw.CINETPAY_CHANNELS ?? "ALL",
     },
+    geniuspay: {
+      apiKey: raw.GENIUSPAY_API_KEY ?? "",
+      apiSecret: raw.GENIUSPAY_API_SECRET ?? "",
+      webhookSecret: raw.GENIUSPAY_WEBHOOK_SECRET ?? "",
+      baseUrl: (raw.GENIUSPAY_BASE_URL ?? "https://geniuspay.ci/api/v1/merchant").replace(
+        /\/+$/,
+        "",
+      ),
+    },
   },
 
   email: {
@@ -154,10 +173,14 @@ export const isSupabaseAdminConfigured =
   isSupabaseConfigured && Boolean(env.supabase.serviceRoleKey);
 
 export const isPaymentsLive =
-  env.payment.provider === "cinetpay" &&
-  Boolean(env.payment.cinetpay.apiKey) &&
-  Boolean(env.payment.cinetpay.siteId) &&
-  Boolean(env.payment.cinetpay.secretKey);
+  (env.payment.provider === "cinetpay" &&
+    Boolean(env.payment.cinetpay.apiKey) &&
+    Boolean(env.payment.cinetpay.siteId) &&
+    Boolean(env.payment.cinetpay.secretKey)) ||
+  (env.payment.provider === "geniuspay" &&
+    Boolean(env.payment.geniuspay.apiKey) &&
+    Boolean(env.payment.geniuspay.apiSecret) &&
+    Boolean(env.payment.geniuspay.webhookSecret));
 
 export const isEmailLive = env.email.provider === "resend" && Boolean(env.email.resend.apiKey);
 
@@ -178,6 +201,12 @@ export function getMissingEnv(): string[] {
     if (!env.payment.cinetpay.apiKey) missing.push("CINETPAY_API_KEY");
     if (!env.payment.cinetpay.siteId) missing.push("CINETPAY_SITE_ID");
     if (!env.payment.cinetpay.secretKey) missing.push("CINETPAY_SECRET_KEY");
+  }
+
+  if (env.payment.provider === "geniuspay") {
+    if (!env.payment.geniuspay.apiKey) missing.push("GENIUSPAY_API_KEY");
+    if (!env.payment.geniuspay.apiSecret) missing.push("GENIUSPAY_API_SECRET");
+    if (!env.payment.geniuspay.webhookSecret) missing.push("GENIUSPAY_WEBHOOK_SECRET");
   }
 
   if (env.email.provider === "resend" && !env.email.resend.apiKey) {

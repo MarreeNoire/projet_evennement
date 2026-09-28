@@ -28,7 +28,7 @@ export class MockPaymentProvider implements PaymentProvider {
       throw new PaymentError(
         "PROVIDER_DISABLED",
         "Le prestataire de test est désactivé en production. " +
-          "Passe PAYMENT_PROVIDER à « cinetpay » et renseigne tes clés.",
+          "Passe PAYMENT_PROVIDER à un prestataire configuré et renseigne ses clés.",
       );
     }
   }

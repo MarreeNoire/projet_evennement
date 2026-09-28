@@ -1,5 +1,5 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getPaymentProvider } from "@/lib/payments";
+import { getPaymentProvider, type PaymentProviderName } from "@/lib/payments";
 import { sendEmail } from "@/lib/email";
 import { ticketConfirmedEmail } from "@/lib/email/templates";
 
@@ -54,7 +54,7 @@ export async function confirmPaidOrder(orderId: string): Promise<ConfirmOrderRes
 
   // 2. Notification in-app (jamais bloquante).
   try {
-    await admin.from("notifications").insert({
+    const { error: notificationError } = await admin.from("notifications").insert({
       user_id: order.user_id,
       type: "ticket_confirmed",
       title: "Billets confirmés 🎟️",
@@ -62,8 +62,15 @@ export async function confirmPaidOrder(orderId: string): Promise<ConfirmOrderRes
       url: "/mes-billets",
       event_id: order.event_id,
     });
+    if (notificationError) {
+      console.error(
+        "[confirmPaidOrder] Notification de billet non créée:",
+        notificationError.message,
+      );
+    }
   } catch {
-    // Journalisé côté Supabase, ne bloque pas le parcours.
+    // Une panne de notification ne doit pas annuler une commande déjà payée.
+    console.error("[confirmPaidOrder] Échec inattendu de création de la notification de billet.");
   }
 
   // 3. Email de confirmation avec billets (jamais bloquant).
@@ -123,13 +130,32 @@ export async function verifyAndConfirm(transactionId: string): Promise<ConfirmOr
 
   const { data: payment } = await admin
     .from("payments")
-    .select("order_id, status")
+    .select("order_id, status, provider, amount, currency")
     .eq("provider_transaction_id", transactionId)
     .maybeSingle();
 
   if (!payment) return null;
 
-  const verification = await getPaymentProvider().verify(transactionId);
+  if (!isPaymentProviderName(payment.provider)) {
+    throw new Error("Prestataire de paiement inconnu.");
+  }
+  const verification = await getPaymentProvider(payment.provider).verify(transactionId);
+  const amountMatches = verification.amount === Math.round(Number(payment.amount));
+  const currencyMatches = verification.currency?.toUpperCase() === payment.currency.toUpperCase();
+
+  if (verification.status === "accepted" && (!amountMatches || !currencyMatches)) {
+    await admin
+      .from("payments")
+      .update({
+        status: "error",
+        payload: verification.raw as never,
+        error_message:
+          "La vérification du prestataire ne correspond pas au montant ou à la devise attendus.",
+      })
+      .eq("provider_transaction_id", transactionId)
+      .eq("provider", payment.provider);
+    return null;
+  }
 
   await admin
     .from("payments")
@@ -139,9 +165,14 @@ export async function verifyAndConfirm(transactionId: string): Promise<ConfirmOr
       payload: verification.raw as never,
       completed_at: verification.status === "accepted" ? new Date().toISOString() : undefined,
     })
-    .eq("provider_transaction_id", transactionId);
+    .eq("provider_transaction_id", transactionId)
+    .eq("provider", payment.provider);
 
   if (verification.status !== "accepted") return null;
 
   return confirmPaidOrder(payment.order_id);
+}
+
+function isPaymentProviderName(value: string): value is PaymentProviderName {
+  return value === "mock" || value === "cinetpay" || value === "geniuspay";
 }

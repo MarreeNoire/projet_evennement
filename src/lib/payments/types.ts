@@ -8,7 +8,7 @@ import type { PaymentStatus } from "@/types/database";
    revient à ajouter une implémentation, sans toucher au reste de l'application.
    ========================================================================== */
 
-export type PaymentProviderName = "mock" | "cinetpay";
+export type PaymentProviderName = "mock" | "cinetpay" | "geniuspay";
 
 /** Informations client transmises au prestataire. */
 export interface CheckoutCustomer {
@@ -100,6 +100,7 @@ export interface PaymentProvider {
   parseNotification(
     payload: Record<string, unknown>,
     headers?: Record<string, string>,
+    rawBody?: string,
   ): Promise<PaymentNotification>;
 }
 
@@ -118,7 +119,9 @@ export class PaymentError extends Error {
 
 /** Normalise les statuts renvoyés par les prestataires. */
 export function normalizePaymentStatus(rawStatus: unknown): PaymentStatus {
-  const value = String(rawStatus ?? "").trim().toUpperCase();
+  const value = String(rawStatus ?? "")
+    .trim()
+    .toUpperCase();
 
   switch (value) {
     case "ACCEPTED":
@@ -138,6 +141,7 @@ export function normalizePaymentStatus(rawStatus: unknown): PaymentStatus {
       return "refused";
     case "CANCELLED":
     case "CANCELED":
+    case "EXPIRED":
       return "cancelled";
     case "REFUNDED":
       return "refunded";

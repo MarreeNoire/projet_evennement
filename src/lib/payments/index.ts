@@ -1,6 +1,7 @@
 import { env } from "@/lib/env";
 
 import { CinetPayProvider } from "./cinetpay";
+import { GeniusPayProvider } from "./geniuspay";
 import { MockPaymentProvider } from "./mock";
 import type { PaymentProvider, PaymentProviderName } from "./types";
 
@@ -12,25 +13,33 @@ import type { PaymentProvider, PaymentProviderName } from "./types";
    classe et une ligne ici.
    ========================================================================== */
 
-let cachedProvider: PaymentProvider | null = null;
+const cachedProviders = new Map<PaymentProviderName, PaymentProvider>();
 
-/** Retourne l'instance du prestataire actif (mise en cache). */
-export function getPaymentProvider(): PaymentProvider {
-  cachedProvider ??= createPaymentProvider(env.payment.provider);
-  return cachedProvider;
+/** Retourne le prestataire actif ou celui d'une transaction existante. */
+export function getPaymentProvider(
+  name: PaymentProviderName = env.payment.provider,
+): PaymentProvider {
+  let provider = cachedProviders.get(name);
+  if (!provider) {
+    provider = createPaymentProvider(name);
+    cachedProviders.set(name, provider);
+  }
+  return provider;
 }
 
 function createPaymentProvider(name: PaymentProviderName): PaymentProvider {
   switch (name) {
     case "cinetpay":
       return new CinetPayProvider();
+    case "geniuspay":
+      return new GeniusPayProvider();
     case "mock":
     default:
       return new MockPaymentProvider();
   }
 }
 
-export { CinetPayProvider, MockPaymentProvider };
+export { CinetPayProvider, GeniusPayProvider, MockPaymentProvider };
 export * from "./types";
 export { buildCinetPayCustomerFields, normalizePhoneNumber, toAmount } from "./cinetpay-payload";
 export {

@@ -40,7 +40,7 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
     return { ok: true, paymentUrl: "/mes-billets", orderReference: order.reference };
   }
 
-  // Ouvre le paiement (mock → page simulation, CinetPay → page CinetPay).
+  // Ouvre le paiement (simulation ou checkout hébergé par le prestataire actif).
   const supabase = await createSupabaseServerClient();
   const { data: event } = await supabase
     .from("events")
@@ -63,7 +63,7 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
         phone: parsed.data.buyerPhone || undefined,
       },
       returnUrl: `${env.appUrl}/commandes/${order.orderId}/retour`,
-      notifyUrl: `${env.appUrl}/api/webhooks/cinetpay`,
+      notifyUrl: `${env.appUrl}/api/webhooks/${provider.name}`,
     });
 
     // Journalise la transaction (règle métier n°12).
