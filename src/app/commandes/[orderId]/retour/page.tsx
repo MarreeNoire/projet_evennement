@@ -30,11 +30,17 @@ export default async function PaymentReturnPage({
   const supabase = await createSupabaseServerClient();
   const { data: order } = await supabase
     .from("orders")
-    .select("id, reference, status, total, user_id")
+    .select("id, reference, status, total, user_id, event_id")
     .eq("id", orderId)
     .maybeSingle();
 
   if (!order || order.user_id !== user.id) redirect(ROUTES.myTickets);
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("slug")
+    .eq("id", order.event_id)
+    .maybeSingle();
 
   // Tente une réconciliation via la dernière transaction journalisée.
   const { data: payment } = await supabase
@@ -45,7 +51,7 @@ export default async function PaymentReturnPage({
     .limit(1)
     .maybeSingle();
 
-  if (payment && order.status === "pending") {
+  if (payment && (order.status === "pending" || order.status === "paid")) {
     await verifyAndConfirm(payment.provider_transaction_id).catch(() => null);
   }
 
@@ -66,23 +72,28 @@ export default async function PaymentReturnPage({
             <p className="eyebrow">Commande {order.reference}</p>
             <h1 className="font-display text-4xl leading-[1.02] font-semibold">Paiement confirmé.</h1>
             <Alert tone="success" title={`Commande ${order.reference} payée`}>
-              Tes billets sont disponibles. Présente leur QR code à l'entrée.
+              Tes billets sont disponibles. Présente leur QR code à l’entrée.
             </Alert>
             <div className="flex justify-center gap-2">
               <ButtonLink href={ROUTES.myTickets}>Voir mes billets</ButtonLink>
               <ButtonLink href={`/evenements`} variant="secondary">
-                Découvrir d'autres événements
+                Découvrir d’autres événements
               </ButtonLink>
             </div>
           </>
-        ) : status === "failed" || statut === "refused" ? (
+        ) : status === "failed" || status === "cancelled" || statut === "refused" || statut === "cancelled" ? (
           <>
             <p className="eyebrow">Commande {order.reference}</p>
-            <h1 className="font-display text-4xl leading-[1.02] font-semibold">Paiement refusé.</h1>
-            <Alert tone="danger" title="La transaction n'a pas abouti">
-              Aucun montant n'a été débité. Tu peux réessayer avec un autre moyen de paiement.
+            <h1 className="font-display text-4xl leading-[1.02] font-semibold">
+              {status === "cancelled" || statut === "cancelled" ? "Paiement annulé." : "Paiement refusé."}
+            </h1>
+            <Alert tone="danger" title="La transaction n’a pas abouti">
+              Aucun montant n’a été débité. Tu peux réessayer avec un autre moyen de paiement.
             </Alert>
-            <div className="flex justify-center">
+            <div className="flex flex-wrap justify-center gap-2">
+              {event?.slug ? (
+                <ButtonLink href={`/evenements/${event.slug}/billets`}>Réessayer le paiement</ButtonLink>
+              ) : null}
               <ButtonLink href={ROUTES.myTickets} variant="secondary">
                 Voir mes commandes
               </ButtonLink>
@@ -100,6 +111,11 @@ export default async function PaymentReturnPage({
             <p className="text-sm text-fg-muted">
               Voir le statut dans <Link href={ROUTES.myTickets} className="text-primary hover:underline">mes billets</Link>.
             </p>
+            <div className="flex justify-center">
+              <ButtonLink href={`/commandes/${orderId}/retour?verifier=1`} variant="secondary">
+                Vérifier le statut à nouveau
+              </ButtonLink>
+            </div>
           </>
         )}
       </main>

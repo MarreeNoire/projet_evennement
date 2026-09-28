@@ -12,10 +12,12 @@ import type { TicketTypeRow } from "@/types/database";
 export function QuantityPicker({
   ticketType,
   quantity,
+  disabled = false,
   onChange,
 }: {
   ticketType: TicketTypeRow;
   quantity: number;
+  disabled?: boolean;
   onChange: (value: number) => void;
 }) {
   const remaining = ticketType.quantity - ticketType.sold_count;
@@ -40,7 +42,7 @@ export function QuantityPicker({
           type="button"
           variant="secondary"
           size="icon-sm"
-          disabled={quantity <= 0}
+          disabled={disabled || quantity <= 0}
           onClick={() => onChange(Math.max(quantity - 1, 0))}
           aria-label={`Retirer un billet ${ticketType.name}`}
         >
@@ -53,7 +55,7 @@ export function QuantityPicker({
           type="button"
           variant="secondary"
           size="icon-sm"
-          disabled={quantity >= max || remaining <= 0}
+          disabled={disabled || quantity >= max || remaining <= 0}
           onClick={() => onChange(Math.min(quantity + 1, max))}
           aria-label={`Ajouter un billet ${ticketType.name}`}
         >

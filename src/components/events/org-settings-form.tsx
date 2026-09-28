@@ -1,25 +1,29 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Save, CheckCircle2 } from "lucide-react";
+import { Save } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/states";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export function OrgSettingsForm() {
-  const [orgName, setOrgName] = useState("Events Côte d'Ivoire Sarl");
-  const [email, setEmail] = useState("contact@events.ci");
-  const [phone, setPhone] = useState("+225 07 00 00 00 00");
-  const [payoutProvider, setPayoutProvider] = useState("wave");
-  const [payoutAccount, setPayoutAccount] = useState("+225 07 01 02 03 04");
+type OrganizationSettings = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+};
 
+export function OrgSettingsForm({ organization }: { organization: OrganizationSettings }) {
+  const [orgName, setOrgName] = useState(organization.name);
+  const [email, setEmail] = useState(organization.email ?? "");
+  const [phone, setPhone] = useState(organization.phone ?? "");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!orgName.trim()) {
       setError("Le nom de l'organisation est obligatoire.");
@@ -32,44 +36,46 @@ export function OrgSettingsForm() {
     startTransition(async () => {
       try {
         const supabase = createSupabaseBrowserClient();
-        const { data: authData } = await supabase.auth.getUser();
-
-        if (authData?.user) {
-          await supabase
-            .from("organizations")
-            .update({
-              name: orgName.trim(),
-              email: email.trim() || null,
-              phone: phone.trim() || null,
-              updated_at: new Date().toISOString(),
-            } as any)
-            .eq("owner_id", authData.user.id);
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData.user) {
+          setError("Ta session a expiré. Reconnecte-toi puis réessaie.");
+          return;
         }
 
-        setSuccess("Paramètres et coordonnées de reversement mis à jour avec succès !");
-      } catch (err: any) {
-        setError("Erreur lors de la sauvegarde des paramètres.");
+        const { data, error: updateError } = await supabase
+          .from("organizations")
+          .update({
+            name: orgName.trim(),
+            email: email.trim() || null,
+            phone: phone.trim() || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", organization.id)
+          .select("id")
+          .maybeSingle();
+
+        if (updateError || !data) {
+          console.error("[OrgSettingsForm] Enregistrement de l'organisation impossible.", updateError?.message);
+          setError("Impossible d'enregistrer ces coordonnées. Vérifie tes droits puis réessaie.");
+          return;
+        }
+
+        setSuccess("Les coordonnées de l'organisation ont été enregistrées.");
+      } catch {
+        setError("La sauvegarde a échoué. Vérifie ta connexion puis réessaie.");
       }
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error ? (
-        <Alert tone="danger" title="Erreur">
-          {error}
-        </Alert>
-      ) : null}
-
-      {success ? (
-        <Alert tone="success" title="Mise à jour réussie">
-          {success}
-        </Alert>
-      ) : null}
+      {error ? <Alert tone="danger" title="Erreur">{error}</Alert> : null}
+      {success ? <Alert tone="success" title="Mise à jour réussie">{success}</Alert> : null}
 
       <Card>
         <CardHeader>
-          <CardTitle>Identité de la Structure</CardTitle>
+          <CardTitle>Identité de la structure</CardTitle>
+          <CardDescription>Ces coordonnées sont enregistrées sur le profil de votre organisation.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
@@ -81,33 +87,32 @@ export function OrgSettingsForm() {
               type="text"
               required
               value={orgName}
-              onChange={(e) => setOrgName(e.target.value)}
-              className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none"
+              onChange={(event) => setOrgName(event.target.value)}
+              disabled={pending}
+              className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none disabled:opacity-60"
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label htmlFor="contactEmail" className="text-xs font-semibold text-fg">
-                Email de contact
-              </label>
+              <label htmlFor="contactEmail" className="text-xs font-semibold text-fg">Email de contact</label>
               <input
                 id="contactEmail"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none"
+                onChange={(event) => setEmail(event.target.value)}
+                disabled={pending}
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none disabled:opacity-60"
               />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="contactPhone" className="text-xs font-semibold text-fg">
-                Téléphone (Côte d&apos;Ivoire)
-              </label>
+              <label htmlFor="contactPhone" className="text-xs font-semibold text-fg">Téléphone (Côte d&apos;Ivoire)</label>
               <input
                 id="contactPhone"
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none"
+                onChange={(event) => setPhone(event.target.value)}
+                disabled={pending}
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none disabled:opacity-60"
               />
             </div>
           </div>
@@ -116,45 +121,16 @@ export function OrgSettingsForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Coordonnées de Reversement Mobile Money</CardTitle>
-          <CardDescription>Les fonds de la billetterie vous seront reversés sur ce numéro.</CardDescription>
+          <CardTitle>Paiements et reversements</CardTitle>
+          <CardDescription>Les moyens de paiement disponibles aux acheteurs et les reversements sont configurés dans votre espace marchand GeniusPay.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label htmlFor="providerSelect" className="text-xs font-semibold text-fg">
-                Opérateur Mobile Money
-              </label>
-              <select
-                id="providerSelect"
-                value={payoutProvider}
-                onChange={(e) => setPayoutProvider(e.target.value)}
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none"
-              >
-                <option value="wave">Wave Money</option>
-                <option value="orange">Orange Money</option>
-                <option value="mtn">MTN Mobile Money</option>
-                <option value="moov">Moov Money</option>
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label htmlFor="payoutNumber" className="text-xs font-semibold text-fg">
-                Numéro du compte
-              </label>
-              <input
-                id="payoutNumber"
-                type="tel"
-                value={payoutAccount}
-                onChange={(e) => setPayoutAccount(e.target.value)}
-                placeholder="+225 07..."
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="pt-2 flex justify-end">
-            <Button type="submit" loading={pending} loadingLabel="Enregistrement...">
-              <Save className="mr-2 size-4" /> Enregistrer les paramètres
+          <p className="text-sm text-fg-muted">
+            Les options activées par GeniusPay apparaissent au moment du paiement. Cette page ne stocke pas de coordonnées bancaires ou Mobile Money.
+          </p>
+          <div className="flex justify-end pt-2">
+            <Button type="submit" loading={pending} loadingLabel="Enregistrement…">
+              <Save className="mr-2 size-4" aria-hidden="true" /> Enregistrer les coordonnées
             </Button>
           </div>
         </CardContent>

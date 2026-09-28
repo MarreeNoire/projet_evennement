@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { Ban, CircleCheck, CircleX } from "lucide-react";
 
 import { Alert } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
@@ -28,22 +29,26 @@ export function MockPayWidget({
   async function decide(decision: "accepted" | "refused" | "cancelled") {
     setError(null);
     startTransition(async () => {
-      const response = await fetch("/api/payments/mock/confirm", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ orderId, transactionId, decision }),
-      });
-      const body = (await response.json()) as { ok?: boolean; error?: string };
-      if (!response.ok || !body.ok) {
-        setError(body.error ?? "Confirmation impossible.");
-        return;
+      try {
+        const response = await fetch("/api/payments/mock/confirm", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ orderId, transactionId, decision }),
+        });
+        const body = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
+        if (!response.ok || !body?.ok) {
+          setError(body?.error ?? "Confirmation impossible. Réessaie.");
+          return;
+        }
+        if (decision === "accepted") {
+          router.push("/mes-billets");
+        } else {
+          router.push(`/commandes/${orderId}/retour?statut=${decision}`);
+        }
+        router.refresh();
+      } catch {
+        setError("La demande a échoué. Vérifie ta connexion puis réessaie.");
       }
-      if (decision === "accepted") {
-        router.push("/mes-billets");
-      } else {
-        router.push(`/commandes/${orderId}/retour?statut=${decision}`);
-      }
-      router.refresh();
     });
   }
 
@@ -55,17 +60,18 @@ export function MockPayWidget({
       <CardContent className="flex flex-col gap-4">
         <Alert tone="warning" title="Aucun argent ne circule">
           Commande {orderReference} · {formatPrice(total)} · transaction {transactionId}.
-          Choisis l'issue pour tester le parcours complet.
+          Choisis l’issue pour tester le parcours complet.
         </Alert>
         {error ? <Alert tone="danger">{error}</Alert> : null}
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => decide("accepted")} loading={pending} loadingLabel="Confirmation…">
-            ✅ Simuler un paiement accepté
+          <Button type="button" onClick={() => decide("accepted")} loading={pending} loadingLabel="Confirmation…">
+            <CircleCheck className="mr-2 size-4" aria-hidden="true" /> Simuler un paiement accepté
           </Button>
-          <Button type="button" variant="secondary" onClick={() => decide("refused")}>
-            ❌ Simuler un refus
+          <Button type="button" variant="secondary" onClick={() => decide("refused")} disabled={pending}>
+            <CircleX className="mr-2 size-4" aria-hidden="true" /> Simuler un refus
           </Button>
-          <Button type="button" variant="ghost" onClick={() => decide("cancelled")}>
+          <Button type="button" variant="ghost" onClick={() => decide("cancelled")} disabled={pending}>
+            <Ban className="mr-2 size-4" aria-hidden="true" />
             Annuler
           </Button>
         </div>

@@ -2,11 +2,11 @@
 
 import { redirect } from "next/navigation";
 
-import { env } from "@/lib/env";
 import { getPaymentProvider } from "@/lib/payments";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createOrder } from "@/lib/orders/create-order";
 import { checkoutSchema } from "@/lib/validation/checkout";
+import { env } from "@/lib/env";
 
 /* =============================================================================
    Action : créer la commande puis ouvrir le paiement
@@ -41,48 +41,67 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
   }
 
   // Ouvre le paiement (simulation ou checkout hébergé par le prestataire actif).
-  const supabase = await createSupabaseServerClient();
-  const { data: event } = await supabase
-    .from("events")
-    .select("title")
-    .eq("id", parsed.data.eventId)
-    .maybeSingle();
-
-  const provider = getPaymentProvider();
-
+  let supabase: Awaited<ReturnType<typeof createSupabaseServerClient>> | null = null;
   try {
+    supabase = await createSupabaseServerClient();
+    const { data: event, error: eventError } = await supabase
+      .from("events")
+      .select("title")
+      .eq("id", parsed.data.eventId)
+      .maybeSingle();
+    if (eventError || !event) throw new Error("Événement indisponible. Réessaie.");
+
+    const provider = getPaymentProvider();
     const session = await provider.createCheckout({
       orderId: order.orderId,
       orderReference: order.reference,
       amount: order.total,
-      currency: env.currency,
+      currency: order.currency,
       description: `Billets pour ${event?.title ?? "l’événement"}`,
       customer: {
         name: parsed.data.buyerName,
         email: parsed.data.buyerEmail || undefined,
         phone: parsed.data.buyerPhone || undefined,
+        country: "CI",
       },
       returnUrl: `${env.appUrl}/commandes/${order.orderId}/retour`,
       notifyUrl: `${env.appUrl}/api/webhooks/${provider.name}`,
     });
 
     // Journalise la transaction (règle métier n°12).
-    await supabase.from("payments").insert({
+    const { error: paymentError } = await supabase.from("payments").insert({
       order_id: order.orderId,
       provider: session.provider,
       provider_transaction_id: session.transactionId,
       provider_payment_token: session.paymentToken,
       provider_payment_url: session.paymentUrl,
       amount: order.total,
-      currency: env.currency,
+      currency: order.currency,
       status: "initiated",
     });
+    if (paymentError) {
+      console.error("[startCheckout] Enregistrement du paiement impossible.", paymentError.message);
+      throw new Error("Impossible de préparer le paiement. Aucune redirection n’a été effectuée.");
+    }
 
     return { ok: true, paymentUrl: session.paymentUrl, orderReference: order.reference };
   } catch (error) {
+    if (supabase) {
+      const { error: cancelError } = await supabase
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", order.orderId)
+        .eq("status", "pending");
+      if (cancelError) {
+        console.error("[startCheckout] Impossible d’annuler la commande en échec.", cancelError.message);
+      }
+    }
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Ouverture du paiement impossible.",
+      error:
+        error instanceof Error
+          ? error.message
+          : "Ouverture du paiement impossible. Réessaie.",
     };
   }
 }

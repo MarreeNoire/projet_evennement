@@ -5,14 +5,11 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
-import { Alert } from "@/components/ui/states";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, fieldAriaProps } from "@/components/ui/field";
 import { startCheckout } from "@/lib/orders/checkout-actions";
 import { priceOrder } from "@/lib/orders/pricing";
 import { checkoutSchema, hasContact, type CheckoutInput } from "@/lib/validation/checkout";
-import { formatPrice } from "@/lib/utils";
 import type { TicketTypeRow } from "@/types/database";
 
 import { QuantityPicker } from "./quantity-picker";
@@ -43,7 +40,12 @@ export function CheckoutForm({
   } = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
-      eventId, items: [], buyerName: "", buyerEmail: "", buyerPhone: "", promoCode: "",
+      eventId,
+      items: [],
+      buyerName: "",
+      buyerEmail: "",
+      buyerPhone: "",
+      promoCode: "",
     },
   });
 
@@ -60,7 +62,8 @@ export function CheckoutForm({
   const onSubmit = handleSubmit((values) => {
     setServerError(null);
     const items = selectedLines.map((line) => ({
-      ticketTypeId: line.ticketType.id, quantity: line.quantity,
+      ticketTypeId: line.ticketType.id,
+      quantity: line.quantity,
     }));
     if (items.length === 0) {
       setServerError("Choisis au moins un billet.");
@@ -71,12 +74,20 @@ export function CheckoutForm({
       return;
     }
     startTransition(async () => {
-      const result = await startCheckout({ ...values, eventId, items });
-      if (!result.ok || !result.paymentUrl) {
-        setServerError(result.error ?? "Commande impossible.");
-        return;
+      try {
+        const result = await startCheckout({ ...values, eventId, items });
+        if (!result.ok || !result.paymentUrl) {
+          setServerError(result.error ?? "Commande impossible. Réessaie.");
+          return;
+        }
+        if (result.paymentUrl.startsWith("/")) {
+          router.push(result.paymentUrl);
+        } else {
+          window.location.assign(result.paymentUrl);
+        }
+      } catch {
+        setServerError("La demande a échoué. Vérifie ta connexion puis réessaie.");
       }
-      router.push(result.paymentUrl);
     });
   });
 
@@ -93,6 +104,7 @@ export function CheckoutForm({
                 key={type.id}
                 ticketType={type}
                 quantity={quantities[type.id] ?? 0}
+                disabled={pending}
                 onChange={(value) => setQuantities((prev) => ({ ...prev, [type.id]: value }))}
               />
             ))}

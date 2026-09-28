@@ -30,7 +30,15 @@ export async function confirmPaidOrder(orderId: string): Promise<ConfirmOrderRes
   if (!order) throw new Error("Commande introuvable.");
 
   if (order.status === "paid") {
-    return { orderId, alreadyConfirmed: true, ticketsCreated: 0 };
+    const { data: created, error: ticketError } = await admin.rpc("generate_tickets_for_order", {
+      target_order_id: orderId,
+    });
+    if (ticketError) throw new Error("Les billets n'ont pas pu être générés. Réessaie.");
+    return {
+      orderId,
+      alreadyConfirmed: true,
+      ticketsCreated: typeof created === "number" ? created : 0,
+    };
   }
 
   if (order.status !== "pending") {
@@ -38,17 +46,35 @@ export async function confirmPaidOrder(orderId: string): Promise<ConfirmOrderRes
   }
 
   // 1. Bascule en payé + génération idempotente des billets.
-  const { error: updateError } = await admin
+  const { data: updated, error: updateError } = await admin
     .from("orders")
     .update({ status: "paid", paid_at: new Date().toISOString() })
     .eq("id", orderId)
-    .eq("status", "pending");
+    .eq("status", "pending")
+    .select("id")
+    .maybeSingle();
 
   if (updateError) throw new Error("Confirmation de la commande impossible.");
+  if (!updated) {
+    const { data: latest } = await admin.from("orders").select("status").eq("id", orderId).maybeSingle();
+    if (latest?.status === "paid") {
+      const { data: created, error: ticketError } = await admin.rpc("generate_tickets_for_order", {
+        target_order_id: orderId,
+      });
+      if (ticketError) throw new Error("Les billets n'ont pas pu être générés. Réessaie.");
+      return {
+        orderId,
+        alreadyConfirmed: true,
+        ticketsCreated: typeof created === "number" ? created : 0,
+      };
+    }
+    throw new Error("Cette commande a changé de statut avant sa confirmation.");
+  }
 
-  const { data: created } = await admin.rpc("generate_tickets_for_order", {
+  const { data: created, error: ticketError } = await admin.rpc("generate_tickets_for_order", {
     target_order_id: orderId,
   });
+  if (ticketError) throw new Error("Les billets n'ont pas pu être générés. Réessaie.");
 
   const ticketsCreated = typeof created === "number" ? created : 0;
 
@@ -108,7 +134,7 @@ export async function confirmPaidOrder(orderId: string): Promise<ConfirmOrderRes
         city: event?.city ?? null,
         organizerName: "",
         orderReference: order.reference,
-        totalAmount: 0,
+        totalAmount: Number(order.total),
         salonUrl: null,
         tickets: (tickets ?? []).map((ticket) => ({
           reference: ticket.reference,
@@ -167,6 +193,15 @@ export async function verifyAndConfirm(transactionId: string): Promise<ConfirmOr
     })
     .eq("provider_transaction_id", transactionId)
     .eq("provider", payment.provider);
+
+  if (verification.status === "refused" || verification.status === "cancelled") {
+    await admin
+      .from("orders")
+      .update({ status: verification.status === "refused" ? "failed" : "cancelled" })
+      .eq("id", payment.order_id)
+      .eq("status", "pending");
+    return null;
+  }
 
   if (verification.status !== "accepted") return null;
 

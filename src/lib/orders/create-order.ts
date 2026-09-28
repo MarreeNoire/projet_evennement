@@ -16,6 +16,7 @@ export interface CreateOrderResult {
   orderId: string;
   reference: string;
   total: number;
+  currency: string;
   /** `true` si billets déjà générés (commande gratuite). */
   confirmed: boolean;
 }
@@ -137,7 +138,7 @@ export async function createOrder(input: CheckoutInput): Promise<CreateOrderResu
       buyer_phone: values.buyerPhone?.trim() || null,
       paid_at: pricing.total === 0 ? new Date().toISOString() : null,
     })
-    .select("id, reference, total")
+    .select("id, reference, total, currency")
     .single();
 
   if (error || !order) {
@@ -162,9 +163,37 @@ export async function createOrder(input: CheckoutInput): Promise<CreateOrderResu
 
   // Gratuite : génère les billets immédiatement (fonction SQL idempotente).
   if (pricing.total === 0) {
-    await supabase.rpc("generate_tickets_for_order", { target_order_id: order.id });
-    return { orderId: order.id, reference: order.reference, total: 0, confirmed: true };
+    const { error: ticketError } = await supabase.rpc("generate_tickets_for_order", {
+      target_order_id: order.id,
+    });
+    if (ticketError) {
+      try {
+        const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+        const admin = createSupabaseAdminClient();
+        await admin
+          .from("orders")
+          .update({ status: "cancelled" })
+          .eq("id", order.id)
+          .eq("status", "paid");
+      } catch (cleanupError) {
+        console.error("[createOrder] Échec de l’annulation de la commande gratuite.", cleanupError);
+      }
+      throw new Error("La création des billets a échoué. Réessaie ou contacte le support.");
+    }
+    return {
+      orderId: order.id,
+      reference: order.reference,
+      total: 0,
+      currency: event.currency ?? "XOF",
+      confirmed: true,
+    };
   }
 
-  return { orderId: order.id, reference: order.reference, total: order.total, confirmed: false };
+  return {
+    orderId: order.id,
+    reference: order.reference,
+    total: order.total,
+    currency: order.currency,
+    confirmed: false,
+  };
 }
