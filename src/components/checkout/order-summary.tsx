@@ -1,6 +1,5 @@
 "use client";
 
-import { Alert } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OrderPricing } from "@/lib/orders/pricing";
@@ -10,11 +9,9 @@ import { formatPrice } from "@/lib/utils";
 
 export function OrderSummary({
   pricing,
-  error,
   pending,
 }: {
   pricing: OrderPricing;
-  error: string | null;
   pending: boolean;
 }) {
   return (
@@ -23,7 +20,6 @@ export function OrderSummary({
         <CardTitle>Récapitulatif</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
-        {error ? <Alert tone="danger">{error}</Alert> : null}
         {pricing.lines.length === 0 ? (
           <p className="text-sm text-fg-muted">Sélectionne au moins un billet.</p>
         ) : (

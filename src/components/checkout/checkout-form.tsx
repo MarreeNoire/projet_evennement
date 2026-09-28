@@ -2,9 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { Alert } from "@/components/ui/states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, fieldAriaProps } from "@/components/ui/field";
 import { startCheckout } from "@/lib/orders/checkout-actions";
@@ -33,7 +34,6 @@ export function CheckoutForm({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
     Object.fromEntries(ticketTypes.map((t) => [t.id, t.id === preselectedId ? 1 : 0])),
   );
@@ -42,7 +42,8 @@ export function CheckoutForm({
     register,
     handleSubmit,
     setValue,
-    formState: { errors },
+    setFocus,
+    formState: { errors, isSubmitting: pending },
   } = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -65,7 +66,7 @@ export function CheckoutForm({
 
   const pricing = useMemo(() => priceOrder(selectedLines), [selectedLines]);
 
-  const onSubmit = handleSubmit((values) => {
+  const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
     const items = values.items;
     if (items.length === 0) {
@@ -76,26 +77,41 @@ export function CheckoutForm({
       setServerError("Indique au moins un email ou un numéro pour recevoir tes billets.");
       return;
     }
-    startTransition(async () => {
-      try {
-        const result = await startCheckout({ ...values, eventId, items });
-        if (!result.ok || !result.paymentUrl) {
-          setServerError(result.error ?? "Commande impossible. Réessaie.");
-          return;
-        }
-        if (result.paymentUrl.startsWith("/")) {
-          router.push(result.paymentUrl);
-        } else {
-          window.location.assign(result.paymentUrl);
-        }
-      } catch {
-        setServerError("La demande a échoué. Vérifie ta connexion puis réessaie.");
+    try {
+      const result = await startCheckout({ ...values, eventId, items });
+      if (!result.ok || !result.paymentUrl) {
+        setServerError(result.error ?? "Commande impossible. Réessaie.");
+        return;
       }
-    });
+      if (result.paymentUrl.startsWith("/")) {
+        router.push(result.paymentUrl);
+      } else {
+        window.location.assign(result.paymentUrl);
+      }
+    } catch {
+      setServerError("La demande a échoué. Vérifie ta connexion puis réessaie.");
+    }
+  }, (invalid) => {
+    const message =
+      invalid.items?.message ??
+      invalid.buyerName?.message ??
+      invalid.buyerEmail?.message ??
+      invalid.buyerPhone?.message ??
+      "Vérifie les informations saisies avant de payer.";
+    setServerError(message);
+
+    if (invalid.buyerName) setFocus("buyerName");
+    else if (invalid.buyerEmail) setFocus("buyerEmail");
+    else if (invalid.buyerPhone) setFocus("buyerPhone");
   });
 
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+      {serverError ? (
+        <div className="lg:col-span-2" role="alert" aria-live="assertive">
+          <Alert tone="danger" title="Le paiement n’a pas démarré">{serverError}</Alert>
+        </div>
+      ) : null}
       <div className="flex min-w-0 flex-col gap-6">
         <Card>
           <CardHeader>
@@ -174,7 +190,7 @@ export function CheckoutForm({
       </div>
 
       <aside className="lg:sticky lg:top-20 lg:self-start">
-        <OrderSummary pricing={pricing} error={serverError} pending={pending} />
+        <OrderSummary pricing={pricing} pending={pending} />
       </aside>
     </form>
   );
