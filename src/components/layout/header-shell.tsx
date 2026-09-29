@@ -3,7 +3,7 @@
 import { Bell, LoaderCircle, Menu, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useOptimistic, useState } from "react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 
 import { Logo } from "@/components/brand/logo";
 import { ButtonLink } from "@/components/ui/button";
@@ -38,6 +38,7 @@ export function HeaderShell({
     unreadCount,
     (count, change: number) => Math.max(0, count + change),
   );
+  const [, startTransition] = useTransition();
   const navItems = getNavItems(user);
 
   useEffect(() => {
@@ -54,10 +55,10 @@ export function HeaderShell({
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
         },
-        () => {
+        () => startTransition(() => {
           updateUnreadCount(1);
-          if (pathname === ROUTES.notifications) router.refresh();
-        },
+          router.refresh();
+        }),
       )
       .on(
         "postgres_changes",
@@ -70,12 +71,17 @@ export function HeaderShell({
         (payload) => {
           const oldRow = payload.old as { is_read?: boolean };
           const newRow = payload.new as { is_read?: boolean };
-          if (oldRow.is_read === false && newRow.is_read === true) {
-            updateUnreadCount(-1);
-          } else if (oldRow.is_read === true && newRow.is_read === false) {
-            updateUnreadCount(1);
+          const change = oldRow.is_read === false && newRow.is_read === true
+            ? -1
+            : oldRow.is_read === true && newRow.is_read === false
+              ? 1
+              : 0;
+          if (change) {
+            startTransition(() => {
+              updateUnreadCount(change);
+              router.refresh();
+            });
           }
-          if (pathname === ROUTES.notifications) router.refresh();
         },
       )
       .subscribe();
