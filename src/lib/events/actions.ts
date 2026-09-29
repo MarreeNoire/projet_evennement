@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export interface CreateEventDraftTicketInput {
@@ -257,6 +259,8 @@ export async function saveEventDraftAction(
       }
     }
 
+    revalidatePath("/org/evenements");
+    revalidatePath("/org");
     return { ok: true, eventId: event.id, slug: event.slug };
   } catch (err: any) {
     console.error("[saveEventDraftAction] Unexpected error:", err);
@@ -377,6 +381,14 @@ export async function setEventStatusAction(
         warning =
           "Attention : cet événement est déjà terminé (date de fin dépassée), il n'apparaîtra pas dans Explorer.";
       }
+    }
+
+    revalidatePath("/org/evenements");
+    revalidatePath("/org");
+    if (published) {
+      revalidatePath("/explorer");
+      revalidatePath("/");
+      revalidatePath("/evenements/[slug]", "page");
     }
 
     return { ok: true, status: event.status, slug: event.slug, warning };
