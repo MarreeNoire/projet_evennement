@@ -62,6 +62,16 @@ export default async function PaymentReturnPage({
     .maybeSingle();
 
   const status = fresh?.status ?? order.status;
+  let hasEventSalon = false;
+  if (status === "paid") {
+    const { data: salon } = await supabase
+      .from("salons")
+      .select("id")
+      .eq("event_id", order.event_id)
+      .limit(1)
+      .maybeSingle();
+    hasEventSalon = Boolean(salon);
+  }
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -74,7 +84,10 @@ export default async function PaymentReturnPage({
             <Alert tone="success" title={`Commande ${order.reference} payée`}>
               Tes billets sont disponibles. Présente leur QR code à l’entrée.
             </Alert>
-            <div className="flex justify-center gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
+              {hasEventSalon && event?.slug ? (
+                <ButtonLink href={`/evenements/${event.slug}/salon`}>Rejoindre le salon</ButtonLink>
+              ) : null}
               <ButtonLink href={ROUTES.myTickets}>Voir mes billets</ButtonLink>
               <ButtonLink href={`/evenements`} variant="secondary">
                 Découvrir d’autres événements

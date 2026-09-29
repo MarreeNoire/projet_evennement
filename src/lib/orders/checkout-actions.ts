@@ -37,7 +37,25 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
 
   // Commande gratuite : billets déjà générés.
   if (order.confirmed) {
-    return { ok: true, paymentUrl: "/mes-billets", orderReference: order.reference };
+    let paymentUrl = "/mes-billets";
+    try {
+      const supabase = await createSupabaseServerClient();
+      const { data: event } = await supabase
+        .from("events")
+        .select("slug")
+        .eq("id", parsed.data.eventId)
+        .maybeSingle();
+      const { data: salon } = await supabase
+        .from("salons")
+        .select("id")
+        .eq("event_id", parsed.data.eventId)
+        .limit(1)
+        .maybeSingle();
+      if (event?.slug && salon) paymentUrl = `/evenements/${event.slug}/salon`;
+    } catch {
+      // La réservation est confirmée : un échec de recherche du salon ne doit pas la bloquer.
+    }
+    return { ok: true, paymentUrl, orderReference: order.reference };
   }
 
   // Ouvre le paiement (simulation ou checkout hébergé par le prestataire actif).

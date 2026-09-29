@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { Logo } from "@/components/brand/logo";
+import { PwaInstallButton } from "@/components/layout/pwa-install-button";
 import { ButtonLink } from "@/components/ui/button";
 import { ROUTES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -13,7 +14,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 import type { HeaderUser } from "./header-types";
-import { APP_NAV, PUBLIC_NAV, getNavItems } from "./nav-config";
+import { getNavItems } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
 
 /* =============================================================================
@@ -176,7 +177,13 @@ export function MobileNav({
       </nav>
 
       <div className="shrink-0 border-t border-border p-4">
-        <ThemeToggle className="w-full justify-center" />
+        <div className="flex flex-col gap-4">
+          <PwaInstallButton />
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-medium text-fg">Apparence</span>
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
     </div>
   );

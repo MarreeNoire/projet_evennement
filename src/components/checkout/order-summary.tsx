@@ -4,15 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OrderPricing } from "@/lib/orders/pricing";
 import { formatPrice } from "@/lib/utils";
+import { Alert } from "@/components/ui/states";
 
 /* Récapitulatif de commande (colonne latérale du tunnel d'achat). */
 
 export function OrderSummary({
   pricing,
   pending,
+  error,
 }: {
   pricing: OrderPricing;
   pending: boolean;
+  error: string | null;
 }) {
   return (
     <Card>
@@ -44,6 +47,11 @@ export function OrderSummary({
             <dd className="tabular-nums">{formatPrice(pricing.total)}</dd>
           </div>
         </dl>
+        {error ? (
+          <div role="alert" aria-live="assertive">
+            <Alert tone="danger" title="Le paiement n’a pas démarré">{error}</Alert>
+          </div>
+        ) : null}
         <Button
           type="submit"
           loading={pending}

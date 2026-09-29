@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { Alert } from "@/components/ui/states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, fieldAriaProps } from "@/components/ui/field";
 import { startCheckout } from "@/lib/orders/checkout-actions";
@@ -34,9 +33,21 @@ export function CheckoutForm({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [quantities, setQuantities] = useState<Record<string, number>>(() =>
-    Object.fromEntries(ticketTypes.map((t) => [t.id, t.id === preselectedId ? 1 : 0])),
+  const initialTicket =
+    ticketTypes.find(
+      (ticket) =>
+        ticket.id === preselectedId &&
+        ticket.is_active &&
+        ticket.sold_count < ticket.quantity &&
+        ticket.max_per_order > 0,
+    ) ??
+    ticketTypes.find(
+      (ticket) => ticket.is_active && ticket.sold_count < ticket.quantity && ticket.max_per_order > 0,
+    );
+  const initialQuantities = Object.fromEntries(
+    ticketTypes.map((ticket) => [ticket.id, ticket.id === initialTicket?.id ? 1 : 0]),
   );
+  const [quantities, setQuantities] = useState<Record<string, number>>(initialQuantities);
 
   const {
     register,
@@ -48,7 +59,7 @@ export function CheckoutForm({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       eventId,
-      items: [],
+      items: checkoutItemsFromQuantities(ticketTypes, initialQuantities),
       buyerName: "",
       buyerEmail: "",
       buyerPhone: "",
@@ -107,11 +118,6 @@ export function CheckoutForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-      {serverError ? (
-        <div className="lg:col-span-2" role="alert" aria-live="assertive">
-          <Alert tone="danger" title="Le paiement n’a pas démarré">{serverError}</Alert>
-        </div>
-      ) : null}
       <div className="flex min-w-0 flex-col gap-6">
         <Card>
           <CardHeader>
@@ -127,6 +133,7 @@ export function CheckoutForm({
                 onChange={(value) => {
                   const next = { ...quantities, [type.id]: value };
                   setQuantities(next);
+                  setServerError(null);
                   setValue("items", checkoutItemsFromQuantities(ticketTypes, next), {
                     shouldDirty: true,
                     shouldValidate: true,
@@ -190,7 +197,7 @@ export function CheckoutForm({
       </div>
 
       <aside className="lg:sticky lg:top-20 lg:self-start">
-        <OrderSummary pricing={pricing} pending={pending} />
+        <OrderSummary pricing={pricing} pending={pending} error={serverError} />
       </aside>
     </form>
   );

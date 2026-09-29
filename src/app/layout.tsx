@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
-import { PwaInstallButton } from "@/components/layout/pwa-install-button";
 import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
@@ -105,7 +104,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppProviders>
           <div id="contenu">{children}</div>
         </AppProviders>
-        <PwaInstallButton />
       </body>
     </html>
   );
