@@ -113,16 +113,16 @@ export default async function OrgDashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <ButtonLink href="/org/check-in" variant="secondary" className="w-full justify-start">
+            <ButtonLink href="/org/check-in" variant="secondary" className="w-full justify-start whitespace-normal text-left">
               <Ticket className="mr-2 size-4 text-primary" /> Ouvrir l&apos;outil de Check-in à l&apos;entrée
             </ButtonLink>
-            <ButtonLink href="/org/billetterie" variant="secondary" className="w-full justify-start">
+            <ButtonLink href="/org/billetterie" variant="secondary" className="w-full justify-start whitespace-normal text-left">
               <Plus className="mr-2 size-4 text-primary" /> Configurer de nouveaux tarifs de billets
             </ButtonLink>
-            <ButtonLink href="/org/paiements" variant="secondary" className="w-full justify-start">
+            <ButtonLink href="/org/paiements" variant="secondary" className="w-full justify-start whitespace-normal text-left">
               <Wallet className="mr-2 size-4 text-primary" /> Demander un virement Mobile Money / Banque
             </ButtonLink>
-            <ButtonLink href="/org/participants" variant="secondary" className="w-full justify-start">
+            <ButtonLink href="/org/participants" variant="secondary" className="w-full justify-start whitespace-normal text-left">
               <Users className="mr-2 size-4 text-primary" /> Voir les participants et les billets
             </ButtonLink>
           </CardContent>
