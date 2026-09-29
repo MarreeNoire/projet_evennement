@@ -230,9 +230,9 @@ export function OrgTicketTypesManager({
         <div className="grid gap-4">
           {tickets.map((t) => (
             <Card key={t.id}>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
+              <CardHeader className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                <div className="min-w-0">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <CardTitle className="text-lg">{t.name}</CardTitle>
                     <AccessBadge level={t.accessLevel} />
                   </div>
@@ -245,9 +245,9 @@ export function OrgTicketTypesManager({
                     <CardDescription className="mt-1">{t.description}</CardDescription>
                   ) : null}
                 </div>
-                <p className="font-display text-xl font-bold text-fg">{formatPrice(t.price)}</p>
+                <p className="font-display text-xl font-bold text-fg sm:shrink-0">{formatPrice(t.price)}</p>
               </CardHeader>
-              <CardContent className="border-t border-border pt-4 flex items-center justify-between text-xs text-fg-muted">
+              <CardContent className="flex flex-col items-start justify-between gap-2 border-t border-border pt-4 text-xs text-fg-muted sm:flex-row sm:items-center">
                 <span>
                   Quota : <strong>{t.quantity} places</strong> ({t.soldCount ?? 0} vendues)
                 </span>

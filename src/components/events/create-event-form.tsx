@@ -549,8 +549,8 @@ export function CreateEventForm() {
 
       {/* Billetterie & Formules de billets */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
-          <div>
+        <CardHeader className="flex flex-col items-start justify-between gap-3 pb-3 sm:flex-row sm:items-center">
+          <div className="min-w-0">
             <CardTitle className="flex items-center gap-2">
               <Ticket className="size-5 text-primary" /> Billetterie & Tarifs
             </CardTitle>
@@ -562,6 +562,7 @@ export function CreateEventForm() {
             type="button"
             variant="secondary"
             size="sm"
+            className="w-full shrink-0 sm:w-auto"
             onClick={handleAddTicket}
             disabled={pending || Boolean(success)}
           >
@@ -684,12 +685,13 @@ export function CreateEventForm() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <ButtonLink href="/org/evenements" variant="secondary">
           Annuler
         </ButtonLink>
         <Button
           type="submit"
+          className="w-full sm:w-auto"
           loading={pending}
           loadingLabel="Enregistrement..."
           disabled={Boolean(success || recoveryHref)}

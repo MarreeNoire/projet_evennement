@@ -63,9 +63,9 @@ export function OrgEventsList({ initialEvents }: { initialEvents?: EventListItem
   return (
     <Card>
       <CardHeader className="p-4 sm:p-5">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">Liste de vos événements</CardTitle>
-          <div className="flex gap-2 text-xs">
+          <div className="flex flex-wrap gap-1 text-xs">
             <button
               onClick={() => setFilter("all")}
               className={`px-2.5 py-1 rounded font-semibold transition-colors ${
@@ -111,18 +111,18 @@ export function OrgEventsList({ initialEvents }: { initialEvents?: EventListItem
               return (
                 <div
                   key={event.id}
-                  className="flex items-center justify-between p-4 sm:p-5 hover:bg-bg-subtle transition-colors"
+                  className="flex min-w-0 flex-col items-start gap-3 p-4 transition-colors hover:bg-bg-subtle sm:flex-row sm:items-center sm:justify-between sm:p-5"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-fg">{event.title}</span>
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <span className="break-words font-bold text-fg">{event.title}</span>
                       {isDraft ? (
                         <Badge variant="warning">Brouillon</Badge>
                       ) : (
                         <Badge variant="success">Publié</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-fg-muted">
+                    <p className="break-words text-xs text-fg-muted">
                       {formattedDate} {event.venue_name ? `· ${event.venue_name}` : ""}{" "}
                       {event.city ? `(${event.city})` : ""}
                     </p>
@@ -130,7 +130,7 @@ export function OrgEventsList({ initialEvents }: { initialEvents?: EventListItem
                       <p className="text-2xs text-fg-subtle">{event.tickets_sold_text}</p>
                     ) : null}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex w-full items-center gap-2 sm:w-auto">
                     <ButtonLink href={`/org/evenements/${event.id}`} variant="secondary" size="sm">
                       <Edit className="mr-1.5 size-3.5" /> Gérer
                     </ButtonLink>

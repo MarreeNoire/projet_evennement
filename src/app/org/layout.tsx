@@ -18,6 +18,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { createSupabaseServerClient, getCurrentProfile } from "@/lib/supabase/server";
 import { BecomeOrganizerForm } from "@/components/auth/become-organizer-form";
+import { OrgMobileNavigation } from "@/components/layout/org-mobile-navigation";
 
 const ORG_MENU_ITEMS = [
   { href: "/org", label: "Vue d'ensemble", icon: LayoutDashboard },
@@ -58,7 +59,7 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <SiteHeader />
-      <div className="container-page flex-1 py-8">
+      <div className="container-page min-w-0 flex-1 py-4 sm:py-6 lg:py-8">
         {!canAccessOrganizationSpace ? (
           <div className="mx-auto max-w-xl py-12 space-y-6">
             <div className="text-center space-y-2">
@@ -70,11 +71,12 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
             <BecomeOrganizerForm user={{ displayName: profile.display_name }} />
           </div>
         ) : (
-          <div className="grid min-w-0 gap-5 lg:gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <div className="grid min-w-0 gap-4 sm:gap-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
             {/* Navigation latérale Organisateur */}
             <aside className="min-w-0">
               <div className="-mx-4 border-y-2 border-fg bg-surface px-4 py-2 lg:mx-0 lg:border-x-0 lg:border-b-0 lg:p-4">
-                <div className="mb-2 flex min-w-0 items-center justify-between gap-2 border-b border-border-strong pb-2 lg:mb-4 lg:block lg:pb-4">
+                <OrgMobileNavigation />
+                <div className="mb-2 hidden min-w-0 items-center justify-between gap-2 border-b border-border-strong pb-2 lg:mb-4 lg:flex lg:pb-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">
                     Espace Organisateur
                   </p>
@@ -83,7 +85,7 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
                   </p>
                 </div>
 
-                <nav aria-label="Navigation organisateur" className="no-scrollbar -mx-4 flex min-w-0 gap-1 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
+                <nav aria-label="Navigation organisateur" className="hidden min-w-0 gap-1 lg:mx-0 lg:flex lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
                   {ORG_MENU_ITEMS.map((item) => {
                     const Icon = item.icon;
                     return (

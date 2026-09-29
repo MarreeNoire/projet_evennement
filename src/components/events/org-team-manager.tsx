@@ -188,12 +188,12 @@ export function OrgTeamManager() {
         </CardHeader>
         <CardContent className="divide-y divide-border p-0">
           {members.map((m) => (
-            <div key={m.id} className="flex items-center justify-between p-4 sm:p-5">
-              <div className="flex items-center gap-3">
+            <div key={m.id} className="flex min-w-0 flex-col items-start gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div className="flex min-w-0 items-center gap-3">
                 <Avatar name={m.name} size="md" />
-                <div>
+                <div className="min-w-0">
                   <p className="font-semibold text-sm text-fg">{m.name}</p>
-                  <p className="text-xs text-fg-subtle">{m.email}</p>
+                  <p className="break-all text-xs text-fg-subtle">{m.email}</p>
                 </div>
               </div>
               <Badge variant={m.role === "owner" ? "accent" : "neutral"}>{m.roleLabel}</Badge>
