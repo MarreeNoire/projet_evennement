@@ -16,7 +16,7 @@ import {
 
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { getCurrentProfile } from "@/lib/supabase/server";
+import { createSupabaseServerClient, getCurrentProfile } from "@/lib/supabase/server";
 import { BecomeOrganizerForm } from "@/components/auth/become-organizer-form";
 
 const ORG_MENU_ITEMS = [
@@ -36,13 +36,30 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
   const profile = await getCurrentProfile();
   if (!profile) redirect("/connexion?redirect=/org");
 
-  const isOrganizer = profile.roles.includes("organizer");
+  let canAccessOrganizationSpace = profile.roles.includes("organizer");
+  if (!canAccessOrganizationSpace) {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const [{ data: owned }, { data: memberships }] = await Promise.all([
+        supabase.from("organizations").select("id").eq("owner_id", user.id).limit(1),
+        supabase
+          .from("organization_members")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .in("role", ["owner", "manager", "checkin_agent"])
+          .limit(1),
+      ]);
+      canAccessOrganizationSpace = Boolean(owned?.length || memberships?.length);
+    }
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <SiteHeader />
       <div className="container-page flex-1 py-8">
-        {!isOrganizer ? (
+        {!canAccessOrganizationSpace ? (
           <div className="mx-auto max-w-xl py-12 space-y-6">
             <div className="text-center space-y-2">
               <h1 className="font-display text-3xl font-bold tracking-tight">Activation de l&apos;Espace Organisateur</h1>

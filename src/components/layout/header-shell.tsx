@@ -2,17 +2,18 @@
 
 import { Bell, LoaderCircle, Menu, Search } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useOptimistic, useState } from "react";
 
 import { Logo } from "@/components/brand/logo";
 import { ButtonLink } from "@/components/ui/button";
 import { ROUTES } from "@/lib/constants";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 import type { HeaderUser } from "./header-types";
 import { MobileNav } from "./mobile-nav";
-import { APP_NAV, PUBLIC_NAV, getNavItems } from "./nav-config";
+import { getNavItems } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 
@@ -29,20 +30,67 @@ export function HeaderShell({
   unreadCount?: number;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [navigating, setNavigating] = useState(false);
+  const [navigatingFromPath, setNavigatingFromPath] = useState<string | null>(null);
+  const navigating = navigatingFromPath === pathname;
+  const [currentUnreadCount, updateUnreadCount] = useOptimistic(
+    unreadCount,
+    (count, change: number) => Math.max(0, count + change),
+  );
   const navItems = getNavItems(user);
 
   useEffect(() => {
-    setNavigating(false);
-  }, [pathname]);
+    if (!user?.id) return;
+
+    const supabase = createSupabaseBrowserClient();
+    const channel = supabase
+      .channel(`notification-count:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          updateUnreadCount(1);
+          if (pathname === ROUTES.notifications) router.refresh();
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const oldRow = payload.old as { is_read?: boolean };
+          const newRow = payload.new as { is_read?: boolean };
+          if (oldRow.is_read === false && newRow.is_read === true) {
+            updateUnreadCount(-1);
+          } else if (oldRow.is_read === true && newRow.is_read === false) {
+            updateUnreadCount(1);
+          }
+          if (pathname === ROUTES.notifications) router.refresh();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [pathname, router, updateUnreadCount, user?.id]);
 
   useEffect(() => {
     let resetTimer: ReturnType<typeof setTimeout> | undefined;
     const startNavigationFeedback = () => {
-      setNavigating(true);
+      setNavigatingFromPath(window.location.pathname);
       if (resetTimer) clearTimeout(resetTimer);
-      resetTimer = setTimeout(() => setNavigating(false), 8000);
+      resetTimer = setTimeout(() => setNavigatingFromPath(null), 8000);
     };
 
     const handleDocumentClick = (event: MouseEvent) => {
@@ -168,18 +216,18 @@ export function HeaderShell({
                 href={ROUTES.notifications}
                 className="text-fg-muted hover:border-border hover:bg-bg-muted hover:text-fg relative inline-flex size-10 items-center justify-center rounded-sm border border-transparent"
                 aria-label={
-                  unreadCount > 0
-                    ? `Notifications, ${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
+                  currentUnreadCount > 0
+                    ? `Notifications, ${currentUnreadCount} non lue${currentUnreadCount > 1 ? "s" : ""}`
                     : "Notifications"
                 }
               >
                 <Bell className="size-5" aria-hidden="true" />
-                {unreadCount > 0 ? (
+                {currentUnreadCount > 0 ? (
                   <span
                     aria-hidden="true"
                     className="bg-danger-solid text-2xs ring-bg absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-sm px-1 font-bold text-white ring-2"
                   >
-                    {unreadCount > 99 ? "99+" : unreadCount}
+                    {currentUnreadCount > 99 ? "99+" : currentUnreadCount}
                   </span>
                 ) : null}
               </Link>
@@ -222,7 +270,7 @@ export function HeaderShell({
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
           user={user}
-          unreadCount={unreadCount}
+          unreadCount={currentUnreadCount}
         />
       </div>
     </header>

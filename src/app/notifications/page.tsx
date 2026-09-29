@@ -1,15 +1,14 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Bell, Megaphone, MessageCircle, Sparkles, Ticket, UserPlus } from "lucide-react";
 import type { ComponentType } from "react";
 
 import { MarkAllReadButton } from "@/components/social/mark-all-read-button";
+import { NotificationLink } from "@/components/social/notification-link";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { Avatar } from "@/components/ui/avatar";
-import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
 import { ROUTES } from "@/lib/constants";
-import { getMyNotifications } from "@/lib/notifications/queries";
+import { getMyNotifications, getUnreadNotificationCount } from "@/lib/notifications/queries";
 import { formatRelative } from "@/lib/social/time";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
@@ -48,8 +47,10 @@ export default async function NotificationsPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect(`${ROUTES.login}?redirect=${ROUTES.notifications}`);
 
-  const notifications = await getMyNotifications();
-  const unreadCount = notifications.filter((item) => !item.is_read).length;
+  const [notifications, unreadCount] = await Promise.all([
+    getMyNotifications(),
+    getUnreadNotificationCount(),
+  ]);
 
   return (
     <SocialShell active="notifications">
@@ -72,7 +73,7 @@ export default async function NotificationsPage() {
             description="Les réponses, mentions et annonces de tes événements apparaîtront ici."
           />
         ) : (
-          <ol className="flex flex-col border-t border-border">
+          <ol className="border-border flex flex-col border-t">
             {notifications.map((notification) => (
               <li key={notification.id}>
                 <NotificationRow notification={notification} />
@@ -90,16 +91,20 @@ function NotificationRow({ notification }: { notification: MyNotificationView })
   const content = (
     <div
       className={cn(
-        "flex items-start gap-4 border-b border-border py-4 transition-colors duration-150",
+        "border-border flex items-start gap-4 border-b py-4 transition-colors duration-150",
         !notification.is_read && "bg-accent-subtle/40",
       )}
     >
       {notification.actor_id ? (
-        <Avatar src={notification.actor_avatar_url} name={notification.actor_name ?? "?"} size="sm" />
+        <Avatar
+          src={notification.actor_avatar_url}
+          name={notification.actor_name ?? "?"}
+          size="sm"
+        />
       ) : (
         <span
           aria-hidden="true"
-          className="flex size-10 shrink-0 items-center justify-center rounded-sm border border-border-strong text-fg-muted"
+          className="border-border-strong text-fg-muted flex size-10 shrink-0 items-center justify-center rounded-sm border"
         >
           <Icon className="size-[18px]" />
         </span>
@@ -110,24 +115,24 @@ function NotificationRow({ notification }: { notification: MyNotificationView })
           {notification.title}
         </p>
         {notification.body ? (
-          <p className="mt-0.5 line-clamp-2 text-sm text-fg-muted">{notification.body}</p>
+          <p className="text-fg-muted mt-0.5 line-clamp-2 text-sm">{notification.body}</p>
         ) : null}
-        <p className="mt-1 text-xs text-fg-subtle">{formatRelative(notification.created_at)}</p>
+        <p className="text-fg-subtle mt-1 text-xs">{formatRelative(notification.created_at)}</p>
       </div>
 
       {!notification.is_read ? (
-        <span aria-hidden="true" className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
+        <span aria-hidden="true" className="bg-primary mt-1.5 size-2 shrink-0 rounded-full" />
       ) : null}
     </div>
   );
 
-  if (notification.url) {
-    return (
-      <Link href={notification.url} className="block hover:bg-bg-muted">
-        {content}
-      </Link>
-    );
-  }
-
-  return content;
+  return (
+    <NotificationLink
+      href={notification.url ?? "/notifications"}
+      notificationId={notification.id}
+      isRead={notification.is_read}
+    >
+      {content}
+    </NotificationLink>
+  );
 }

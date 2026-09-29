@@ -2,19 +2,42 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, Eye, Lock, Save, CheckCircle2 } from "lucide-react";
+import { Bell, Eye, Lock, Save } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/states";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { NotificationPreferenceRow } from "@/types/database";
 
-export function UserSettingsForm({ initialVisibility = "public" }: { initialVisibility?: string }) {
+const SALON_NOTIFICATION_TYPES = [
+  "post_reply",
+  "mention",
+  "new_salon_post",
+  "new_member",
+  "organizer_announcement",
+  "message",
+] as const;
+const CONNECTION_NOTIFICATION_TYPES = ["connection_request", "connection_accepted"] as const;
+
+export function UserSettingsForm({
+  initialVisibility = "public",
+  initialNotificationPreferences,
+}: {
+  initialVisibility?: string;
+  initialNotificationPreferences: NotificationPreferenceRow[];
+}) {
   const router = useRouter();
 
-  const [reminderEmails, setReminderEmails] = useState(true);
-  const [salonActivity, setSalonActivity] = useState(true);
-  const [recommendations, setRecommendations] = useState(false);
+  const preferenceEnabled = (types: readonly string[]) =>
+    initialNotificationPreferences.some(
+      (preference) => types.includes(preference.type) && preference.in_app,
+    );
+  const [eventReminders, setEventReminders] = useState(preferenceEnabled(["event_reminder"]));
+  const [salonActivity, setSalonActivity] = useState(preferenceEnabled(SALON_NOTIFICATION_TYPES));
+  const [connectionActivity, setConnectionActivity] = useState(
+    preferenceEnabled(CONNECTION_NOTIFICATION_TYPES),
+  );
   const [visibility, setVisibility] = useState(initialVisibility);
 
   const [error, setError] = useState<string | null>(null);
@@ -31,25 +54,47 @@ export function UserSettingsForm({ initialVisibility = "public" }: { initialVisi
         const supabase = createSupabaseBrowserClient();
         const { data: authData } = await supabase.auth.getUser();
 
-        if (authData?.user) {
-          await supabase
-            .from("profiles")
-            .update({
-              visibility: visibility as any,
-              updated_at: new Date().toISOString(),
-            } as any)
-            .eq("id", authData.user.id);
-        }
+        if (!authData.user) throw new Error("Connecte-toi pour enregistrer tes préférences.");
 
-        setSuccess("Vos réglages et préférences de visibilité ont été enregistrés.");
+        const [profileUpdate, reminderUpdate, salonUpdate, connectionUpdate] = await Promise.all([
+          supabase
+            .from("profiles")
+            .update({ visibility: visibility as any, updated_at: new Date().toISOString() } as any)
+            .eq("id", authData.user.id),
+          supabase
+            .from("notification_preferences")
+            .update({ in_app: eventReminders })
+            .eq("user_id", authData.user.id)
+            .eq("type", "event_reminder"),
+          supabase
+            .from("notification_preferences")
+            .update({ in_app: salonActivity })
+            .eq("user_id", authData.user.id)
+            .in("type", [...SALON_NOTIFICATION_TYPES]),
+          supabase
+            .from("notification_preferences")
+            .update({ in_app: connectionActivity })
+            .eq("user_id", authData.user.id)
+            .in("type", [...CONNECTION_NOTIFICATION_TYPES]),
+        ]);
+        const saveError =
+          profileUpdate.error ??
+          reminderUpdate.error ??
+          salonUpdate.error ??
+          connectionUpdate.error;
+        if (saveError) throw new Error(saveError.message);
+
+        setSuccess("Tes réglages et préférences de notification ont été enregistrés.");
       } catch (err: any) {
-        setError("Erreur lors de la sauvegarde de vos réglages.");
+        setError(
+          err instanceof Error ? err.message : "Erreur lors de la sauvegarde de tes réglages.",
+        );
       }
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+    <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
       {error ? (
         <Alert tone="danger" title="Erreur">
           {error}
@@ -64,50 +109,56 @@ export function UserSettingsForm({ initialVisibility = "public" }: { initialVisi
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Bell className="size-5 text-primary" /> Notifications & Alertes
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Bell className="text-primary size-5" /> Notifications & Alertes
           </CardTitle>
           <CardDescription>
             Choisis comment nous t&apos;informons des événements et messages de salon.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <label className="flex items-center justify-between text-sm cursor-pointer border-b border-border pb-3">
+          <label className="border-border flex cursor-pointer items-center justify-between border-b pb-3 text-sm">
             <div>
-              <p className="font-semibold text-fg">Emails de rappel d&apos;événement</p>
-              <p className="text-xs text-fg-muted">Recevoir un rappel 24h avant le début d&apos;un événement réservé.</p>
+              <p className="text-fg font-semibold">Rappels d&apos;événement</p>
+              <p className="text-fg-muted text-xs">
+                Recevoir une notification 24h avant le début d&apos;un événement réservé.
+              </p>
             </div>
             <input
               type="checkbox"
-              checked={reminderEmails}
-              onChange={(e) => setReminderEmails(e.target.checked)}
-              className="size-4 accent-primary"
+              checked={eventReminders}
+              onChange={(e) => setEventReminders(e.target.checked)}
+              className="accent-primary size-4"
             />
           </label>
 
-          <label className="flex items-center justify-between text-sm cursor-pointer border-b border-border pb-3">
+          <label className="border-border flex cursor-pointer items-center justify-between border-b pb-3 text-sm">
             <div>
-              <p className="font-semibold text-fg">Activités dans les salons</p>
-              <p className="text-xs text-fg-muted">Notifications lorsque quelqu&apos;un répond à tes publications.</p>
+              <p className="text-fg font-semibold">Activités dans les salons</p>
+              <p className="text-fg-muted text-xs">
+                Nouvelles publications, réponses, mentions et annonces dans tes salons.
+              </p>
             </div>
             <input
               type="checkbox"
               checked={salonActivity}
               onChange={(e) => setSalonActivity(e.target.checked)}
-              className="size-4 accent-primary"
+              className="accent-primary size-4"
             />
           </label>
 
-          <label className="flex items-center justify-between text-sm cursor-pointer">
+          <label className="flex cursor-pointer items-center justify-between text-sm">
             <div>
-              <p className="font-semibold text-fg">Offres & événements recommandés</p>
-              <p className="text-xs text-fg-muted">Recevoir nos suggestions selon tes thématiques préférées.</p>
+              <p className="text-fg font-semibold">Connexions et messages</p>
+              <p className="text-fg-muted text-xs">
+                Être averti des demandes et acceptations de connexion.
+              </p>
             </div>
             <input
               type="checkbox"
-              checked={recommendations}
-              onChange={(e) => setRecommendations(e.target.checked)}
-              className="size-4 accent-primary"
+              checked={connectionActivity}
+              onChange={(e) => setConnectionActivity(e.target.checked)}
+              className="accent-primary size-4"
             />
           </label>
         </CardContent>
@@ -115,8 +166,8 @@ export function UserSettingsForm({ initialVisibility = "public" }: { initialVisi
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Eye className="size-5 text-primary" /> Visibilité du Profil
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Eye className="text-primary size-5" /> Visibilité du Profil
           </CardTitle>
           <CardDescription>
             Contrôle qui peut voir ton profil dans la recherche et le networking.
@@ -126,10 +177,12 @@ export function UserSettingsForm({ initialVisibility = "public" }: { initialVisi
           <select
             value={visibility}
             onChange={(e) => setVisibility(e.target.value)}
-            className="w-full rounded-md border border-border bg-transparent p-2.5 text-sm focus:border-border-focus focus:outline-none"
+            className="border-border focus:border-border-focus w-full rounded-md border bg-transparent p-2.5 text-sm focus:outline-none"
           >
             <option value="public">Visible par tous les utilisateurs (Recommandé)</option>
-            <option value="members">Visible uniquement par les participants des mêmes événements</option>
+            <option value="members">
+              Visible uniquement par les participants des mêmes événements
+            </option>
             <option value="private">Privé (Masqué de la recherche)</option>
           </select>
         </CardContent>
@@ -137,8 +190,8 @@ export function UserSettingsForm({ initialVisibility = "public" }: { initialVisi
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Lock className="size-5 text-primary" /> Sécurité
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Lock className="text-primary size-5" /> Sécurité
           </CardTitle>
           <CardDescription>Modification du mot de passe et sécurité de connexion.</CardDescription>
         </CardHeader>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Camera, Search, CheckCircle2, AlertCircle, XCircle, ShieldCheck } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AlertCircle, Camera, CheckCircle2, Search, ShieldCheck, XCircle } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/states";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -16,217 +16,238 @@ export interface ScanResult {
   message?: string;
 }
 
-export function OrgCheckInScanner() {
+export interface CheckInEvent {
+  id: string;
+  title: string;
+  start_at: string;
+  city: string;
+}
+
+type DetectedBarcode = { rawValue: string };
+type QrDetector = { detect: (source: HTMLVideoElement) => Promise<DetectedBarcode[]> };
+type QrDetectorConstructor = new (options: { formats: string[] }) => QrDetector;
+
+export function OrgCheckInScanner({ events }: { events: CheckInEvent[] }) {
+  const [eventId, setEventId] = useState(events[0]?.id ?? "");
   const [code, setCode] = useState("");
   const [scanning, setScanning] = useState(false);
-  const [lastResult, setLastResult] = useState<ScanResult | null>({
-    code: "ATF-98234",
-    status: "valid",
-    holderName: "Kouassi Jean-Marc",
-    ticketType: "Pass VIP",
-    message: "Accès Autorisé",
-  });
+  const [lastResult, setLastResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const detectorRef = useRef<QrDetector | null>(null);
 
-  function handleValidate(inputCode?: string) {
-    const targetCode = (inputCode || code).trim().toUpperCase();
+  useEffect(() => () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+  }, []);
+
+  function stopCamera() {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    detectorRef.current = null;
+    setScanning(false);
+  }
+
+  const validateTicket = useCallback(async (inputCode: string) => {
+    const targetCode = inputCode.trim();
+    if (!eventId) {
+      setError("Sélectionnez d’abord l’événement contrôlé.");
+      return;
+    }
     if (!targetCode) {
-      setError("Veuillez saisir un code ou une référence de billet.");
+      setError("Scannez le QR code ou saisissez la référence du billet.");
       return;
     }
 
     setError(null);
-    startTransition(async () => {
-      try {
-        const supabase = createSupabaseBrowserClient();
+    setPending(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { data, error: rpcError } = await supabase.rpc("perform_check_in", {
+        p_event_id: eventId,
+        p_code: targetCode,
+      });
+      if (rpcError) throw rpcError;
 
-        // 1. Tenter la fonction RPC Supabase perform_check_in
-        const { data: rpcRes, error: rpcErr } = await supabase.rpc("perform_check_in", {
-          p_event_id: "00000000-0000-0000-0000-000000000000",
-          p_code: targetCode,
-        });
+      const item = data?.[0];
+      if (!item) throw new Error("Le contrôle n’a retourné aucun résultat.");
+      setLastResult({
+        code: targetCode,
+        status: item.result === "valid" ? "valid" : item.result === "already_used" ? "already_used" : "invalid",
+        holderName: item.holder_name ?? undefined,
+        ticketType: item.ticket_type_name ?? undefined,
+        message: item.message ?? undefined,
+      });
+      setCode("");
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : "Le contrôle du billet a échoué.";
+      setError(
+        message.includes("42501") || message.toLowerCase().includes("autorisé")
+          ? "Votre compte n’est pas autorisé à contrôler cet événement. Demandez à l’organisateur de vous attribuer le rôle Agent de contrôle."
+          : "Impossible de vérifier ce billet. Vérifiez la connexion puis réessayez.",
+      );
+    } finally {
+      setPending(false);
+    }
+  }, [eventId]);
 
-        if (!rpcErr && rpcRes && rpcRes.length > 0 && rpcRes[0]) {
-          const item = rpcRes[0];
-          setLastResult({
-            code: targetCode,
-            status: item.result === "valid" ? "valid" : item.result === "already_used" ? "already_used" : "invalid",
-            holderName: item.holder_name || "Titulaire",
-            ticketType: item.ticket_type_name || "Pass Général",
-            message: item.message || (item.result === "valid" ? "Accès Autorisé" : "Billet non valide"),
-          });
-          setCode("");
-          return;
-        }
+  async function startCamera() {
+    setError(null);
+    const Detector = (window as Window & { BarcodeDetector?: QrDetectorConstructor }).BarcodeDetector;
+    if (!Detector) {
+      setError("Le scan caméra n’est pas pris en charge par ce navigateur. Saisissez la référence du billet.");
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError("La caméra est inaccessible. Ouvrez l’application en HTTPS ou saisissez la référence du billet.");
+      return;
+    }
 
-        // 2. Recherche directe dans la table tickets
-        const { data: ticket } = await supabase
-          .from("tickets")
-          .select("*, order:orders(buyer_name)")
-          .or(`reference.eq.${targetCode},qr_token.eq.${targetCode}`)
-          .maybeSingle();
-
-        if (ticket) {
-          if (ticket.status === "paid") {
-            // Marquer comme utilisé
-            await supabase
-              .from("tickets")
-              .update({ status: "used", checked_in_at: new Date().toISOString() })
-              .eq("id", ticket.id);
-
-            setLastResult({
-              code: targetCode,
-              status: "valid",
-              holderName: (ticket as any).order?.buyer_name || ticket.holder_name || "Participant",
-              ticketType: "Pass Général",
-              message: "Accès Autorisé (Billet Valide)",
-            });
-          } else if (ticket.status === "used") {
-            setLastResult({
-              code: targetCode,
-              status: "already_used",
-              holderName: ticket.holder_name || "Participant",
-              ticketType: "Pass Général",
-              message: "Attention : Billet DÉJÀ UTILISÉ !",
-            });
-          } else {
-            setLastResult({
-              code: targetCode,
-              status: "invalid",
-              message: `Billet invalide (Statut : ${ticket.status})`,
-            });
-          }
-          setCode("");
-          return;
-        }
-
-        // 3. Fallback de démonstration si code de test
-        if (targetCode.includes("ATF") || targetCode.includes("REF") || targetCode.length >= 4) {
-          setLastResult({
-            code: targetCode,
-            status: "valid",
-            holderName: "Participant Confirmé",
-            ticketType: "Pass Validé",
-            message: "Accès Autorisé (Validation Simulation)",
-          });
-          setCode("");
-        } else {
-          setLastResult({
-            code: targetCode,
-            status: "invalid",
-            message: "Code introuvable dans la base de billetterie.",
-          });
-        }
-      } catch (err: any) {
-        setError("Erreur lors de la vérification du billet.");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode: { ideal: "environment" } },
+      });
+      streamRef.current = stream;
+      detectorRef.current = new Detector({ formats: ["qr_code"] });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
       }
-    });
-  }
-
-  function toggleCameraScanner() {
-    setScanning(!scanning);
-    if (!scanning) {
-      setTimeout(() => {
-        handleValidate("ATF-DEMO-883");
-        setScanning(false);
-      }, 2000);
+      setScanning(true);
+    } catch {
+      stopCamera();
+      setError("La caméra n’a pas pu démarrer. Autorisez son accès ou saisissez la référence du billet.");
     }
   }
 
+  useEffect(() => {
+    if (!scanning) return;
+    let active = true;
+    const poll = async () => {
+      const video = videoRef.current;
+      const detector = detectorRef.current;
+      if (active && video && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && detector) {
+        try {
+          const [barcode] = await detector.detect(video);
+          if (barcode?.rawValue) {
+            active = false;
+            streamRef.current?.getTracks().forEach((track) => track.stop());
+            streamRef.current = null;
+            detectorRef.current = null;
+            setScanning(false);
+            void validateTicket(barcode.rawValue);
+            return;
+          }
+        } catch {
+          // Une frame illisible est normale pendant le déplacement du téléphone.
+        }
+      }
+      if (active) window.setTimeout(poll, 250);
+    };
+    void poll();
+    return () => {
+      active = false;
+    };
+  }, [scanning, validateTicket]);
+
   return (
     <div className="space-y-6">
-      {error ? (
-        <Alert tone="danger" title="Erreur de saisie">
-          {error}
+      {events.length === 0 ? (
+        <Alert tone="warning" title="Aucun événement disponible">
+          Les événements annulés ne peuvent pas être contrôlés. Vous devez être propriétaire, gestionnaire ou agent de contrôle d’une organisation.
         </Alert>
-      ) : null}
+      ) : (
+        <>
+          {error ? <Alert tone="danger" title="Contrôle impossible">{error}</Alert> : null}
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="flex flex-col items-center text-center p-6 space-y-4 border-2 border-dashed border-primary/40 bg-surface">
-          <div className="size-16 rounded-full bg-primary-subtle flex items-center justify-center text-primary">
-            <Camera className="size-8" />
-          </div>
-          <div>
-            <h2 className="font-bold text-lg text-fg">Scanner avec la caméra</h2>
-            <p className="text-xs text-fg-muted mt-1">
-              Autorisez l&apos;accès caméra pour scanner les QR codes des participants.
-            </p>
-          </div>
-          <Button
-            onClick={toggleCameraScanner}
-            variant={scanning ? "secondary" : "primary"}
-            className="w-full"
-          >
-            {scanning ? "Scan en cours... (Simulé)" : "Démarrer le scanner QR"}
-          </Button>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Événement à contrôler</CardTitle>
+              <CardDescription>Chaque billet est vérifié et enregistré pour l’événement sélectionné.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <label htmlFor="check-in-event" className="sr-only">Événement à contrôler</label>
+              <select
+                id="check-in-event"
+                value={eventId}
+                onChange={(event) => {
+                  setEventId(event.target.value);
+                  setLastResult(null);
+                  if (scanning) stopCamera();
+                }}
+                className="min-h-11 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg"
+              >
+                {events.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.title} · {new Date(event.start_at).toLocaleDateString("fr-FR")} · {event.city}
+                  </option>
+                ))}
+              </select>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Saisie Manuelle</CardTitle>
-            <CardDescription>Recherche par référence de billet ou nom du titulaire.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleValidate();
-              }}
-              className="space-y-4"
-            >
-              <div className="space-y-1.5">
-                <label htmlFor="ticketCode" className="text-xs font-semibold text-fg">
-                  Code ou Référence Billet
-                </label>
-                <input
-                  id="ticketCode"
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="ex: REF-8921-ATF"
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none font-mono uppercase"
-                />
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="flex flex-col items-center space-y-4 p-6 text-center">
+              <div className="flex size-16 items-center justify-center rounded-full bg-primary-subtle text-primary">
+                <Camera className="size-8" />
               </div>
-              <Button type="submit" variant="secondary" className="w-full" loading={pending} loadingLabel="Vérification...">
-                <Search className="mr-2 size-4" /> Valider le billet
+              <div>
+                <h2 className="text-lg font-bold text-fg">Scanner le QR code</h2>
+                <p className="mt-1 text-xs text-fg-muted">La caméra arrière lit le QR personnel du billet.</p>
+              </div>
+              <video ref={videoRef} className={scanning ? "aspect-video w-full rounded-md bg-black object-cover" : "hidden"} muted playsInline />
+              <Button onClick={scanning ? stopCamera : startCamera} variant={scanning ? "secondary" : "primary"} className="w-full" disabled={!eventId || pending}>
+                {scanning ? "Arrêter le scanner" : "Démarrer le scanner QR"}
               </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+            </Card>
 
-      {lastResult ? (
-        <Card
-          className={
-            lastResult.status === "valid"
-              ? "bg-success-subtle/30 border-success/30"
-              : lastResult.status === "already_used"
-              ? "bg-warning-subtle/30 border-warning/30"
-              : "bg-danger-subtle/30 border-danger/30"
-          }
-        >
-          <CardContent className="p-4 flex items-center gap-3">
-            {lastResult.status === "valid" ? (
-              <CheckCircle2 className="size-6 text-success shrink-0" />
-            ) : lastResult.status === "already_used" ? (
-              <AlertCircle className="size-6 text-warning shrink-0" />
-            ) : (
-              <XCircle className="size-6 text-danger shrink-0" />
-            )}
-            <div>
-              <p className="font-bold text-sm text-fg">
-                Dernier billet scanné : {lastResult.code}
-              </p>
-              <p className="text-xs text-fg-muted">
-                {lastResult.holderName ? `${lastResult.holderName} · ` : ""}
-                {lastResult.ticketType ? `${lastResult.ticketType} · ` : ""}
-                <strong>{lastResult.message}</strong>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Saisie manuelle</CardTitle>
+                <CardDescription>Utilisez la référence imprimée si la caméra est indisponible.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={(event) => { event.preventDefault(); void validateTicket(code); }} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label htmlFor="ticketCode" className="text-xs font-semibold text-fg">Référence du billet</label>
+                    <input
+                      id="ticketCode"
+                      type="text"
+                      value={code}
+                      onChange={(event) => setCode(event.target.value)}
+                      placeholder="ex. TCK-AB12CD34EF"
+                      autoComplete="off"
+                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 font-mono text-sm uppercase focus:border-border-focus focus:outline-none"
+                    />
+                  </div>
+                  <Button type="submit" variant="secondary" className="w-full" loading={pending} loadingLabel="Vérification…" disabled={!eventId}>
+                    <Search className="mr-2 size-4" /> Vérifier le billet
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          {lastResult ? (
+            <Card className={lastResult.status === "valid" ? "border-success/30 bg-success-subtle/30" : lastResult.status === "already_used" ? "border-warning/30 bg-warning-subtle/30" : "border-danger/30 bg-danger-subtle/30"}>
+              <CardContent className="flex items-center gap-3 p-4">
+                {lastResult.status === "valid" ? <CheckCircle2 className="size-6 shrink-0 text-success" /> : lastResult.status === "already_used" ? <AlertCircle className="size-6 shrink-0 text-warning" /> : <XCircle className="size-6 shrink-0 text-danger" />}
+                <div>
+                  <p className="text-sm font-bold text-fg">{lastResult.status === "valid" ? "Billet accepté" : lastResult.status === "already_used" ? "Billet déjà utilisé" : "Billet refusé"} · {lastResult.code}</p>
+                  <p className="text-xs text-fg-muted">
+                    {[lastResult.holderName, lastResult.ticketType, lastResult.message].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+          <p className="flex items-center gap-2 text-xs text-fg-subtle">
+            <ShieldCheck className="size-4 shrink-0" /> Un scan accepté marque le billet comme utilisé. Un deuxième passage est refusé et journalisé.
+          </p>
+        </>
+      )}
     </div>
   );
 }
