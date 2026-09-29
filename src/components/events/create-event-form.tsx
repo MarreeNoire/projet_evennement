@@ -205,6 +205,7 @@ export function CreateEventForm() {
           description,
           startAt,
           endAt,
+          publishNow,
           tickets: tickets.map((t) => ({
             name: t.name,
             description: t.description || undefined,
@@ -219,23 +220,7 @@ export function CreateEventForm() {
             const imageError = await savePendingImages(res.eventId);
             if (imageError) {
               setRecoveryHref(`/org/evenements/${res.eventId}`);
-              setError(`L’événement a été enregistré en brouillon, mais les images n’ont pas été sauvegardées : ${imageError}`);
-              return;
-            }
-          }
-
-          // 3. Publier immédiatement si demandé : sans cela l'événement reste
-          //    un brouillon, invisible dans Explorer.
-          if (publishNow && res.eventId) {
-            const publish = await setEventStatusAction(res.eventId, "published");
-
-            if (!publish.ok) {
-              setError(
-                `L'événement a bien été enregistré en brouillon, mais la publication a échoué : ${
-                  publish.error ?? "raison inconnue"
-                }`,
-              );
-              redirectToEvents(2500);
+              setError(`${publishNow ? "L’événement est publié" : "L’événement a été enregistré en brouillon"}, mais les images n’ont pas été sauvegardées : ${imageError}`);
               return;
             }
           }

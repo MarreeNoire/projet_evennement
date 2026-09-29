@@ -20,6 +20,8 @@ export interface CreateEventDraftInput {
   description?: string;
   startAt: string;
   endAt?: string;
+  /** Publier dès la création au lieu de créer d'abord un brouillon. */
+  publishNow?: boolean;
   /** URL publique de l'image de couverture (bucket `event-covers`). */
   coverUrl?: string;
   /** URL publiques des images de galerie (bucket `event-covers`). */
@@ -215,7 +217,8 @@ export async function saveEventDraftAction(
         gallery: sanitizeGalleryUrls(input.galleryUrls),
         start_at: startAtIso,
         end_at: endAtIso,
-        status: "draft",
+        status: input.publishNow ? "published" : "draft",
+        published_at: input.publishNow ? new Date().toISOString() : null,
         salon_privacy: "members",
         currency: "XOF",
         min_price: 0,
@@ -257,6 +260,17 @@ export async function saveEventDraftAction(
           );
         }
       }
+    }
+
+    if (input.publishNow) {
+      const { error: salonError } = await supabase.rpc("ensure_event_salon", {
+        target_event_id: event.id,
+      });
+      if (salonError) {
+        console.warn("[saveEventDraftAction] Salon non créé :", salonError.message);
+      }
+      revalidatePath("/explorer");
+      revalidatePath("/");
     }
 
     revalidatePath("/org/evenements");
