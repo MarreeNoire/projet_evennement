@@ -29,13 +29,14 @@ const items = [
   { href: "/org/paiements", label: "Paiements", icon: Wallet },
   { href: "/org/parametres", label: "Paramètres", icon: Settings },
 ];
+const overviewItem = items[0]!;
 
 export function OrgMobileNavigation() {
   const pathname = usePathname();
   const currentItem =
     items.find((item) => item.href === pathname) ??
     items.find((item) => item.href !== "/org" && pathname.startsWith(`${item.href}/`)) ??
-    items[0];
+    overviewItem;
   const CurrentIcon = currentItem.icon;
 
   return (
