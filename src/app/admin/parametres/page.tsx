@@ -1,4 +1,5 @@
 import { AdminSettingsForm } from "@/components/admin/admin-settings-form";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "Paramètres Plateforme | Super Admin | Event",
@@ -6,6 +7,10 @@ export const metadata = {
 };
 
 export default async function AdminParametresPage() {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.from("platform_settings").select("value").eq("key", "platform.commission_rate").maybeSingle();
+  const rawRate = data?.value;
+  const initialCommissionPercent = typeof rawRate === "number" && rawRate >= 0 && rawRate <= 1 ? rawRate * 100 : 5;
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="border-b border-border pb-4">
@@ -15,7 +20,7 @@ export default async function AdminParametresPage() {
         </p>
       </div>
 
-      <AdminSettingsForm />
+      <AdminSettingsForm initialCommissionPercent={initialCommissionPercent} />
     </div>
   );
 }

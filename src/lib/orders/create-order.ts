@@ -108,12 +108,24 @@ export async function createOrder(input: CheckoutInput): Promise<CreateOrderResu
     }
   }
 
+  // Le taux configuré en administration s'applique aux nouvelles commandes.
+  // Les commandes existantes conservent leur commission déjà enregistrée.
+  const { data: commissionSetting } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "platform.commission_rate")
+    .maybeSingle();
+  const configuredRate = commissionSetting?.value;
+  const commissionRate = typeof configuredRate === "number" && configuredRate >= 0 && configuredRate <= 1
+    ? configuredRate
+    : undefined;
+
   const pricing = priceOrder(
     values.items.map((item) => ({
       ticketType: ticketTypes.find((t) => t.id === item.ticketTypeId)!,
       quantity: item.quantity,
     })),
-    { promoDiscount },
+    { promoDiscount, commissionRate },
   );
 
   const reference = generateReference("CMD");

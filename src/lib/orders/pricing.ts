@@ -32,7 +32,7 @@ export interface OrderPricing {
 /** Calcule le sous-total, la remise, les frais et la commission (5 %). */
 export function priceOrder(
   lines: Array<{ ticketType: Pick<TicketTypeRow, "id" | "name" | "price" | "access_level">; quantity: number }>,
-  options: { promoDiscount?: number } = {},
+  options: { promoDiscount?: number; commissionRate?: number } = {},
 ): OrderPricing {
   const priced: PricedLine[] = lines.map(({ ticketType, quantity }) => ({
     ticketTypeId: ticketType.id,
@@ -48,7 +48,10 @@ export function priceOrder(
   const discount = Math.min(Math.max(options.promoDiscount ?? 0, 0), subtotal);
   const fees = 0; // Pas de frais acheteur au lancement (décision produit).
   const total = Math.max(subtotal - discount + fees, 0);
-  const commission = Math.round(total * PLATFORM_COMMISSION_RATE);
+  const commissionRate = Number.isFinite(options.commissionRate)
+    ? Math.min(Math.max(options.commissionRate!, 0), 1)
+    : PLATFORM_COMMISSION_RATE;
+  const commission = Math.round(total * commissionRate);
   const netForOrganizer = total - commission;
 
   return { lines: priced, ticketCount, subtotal, discount, fees, total, commission, netForOrganizer };

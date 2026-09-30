@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/ui/states";
 import { Badge } from "@/components/ui/badge";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatDate, formatNumber, formatPrice } from "@/lib/utils";
+import { PayoutControls } from "@/components/admin/payout-controls";
 
 export const metadata = {
   title: "Paiements et commissions | Administration | Event",
@@ -22,6 +23,7 @@ interface PayoutRow {
   status: string;
   method: string | null;
   reference: string | null;
+  organization_id: string;
   created_at: string;
 }
 
@@ -36,6 +38,7 @@ function statusDetails(status: string) {
 export default async function AdminPaiementsPage() {
   let commissions: CommissionRow[] = [];
   let payouts: PayoutRow[] = [];
+  let loadError = false;
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -43,15 +46,17 @@ export default async function AdminPaiementsPage() {
       supabase.from("event_stats").select("commission"),
       supabase
         .from("payouts")
-        .select("id, net_amount, currency, status, method, reference, created_at")
+        .select("id, net_amount, currency, status, method, reference, organization_id, created_at")
         .order("created_at", { ascending: false })
         .limit(50),
     ]);
     commissions = (commissionResult.data as CommissionRow[] | null) ?? [];
     payouts = (payoutResult.data as PayoutRow[] | null) ?? [];
+    loadError = Boolean(commissionResult.error || payoutResult.error);
   } catch {
     commissions = [];
     payouts = [];
+    loadError = true;
   }
 
   const commissionTotal = commissions.reduce((sum, row) => sum + row.commission, 0);
@@ -64,6 +69,12 @@ export default async function AdminPaiementsPage() {
         <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Paiements et commissions</h1>
         <p className="mt-2 text-sm text-fg-muted">Montants issus des commissions et reversements enregistrés.</p>
       </header>
+
+      <p className="max-w-3xl border border-warning/40 bg-warning-subtle p-3 text-sm text-fg">
+        Les statuts ici servent au suivi des virements manuels. Utilisez « Marquer versé » uniquement après avoir effectué le transfert et saisi sa référence.
+      </p>
+
+      {loadError ? <p role="alert" className="border border-danger/30 bg-danger-subtle p-3 text-sm text-danger">Certaines données financières n’ont pas pu être chargées. Actualisez la page ou vérifiez les droits d’accès.</p> : null}
 
       {commissions.length === 0 && payouts.length === 0 ? (
         <EmptyState
@@ -104,6 +115,7 @@ export default async function AdminPaiementsPage() {
                       <th className="px-5 py-3">Moyen</th>
                       <th className="px-5 py-3">Montant net</th>
                       <th className="px-5 py-3">Statut</th>
+                      <th className="px-5 py-3">Action admin</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -116,6 +128,7 @@ export default async function AdminPaiementsPage() {
                           <td className="px-5 py-3">{payout.method || "Non renseigné"}</td>
                           <td className="px-5 py-3 font-semibold tabular-nums">{formatPrice(payout.net_amount)}</td>
                           <td className="px-5 py-3"><Badge variant={status.variant}>{status.label}</Badge></td>
+                          <td className="px-5 py-3"><PayoutControls payoutId={payout.id} status={payout.status} /></td>
                         </tr>
                       );
                     })}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, LogOut, Plus, Settings, X } from "lucide-react";
+import { Bell, LogOut, Plus, Settings, Shield, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -88,6 +88,17 @@ export function MobileNav({
       </div>
 
       <nav aria-label="Navigation mobile" className="flex-1 overflow-y-auto p-4">
+        {user?.isAdmin ? (
+          <Link
+            href={ROUTES.admin}
+            aria-current={pathname.startsWith(ROUTES.admin) ? "page" : undefined}
+            className="mb-4 flex min-h-14 items-center gap-3 rounded-xl border border-danger/40 bg-danger-subtle px-4 font-semibold text-danger shadow-sm"
+          >
+            <Shield className="size-5 shrink-0" aria-hidden="true" />
+            <span className="flex-1">Espace administrateur</span>
+            <span aria-hidden="true">→</span>
+          </Link>
+        ) : null}
         <form action={ROUTES.explore} method="get" role="search" className="mb-4">
           <label htmlFor="mobile-search" className="sr-only">
             Rechercher un événement
