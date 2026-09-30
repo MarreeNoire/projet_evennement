@@ -27,9 +27,6 @@ function ExploreFiltersInner({
   const [city, setCity] = useState(params.get("ville") ?? "");
   const [sort, setSort] = useState(params.get("tri") ?? "date_asc");
   const [freeOnly, setFreeOnly] = useState(params.get("gratuit") === "1");
-  const [startDate, setStartDate] = useState(params.get("du") ?? "");
-  const [endDate, setEndDate] = useState(params.get("au") ?? "");
-  const [dateError, setDateError] = useState<string | null>(null);
   const search = params.toString();
 
   useEffect(() => {
@@ -39,24 +36,14 @@ function ExploreFiltersInner({
     setCity(current.get("ville") ?? "");
     setSort(current.get("tri") ?? "date_asc");
     setFreeOnly(current.get("gratuit") === "1");
-    setStartDate(current.get("du") ?? "");
-    setEndDate(current.get("au") ?? "");
-    setDateError(null);
   }, [search]);
 
   function apply(event?: React.FormEvent) {
     event?.preventDefault();
-    if (startDate && endDate && endDate < startDate) {
-      setDateError("Choisis une date de fin égale ou postérieure à la date de début.");
-      return;
-    }
-    setDateError(null);
     const next = new URLSearchParams();
     if (query.trim()) next.set("q", query.trim());
     if (category) next.set("categorie", category);
     if (city) next.set("ville", city);
-    if (startDate) next.set("du", startDate);
-    if (endDate) next.set("au", endDate);
     if (sort && sort !== "date_asc") next.set("tri", sort);
     if (freeOnly) next.set("gratuit", "1");
     const serialized = next.toString();
@@ -69,9 +56,6 @@ function ExploreFiltersInner({
     setCity("");
     setSort("date_asc");
     setFreeOnly(false);
-    setStartDate("");
-    setEndDate("");
-    setDateError(null);
     startTransition(() => onNavigate("/explorer"));
   }
 
@@ -129,42 +113,6 @@ function ExploreFiltersInner({
         </div>
         <div>
           <label
-            htmlFor="explorer-start-date"
-            className="text-fg-muted mb-1.5 block text-xs font-semibold"
-          >
-            À partir du
-          </label>
-          <Input
-            id="explorer-start-date"
-            type="date"
-            value={startDate}
-            aria-invalid={Boolean(dateError)}
-            onChange={(event) => {
-              setStartDate(event.target.value);
-              setDateError(null);
-            }}
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="explorer-end-date"
-            className="text-fg-muted mb-1.5 block text-xs font-semibold"
-          >
-            Jusqu&apos;au
-          </label>
-          <Input
-            id="explorer-end-date"
-            type="date"
-            value={endDate}
-            aria-invalid={Boolean(dateError)}
-            onChange={(event) => {
-              setEndDate(event.target.value);
-              setDateError(null);
-            }}
-          />
-        </div>
-        <div>
-          <label
             htmlFor="explorer-sort"
             className="text-fg-muted mb-1.5 block text-xs font-semibold"
           >
@@ -179,12 +127,6 @@ function ExploreFiltersInner({
           </Select>
         </div>
       </div>
-
-      {dateError ? (
-        <p role="alert" className="text-danger text-sm font-medium">
-          {dateError}
-        </p>
-      ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
         <label className="text-fg-muted flex cursor-pointer items-center gap-2 text-sm">
@@ -203,8 +145,6 @@ function ExploreFiltersInner({
           {(query ||
             category ||
             city ||
-            startDate ||
-            endDate ||
             freeOnly ||
             sort !== "date_asc") && (
             <Button type="button" variant="ghost" size="sm" onClick={reset}>
