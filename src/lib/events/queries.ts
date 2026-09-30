@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { isDateInput, startOfDayAfter } from "@/lib/events/date-range";
 import type { PublishedEventView } from "@/types/database";
 
@@ -311,7 +312,20 @@ export interface AdminEventListItem {
 /** Derniers événements lisibles par l'utilisateur connecté (supervision admin). */
 export async function getRecentEvents(limit = 20): Promise<AdminEventListItem[]> {
   try {
-    const supabase = await createSupabaseServerClient();
+    const sessionClient = await createSupabaseServerClient();
+    const { data: { user } } = await sessionClient.auth.getUser();
+    if (!user) return [];
+    const { data: adminRole } = await sessionClient
+      .from("user_roles")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!adminRole) return [];
+
+    // Les administrateurs doivent aussi pouvoir modérer les brouillons et les
+    // événements d'organisations qu'ils ne gèrent pas.
+    const supabase = createSupabaseAdminClient();
     const { data: events, error } = await supabase
       .from("events")
       .select("id, title, slug, status, start_at, end_at, organization_id")

@@ -1,30 +1,17 @@
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypeScript from "eslint-config-next/typescript";
 
 /* =============================================================================
    Configuration ESLint (format « flat config »)
    ========================================================================== */
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({ baseDirectory: __dirname });
-
-const config = [
+const config = defineConfig([
+  ...nextVitals,
+  ...nextTypeScript,
   {
-    ignores: [
-      ".next/**",
-      "node_modules/**",
-      "coverage/**",
-      "playwright-report/**",
-      "test-results/**",
-      "next-env.d.ts",
-    ],
-  },
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    settings: { react: { version: "19.3" } },
     rules: {
       // Les variables non utilisées sont une erreur, sauf préfixées par _.
       "@typescript-eslint/no-unused-vars": [
@@ -37,6 +24,14 @@ const config = [
       eqeqeq: ["error", "smart"],
     },
   },
-];
+  globalIgnores([
+    ".next/**",
+    "node_modules/**",
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
+    "next-env.d.ts",
+  ]),
+]);
 
 export default config;

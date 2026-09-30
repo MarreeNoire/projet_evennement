@@ -25,9 +25,11 @@ export default async function AdminUtilisateursPage({
   }
   const { data: profiles, error } = await query;
   const userIds = (profiles ?? []).map((profile) => profile.id);
-  const { data: roles } = userIds.length
+  const roleResult = userIds.length
     ? await supabase.from("user_roles").select("user_id, role").in("user_id", userIds)
-    : { data: [] };
+    : { data: [], error: null };
+  const roles = roleResult.data ?? [];
+  const rolesLoadError = Boolean(roleResult.error);
   const rolesByUser = new Map<string, string[]>();
   for (const role of roles ?? []) rolesByUser.set(role.user_id, [...(rolesByUser.get(role.user_id) ?? []), role.role]);
 
@@ -58,7 +60,7 @@ export default async function AdminUtilisateursPage({
                       <p className="mt-1 text-xs text-fg-subtle">Inscrit le {new Date(profile.created_at).toLocaleDateString("fr-FR")}{profile.is_verified ? " · Profil vérifié" : ""}</p>
                     </div>
                     <div className="flex flex-wrap gap-2" aria-label="Rôles">
-                      {userRoles.length ? userRoles.map((role) => <Badge key={role} variant={role === "admin" ? "danger" : role === "organizer" ? "accent" : "neutral"}>{role === "admin" ? "Administrateur" : role === "organizer" ? "Organisateur" : "Participant"}</Badge>) : <Badge variant="neutral">Participant</Badge>}
+                      {rolesLoadError ? <Badge variant="warning">Rôles indisponibles</Badge> : userRoles.length ? userRoles.map((role) => <Badge key={role} variant={role === "admin" ? "danger" : role === "organizer" ? "accent" : "neutral"}>{role === "admin" ? "Administrateur" : role === "organizer" ? "Organisateur" : "Participant"}</Badge>) : <Badge variant="neutral">Aucun rôle</Badge>}
                       <Link href={`/admin/utilisateurs/${profile.id}`} className="inline-flex min-h-9 items-center gap-1 rounded-md border border-border px-3 text-xs font-semibold text-fg hover:bg-bg-muted"><Users className="size-3.5" aria-hidden="true" /> Gérer</Link>
                     </div>
                   </li>

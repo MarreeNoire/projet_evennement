@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Calendar, Eye } from "lucide-react";
 
+import { AdminEventDeleteControl } from "@/components/admin/admin-event-delete-control";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/states";
@@ -37,13 +38,13 @@ export default async function AdminEvenementsPage() {
       <div className="border-b border-border pb-4">
         <h1 className="font-display text-2xl font-bold tracking-tight">Modération des Événements</h1>
         <p className="text-sm text-fg-muted">
-          Événements publiés sur le réseau et état de leur visibilité publique.
+          Consultez et modérez les événements publiés, annulés et en préparation.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Événements Publiés sur le Réseau</CardTitle>
+          <CardTitle className="text-base">Événements de la plateforme</CardTitle>
           <p className="text-xs text-fg-muted">
             {publishedCount} publié{publishedCount > 1 ? "s" : ""} · {visibleCount} visible
             {visibleCount > 1 ? "s" : ""} dans Explorer (publié et non terminé)
@@ -54,7 +55,7 @@ export default async function AdminEvenementsPage() {
             <div className="p-5">
               <EmptyState
                 title="Aucun événement visible"
-                description="Aucun événement n'est lisible avec ce compte. Les brouillons des autres organisations restent privés (RLS)."
+                description="Aucun événement n’a encore été créé sur la plateforme."
               />
             </div>
           ) : (
@@ -85,6 +86,7 @@ export default async function AdminEvenementsPage() {
                         <Eye className="size-4" aria-hidden="true" /> Fiche publique
                       </Link>
                     ) : null}
+                    <AdminEventDeleteControl eventId={event.id} title={event.title} />
                   </div>
                 </div>
               );

@@ -92,17 +92,17 @@ Le fichier `.gitignore` fourni exclut déjà `.env*` (sauf `.env.example`).
 > Sur le plan gratuit, Supabase **met le projet en pause après 7 jours de faible
 > activité**, ce qui rend l'application indisponible pour tes utilisateurs. Un
 > projet payant n'est jamais mis en pause automatiquement.
-> *Billing → Upgrade to Pro.*
+> _Billing → Upgrade to Pro._
 
 ### 3.2 Récupérer les clés
 
 **Project Settings → API** :
 
-| Champ à copier | Variable à renseigner |
-|---|---|
-| Project URL | `NEXT_PUBLIC_SUPABASE_URL` |
-| `anon` **public** | `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
-| `service_role` **secret** | `SUPABASE_SERVICE_ROLE_KEY` |
+| Champ à copier            | Variable à renseigner           |
+| ------------------------- | ------------------------------- |
+| Project URL               | `NEXT_PUBLIC_SUPABASE_URL`      |
+| `anon` **public**         | `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+| `service_role` **secret** | `SUPABASE_SERVICE_ROLE_KEY`     |
 
 > La clé `service_role` contourne toutes les règles de sécurité. Elle ne doit
 > servir **que côté serveur**. Ne la mets jamais dans une variable préfixée
@@ -129,26 +129,26 @@ La référence du projet se trouve dans l'URL du tableau de bord :
 **Authentication → Sign In / Providers** :
 
 - **Email** : activé.
-- **Confirm email** : *activé* en production (l'utilisateur doit confirmer son
+- **Confirm email** : _activé_ en production (l'utilisateur doit confirmer son
   adresse) — tu peux le désactiver le temps des tests.
 - **Google** (optionnel) : renseigne `Client ID` et `Client Secret` obtenus sur
   Google Cloud Console, puis ajoute l'URL de redirection affichée par Supabase.
 
 **Authentication → URL Configuration** :
 
-| Champ | Valeur |
-|---|---|
-| Site URL | `https://ton-domaine.ci` |
+| Champ         | Valeur                                                                    |
+| ------------- | ------------------------------------------------------------------------- |
+| Site URL      | `https://ton-domaine.ci`                                                  |
 | Redirect URLs | `https://ton-domaine.ci/**`<br>`http://localhost:3000/**` (développement) |
 
 ### 3.5 Vérifier le stockage
 
 **Storage** doit contenir trois buckets créés par la migration `0032` :
 
-| Bucket | Accès | Usage |
-|---|---|---|
-| `avatars` | public | Photos de profil |
-| `event-covers` | public | Couvertures d'événements |
+| Bucket         | Accès     | Usage                                                |
+| -------------- | --------- | ---------------------------------------------------- |
+| `avatars`      | public    | Photos de profil                                     |
+| `event-covers` | public    | Couvertures d'événements                             |
 | `salon-photos` | **privé** | Photos et vidéos des salons (servies par URL signée) |
 
 ---
@@ -162,13 +162,13 @@ La référence du projet se trouve dans l'URL du tableau de bord :
    enregistrements.
 3. Une fois Resend et Vercel configurés, il y aura au total :
 
-| Type | Nom | Valeur | Service |
-|---|---|---|---|
-| `A` | `@` | `76.76.21.21` | Vercel |
-| `CNAME` | `www` | `cname.vercel-dns.com` | Vercel |
-| `TXT` | `@` | `v=spf1 include:amazonses.com ~all` | Resend (SPF) |
-| `TXT` | `resend._domainkey` | *(fourni par Resend)* | Resend (DKIM) |
-| `TXT` | `_dmarc` | `v=DMARC1; p=none; rua=mailto:dmarc@ton-domaine.ci` | Resend (DMARC) |
+| Type    | Nom                 | Valeur                                              | Service        |
+| ------- | ------------------- | --------------------------------------------------- | -------------- |
+| `A`     | `@`                 | `76.76.21.21`                                       | Vercel         |
+| `CNAME` | `www`               | `cname.vercel-dns.com`                              | Vercel         |
+| `TXT`   | `@`                 | `v=spf1 include:amazonses.com ~all`                 | Resend (SPF)   |
+| `TXT`   | `resend._domainkey` | _(fourni par Resend)_                               | Resend (DKIM)  |
+| `TXT`   | `_dmarc`            | `v=DMARC1; p=none; rua=mailto:dmarc@ton-domaine.ci` | Resend (DMARC) |
 
 > N'ajoute ces enregistrements qu'après avoir lu les deux sections suivantes :
 > chaque service fournit les valeurs exactes à recopier.
@@ -186,12 +186,12 @@ de les afficher dans les logs du serveur).
 2. **Domains → Add Domain** : saisis `ton-domaine.ci`.
 3. Resend affiche les enregistrements DNS à créer. Ajoute-les chez ton registrar :
 
-   | Type | Nom | Valeur |
-   |---|---|---|
-   | `TXT` | `@` | `v=spf1 include:amazonses.com ~all` |
-   | `TXT` | `resend._domainkey` | *(clé DKIM fournie)* |
-   | `TXT` | `_dmarc` | `v=DMARC1; p=none;` |
-   | `MX` | `send` | `feedback-smtp.eu-west-1.amazonses.com` (priorité 10) |
+   | Type  | Nom                 | Valeur                                                |
+   | ----- | ------------------- | ----------------------------------------------------- |
+   | `TXT` | `@`                 | `v=spf1 include:amazonses.com ~all`                   |
+   | `TXT` | `resend._domainkey` | _(clé DKIM fournie)_                                  |
+   | `TXT` | `_dmarc`            | `v=DMARC1; p=none;`                                   |
+   | `MX`  | `send`              | `feedback-smtp.eu-west-1.amazonses.com` (priorité 10) |
 
 4. Attends la propagation DNS (de quelques minutes à quelques heures), puis
    clique sur **Verify DNS Records**. Le statut doit passer à **Verified**.
@@ -201,7 +201,7 @@ de les afficher dans les logs du serveur).
 Par défaut, un compte Resend ne peut envoyer qu'à sa propre adresse. Pour écrire
 à **n'importe quel destinataire** :
 
-**Settings → Production Approval** (ou *Enable production access*), remplis le
+**Settings → Production Approval** (ou _Enable production access_), remplis le
 formulaire décrivant ton usage. C'est une étape **indispensable** en production.
 
 ### 5.3 Récupérer la clé
@@ -221,10 +221,10 @@ EMAIL_REPLY_TO=support@ton-domaine.ci
 
 ### 5.4 Limites à connaître
 
-| Plan | Quota | Débit | Domaines |
-|---|---|---|---|
-| **Free** | 100 emails/jour, 3 000/mois | 10 requêtes/s | 3 |
-| **Pro** (environ 20 $/mois) | pas de quota journalier, 50 000/mois | idem | 10 |
+| Plan                        | Quota                                | Débit         | Domaines |
+| --------------------------- | ------------------------------------ | ------------- | -------- |
+| **Free**                    | 100 emails/jour, 3 000/mois          | 10 requêtes/s | 3        |
+| **Pro** (environ 20 $/mois) | pas de quota journalier, 50 000/mois | idem          | 10       |
 
 Contraintes imposées par Resend, à surveiller dans **Metrics** :
 
@@ -244,13 +244,13 @@ qui peut prendre de 24 h à quelques jours.
 
 ### 6.1 Pourquoi CinetPay
 
-| Critère | CinetPay |
-|---|---|
-| Licence | Établissement de paiement autorisé par la **BCEAO** |
+| Critère         | CinetPay                                                              |
+| --------------- | --------------------------------------------------------------------- |
+| Licence         | Établissement de paiement autorisé par la **BCEAO**                   |
 | Moyens couverts | **Wave CI, Orange Money CI, MTN MoMo, Moov Africa + Visa/Mastercard** |
-| Devise | FCFA (XOF) natif, sans conversion |
-| Commission | environ 1,5 % à 2 % par transaction |
-| Intégration | API REST, webhooks, tableau de bord en français |
+| Devise          | FCFA (XOF) natif, sans conversion                                     |
+| Commission      | environ 1,5 % à 2 % par transaction                                   |
+| Intégration     | API REST, webhooks, tableau de bord en français                       |
 
 Un agrégateur unique évite d'intégrer quatre SDK mobile money séparés. À noter :
 depuis le 30 juin 2026, les prestataires encaissant en FCFA doivent être reliés au
@@ -261,8 +261,8 @@ et à jour de cette obligation.
 
 1. Va sur **https://cinetpay.com** puis **Créer un compte** (ou
    `https://app.cinetpay.com` pour le tableau de bord).
-2. Crée un **compte marchand** en précisant ton activité : *billetterie
-   événementielle*.
+2. Crée un **compte marchand** en précisant ton activité : _billetterie
+   événementielle_.
 3. Prépare les pièces justificatives :
    - pièce d'identité du représentant ;
    - justificatif d'entreprise (RCCM / DFE) **ou** compte personnel selon le
@@ -276,13 +276,13 @@ et à jour de cette obligation.
 ### 6.3 Récupérer les trois clés
 
 Dans ton tableau de bord CinetPay : **Intégration → Clés d'API** (ou
-*Paramètres → API*).
+_Paramètres → API_).
 
-| Champ CinetPay | Variable à renseigner |
-|---|---|
-| `apikey` | `CINETPAY_API_KEY` |
-| `site_id` | `CINETPAY_SITE_ID` |
-| `secret_key` *(clé de signature)* | `CINETPAY_SECRET_KEY` |
+| Champ CinetPay                    | Variable à renseigner |
+| --------------------------------- | --------------------- |
+| `apikey`                          | `CINETPAY_API_KEY`    |
+| `site_id`                         | `CINETPAY_SITE_ID`    |
+| `secret_key` _(clé de signature)_ | `CINETPAY_SECRET_KEY` |
 
 Puis :
 
@@ -347,6 +347,44 @@ Pour éviter qu'un webhook forgé ou rejoué ne délivre un billet :
 Conséquence : même si quelqu'un découvre l'URL du webhook, il ne peut pas
 s'offrir des billets.
 
+### 6.8 GeniusPay (alternative)
+
+L'application peut aussi utiliser GeniusPay avec son checkout hébergé. Le mode
+checkout laisse GeniusPay afficher les moyens activés sur le compte marchand ;
+aucun `payment_method` n'est envoyé par l'application. Active dans le tableau de
+bord marchand **Wave, Orange Money, MTN, Moov et cartes** pour le site concerné.
+
+Dans **Paramètres → API**, récupère les clés Sandbox, puis ajoute-les aux
+variables d'environnement du serveur (pas dans le navigateur ni dans Git) :
+
+```dotenv
+PAYMENT_PROVIDER=geniuspay
+GENIUSPAY_API_KEY=pk_sandbox_...
+GENIUSPAY_API_SECRET=sk_sandbox_...
+GENIUSPAY_WEBHOOK_SECRET=whsec_...
+GENIUSPAY_BASE_URL=https://geniuspay.ci/api/v1/merchant
+```
+
+Si le tableau de bord GeniusPay fournit une URL API Sandbox dédiée, renseigne-la
+dans `GENIUSPAY_BASE_URL`. Les clés et le secret webhook ne doivent jamais être
+copiés dans le chat ni dans une variable `NEXT_PUBLIC_*`.
+
+Après déploiement, crée un webhook GeniusPay vers :
+
+```text
+https://ton-domaine.ci/api/webhooks/geniuspay
+```
+
+Abonne-le aux événements `payment.success`, `payment.failed`,
+`payment.cancelled` et `payment.expired`. Le serveur vérifie la signature HMAC et
+son horodatage, puis relit le statut, le montant et la devise via l'API GeniusPay
+avant de confirmer la commande et de générer les billets.
+
+Teste d'abord un paiement accepté, un refus et une annulation en Sandbox. Après
+validation, remplace les trois secrets par ceux de Production, garde
+`GENIUSPAY_BASE_URL` selon l'URL de production fournie par GeniusPay, puis
+redéploie avec `PAYMENT_PROVIDER=geniuspay`.
+
 ---
 
 ## 7. Vercel (hébergement)
@@ -357,13 +395,13 @@ s'offrir des billets.
 2. **Add New → Project**, puis importe ton dépôt GitHub privé.
 3. Vercel détecte Next.js automatiquement. **Ne modifie rien** :
 
-   | Réglage | Valeur |
-   |---|---|
-   | Framework Preset | Next.js |
-   | Build Command | `npm run build` |
-   | Output Directory | `.next` |
-   | Install Command | `npm install` |
-   | Node.js Version | **22.x** (Settings → General) |
+   | Réglage          | Valeur                        |
+   | ---------------- | ----------------------------- |
+   | Framework Preset | Next.js                       |
+   | Build Command    | `npm run build`               |
+   | Output Directory | `.next`                       |
+   | Install Command  | `npm install`                 |
+   | Node.js Version  | **22.x** (Settings → General) |
 
 4. **Ne clique pas encore sur Deploy** : ajoute d'abord les variables.
 
@@ -372,26 +410,30 @@ s'offrir des billets.
 **Settings → Environment Variables**. Ajoute chaque variable pour **Production**,
 **Preview** et **Development** selon la colonne indiquée :
 
-| Nom | Valeur | Environnements |
-|---|---|---|
-| `NEXT_PUBLIC_APP_URL` | `https://ton-domaine.ci` | Production |
-| `NEXT_PUBLIC_APP_NAME` | `Rassemble` | Tous |
-| `NEXT_PUBLIC_CURRENCY` | `XOF` | Tous |
-| `PLATFORM_COMMISSION_RATE` | `0.05` | Tous |
-| `PAYMENT_PROVIDER` | `cinetpay` | Production |
-| `EMAIL_PROVIDER` | `resend` | Production |
-| `NEXT_PUBLIC_SUPABASE_URL` | *(étape 3.2)* | Tous |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *(étape 3.2)* | Tous |
-| `SUPABASE_SERVICE_ROLE_KEY` | *(étape 3.2)* | Production, Preview |
-| `RESEND_API_KEY` | *(étape 5.3)* | Production |
-| `EMAIL_FROM` | `Rassemble <billets@ton-domaine.ci>` | Production |
-| `EMAIL_REPLY_TO` | `support@ton-domaine.ci` | Production |
-| `CINETPAY_API_KEY` | *(étape 6.3)* | Production |
-| `CINETPAY_SITE_ID` | *(étape 6.3)* | Production |
-| `CINETPAY_SECRET_KEY` | *(étape 6.3)* | Production |
-| `CINETPAY_BASE_URL` | `https://api-checkout.cinetpay.com` | Tous |
-| `CINETPAY_CHANNELS` | `ALL` | Tous |
-| `CRON_SECRET` | chaîne aléatoire longue | Production |
+| Nom                             | Valeur                                 | Environnements      |
+| ------------------------------- | -------------------------------------- | ------------------- |
+| `NEXT_PUBLIC_APP_URL`           | `https://ton-domaine.ci`               | Production          |
+| `NEXT_PUBLIC_APP_NAME`          | `Rassemble`                            | Tous                |
+| `NEXT_PUBLIC_CURRENCY`          | `XOF`                                  | Tous                |
+| `PLATFORM_COMMISSION_RATE`      | `0.05`                                 | Tous                |
+| `PAYMENT_PROVIDER`              | `cinetpay` ou `geniuspay`              | Production          |
+| `EMAIL_PROVIDER`                | `resend`                               | Production          |
+| `NEXT_PUBLIC_SUPABASE_URL`      | _(étape 3.2)_                          | Tous                |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | _(étape 3.2)_                          | Tous                |
+| `SUPABASE_SERVICE_ROLE_KEY`     | _(étape 3.2)_                          | Production, Preview |
+| `RESEND_API_KEY`                | _(étape 5.3)_                          | Production          |
+| `EMAIL_FROM`                    | `Rassemble <billets@ton-domaine.ci>`   | Production          |
+| `EMAIL_REPLY_TO`                | `support@ton-domaine.ci`               | Production          |
+| `CINETPAY_API_KEY`              | _(étape 6.3)_                          | Production          |
+| `CINETPAY_SITE_ID`              | _(étape 6.3)_                          | Production          |
+| `CINETPAY_SECRET_KEY`           | _(étape 6.3)_                          | Production          |
+| `CINETPAY_BASE_URL`             | `https://api-checkout.cinetpay.com`    | Tous                |
+| `CINETPAY_CHANNELS`             | `ALL`                                  | Tous                |
+| `GENIUSPAY_API_KEY`             | _(étape 6.8)_                          | Production          |
+| `GENIUSPAY_API_SECRET`          | _(étape 6.8)_                          | Production          |
+| `GENIUSPAY_WEBHOOK_SECRET`      | _(étape 6.8)_                          | Production          |
+| `GENIUSPAY_BASE_URL`            | `https://geniuspay.ci/api/v1/merchant` | Tous                |
+| `CRON_SECRET`                   | chaîne aléatoire longue                | Production          |
 
 Pour générer un `CRON_SECRET` solide :
 
@@ -409,9 +451,9 @@ Clique sur **Deploy**. Vercel compile et expose l'application sur une URL du typ
 **Settings → Domains → Add**, ajoute `ton-domaine.ci` et `www.ton-domaine.ci`.
 Vercel indique les enregistrements à créer chez ton registrar :
 
-| Type | Nom | Valeur |
-|---|---|---|
-| `A` | `@` | `76.76.21.21` |
+| Type    | Nom   | Valeur                 |
+| ------- | ----- | ---------------------- |
+| `A`     | `@`   | `76.76.21.21`          |
 | `CNAME` | `www` | `cname.vercel-dns.com` |
 
 Attends la vérification : de quelques minutes à quelques heures. Le certificat
@@ -422,7 +464,7 @@ HTTPS est émis automatiquement.
 Une fois le domaine actif :
 
 1. **Supabase** → Authentication → URL Configuration : `https://ton-domaine.ci`
-   en *Site URL*, et `https://ton-domaine.ci/**` dans les *Redirect URLs*.
+   en _Site URL_, et `https://ton-domaine.ci/**` dans les _Redirect URLs_.
 2. **CinetPay** → mets à jour l'URL du site si tu avais utilisé l'URL Vercel
    temporaire.
 3. **Vercel** → vérifie `NEXT_PUBLIC_APP_URL`, puis **Redeploy**.
@@ -455,21 +497,21 @@ l'interface.
 
 Reproduis le scénario de validation du cahier des charges, dans cet ordre :
 
-| # | Action | Attendu |
-|---|---|---|
-| 1 | Un organisateur crée un événement et ses billets | Visible après publication |
-| 2 | Un visiteur non connecté ouvre la page événement | Détails, programme et billets visibles |
-| 3 | Le visiteur s'inscrit puis achète un billet | Redirection CinetPay, paiement accepté |
-| 4 | Retour sur la plateforme | Commande `paid`, billets générés, **email avec QR reçu** |
-| 5 | Le participant ouvre son billet | QR affiché, statut « Valide » |
-| 6 | Le participant accède au salon | **Membre automatiquement** |
-| 7 | Il publie un message et une photo | Visibles immédiatement par les membres |
-| 8 | Un second participant se connecte | Il peut demander une connexion |
-| 9 | L'organisateur scanne le QR à l'entrée | ✅ « Accès autorisé » |
-| 10 | Re-scan du même billet | ⚠️ « Ce billet a déjà été utilisé » |
-| 11 | Scan d'un billet d'un autre événement | ❌ « appartient à un autre événement » |
-| 12 | Tableau de bord organisateur | Ventes, entrées et revenus cohérents |
-| 13 | Après l'événement | Salon accessible, historique conservé |
+| #   | Action                                           | Attendu                                                  |
+| --- | ------------------------------------------------ | -------------------------------------------------------- |
+| 1   | Un organisateur crée un événement et ses billets | Visible après publication                                |
+| 2   | Un visiteur non connecté ouvre la page événement | Détails, programme et billets visibles                   |
+| 3   | Le visiteur s'inscrit puis achète un billet      | Redirection CinetPay, paiement accepté                   |
+| 4   | Retour sur la plateforme                         | Commande `paid`, billets générés, **email avec QR reçu** |
+| 5   | Le participant ouvre son billet                  | QR affiché, statut « Valide »                            |
+| 6   | Le participant accède au salon                   | **Membre automatiquement**                               |
+| 7   | Il publie un message et une photo                | Visibles immédiatement par les membres                   |
+| 8   | Un second participant se connecte                | Il peut demander une connexion                           |
+| 9   | L'organisateur scanne le QR à l'entrée           | ✅ « Accès autorisé »                                    |
+| 10  | Re-scan du même billet                           | ⚠️ « Ce billet a déjà été utilisé »                      |
+| 11  | Scan d'un billet d'un autre événement            | ❌ « appartient à un autre événement »                   |
+| 12  | Tableau de bord organisateur                     | Ventes, entrées et revenus cohérents                     |
+| 13  | Après l'événement                                | Salon accessible, historique conservé                    |
 
 Tant que ces 13 étapes passent, le cœur du produit fonctionne.
 
@@ -489,10 +531,10 @@ Les routes `/api/cron/*` sont protégées par `CRON_SECRET`. Déclare-les dans
 }
 ```
 
-| Tâche | Rôle | Fréquence |
-|---|---|---|
-| `event-reminders` | Envoie le rappel aux participants la veille | quotidienne |
-| `expire-tickets` | Expire les billets non payés, clôt les commandes abandonnées | quotidienne |
+| Tâche             | Rôle                                                         | Fréquence   |
+| ----------------- | ------------------------------------------------------------ | ----------- |
+| `event-reminders` | Envoie le rappel aux participants la veille                  | quotidienne |
+| `expire-tickets`  | Expire les billets non payés, clôt les commandes abandonnées | quotidienne |
 
 > Le plan Vercel **Hobby** n'autorise que **2 tâches, une fois par jour**. Pour des
 > rappels plus fréquents, le plan **Pro** (environ 20 $/mois) est nécessaire.
@@ -507,15 +549,15 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://ton-domaine.ci/api/cron/eve
 
 ## 11. Sauvegardes et supervision
 
-| Sujet | Recommandation |
-|---|---|
-| **Sauvegardes base** | Plan Supabase Pro : sauvegardes quotidiennes automatiques, restauration à un instant précis (PITR) en option |
-| **Export supplémentaire** | `pg_dump` hebdomadaire vers un stockage externe |
-| **Erreurs applicatives** | Sentry (`SENTRY_DSN`) — optionnel mais recommandé |
-| **Disponibilité** | Pages de statut Supabase et Vercel, alertes email en cas d'incident |
-| **Emails** | Surveiller **Resend → Metrics** : rebonds < 4 %, spam < 0,08 % |
-| **Paiements** | Réconciliation mensuelle entre `Database → payments` et les relevés CinetPay |
-| **Journal d'audit** | La table `audit_logs` conserve paiements, modération et actions d'administration |
+| Sujet                     | Recommandation                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Sauvegardes base**      | Plan Supabase Pro : sauvegardes quotidiennes automatiques, restauration à un instant précis (PITR) en option |
+| **Export supplémentaire** | `pg_dump` hebdomadaire vers un stockage externe                                                              |
+| **Erreurs applicatives**  | Sentry (`SENTRY_DSN`) — optionnel mais recommandé                                                            |
+| **Disponibilité**         | Pages de statut Supabase et Vercel, alertes email en cas d'incident                                          |
+| **Emails**                | Surveiller **Resend → Metrics** : rebonds < 4 %, spam < 0,08 %                                               |
+| **Paiements**             | Réconciliation mensuelle entre `Database → payments` et les relevés CinetPay                                 |
+| **Journal d'audit**       | La table `audit_logs` conserve paiements, modération et actions d'administration                             |
 
 ---
 
@@ -543,14 +585,14 @@ Avant d'annoncer l'ouverture :
 
 ## Annexe — Coûts mensuels indicatifs
 
-| Poste | Plan | Coût |
-|---|---|---|
-| Supabase | Pro | ~25 $ |
-| Vercel | Hobby (ou Pro pour les crons fréquents) | 0 $ (ou ~20 $) |
-| Resend | Free (100 emails/jour) puis Pro | 0 $ (puis ~20 $) |
-| Domaine | — | ~1 000 FCFA/mois lissé |
-| CinetPay | Commission | ~1,5 % à 2 % par transaction |
-| **Total fixe au démarrage** | | **~25 $ à 45 $/mois** |
+| Poste                       | Plan                                    | Coût                         |
+| --------------------------- | --------------------------------------- | ---------------------------- |
+| Supabase                    | Pro                                     | ~25 $                        |
+| Vercel                      | Hobby (ou Pro pour les crons fréquents) | 0 $ (ou ~20 $)               |
+| Resend                      | Free (100 emails/jour) puis Pro         | 0 $ (puis ~20 $)             |
+| Domaine                     | —                                       | ~1 000 FCFA/mois lissé       |
+| CinetPay                    | Commission                              | ~1,5 % à 2 % par transaction |
+| **Total fixe au démarrage** |                                         | **~25 $ à 45 $/mois**        |
 
 Les commissions CinetPay sont variables et proportionnelles au chiffre
 d'affaires, donc neutres tant qu'il n'y a pas de ventes.

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient, getCurrentProfile } from "@/lib/supabase/server";
 
 async function requireAdmin() {
@@ -157,5 +158,147 @@ export async function setProfileVerificationAction(userId: string, verified: boo
       : verified
         ? "Profil vérifié."
         : "Vérification du profil retirée.",
+  };
+}
+
+/** Attribue ou retire un rôle à un utilisateur, en laissant la base protéger le dernier administrateur. */
+export async function setUserRoleAction(
+  userId: string,
+  role: "participant" | "organizer" | "admin",
+  granted: boolean,
+): Promise<{ error?: string; success?: string }> {
+  const actor = await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return { error: "Utilisateur invalide." };
+  if (role === "admin" && !granted && userId === actor.id) {
+    return { error: "Vous ne pouvez pas retirer votre propre accès administrateur." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc("admin_set_user_role", {
+    p_user_id: userId,
+    p_role: role,
+    p_grant: granted,
+  });
+  if (error) {
+    console.error("[setUserRoleAction] Modification du rôle impossible:", error);
+    if (error.message.includes("LAST_ADMIN")) {
+      return { error: "Le dernier administrateur de la plateforme ne peut pas être retiré." };
+    }
+    if (error.message.includes("USER_NOT_FOUND")) return { error: "Cet utilisateur n’existe plus." };
+    return { error: "Le rôle n’a pas pu être modifié. Actualisez la page puis réessayez." };
+  }
+
+  revalidatePath("/admin/utilisateurs");
+  revalidatePath(`/admin/utilisateurs/${userId}`);
+  return {
+    success: granted
+      ? `Le rôle ${role === "admin" ? "Administrateur" : role === "organizer" ? "Organisateur" : "Participant"} a été attribué.`
+      : `Le rôle ${role === "admin" ? "Administrateur" : role === "organizer" ? "Organisateur" : "Participant"} a été retiré.`,
+  };
+}
+
+/** Supprime un événement sans ventes, ou le retire de la plateforme en conservant les commandes. */
+export async function deleteAdminEventAction(
+  eventId: string,
+): Promise<{ error?: string; success?: string; warning?: string }> {
+  await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(eventId)) return { error: "Événement invalide." };
+
+  const admin = createSupabaseAdminClient();
+  const [{ data: event, error: eventError }, { count: orderCount, error: ordersError }] = await Promise.all([
+    admin.from("events").select("id, title, slug, status").eq("id", eventId).maybeSingle(),
+    admin.from("orders").select("id", { count: "exact", head: true }).eq("event_id", eventId),
+  ]);
+
+  if (eventError || !event) return { error: "Événement introuvable." };
+  if (ordersError) return { error: "Impossible de vérifier les ventes de cet événement." };
+
+  const supabase = await createSupabaseServerClient();
+  const hasOrders = (orderCount ?? 0) > 0;
+  if (hasOrders) {
+    const { error } = await admin
+      .from("events")
+      .update({
+        status: "cancelled",
+        cancelled_at: new Date().toISOString(),
+        cancellation_reason: "Événement retiré par l’administration.",
+      })
+      .eq("id", eventId);
+    if (error) return { error: "L’événement n’a pas pu être retiré de la plateforme." };
+  } else {
+    const { error } = await admin.from("events").delete().eq("id", eventId);
+    if (error) {
+      console.error("[deleteAdminEventAction] Suppression refusée:", error);
+      return { error: "L’événement n’a pas pu être supprimé. Vérifiez qu’aucune donnée liée ne bloque l’opération." };
+    }
+  }
+
+  const { error: auditError } = await supabase.rpc("log_audit", {
+    p_action: hasOrders ? "event.remove" : "event.delete",
+    p_entity_type: "event",
+    p_entity_id: eventId,
+    p_event_id: hasOrders ? eventId : null,
+    p_before: { title: event.title, status: event.status, orders: orderCount ?? 0 },
+    p_after: hasOrders ? { status: "cancelled", removed_by_admin: true } : { deleted: true },
+  });
+
+  revalidatePath("/admin/evenements");
+  revalidatePath("/explorer");
+  revalidatePath("/");
+  revalidatePath(`/evenements/${event.slug}`);
+  return {
+    success: hasOrders
+      ? "Événement retiré de la plateforme. Les commandes et les billets sont conservés."
+      : "Événement supprimé.",
+    warning: auditError ? "Le journal d’audit n’a pas pu être mis à jour." : undefined,
+  };
+}
+
+/** Bloque un compte dans Supabase Auth ou lui rend l'accès. */
+export async function setUserBanAction(
+  userId: string,
+  banned: boolean,
+): Promise<{ error?: string; success?: string }> {
+  const actor = await requireAdmin();
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return { error: "Utilisateur invalide." };
+  if (banned && userId === actor.id) return { error: "Vous ne pouvez pas bannir votre propre compte." };
+
+  const admin = createSupabaseAdminClient();
+  const [{ data: target, error: userError }, { data: targetRoles, error: rolesError }] = await Promise.all([
+    admin.auth.admin.getUserById(userId),
+    admin.from("user_roles").select("role").eq("user_id", userId),
+  ]);
+
+  if (userError || !target.user) return { error: "Utilisateur introuvable dans les comptes de la plateforme." };
+  if (rolesError) return { error: "Impossible de vérifier les rôles de cet utilisateur." };
+  if (banned && targetRoles?.some((role) => role.role === "admin")) {
+    return { error: "Un compte administrateur ne peut pas être banni depuis cette action." };
+  }
+
+  const { error } = await admin.auth.admin.updateUserById(userId, {
+    ban_duration: banned ? "876000h" : "none",
+  });
+  if (error) {
+    console.error("[setUserBanAction] Mise à jour du bannissement impossible:", error);
+    return { error: "Le statut de bannissement n’a pas pu être mis à jour." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error: auditError } = await supabase.rpc("log_audit", {
+    p_action: banned ? "user.ban" : "user.unban",
+    p_entity_type: "user",
+    p_entity_id: userId,
+    p_before: { banned: Boolean(target.user.banned_until && Date.parse(target.user.banned_until) > Date.now()) },
+    p_after: { banned, by: actor.id },
+  });
+
+  revalidatePath("/admin/utilisateurs");
+  revalidatePath(`/admin/utilisateurs/${userId}`);
+  return {
+    success: auditError
+      ? "Statut du compte mis à jour, mais le journal d’audit n’a pas pu être écrit."
+      : banned
+        ? "Compte banni. L’utilisateur ne peut plus ouvrir de nouvelle session."
+        : "Bannissement retiré. L’utilisateur peut se reconnecter.",
   };
 }

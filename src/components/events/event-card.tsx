@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BadgeCheck, MapPin } from "lucide-react";
 
 import { AccessLevelBadge } from "@/components/ui/badge";
+import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { CURRENCY_LABEL, getCategoryLabel } from "@/lib/constants";
 import { formatDate, formatNumber } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
@@ -55,12 +56,13 @@ export function EventCard({ event }: { event: PublishedEventView }) {
       <article className="border-border border-t-primary bg-surface group-hover:border-primary flex h-full flex-col overflow-hidden border border-t-2 transition-colors duration-150">
         <div className="border-border bg-bg-muted relative aspect-16/10 overflow-hidden border-b">
           {imageUrl ? (
-            // Les images Supabase sont servies directement pour éviter le proxy Next.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <PublicStorageImage
               src={imageUrl}
               alt=""
               className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-[1.02]"
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              fill
+              quality={68}
             />
           ) : (
             <div className="text-fg-subtle flex size-full items-center justify-center text-sm">
@@ -99,14 +101,15 @@ export function EventCard({ event }: { event: PublishedEventView }) {
           {gallery.length > 0 && (
             <div className="mb-2 flex gap-1">
               {gallery.slice(0, 3).map((url, index) => (
-                <img
+                <PublicStorageImage
                   key={`${event.id}-gallery-${index}`}
                   src={url}
-                  alt={`Gallery ${index + 1}`}
+                  alt=""
                   width={40}
                   height={40}
+                  sizes="40px"
+                  quality={48}
                   className="border-border/50 bg-bg-muted rounded-md border object-cover"
-                  style={{ flexShrink: 0 }}
                 />
               ))}
             </div>

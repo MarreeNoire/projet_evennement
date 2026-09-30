@@ -25,16 +25,27 @@ export async function getMyNotifications(limit = 50): Promise<MyNotificationView
 
 /** Compteur exact, indépendant de la limite d'affichage de la liste. */
 export async function getUnreadNotificationCount(): Promise<number> {
-  const supabase = await createSupabaseServerClient();
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) return 0;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    if (authError || !userData.user) return 0;
 
-  const { data, error } = await supabase.rpc("unread_notification_count");
-  if (error) {
-    console.error("[getUnreadNotificationCount]", error.message);
+    const { data, error } = await supabase.rpc("unread_notification_count");
+    if (error) {
+      // Une coupure réseau de Supabase ne doit pas faire échouer le rendu de la page.
+      console.warn("[getUnreadNotificationCount] Compteur indisponible:", error.message);
+      return 0;
+    }
+    return data ?? 0;
+  } catch (error) {
+    // Le client Supabase peut lever une exception réseau (`fetch failed`) au lieu
+    // de renvoyer une erreur PostgREST. Le compteur reste facultatif à l'affichage.
+    console.warn(
+      "[getUnreadNotificationCount] Impossible de joindre Supabase:",
+      error instanceof Error ? error.message : error,
+    );
     return 0;
   }
-  return data ?? 0;
 }
 
 /** Préférences du compte courant; RLS restreint la lecture à son propriétaire. */

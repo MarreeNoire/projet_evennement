@@ -3,9 +3,11 @@ import { ArrowLeft, CalendarDays, Mail, MapPin, Phone, ShieldCheck, Ticket, User
 import { notFound } from "next/navigation";
 
 import { ProfileVerificationControl } from "@/components/admin/profile-verification-control";
+import { UserBanControl } from "@/components/admin/user-ban-control";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
   title: "Fiche utilisateur | Administration | Event",
@@ -23,6 +25,10 @@ export default async function AdminUtilisateurDetailPage({ params }: { params: P
     .eq("id", id)
     .maybeSingle();
   if (error || !profile) notFound();
+
+  const { data: authUser } = await createSupabaseAdminClient().auth.admin.getUserById(id);
+  // Le statut doit tenir compte de l’expiration réelle au moment de cette requête serveur.
+  const isBanned = Boolean(authUser.user?.banned_until && Date.parse(authUser.user.banned_until) > Date.now()); // eslint-disable-line react-hooks/purity
 
   const [roleResult, ordersResult, ownedOrgs, memberships] = await Promise.all([
     supabase.from("user_roles").select("role, granted_at").eq("user_id", id).order("granted_at", { ascending: true }),
@@ -53,6 +59,7 @@ export default async function AdminUtilisateurDetailPage({ params }: { params: P
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="font-display text-2xl font-bold tracking-tight">{profile.display_name || profile.full_name || "Compte sans nom"}</h1>
           {profile.is_verified ? <Badge variant="success"><ShieldCheck className="size-3" /> Vérifié</Badge> : <Badge variant="neutral">Non vérifié</Badge>}
+          {isBanned ? <Badge variant="danger">Banni</Badge> : null}
         </div>
         {profile.username ? <p className="mt-1 text-sm text-fg-muted">@{profile.username}</p> : null}
       </header>
@@ -87,6 +94,21 @@ export default async function AdminUtilisateurDetailPage({ params }: { params: P
             <CardContent className="space-y-3">
               <p className="text-sm text-fg-muted">Le badge de vérification est visible dans l’application. Chaque changement est conservé dans le journal admin.</p>
               <ProfileVerificationControl userId={profile.id} isVerified={profile.is_verified} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle className="text-base">Accès au compte</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-fg-muted">
+                {isBanned
+                  ? "Ce compte est banni et ne peut plus ouvrir de nouvelle session."
+                  : "Bannissez ce compte pour empêcher l’utilisateur d’ouvrir de nouvelles sessions."}
+              </p>
+              <UserBanControl
+                userId={profile.id}
+                userName={profile.display_name || profile.full_name || profile.email || "cet utilisateur"}
+                isBanned={isBanned}
+              />
             </CardContent>
           </Card>
         </div>

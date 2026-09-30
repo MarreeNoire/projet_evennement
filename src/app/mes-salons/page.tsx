@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { PhaseTag } from "@/components/social/phase-tag";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { ButtonLink } from "@/components/ui/button";
+import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { EmptyState } from "@/components/ui/states";
 import { ROUTES } from "@/lib/constants";
 import { getEventsByIds, getUserSalons, type SalonEventInfo } from "@/lib/salons/queries";
@@ -162,12 +163,13 @@ function SalonStub({
     >
       <div className="bg-bg-muted border-border relative h-36 overflow-hidden border-b">
         {event?.cover_url ? (
-          // Les couvertures Supabase sont servies directement, sans proxy Next.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <PublicStorageImage
             src={event.cover_url}
             alt=""
             className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            sizes="(min-width: 640px) 50vw, 100vw"
+            fill
+            quality={58}
           />
         ) : date ? (
           <div className="flex size-full items-center justify-between px-6">

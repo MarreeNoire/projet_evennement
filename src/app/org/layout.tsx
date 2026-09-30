@@ -37,24 +37,18 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
   const profile = await getCurrentProfile();
   if (!profile) redirect("/connexion?redirect=/org");
 
-  let canAccessOrganizationSpace = profile.roles.includes("organizer");
-  if (!canAccessOrganizationSpace) {
-    const supabase = await createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const [{ data: owned }, { data: memberships }] = await Promise.all([
-        supabase.from("organizations").select("id").eq("owner_id", user.id).limit(1),
-        supabase
-          .from("organization_members")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("status", "active")
-          .in("role", ["owner", "manager", "checkin_agent"])
-          .limit(1),
-      ]);
-      canAccessOrganizationSpace = Boolean(owned?.length || memberships?.length);
-    }
-  }
+  const supabase = await createSupabaseServerClient();
+  const [{ data: owned }, { data: memberships }] = await Promise.all([
+    supabase.from("organizations").select("id").eq("owner_id", profile.id).limit(1),
+    supabase
+      .from("organization_members")
+      .select("id")
+      .eq("user_id", profile.id)
+      .eq("status", "active")
+      .in("role", ["owner", "manager", "checkin_agent"])
+      .limit(1),
+  ]);
+  const canAccessOrganizationSpace = Boolean(owned?.length || memberships?.length);
 
   return (
     <div className="flex min-h-dvh flex-col bg-bg">

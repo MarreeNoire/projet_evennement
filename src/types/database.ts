@@ -21,13 +21,7 @@ export type EventStatus = "draft" | "published" | "cancelled" | "completed";
 export type TicketStatus = "pending" | "paid" | "cancelled" | "refunded" | "used" | "expired";
 export type OrderStatus = "pending" | "paid" | "failed" | "cancelled" | "refunded";
 export type PaymentStatus =
-  | "initiated"
-  | "pending"
-  | "accepted"
-  | "refused"
-  | "cancelled"
-  | "refunded"
-  | "error";
+  "initiated" | "pending" | "accepted" | "refused" | "cancelled" | "refunded" | "error";
 export type SalonPrivacy = "public" | "members" | "private";
 export type PostKind = "post" | "announcement";
 export type ReactionType = "like" | "love" | "fire" | "clap" | "wow";
@@ -48,24 +42,12 @@ export type NotificationType =
   | "report_resolved";
 export type ReportTarget = "post" | "comment" | "user" | "event" | "message";
 export type ReportReason =
-  | "spam"
-  | "harassment"
-  | "hate"
-  | "violence"
-  | "nudity"
-  | "misinformation"
-  | "other";
+  "spam" | "harassment" | "hate" | "violence" | "nudity" | "misinformation" | "other";
 export type ReportStatus = "open" | "reviewing" | "resolved" | "dismissed";
 export type MediaKind = "image" | "video";
 export type DiscountKind = "percentage" | "fixed";
 export type CheckinResult =
-  | "valid"
-  | "invalid"
-  | "already_used"
-  | "wrong_event"
-  | "cancelled"
-  | "refunded"
-  | "unpaid";
+  "valid" | "invalid" | "already_used" | "wrong_event" | "cancelled" | "refunded" | "unpaid";
 
 /* --------------------------------- Tables ---------------------------------- */
 
@@ -590,7 +572,7 @@ export type DatabaseFunctions = {
   highest_access_level: { Args: { event_id: string; user_id?: string }; Returns: AccessLevel };
   is_blocked_between: { Args: { user_a: string; user_b: string }; Returns: boolean };
   is_conversation_member: { Args: { conversation_id: string; user_id?: string }; Returns: boolean };
-  unread_notification_count: { Args: { target_user?: string }; Returns: number };
+  unread_notification_count: { Args: Record<string, never>; Returns: number };
   ensure_event_salon: { Args: { target_event_id: string }; Returns: string };
   generate_tickets_for_order: { Args: { target_order_id: string }; Returns: number };
   log_audit: {
@@ -603,6 +585,10 @@ export type DatabaseFunctions = {
       p_before?: Json | null;
       p_after?: Json | null;
     };
+    Returns: undefined;
+  };
+  admin_set_user_role: {
+    Args: { p_user_id: string; p_role: UserRole; p_grant: boolean };
     Returns: undefined;
   };
   resolve_report: {

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
@@ -47,7 +48,7 @@ export async function createSupabaseServerClient() {
  * Toujours utiliser `auth.getUser()` (et non `getSession()`) côté serveur :
  * c'est la seule méthode qui valide le jeton auprès de Supabase.
  */
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   if (!env.supabase.url || !env.supabase.anonKey) return null;
 
   try {
@@ -61,10 +62,10 @@ export async function getCurrentUser() {
     console.error("Error in getCurrentUser:", error);
     return null;
   }
-}
+});
 
 /** Profil complet + rôles de l'utilisateur connecté. */
-export async function getCurrentProfile() {
+export const getCurrentProfile = cache(async function getCurrentProfile() {
   const user = await getCurrentUser();
   if (!user) return null;
 
@@ -90,4 +91,4 @@ export async function getCurrentProfile() {
     ...profile,
     roles: rolesList,
   };
-}
+});

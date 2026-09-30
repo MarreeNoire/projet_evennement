@@ -4,6 +4,7 @@ import QRCode from "react-qr-code";
 
 import { AccessLevelBadge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
+import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { EmptyState } from "@/components/ui/states";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { ROUTES, TICKET_STATUS_LABELS } from "@/lib/constants";
@@ -70,12 +71,13 @@ function TicketStub({ ticket }: { ticket: Record<string, any> }) {
       {/* Affiche */}
       <div className="bg-bg-muted relative flex min-h-32 flex-1 flex-col justify-between gap-6 overflow-hidden p-5 sm:p-6">
         {ticket.event_cover_url ? (
-          // Les couvertures Supabase sont servies directement, sans proxy Next.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <PublicStorageImage
             src={ticket.event_cover_url}
             alt=""
             className="absolute inset-0 size-full object-cover opacity-25"
+            sizes="(min-width: 640px) 65vw, 100vw"
+            fill
+            quality={55}
           />
         ) : null}
         <div className="relative">

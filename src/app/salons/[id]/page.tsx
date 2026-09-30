@@ -8,6 +8,7 @@ import { PostCard } from "@/components/social/post-card";
 import { SocialShell } from "@/components/social/social-shell";
 import { Avatar, AvatarGroup } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
+import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { EmptyState } from "@/components/ui/states";
 import { ROUTES, SALON_PRIVACY_LABELS, SALON_TABS } from "@/lib/constants";
 import {
@@ -85,12 +86,13 @@ export default async function SalonDetailPage({
       {/* Affiche du salon */}
       <header className="bg-surface-raised relative overflow-hidden rounded-lg p-6 sm:p-10">
         {event?.cover_url ? (
-          // Les couvertures Supabase sont servies directement, sans proxy Next.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <PublicStorageImage
             src={event.cover_url}
             alt=""
             className="absolute inset-0 size-full object-cover opacity-25"
+            sizes="100vw"
+            fill
+            quality={55}
           />
         ) : null}
         <div className="relative">
@@ -254,6 +256,8 @@ export default async function SalonDetailPage({
                       src={photo.url}
                       alt={photo.caption || "Photo partagée dans le salon"}
                       className="size-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </li>
                 ))}

@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ButtonLink } from "@/components/ui/button";
 import { APP_NAME, CURRENCY_LABEL, PLATFORM_COMMISSION_RATE, ROUTES } from "@/lib/constants";
-import { getCurrentProfile } from "@/lib/supabase/server";
+import { createSupabaseServerClient, getCurrentProfile } from "@/lib/supabase/server";
 import { BecomeOrganizerForm } from "@/components/auth/become-organizer-form";
 
 export const metadata: Metadata = { title: "Devenir organisateur | Event" };
@@ -79,7 +79,15 @@ const PLANS = [
 
 export default async function BecomeOrganizerPage() {
   const profile = await getCurrentProfile();
-  const isOrganizer = profile?.roles.includes("organizer");
+  let hasOrganization = false;
+  if (profile) {
+    const supabase = await createSupabaseServerClient();
+    const [{ data: owned }, { data: memberships }] = await Promise.all([
+      supabase.from("organizations").select("id").eq("owner_id", profile.id).limit(1),
+      supabase.from("organization_members").select("id").eq("user_id", profile.id).eq("status", "active").limit(1),
+    ]);
+    hasOrganization = Boolean(owned?.length || memberships?.length);
+  }
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -104,7 +112,7 @@ export default async function BecomeOrganizerPage() {
 
             <div className="flex flex-col gap-4">
               {profile ? (
-                isOrganizer ? (
+                hasOrganization ? (
                   <div className="rounded-xl border border-success/30 bg-success-subtle/20 p-6 space-y-4 text-center">
                     <p className="font-bold text-lg text-fg">Vous êtes déjà organisateur !</p>
                     <p className="text-sm text-fg-muted">

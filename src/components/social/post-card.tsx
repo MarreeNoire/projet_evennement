@@ -96,6 +96,8 @@ export function PostCard({
                     src={image.url}
                     alt={`Photo partagée par ${authorName}`}
                     className="size-full object-cover transition-transform duration-300 hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </li>
               ))}
