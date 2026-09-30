@@ -2,7 +2,46 @@
 
 import { revalidatePath } from "next/cache";
 
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+type AdminSupabaseClient = ReturnType<typeof createSupabaseAdminClient>;
+
+async function canManageOrganizationWithAdmin(
+  admin: AdminSupabaseClient,
+  organizationId: string,
+  userId: string,
+): Promise<boolean> {
+  const [
+    { data: organization, error: organizationError },
+    { data: memberships, error: membershipError },
+    { data: platformAdmins, error: rolesError },
+  ] = await Promise.all([
+    admin.from("organizations").select("id, owner_id").eq("id", organizationId).maybeSingle(),
+    admin
+      .from("organization_members")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .in("role", ["owner", "manager"]),
+    admin.from("user_roles").select("user_id").eq("user_id", userId).eq("role", "admin"),
+  ]);
+
+  if (organizationError || membershipError || rolesError) {
+    console.error("[canManageOrganizationWithAdmin] Permission lookup failed:", {
+      organizationError,
+      membershipError,
+      rolesError,
+    });
+    return false;
+  }
+
+  return Boolean(
+    organization &&
+      (organization.owner_id === userId || memberships?.length || platformAdmins?.length),
+  );
+}
 
 export interface CreateEventDraftTicketInput {
   name: string;
@@ -197,6 +236,15 @@ export async function createEventForPublishingAction(
       };
     }
 
+    // La création est exécutée avec la clé serveur uniquement après une
+    // vérification explicite du propriétaire, d'un rôle de gestion actif ou
+    // du rôle administrateur. Cela évite que le contexte RLS du Server Action
+    // bloque une création pourtant autorisée.
+    const admin = createSupabaseAdminClient();
+    if (!(await canManageOrganizationWithAdmin(admin, orgId, user.id))) {
+      return { ok: false, error: "Seul le propriétaire, un gestionnaire actif ou un administrateur peut publier un événement." };
+    }
+
     // 3. Générer le slug de l'événement
     const titleSlug =
       input.title
@@ -228,7 +276,7 @@ export async function createEventForPublishingAction(
 
     // La ligne démarre en brouillon uniquement pendant l'envoi Storage. Elle sera
     // publiée dans la même étape que l'association de toutes les images.
-    const { data: event, error: eventError } = await supabase
+    const { data: event, error: eventError } = await admin
       .from("events")
       .insert({
         organization_id: orgId,
@@ -276,13 +324,13 @@ export async function createEventForPublishingAction(
         }));
 
       if (ticketRows.length > 0) {
-        const { error: ticketError } = await supabase
+        const { error: ticketError } = await admin
           .from("ticket_types")
           .insert(ticketRows as any);
 
         if (ticketError) {
           console.error("[createEventForPublishingAction] Ticket creation failed:", ticketError);
-          await supabase.from("events").delete().eq("id", event.id);
+          await admin.from("events").delete().eq("id", event.id);
           return {
             ok: false,
             error: "La billetterie n'a pas pu être enregistrée. L'événement n'a pas été créé.",
@@ -681,14 +729,18 @@ export async function publishEventWithImagesAction(
     const supabase = await createSupabaseServerClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return { ok: false, error: "Reconnectez-vous pour publier l'événement." };
+    const admin = createSupabaseAdminClient();
 
     const [{ data: event, error: eventError }, { data: tickets, error: ticketsError }] = await Promise.all([
-      supabase.from("events").select("id, status, end_at").eq("id", eventId).maybeSingle(),
-      supabase.from("ticket_types").select("id").eq("event_id", eventId).eq("is_active", true).limit(1),
+      admin.from("events").select("id, organization_id, status, end_at").eq("id", eventId).maybeSingle(),
+      admin.from("ticket_types").select("id").eq("event_id", eventId).eq("is_active", true).limit(1),
     ]);
 
     if (eventError || !event) {
       return { ok: false, error: "L'événement n'est pas accessible depuis une organisation que vous gérez." };
+    }
+    if (!(await canManageOrganizationWithAdmin(admin, event.organization_id, user.id))) {
+      return { ok: false, error: "Vous n'êtes pas autorisé à publier cet événement." };
     }
     if (event.status !== "draft") {
       return { ok: false, error: "Cet événement a déjà été publié ou modifié. Actualisez la liste." };
@@ -700,7 +752,7 @@ export async function publishEventWithImagesAction(
       return { ok: false, error: "Ajoutez au moins une formule de billet avant de publier." };
     }
 
-    const { data: published, error: updateError } = await supabase
+    const { data: published, error: updateError } = await admin
       .from("events")
       .update({
         cover_url: coverUrl,
@@ -718,12 +770,12 @@ export async function publishEventWithImagesAction(
       return { ok: false, error: "Les images ont été envoyées, mais la publication n'a pas abouti. Réessayez." };
     }
 
-    const { error: salonError } = await supabase.rpc("ensure_event_salon", {
+    const { error: salonError } = await admin.rpc("ensure_event_salon", {
       target_event_id: eventId,
     });
 
     if (salonError) {
-      await supabase
+      await admin
         .from("events")
         .update({ status: "draft", published_at: null } as any)
         .eq("id", eventId)
@@ -753,8 +805,18 @@ export async function discardUnpublishedEventAction(eventId: string): Promise<Up
     const supabase = await createSupabaseServerClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return { ok: false, error: "Reconnectez-vous pour terminer le nettoyage." };
+    const admin = createSupabaseAdminClient();
+    const { data: event, error: eventError } = await admin
+      .from("events")
+      .select("organization_id")
+      .eq("id", eventId)
+      .eq("status", "draft")
+      .maybeSingle();
+    if (eventError || !event || !(await canManageOrganizationWithAdmin(admin, event.organization_id, user.id))) {
+      return { ok: false, error: "L'événement temporaire n'a pas pu être supprimé." };
+    }
 
-    const { data, error } = await supabase
+    const { data, error } = await admin
       .from("events")
       .delete()
       .eq("id", eventId)
