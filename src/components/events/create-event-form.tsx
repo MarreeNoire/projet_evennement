@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Alert } from "@/components/ui/states";
 import { CATEGORIES } from "@/lib/constants";
-import { saveEventDraftAction, setEventStatusAction, updateEventCoverAction, updateEventGalleryAction } from "@/lib/events/actions";
+import { saveEventDraftAction, updateEventCoverAction, updateEventGalleryAction } from "@/lib/events/actions";
 import { uploadEventCover } from "@/lib/events/upload-cover";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -103,21 +103,19 @@ export function CreateEventForm() {
     }, delay);
   }
 
-  async function savePendingImages(eventId: string): Promise<string | null> {
-    if (!pendingCover && pendingGallery.length === 0) return null;
+  async function savePendingImages(eventId: string, publishAfterCover: boolean): Promise<string | null> {
+    if (!pendingCover) return "Ajoutez une image de couverture avant d’enregistrer l’événement.";
 
     setUploadState("Envoi des images…");
     try {
       let coverUrl: string | null = null;
       const galleryUrls: string[] = [];
 
-      if (pendingCover) {
-        const upload = await uploadEventCover(pendingCover.file, eventId);
-        if (!upload.ok || !upload.url) {
-          return upload.error ?? "L’image de couverture n’a pas pu être envoyée.";
-        }
-        coverUrl = upload.url;
+      const coverUpload = await uploadEventCover(pendingCover.file, eventId);
+      if (!coverUpload.ok || !coverUpload.url) {
+        return coverUpload.error ?? "L’image de couverture n’a pas pu être envoyée.";
       }
+      coverUrl = coverUpload.url;
 
       for (const item of pendingGallery) {
         const upload = await uploadEventCover(item.file, eventId);
@@ -127,14 +125,14 @@ export function CreateEventForm() {
         galleryUrls.push(upload.url);
       }
 
-      if (coverUrl) {
-        const result = await updateEventCoverAction(eventId, coverUrl);
-        if (!result.ok) return result.error ?? "La couverture n’a pas pu être associée à l’événement.";
-      }
-
       if (galleryUrls.length > 0) {
         const result = await updateEventGalleryAction(eventId, galleryUrls);
         if (!result.ok) return result.error ?? "La galerie n’a pas pu être associée à l’événement.";
+      }
+
+      const coverResult = await updateEventCoverAction(eventId, coverUrl, publishAfterCover);
+      if (!coverResult.ok) {
+        return coverResult.error ?? "La couverture n’a pas pu être associée à l’événement.";
       }
 
       return null;
@@ -157,6 +155,11 @@ export function CreateEventForm() {
 
     if (!startAt) {
       setError("Veuillez indiquer au moins la date et l'heure de début.");
+      return;
+    }
+
+    if (!pendingCover) {
+      setError("Ajoutez une image de couverture avant de créer l’événement, même pour l’enregistrer en brouillon.");
       return;
     }
 
@@ -205,7 +208,6 @@ export function CreateEventForm() {
           description,
           startAt,
           endAt,
-          publishNow,
           tickets: tickets.map((t) => ({
             name: t.name,
             description: t.description || undefined,
@@ -217,10 +219,10 @@ export function CreateEventForm() {
 
         if (res.ok) {
           if (res.eventId) {
-            const imageError = await savePendingImages(res.eventId);
+            const imageError = await savePendingImages(res.eventId, publishNow);
             if (imageError) {
               setRecoveryHref(`/org/evenements/${res.eventId}`);
-              setError(`${publishNow ? "L’événement est publié" : "L’événement a été enregistré en brouillon"}, mais les images n’ont pas été sauvegardées : ${imageError}`);
+              setError(`L’événement a été enregistré en brouillon, mais sa couverture n’a pas pu être enregistrée${publishNow ? " ou il n’a pas pu être publié" : ""} : ${imageError}`);
               return;
             }
           }
@@ -316,20 +318,11 @@ export function CreateEventForm() {
 
               await supabase.from("ticket_types").insert(ticketRows as any);
 
-              const imageError = await savePendingImages(createdEvent.id);
+              const imageError = await savePendingImages(createdEvent.id, publishNow);
               if (imageError) {
                 setRecoveryHref(`/org/evenements/${createdEvent.id}`);
                 setError(`L’événement a été enregistré en brouillon, mais les images n’ont pas été sauvegardées : ${imageError}`);
                 return;
-              }
-
-              if (publishNow) {
-                const publish = await setEventStatusAction(createdEvent.id, "published");
-                if (!publish.ok) {
-                  setRecoveryHref(`/org/evenements/${createdEvent.id}`);
-                  setError(`Les images sont enregistrées, mais la publication a échoué : ${publish.error ?? "raison inconnue"}`);
-                  return;
-                }
               }
 
               setSuccess(

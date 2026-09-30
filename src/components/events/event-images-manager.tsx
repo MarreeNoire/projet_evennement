@@ -217,7 +217,10 @@ export function EventImagesManager({
         {error ? <Alert tone="danger" title="Image impossible" floating onDismiss={() => setError(null)}>{error}</Alert> : null}
         {success ? <Alert tone="success" title="Images à jour">{success}</Alert> : null}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-fg">Image de couverture</p>
+          <p className="text-xs font-semibold text-fg">
+            Image de couverture{mode === "create" ? <span className="text-danger"> *</span> : null}
+            {mode === "create" ? <span className="text-fg-muted font-normal"> · obligatoire</span> : null}
+          </p>
           {displayedCover ? (
             <div className="relative aspect-21/9 overflow-hidden rounded-md border border-border bg-bg-muted">
               <Image src={displayedCover} alt="Couverture" fill className="object-cover" />
@@ -242,7 +245,7 @@ export function EventImagesManager({
             >
               {pending ? <Loader2 className="size-5 animate-spin" aria-hidden="true" /> : <ImagePlus className="size-5" aria-hidden="true" />}
               Ajouter une image de couverture
-              <span className="text-xs text-fg-subtle">JPG, PNG, WebP ou AVIF, 5 Mo maximum</span>
+              <span className="text-xs text-fg-subtle">JPG, PNG, WebP ou AVIF · jusqu&apos;à 20 Mo, optimisation automatique</span>
             </button>
           )}
           <input

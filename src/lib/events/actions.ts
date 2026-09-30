@@ -20,8 +20,6 @@ export interface CreateEventDraftInput {
   description?: string;
   startAt: string;
   endAt?: string;
-  /** Publier dès la création au lieu de créer d'abord un brouillon. */
-  publishNow?: boolean;
   /** URL publique de l'image de couverture (bucket `event-covers`). */
   coverUrl?: string;
   /** URL publiques des images de galerie (bucket `event-covers`). */
@@ -226,8 +224,7 @@ export async function saveEventDraftAction(
         gallery: sanitizeGalleryUrls(input.galleryUrls),
         start_at: startAtIso,
         end_at: endAtIso,
-        status: input.publishNow ? "published" : "draft",
-        published_at: input.publishNow ? new Date().toISOString() : null,
+        status: "draft",
         salon_privacy: "members",
         currency: "XOF",
         min_price: 0,
@@ -269,17 +266,6 @@ export async function saveEventDraftAction(
           );
         }
       }
-    }
-
-    if (input.publishNow) {
-      const { error: salonError } = await supabase.rpc("ensure_event_salon", {
-        target_event_id: event.id,
-      });
-      if (salonError) {
-        console.warn("[saveEventDraftAction] Salon non créé :", salonError.message);
-      }
-      revalidatePath("/explorer");
-      revalidatePath("/");
     }
 
     revalidatePath("/org/evenements");
@@ -640,6 +626,7 @@ export interface UpdateEventCoverResult {
 export async function updateEventCoverAction(
   eventId: string,
   coverUrl: string | null,
+  publishNow = false,
 ): Promise<UpdateEventCoverResult> {
   if (!eventId || !UUID_PATTERN.test(eventId)) {
     return { ok: false, error: "Événement introuvable en base." };
@@ -660,15 +647,37 @@ export async function updateEventCoverAction(
       return { ok: false, error: "Vous devez être connecté." };
     }
 
+    const update: Record<string, unknown> = {
+      cover_url: sanitizeCoverUrl(coverUrl),
+    };
+    if (publishNow) {
+      update.status = "published";
+      update.published_at = new Date().toISOString();
+    }
+
     const { error } = await supabase
       .from("events")
-      .update({ cover_url: sanitizeCoverUrl(coverUrl) } as any)
+      .update(update as any)
       .eq("id", eventId);
 
     if (error) {
       console.error("[updateEventCoverAction] Error:", error);
       return { ok: false, error: `Enregistrement impossible : ${error.message}` };
     }
+
+    if (publishNow) {
+      const { error: salonError } = await supabase.rpc("ensure_event_salon", {
+        target_event_id: eventId,
+      });
+      if (salonError) {
+        console.warn("[updateEventCoverAction] Salon non créé :", salonError.message);
+      }
+      revalidatePath("/explorer");
+      revalidatePath("/");
+      revalidatePath("/evenements/[slug]", "page");
+    }
+    revalidatePath("/org/evenements");
+    revalidatePath("/org");
 
     return { ok: true };
   } catch (err: any) {
