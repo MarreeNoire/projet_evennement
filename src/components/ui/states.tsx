@@ -124,14 +124,18 @@ export function Alert({ tone = "info", title, children, className, floating = fa
       className={cn(
         "flex gap-3 rounded-xl border p-4 text-sm",
         styles.wrapper,
-        floating && "fixed inset-x-3 bottom-24 z-50 mx-auto max-w-xl shadow-xl md:bottom-6",
+        floating &&
+          "fixed inset-x-3 bottom-24 z-50 mx-auto max-w-xl border-danger/50 bg-surface text-fg shadow-xl md:bottom-6",
         className,
       )}
     >
       {/* Symbole + texte : l'information n'est jamais portée par la couleur seule */}
       <span
         aria-hidden="true"
-        className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-current text-xs font-bold"
+        className={cn(
+          "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-current text-xs font-bold",
+          floating && tone === "danger" && "border-danger text-danger",
+        )}
       >
         {styles.symbol}
       </span>
