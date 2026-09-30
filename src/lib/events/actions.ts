@@ -52,9 +52,11 @@ export interface CreateEventDraftResult {
 }
 
 /**
- * Action serveur pour enregistrer un nouvel événement en tant que brouillon.
+ * Crée la fiche de publication temporaire qui permet de téléverser les images
+ * avec les règles Storage existantes. Elle reste invisible et ne doit être
+ * annoncée comme créée qu'après publishEventWithImagesAction.
  */
-export async function saveEventDraftAction(
+export async function createEventForPublishingAction(
   input: CreateEventDraftInput,
 ): Promise<CreateEventDraftResult> {
   if (!input.title || !input.title.trim()) {
@@ -65,9 +67,25 @@ export async function saveEventDraftAction(
     return { ok: false, error: "La date et l'heure de début sont obligatoires." };
   }
 
+  const parsedStart = new Date(input.startAt);
+  const parsedEnd = input.endAt?.trim() ? new Date(input.endAt) : new Date(parsedStart.getTime() + 2 * 3600 * 1000);
+  if (Number.isNaN(parsedStart.getTime()) || parsedStart.getTime() <= Date.now()) {
+    return { ok: false, error: "La date de début doit être valide et dans le futur." };
+  }
+  if (Number.isNaN(parsedEnd.getTime()) || parsedEnd.getTime() <= parsedStart.getTime()) {
+    return { ok: false, error: "La date de fin doit être postérieure à la date de début." };
+  }
+
+  if (!input.tickets?.length) {
+    return { ok: false, error: "Ajoutez au moins une formule de billet avant de publier." };
+  }
+
   for (const [index, ticket] of (input.tickets ?? []).entries()) {
-    if (!Number.isFinite(ticket.price) || ticket.price < 0) {
-      return { ok: false, error: `Le prix de la formule n°${index + 1} doit être un nombre positif ou nul.` };
+    if (!ticket.name?.trim()) {
+      return { ok: false, error: `Le nom de la formule n°${index + 1} est obligatoire.` };
+    }
+    if (!Number.isInteger(ticket.price) || ticket.price < 0) {
+      return { ok: false, error: `Le prix de la formule n°${index + 1} doit être un montant entier positif ou nul.` };
     }
     if (!Number.isInteger(ticket.quantity) || ticket.quantity < 1) {
       return { ok: false, error: `Le quota de la formule n°${index + 1} doit être un entier supérieur à 0.` };
@@ -85,31 +103,32 @@ export async function saveEventDraftAction(
       return { ok: false, error: "Vous devez être connecté pour enregistrer un brouillon." };
     }
 
-    // 1. Rechercher l'organisation de l'utilisateur
-    //    `maybeSingle()` renvoie une erreur dès qu'il existe PLUSIEURS lignes :
-    //    on limite donc explicitement à une ligne (un organisateur peut posséder
-    //    plusieurs organisations, l'historique de l'app en a créé plusieurs).
+    // 1. Choisir une organisation réellement gérable. Un simple membre (ex. agent
+    //    de contrôle) ne peut pas créer d'événement ni téléverser sa couverture.
     let orgId: string | null = null;
 
-    const { data: ownedOrgs } = await supabase
-      .from("organizations")
-      .select("id")
-      .eq("owner_id", user.id)
-      .order("created_at", { ascending: true })
-      .limit(1);
+    const [{ data: ownedOrgs }, { data: memberOrgs }] = await Promise.all([
+      supabase
+        .from("organizations")
+        .select("id")
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: true })
+        .limit(1),
+      supabase
+        .from("organization_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .in("role", ["owner", "manager"])
+        .order("joined_at", { ascending: true })
+        .limit(1),
+    ]);
 
     const ownedOrg = ownedOrgs?.[0];
 
     if (ownedOrg) {
       orgId = ownedOrg.id;
     } else {
-      const { data: memberOrgs } = await supabase
-        .from("organization_members")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .order("joined_at", { ascending: true })
-        .limit(1);
-
       const memberOrg = memberOrgs?.[0];
 
       if (memberOrg) {
@@ -133,8 +152,8 @@ export async function saveEventDraftAction(
       } else {
         // Repli si la migration 0034 n'est pas déployée sur le projet distant.
         if (rpcError) {
-          console.warn(
-            "[saveEventDraftAction] RPC become_organizer indisponible :",
+        console.warn(
+            "[createEventForPublishingAction] RPC become_organizer indisponible :",
             rpcError.message,
           );
         }
@@ -190,11 +209,8 @@ export async function saveEventDraftAction(
     const slug = `${titleSlug}-${Math.floor(1000 + Math.random() * 9000)}`;
 
     // 4. Formater les dates
-    const startAtIso = new Date(input.startAt).toISOString();
-    const endAtIso =
-      input.endAt && input.endAt.trim()
-        ? new Date(input.endAt).toISOString()
-        : new Date(new Date(input.startAt).getTime() + 2 * 3600 * 1000).toISOString();
+    const startAtIso = parsedStart.toISOString();
+    const endAtIso = parsedEnd.toISOString();
 
     // La vue publique `published_events` n'expose que les événements dont la fin
     // est à venir (`end_at >= now()`) : un événement passé serait invisible dans
@@ -207,7 +223,11 @@ export async function saveEventDraftAction(
       };
     }
 
-    // 5. Insérer l'événement dans Supabase
+    const ticketPrices = input.tickets.map((ticket) => ticket.price);
+    const capacity = input.tickets.reduce((total, ticket) => total + ticket.quantity, 0);
+
+    // La ligne démarre en brouillon uniquement pendant l'envoi Storage. Elle sera
+    // publiée dans la même étape que l'association de toutes les images.
     const { data: event, error: eventError } = await supabase
       .from("events")
       .insert({
@@ -227,14 +247,15 @@ export async function saveEventDraftAction(
         status: "draft",
         salon_privacy: "members",
         currency: "XOF",
-        min_price: 0,
-        max_price: 0,
+        capacity,
+        min_price: Math.min(...ticketPrices),
+        max_price: Math.max(...ticketPrices),
       } as any)
       .select("id, slug")
       .single();
 
     if (eventError) {
-      console.error("[saveEventDraftAction] Error inserting event:", eventError);
+      console.error("[createEventForPublishingAction] Error inserting event:", eventError);
       return { ok: false, error: `Erreur d'enregistrement : ${eventError.message}` };
     }
 
@@ -260,19 +281,19 @@ export async function saveEventDraftAction(
           .insert(ticketRows as any);
 
         if (ticketError) {
-          console.warn(
-            "[saveEventDraftAction] Warning inserting ticket types:",
-            ticketError.message,
-          );
+          console.error("[createEventForPublishingAction] Ticket creation failed:", ticketError);
+          await supabase.from("events").delete().eq("id", event.id);
+          return {
+            ok: false,
+            error: "La billetterie n'a pas pu être enregistrée. L'événement n'a pas été créé.",
+          };
         }
       }
     }
 
-    revalidatePath("/org/evenements");
-    revalidatePath("/org");
     return { ok: true, eventId: event.id, slug: event.slug };
   } catch (err: any) {
-    console.error("[saveEventDraftAction] Unexpected error:", err);
+    console.error("[createEventForPublishingAction] Unexpected error:", err);
     return { ok: false, error: err?.message || "Une erreur inattendue est survenue." };
   }
 }
@@ -348,6 +369,25 @@ export async function setEventStatusAction(
     }
 
     const published = status === "published";
+
+    if (published) {
+      const [{ data: currentEvent, error: eventCheckError }, { data: activeTickets, error: ticketCheckError }] = await Promise.all([
+        supabase.from("events").select("cover_url, start_at, end_at").eq("id", eventId).maybeSingle(),
+        supabase.from("ticket_types").select("id").eq("event_id", eventId).eq("is_active", true).limit(1),
+      ]);
+      if (eventCheckError || !currentEvent) {
+        return { ok: false, error: "Événement introuvable ou inaccessible." };
+      }
+      if (!currentEvent.cover_url) {
+        return { ok: false, error: "Ajoutez une image de couverture avant de publier." };
+      }
+      if (ticketCheckError || !activeTickets?.length) {
+        return { ok: false, error: "Ajoutez au moins une formule de billet active avant de publier." };
+      }
+      if (new Date(currentEvent.start_at).getTime() <= Date.now() || new Date(currentEvent.end_at).getTime() <= Date.now()) {
+        return { ok: false, error: "Les dates de l’événement doivent être dans le futur pour le publier." };
+      }
+    }
 
     const { data: event, error: updateError } = await supabase
       .from("events")
@@ -622,6 +662,118 @@ export interface UpdateEventCoverResult {
   error?: string;
 }
 
+/** Associe les images et publie uniquement un événement complet et gérable. */
+export async function publishEventWithImagesAction(
+  eventId: string,
+  coverUrl: string,
+  galleryUrls: string[],
+): Promise<UpdateEventCoverResult> {
+  if (!UUID_PATTERN.test(eventId) || !sanitizeCoverUrl(coverUrl)) {
+    return { ok: false, error: "Ajoutez une couverture valide avant de publier." };
+  }
+
+  const safeGallery = sanitizeGalleryUrls(galleryUrls);
+  if (safeGallery.length !== galleryUrls.length || safeGallery.length > 6) {
+    return { ok: false, error: "Une image de la galerie est invalide. Vérifiez les fichiers sélectionnés." };
+  }
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return { ok: false, error: "Reconnectez-vous pour publier l'événement." };
+
+    const [{ data: event, error: eventError }, { data: tickets, error: ticketsError }] = await Promise.all([
+      supabase.from("events").select("id, status, end_at").eq("id", eventId).maybeSingle(),
+      supabase.from("ticket_types").select("id").eq("event_id", eventId).eq("is_active", true).limit(1),
+    ]);
+
+    if (eventError || !event) {
+      return { ok: false, error: "L'événement n'est pas accessible depuis une organisation que vous gérez." };
+    }
+    if (event.status !== "draft") {
+      return { ok: false, error: "Cet événement a déjà été publié ou modifié. Actualisez la liste." };
+    }
+    if (new Date(event.end_at).getTime() <= Date.now()) {
+      return { ok: false, error: "La date de fin doit être dans le futur pour publier l'événement." };
+    }
+    if (ticketsError || !tickets?.length) {
+      return { ok: false, error: "Ajoutez au moins une formule de billet avant de publier." };
+    }
+
+    const { data: published, error: updateError } = await supabase
+      .from("events")
+      .update({
+        cover_url: coverUrl,
+        gallery: safeGallery,
+        status: "published",
+        published_at: new Date().toISOString(),
+      } as any)
+      .eq("id", eventId)
+      .eq("status", "draft")
+      .select("id, slug")
+      .maybeSingle();
+
+    if (updateError || !published) {
+      console.error("[publishEventWithImagesAction] Publication failed:", updateError);
+      return { ok: false, error: "Les images ont été envoyées, mais la publication n'a pas abouti. Réessayez." };
+    }
+
+    const { error: salonError } = await supabase.rpc("ensure_event_salon", {
+      target_event_id: eventId,
+    });
+
+    if (salonError) {
+      await supabase
+        .from("events")
+        .update({ status: "draft", published_at: null } as any)
+        .eq("id", eventId)
+        .eq("status", "published");
+      console.error("[publishEventWithImagesAction] Salon creation failed:", salonError);
+      return { ok: false, error: "Le salon de l'événement n'a pas pu être préparé. La publication a été annulée, réessayez." };
+    }
+
+    revalidatePath("/explorer");
+    revalidatePath("/");
+    revalidatePath("/org/evenements");
+    revalidatePath("/org");
+    revalidatePath("/evenements/[slug]", "page");
+
+    return { ok: true };
+  } catch (error) {
+    console.error("[publishEventWithImagesAction] Unexpected error:", error);
+    return { ok: false, error: "Une erreur est survenue pendant la publication. Réessayez." };
+  }
+}
+
+/** Supprime une fiche temporaire restée non publiée après un échec d'envoi. */
+export async function discardUnpublishedEventAction(eventId: string): Promise<UpdateEventCoverResult> {
+  if (!UUID_PATTERN.test(eventId)) return { ok: false, error: "Événement introuvable." };
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return { ok: false, error: "Reconnectez-vous pour terminer le nettoyage." };
+
+    const { data, error } = await supabase
+      .from("events")
+      .delete()
+      .eq("id", eventId)
+      .eq("status", "draft")
+      .select("id")
+      .maybeSingle();
+
+    if (error || !data) {
+      console.error("[discardUnpublishedEventAction] Cleanup failed:", error);
+      return { ok: false, error: "L'événement temporaire n'a pas pu être supprimé." };
+    }
+    revalidatePath("/org/evenements");
+    return { ok: true };
+  } catch (error) {
+    console.error("[discardUnpublishedEventAction] Unexpected error:", error);
+    return { ok: false, error: "L'événement temporaire n'a pas pu être supprimé." };
+  }
+}
+
 /** Associe (ou retire, avec `null`) l'image de couverture d'un événement. */
 export async function updateEventCoverAction(
   eventId: string,
@@ -655,14 +807,19 @@ export async function updateEventCoverAction(
       update.published_at = new Date().toISOString();
     }
 
-    const { error } = await supabase
+    const { data: updatedEvent, error } = await supabase
       .from("events")
       .update(update as any)
-      .eq("id", eventId);
+      .eq("id", eventId)
+      .select("id")
+      .maybeSingle();
 
     if (error) {
       console.error("[updateEventCoverAction] Error:", error);
       return { ok: false, error: `Enregistrement impossible : ${error.message}` };
+    }
+    if (!updatedEvent) {
+      return { ok: false, error: "Événement introuvable ou vous n'êtes pas autorisé à le modifier." };
     }
 
     if (publishNow) {

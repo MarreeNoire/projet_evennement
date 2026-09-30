@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import { CalendarPlus, Edit } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
@@ -18,46 +18,10 @@ export interface EventListItem {
   tickets_sold_text?: string;
 }
 
-const LOCAL_DRAFTS_KEY = "rassemble_draft_events";
-
-function subscribeToLocalDrafts(onChange: () => void) {
-  window.addEventListener("storage", onChange);
-  return () => window.removeEventListener("storage", onChange);
-}
-
-function getLocalDraftsSnapshot() {
-  try {
-    return window.localStorage.getItem(LOCAL_DRAFTS_KEY) ?? "[]";
-  } catch {
-    return "[]";
-  }
-}
-
-function getServerDraftsSnapshot() {
-  return "[]";
-}
-
 export function OrgEventsList({ initialEvents }: { initialEvents?: EventListItem[] }) {
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
-  const localDraftsRaw = useSyncExternalStore(
-    subscribeToLocalDrafts,
-    getLocalDraftsSnapshot,
-    getServerDraftsSnapshot,
-  );
-  let localDrafts: EventListItem[] = [];
-  try {
-    const parsed = JSON.parse(localDraftsRaw);
-    if (Array.isArray(parsed)) localDrafts = parsed;
-  } catch {
-    // Ignore malformed locally stored drafts.
-  }
-
   const serverEvents = initialEvents ?? [];
-  const serverEventIds = new Set(serverEvents.map((event) => event.id));
-  const displayList = [
-    ...localDrafts.filter((draft) => !serverEventIds.has(draft.id)),
-    ...serverEvents,
-  ];
+  const displayList = serverEvents;
 
   const filteredEvents = displayList.filter((event) => {
     if (filter === "published") return event.status === "published";

@@ -8,10 +8,14 @@ import { EventImagesManager, type PendingImage } from "./event-images-manager";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Alert } from "@/components/ui/states";
-import { CATEGORIES } from "@/lib/constants";
-import { saveEventDraftAction, updateEventCoverAction, updateEventGalleryAction } from "@/lib/events/actions";
-import { uploadEventCover } from "@/lib/events/upload-cover";
+import { CATEGORIES, STORAGE_BUCKETS } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import {
+  createEventForPublishingAction,
+  discardUnpublishedEventAction,
+  publishEventWithImagesAction,
+} from "@/lib/events/actions";
+import { uploadEventCover } from "@/lib/events/upload-cover";
 
 export interface TicketDraft {
   name: string;
@@ -45,8 +49,8 @@ export function CreateEventForm() {
   // Billetterie intégrée
   const [tickets, setTickets] = useState<TicketDraft[]>(DEFAULT_TICKET_DRAFTS);
 
-  // Images : choisies avant l'enregistrement, envoyées juste après la création
-  // (la RLS du bucket `event-covers` exige que l'événement existe déjà).
+  // Les images sont sélectionnées avant la création puis envoyées dès que la
+  // fiche temporaire existe, conformément aux règles d'accès du bucket.
   const [pendingCover, setPendingCover] = useState<PendingImage | null>(null);
   const [pendingGallery, setPendingGallery] = useState<PendingImage[]>([]);
   const [uploadState, setUploadState] = useState<string | null>(null);
@@ -55,12 +59,6 @@ export function CreateEventForm() {
   const [recoveryHref, setRecoveryHref] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-
-  /**
-   * Par défaut l'événement est publié : c'est la seule façon de le voir
-   * apparaître dans Explorer (la vue publique exclut les brouillons).
-   */
-  const [publishNow, setPublishNow] = useState(true);
 
   function handleAddTicket() {
     setTickets((prev) => [
@@ -95,51 +93,64 @@ export function CreateEventForm() {
     });
   }
 
-  /** Redirige vers la liste des événements une fois l'enregistrement terminé. */
-  function redirectToEvents(delay = 900) {
+  /** Redirige vers la liste après confirmation de la publication. */
+  function redirectToEvents(delay = 700) {
     setTimeout(() => {
-      router.push("/org/evenements");
-      router.refresh();
+      router.replace("/org/evenements");
     }, delay);
   }
 
-  async function savePendingImages(eventId: string, publishAfterCover: boolean): Promise<string | null> {
-    if (!pendingCover) return "Ajoutez une image de couverture avant d’enregistrer l’événement.";
+  async function savePendingImages(
+    eventId: string,
+  ): Promise<{ error: string; safeToDiscard: boolean } | null> {
+    if (!pendingCover) return { error: "Ajoutez une image de couverture avant de publier.", safeToDiscard: true };
 
     setUploadState("Envoi des images…");
     try {
-      let coverUrl: string | null = null;
-      const galleryUrls: string[] = [];
+      const uploads = await Promise.all([
+        uploadEventCover(pendingCover.file, eventId),
+        ...pendingGallery.map((item) => uploadEventCover(item.file, eventId)),
+      ]);
+      const uploadedPaths = uploads.flatMap((upload) => upload.path ? [upload.path] : []);
+      const uploadError = uploads.find((upload) => !upload.ok || !upload.url);
 
-      const coverUpload = await uploadEventCover(pendingCover.file, eventId);
-      if (!coverUpload.ok || !coverUpload.url) {
-        return coverUpload.error ?? "L’image de couverture n’a pas pu être envoyée.";
-      }
-      coverUrl = coverUpload.url;
-
-      for (const item of pendingGallery) {
-        const upload = await uploadEventCover(item.file, eventId);
-        if (!upload.ok || !upload.url) {
-          return upload.error ?? "Une image de la galerie n’a pas pu être envoyée.";
-        }
-        galleryUrls.push(upload.url);
-      }
-
-      if (galleryUrls.length > 0) {
-        const result = await updateEventGalleryAction(eventId, galleryUrls);
-        if (!result.ok) return result.error ?? "La galerie n’a pas pu être associée à l’événement.";
+      if (uploadError) {
+        const { error: cleanupError } = uploadedPaths.length
+          ? await createSupabaseBrowserClient()
+              .storage.from(STORAGE_BUCKETS.EVENT_COVERS).remove(uploadedPaths)
+          : { error: null };
+        return {
+          error: uploadError.error ?? "Une image sélectionnée n’a pas pu être envoyée.",
+          safeToDiscard: !cleanupError,
+        };
       }
 
-      const coverResult = await updateEventCoverAction(eventId, coverUrl, publishAfterCover);
-      if (!coverResult.ok) {
-        return coverResult.error ?? "La couverture n’a pas pu être associée à l’événement.";
+      const [coverUpload, ...galleryUploads] = uploads;
+      if (!coverUpload?.url) {
+        return { error: "L’image de couverture n’a pas pu être envoyée.", safeToDiscard: true };
+      }
+
+      setUploadState("Publication de l’événement et préparation du salon…");
+      const result = await publishEventWithImagesAction(
+        eventId,
+        coverUpload.url,
+        galleryUploads.flatMap((upload) => upload.url ? [upload.url] : []),
+      );
+
+      if (!result.ok) {
+        const { error: cleanupError } = uploadedPaths.length
+          ? await createSupabaseBrowserClient()
+              .storage.from(STORAGE_BUCKETS.EVENT_COVERS).remove(uploadedPaths)
+          : { error: null };
+        return { error: result.error ?? "La publication n’a pas abouti.", safeToDiscard: !cleanupError };
       }
 
       return null;
     } catch (uploadError: unknown) {
-      return uploadError instanceof Error
-        ? uploadError.message
-        : "Les images n’ont pas pu être enregistrées.";
+      return {
+        error: uploadError instanceof Error ? uploadError.message : "Les images n’ont pas pu être enregistrées.",
+        safeToDiscard: false,
+      };
     } finally {
       setUploadState(null);
     }
@@ -159,7 +170,7 @@ export function CreateEventForm() {
     }
 
     if (!pendingCover) {
-      setError("Ajoutez une image de couverture avant de créer l’événement, même pour l’enregistrer en brouillon.");
+      setError("Ajoutez une image de couverture pour publier l’événement.");
       return;
     }
 
@@ -175,7 +186,7 @@ export function CreateEventForm() {
         setError(`Veuillez donner un nom à la formule de billet n°${i + 1}.`);
         return;
       }
-      if (t.price === "" || !Number.isFinite(t.price) || t.price < 0) {
+      if (t.price === "" || !Number.isInteger(t.price) || t.price < 0) {
         setError(`Veuillez saisir un prix valide pour la formule "${t.name}" (0 si elle est gratuite).`);
         return;
       }
@@ -187,11 +198,14 @@ export function CreateEventForm() {
 
     // Explorer n'affiche que les événements dont la fin est à venir : on bloque
     // tout de suite une date passée, au lieu de créer un événement invisible.
-    const endValue = endAt || startAt;
-    if (new Date(endValue).getTime() <= Date.now()) {
-      setError(
-        "La date de fin doit être dans le futur : Explorer n'affiche que les événements à venir.",
-      );
+    const startTime = new Date(startAt).getTime();
+    const endTime = endAt ? new Date(endAt).getTime() : startTime + 2 * 3600 * 1000;
+    if (!Number.isFinite(startTime) || startTime <= Date.now()) {
+      setError("La date de début doit être valide et dans le futur.");
+      return;
+    }
+    if (!Number.isFinite(endTime) || endTime <= startTime) {
+      setError("La date de fin doit être postérieure à la date de début.");
       return;
     }
 
@@ -199,8 +213,7 @@ export function CreateEventForm() {
 
     startTransition(async () => {
       try {
-        // 1. Tenter l'action serveur avec les billets
-        const res = await saveEventDraftAction({
+        const res = await createEventForPublishingAction({
           title,
           category,
           city,
@@ -217,149 +230,30 @@ export function CreateEventForm() {
           })),
         });
 
-        if (res.ok) {
-          if (res.eventId) {
-            const imageError = await savePendingImages(res.eventId, publishNow);
-            if (imageError) {
-              setRecoveryHref(`/org/evenements/${res.eventId}`);
-              setError(`L’événement reste en brouillon, car les images sélectionnées n’ont pas toutes été enregistrées${publishNow ? " et il n’a donc pas été publié" : ""} : ${imageError}`);
-              return;
-            }
-          }
-
-          setSuccess(
-            publishNow
-              ? "Votre événement et sa billetterie sont publiés : ils apparaissent maintenant dans Explorer."
-              : "Votre événement a été enregistré comme brouillon avec sa billetterie.",
-          );
-          redirectToEvents();
+        if (!res.ok || !res.eventId) {
+          setError(res.error ?? "L’événement n’a pas pu être créé. Vérifiez votre accès à une organisation.");
           return;
         }
 
-        console.warn("[CreateEventForm] Action serveur a échoué, tentative via le client Supabase:", res.error);
-
-        // 2. Stratégie de secours : Client Supabase du navigateur direct
-        const supabase = createSupabaseBrowserClient();
-        const { data: authData } = await supabase.auth.getUser();
-
-        if (authData?.user) {
-          const user = authData.user;
-          const slugBase = title
-            .trim()
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-") || "evenement";
-          const slug = `${slugBase}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-          // Récupérer ou créer l'organisation
-          const { data: org } = await supabase
-            .from("organizations")
-            .select("id")
-            .eq("owner_id", user.id)
-            .maybeSingle();
-
-          let orgId = org?.id;
-
-          if (!orgId) {
-            const { data: newOrg } = await supabase
-              .from("organizations")
-              .insert({
-                owner_id: user.id,
-                name: `Organisation ${user.email || "Evenement"}`,
-                slug: `org-${Math.floor(1000 + Math.random() * 9000)}`,
-              } as any)
-              .select("id")
-              .single();
-            orgId = newOrg?.id;
+        const mediaFailure = await savePendingImages(res.eventId);
+        if (mediaFailure) {
+          let recovery = !mediaFailure.safeToDiscard;
+          if (!recovery) {
+            const cleanup = await discardUnpublishedEventAction(res.eventId);
+            recovery = !cleanup.ok;
           }
-
-          if (orgId) {
-            const startAtIso = new Date(startAt).toISOString();
-            const endAtIso = endAt
-              ? new Date(endAt).toISOString()
-              : new Date(new Date(startAt).getTime() + 2 * 3600 * 1000).toISOString();
-
-            const { data: createdEvent, error: insertErr } = await supabase
-              .from("events")
-              .insert({
-                organization_id: orgId,
-                created_by: user.id,
-                title: title.trim(),
-                slug,
-                category,
-                city: city.trim() || "Abidjan",
-                venue_name: venueName.trim() || null,
-                address: venueName.trim() || null,
-                description: description.trim() || null,
-                start_at: startAtIso,
-                end_at: endAtIso,
-                status: "draft",
-                published_at: null,
-                salon_privacy: "members",
-                currency: "XOF",
-                min_price: 0,
-                max_price: 0,
-              } as any)
-              .select("id")
-              .single();
-
-            if (!insertErr && createdEvent) {
-              // Insérer les billets
-              const ticketRows = tickets.map((t, idx) => ({
-                event_id: createdEvent.id,
-                name: t.name.trim(),
-                description: t.description.trim() || null,
-                price: Math.max(0, Math.round(Number(t.price) || 0)),
-                quantity: Math.max(1, Math.round(Number(t.quantity) || 50)),
-                access_level: t.accessLevel,
-                position: idx,
-                is_active: true,
-                covers_salon: true,
-              }));
-
-              await supabase.from("ticket_types").insert(ticketRows as any);
-
-              const imageError = await savePendingImages(createdEvent.id, publishNow);
-              if (imageError) {
-                setRecoveryHref(`/org/evenements/${createdEvent.id}`);
-                setError(`L’événement a été enregistré en brouillon, mais les images n’ont pas été sauvegardées : ${imageError}`);
-                return;
-              }
-
-              setSuccess(
-                publishNow
-                  ? "Votre événement et sa billetterie sont publiés : ils apparaissent maintenant dans Explorer."
-                  : "Votre événement a été enregistré comme brouillon avec sa billetterie.",
-              );
-              redirectToEvents();
-              return;
-            }
-          }
+          if (recovery) setRecoveryHref(`/org/evenements/${res.eventId}`);
+          setError(recovery
+            ? `${mediaFailure.error} L’événement n’a pas été publié ; sa fiche reste accessible pour corriger le problème.`
+            : `${mediaFailure.error} La création incomplète a été supprimée. Corrigez le problème puis réessayez.`);
+          return;
         }
 
-        // 3. Fallback stockage local (si déconnecté / mode démo)
-        const localDrafts = JSON.parse(localStorage.getItem("rassemble_draft_events") || "[]");
-        localDrafts.unshift({
-          id: `draft-${Date.now()}`,
-          title: title.trim(),
-          category,
-          city: city.trim() || "Abidjan",
-          venue_name: venueName.trim() || "À déterminer",
-          description: description.trim(),
-          start_at: startAt,
-          end_at: endAt,
-          status: "draft",
-          tickets,
-          created_at: new Date().toISOString(),
-        });
-        localStorage.setItem("rassemble_draft_events", JSON.stringify(localDrafts));
-
-        setSuccess(
-          "Enregistré localement (hors ligne) : l'événement devra être recréé en ligne pour être publié.",
-        );
+        setSuccess("Votre événement, sa billetterie et son salon sont publiés et visibles dans Explorer.");
         redirectToEvents();
       } catch (err: any) {
-        console.error("[CreateEventForm] Client save error:", err);
-        setError("Erreur lors de l'enregistrement de l'événement. Veuillez réessayer.");
+        console.error("[CreateEventForm] Publication error:", err);
+        setError(err instanceof Error ? err.message : "Erreur lors de la publication. Veuillez réessayer.");
       }
     });
   }
@@ -380,7 +274,7 @@ export function CreateEventForm() {
       ) : null}
 
       {success ? (
-        <Alert tone="success" title={publishNow ? "Événement publié" : "Brouillon enregistré"}>
+        <Alert tone="success" title="Événement publié">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="size-4 text-success" />
             <span>{success} Redirection…</span>
@@ -639,24 +533,11 @@ export function CreateEventForm() {
 
       {/* Publication */}
       <Card>
-        <CardContent className="flex items-start gap-3 pt-5">
-          <input
-            id="publishNow"
-            type="checkbox"
-            checked={publishNow}
-            onChange={(e) => setPublishNow(e.target.checked)}
-            disabled={pending || Boolean(success)}
-            className="mt-0.5 size-4 shrink-0 accent-primary"
-          />
-          <div>
-            <label htmlFor="publishNow" className="text-sm font-semibold text-fg">
-              Publier immédiatement dans Explorer et ouvrir la billetterie
-            </label>
-            <p className="mt-0.5 text-xs text-fg-muted">
-              Seuls les événements publiés et à venir apparaissent dans Explorer. Les visiteurs pourront
-              immédiatement commander des billets dès la création.
-            </p>
-          </div>
+        <CardContent className="pt-5">
+          <p className="text-sm font-semibold text-fg">Publication immédiate</p>
+          <p className="mt-1 text-xs text-fg-muted">
+            Après l’enregistrement de la couverture, de la galerie et des formules, l’événement sera publié dans Explorer et son salon sera créé.
+          </p>
         </CardContent>
       </Card>
 
@@ -668,11 +549,11 @@ export function CreateEventForm() {
           type="submit"
           className="w-full sm:w-auto"
           loading={pending}
-          loadingLabel="Enregistrement..."
+          loadingLabel={uploadState ?? "Publication..."}
           disabled={Boolean(success || recoveryHref)}
         >
           <Save className="mr-2 size-4" />
-          {publishNow ? "Créer l'événement et sa billetterie" : "Enregistrer le brouillon"}
+          Publier l'événement et sa billetterie
         </Button>
       </div>
     </form>

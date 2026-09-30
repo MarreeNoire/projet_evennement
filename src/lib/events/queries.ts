@@ -263,7 +263,8 @@ export async function getOrganizerEvents() {
         .from("organization_members")
         .select("organization_id")
         .eq("user_id", user.id)
-        .eq("status", "active"),
+        .eq("status", "active")
+        .in("role", ["owner", "manager"]),
     ]);
 
     const orgIds = [

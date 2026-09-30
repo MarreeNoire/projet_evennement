@@ -41,6 +41,8 @@ export interface UploadCoverResult {
   ok: boolean;
   /** URL publique de l'image, prête pour `events.cover_url`. */
   url?: string;
+  /** Chemin Storage utilisé pour supprimer l'image si la publication échoue. */
+  path?: string;
   error?: string;
 }
 
@@ -95,15 +97,6 @@ export async function uploadEventCover(file: File, eventId: string): Promise<Upl
     }
     const uploadContentType = uploadFile.type || contentType;
     const supabase = createSupabaseBrowserClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return { ok: false, error: "Vous devez être connecté pour ajouter une image." };
-    }
-
     const ext =
       uploadFile.name
         .split(".")
@@ -134,7 +127,7 @@ export async function uploadEventCover(file: File, eventId: string): Promise<Upl
       return { ok: false, error: "L'image a été envoyée mais son URL est introuvable." };
     }
 
-    return { ok: true, url: data.publicUrl };
+    return { ok: true, url: data.publicUrl, path };
   } catch (err: any) {
     console.error("[uploadEventCover] Unexpected error:", err);
     return { ok: false, error: err?.message || "Une erreur inattendue est survenue." };
