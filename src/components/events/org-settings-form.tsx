@@ -69,7 +69,7 @@ export function OrgSettingsForm({ organization }: { organization: OrganizationSe
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error ? <Alert tone="danger" title="Erreur">{error}</Alert> : null}
+      {error ? <Alert tone="danger" title="Erreur" floating onDismiss={() => setError(null)}>{error}</Alert> : null}
       {success ? <Alert tone="success" title="Mise à jour réussie">{success}</Alert> : null}
 
       <Card>

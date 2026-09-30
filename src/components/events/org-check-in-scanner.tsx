@@ -160,7 +160,7 @@ export function OrgCheckInScanner({ events }: { events: CheckInEvent[] }) {
         </Alert>
       ) : (
         <>
-          {error ? <Alert tone="danger" title="Contrôle impossible">{error}</Alert> : null}
+          {error ? <Alert tone="danger" title="Contrôle impossible" floating onDismiss={() => setError(null)}>{error}</Alert> : null}
 
           <Card>
             <CardHeader>

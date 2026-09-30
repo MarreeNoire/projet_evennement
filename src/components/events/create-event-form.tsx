@@ -374,7 +374,7 @@ export function CreateEventForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error ? (
-        <Alert tone="danger" title="Erreur de validation">
+        <Alert tone="danger" title="Erreur de validation" floating onDismiss={() => setError(null)}>
           <div className="space-y-2">
             <p>{error}</p>
             {recoveryHref ? (

@@ -202,7 +202,7 @@ export function OrgEventTicketTypesEditor({
 
       <CardContent className="space-y-4">
         {error ? (
-          <Alert tone="danger" title="Erreur">
+          <Alert tone="danger" title="Erreur" floating onDismiss={() => setError(null)}>
             {error}
           </Alert>
         ) : null}

@@ -117,7 +117,7 @@ export function OrgTicketTypesManager({
       </div>
 
       {error ? (
-        <Alert tone="danger" title="Erreur">
+        <Alert tone="danger" title="Erreur" floating onDismiss={() => setError(null)}>
           {error}
         </Alert>
       ) : null}

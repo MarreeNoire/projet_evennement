@@ -214,7 +214,7 @@ export function EventImagesManager({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {error ? <Alert tone="danger" title="Image impossible">{error}</Alert> : null}
+        {error ? <Alert tone="danger" title="Image impossible" floating onDismiss={() => setError(null)}>{error}</Alert> : null}
         {success ? <Alert tone="success" title="Images à jour">{success}</Alert> : null}
         <div className="space-y-2">
           <p className="text-xs font-semibold text-fg">Image de couverture</p>

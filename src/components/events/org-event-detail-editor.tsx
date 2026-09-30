@@ -297,7 +297,7 @@ export function OrgEventDetailEditor({
   return (
     <div className="space-y-6">
       {error ? (
-        <Alert tone="danger" title="Erreur">
+        <Alert tone="danger" title="Erreur" floating onDismiss={() => setError(null)}>
           {error}
         </Alert>
       ) : null}
@@ -500,7 +500,7 @@ export function OrgEventDetailEditor({
         </CardHeader>
         <CardContent className="space-y-6">
           {error ? (
-            <Alert tone="danger" title="Image impossible">
+            <Alert tone="danger" title="Image impossible" floating onDismiss={() => setError(null)}>
               {error}
             </Alert>
           ) : null}

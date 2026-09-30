@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 /* =============================================================================
    États vide, erreur et messages
@@ -109,15 +110,23 @@ export interface AlertProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
+  /** Garde une erreur de formulaire visible pendant le défilement, surtout sur mobile. */
+  floating?: boolean;
+  onDismiss?: () => void;
 }
 
-export function Alert({ tone = "info", title, children, className }: AlertProps) {
+export function Alert({ tone = "info", title, children, className, floating = false, onDismiss }: AlertProps) {
   const styles = ALERT_TONES[tone];
 
   return (
     <div
       role={tone === "danger" ? "alert" : "status"}
-      className={cn("flex gap-3 rounded-xl border p-4 text-sm", styles.wrapper, className)}
+      className={cn(
+        "flex gap-3 rounded-xl border p-4 text-sm",
+        styles.wrapper,
+        floating && "fixed inset-x-3 bottom-24 z-50 mx-auto max-w-xl shadow-xl md:bottom-6",
+        className,
+      )}
     >
       {/* Symbole + texte : l'information n'est jamais portée par la couleur seule */}
       <span
@@ -130,6 +139,16 @@ export function Alert({ tone = "info", title, children, className }: AlertProps)
         {title ? <p className="font-semibold">{title}</p> : null}
         <div className="leading-relaxed opacity-95">{children}</div>
       </div>
+      {onDismiss ? (
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Fermer le message"
+          className="ml-auto inline-flex size-8 shrink-0 items-center justify-center rounded-sm hover:bg-black/5 focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <X className="size-4" aria-hidden="true" />
+        </button>
+      ) : null}
     </div>
   );
 }
