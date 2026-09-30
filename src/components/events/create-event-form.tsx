@@ -222,7 +222,7 @@ export function CreateEventForm() {
             const imageError = await savePendingImages(res.eventId, publishNow);
             if (imageError) {
               setRecoveryHref(`/org/evenements/${res.eventId}`);
-              setError(`L’événement a été enregistré en brouillon, mais sa couverture n’a pas pu être enregistrée${publishNow ? " ou il n’a pas pu être publié" : ""} : ${imageError}`);
+              setError(`L’événement reste en brouillon, car les images sélectionnées n’ont pas toutes été enregistrées${publishNow ? " et il n’a donc pas été publié" : ""} : ${imageError}`);
               return;
             }
           }
