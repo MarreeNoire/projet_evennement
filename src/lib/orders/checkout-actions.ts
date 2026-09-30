@@ -1,12 +1,29 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 import { getPaymentProvider } from "@/lib/payments";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createOrder } from "@/lib/orders/create-order";
 import { checkoutSchema } from "@/lib/validation/checkout";
 import { env } from "@/lib/env";
+
+async function getPublicAppUrl() {
+  const configuredUrl = env.appUrl;
+  if (configuredUrl && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(configuredUrl)) {
+    return configuredUrl;
+  }
+
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  if (!host || /[\s/@\\]/.test(host)) {
+    throw new Error("Impossible de déterminer l’adresse publique de l’application.");
+  }
+  const forwardedProtocol = requestHeaders.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const protocol = env.isProduction ? "https" : forwardedProtocol || "http";
+  return `${protocol}://${host}`;
+}
 
 /* =============================================================================
    Action : créer la commande puis ouvrir le paiement
@@ -61,6 +78,7 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
   // Ouvre le paiement (simulation ou checkout hébergé par le prestataire actif).
   let supabase: Awaited<ReturnType<typeof createSupabaseServerClient>> | null = null;
   try {
+    const appUrl = await getPublicAppUrl();
     supabase = await createSupabaseServerClient();
     const { data: event, error: eventError } = await supabase
       .from("events")
@@ -82,8 +100,8 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
         phone: parsed.data.buyerPhone || undefined,
         country: "CI",
       },
-      returnUrl: `${env.appUrl}/commandes/${order.orderId}/retour`,
-      notifyUrl: `${env.appUrl}/api/webhooks/${provider.name}`,
+      returnUrl: `${appUrl}/commandes/${order.orderId}/retour`,
+      notifyUrl: `${appUrl}/api/webhooks/${provider.name}`,
     });
 
     // Journalise la transaction (règle métier n°12).

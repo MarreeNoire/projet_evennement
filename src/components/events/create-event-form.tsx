@@ -16,8 +16,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 export interface TicketDraft {
   name: string;
   description: string;
-  price: number;
-  quantity: number;
+  price: number | "";
+  quantity: number | "";
   accessLevel: "standard" | "vip" | "vvip";
 }
 
@@ -25,8 +25,8 @@ const DEFAULT_TICKET_DRAFTS: TicketDraft[] = [
   {
     name: "Pass Standard",
     description: "Accès général à l'événement et aux conférences.",
-    price: 0,
-    quantity: 100,
+    price: "",
+    quantity: "",
     accessLevel: "standard",
   },
 ];
@@ -68,8 +68,8 @@ export function CreateEventForm() {
       {
         name: prev.length === 1 ? "Pass VIP" : `Formule #${prev.length + 1}`,
         description: "",
-        price: 5000,
-        quantity: 50,
+        price: "",
+        quantity: "",
         accessLevel: prev.length === 1 ? "vip" : "standard",
       },
     ]);
@@ -172,12 +172,12 @@ export function CreateEventForm() {
         setError(`Veuillez donner un nom à la formule de billet n°${i + 1}.`);
         return;
       }
-      if (t.quantity < 1) {
-        setError(`Le quota de billets pour "${t.name}" doit être supérieur à 0.`);
+      if (t.price === "" || !Number.isFinite(t.price) || t.price < 0) {
+        setError(`Veuillez saisir un prix valide pour la formule "${t.name}" (0 si elle est gratuite).`);
         return;
       }
-      if (t.price < 0) {
-        setError(`Le prix pour "${t.name}" ne peut pas être négatif.`);
+      if (t.quantity === "" || !Number.isInteger(t.quantity) || t.quantity < 1) {
+        setError(`Veuillez saisir un quota entier supérieur à 0 pour la formule "${t.name}".`);
         return;
       }
     }
@@ -209,8 +209,8 @@ export function CreateEventForm() {
           tickets: tickets.map((t) => ({
             name: t.name,
             description: t.description || undefined,
-            price: t.price,
-            quantity: t.quantity,
+            price: Number(t.price),
+            quantity: Number(t.quantity),
             accessLevel: t.accessLevel,
           })),
         });
@@ -592,11 +592,9 @@ export function CreateEventForm() {
                   <label className="text-xs font-medium text-fg">Prix (FCFA)</label>
                   <input
                     type="number"
-                    min={0}
-                    step={500}
-                    required
+                    step={1}
                     value={ticket.price}
-                    onChange={(e) => handleUpdateTicket(index, "price", Math.max(0, Number(e.target.value)))}
+                    onChange={(e) => handleUpdateTicket(index, "price", e.target.value === "" ? "" : Number(e.target.value))}
                     className="w-full rounded-md border border-border bg-transparent px-3 py-1.5 text-sm focus:border-border-focus focus:outline-none"
                   />
                   <p className="text-[11px] text-fg-muted">0 = Gratuit</p>
@@ -606,10 +604,9 @@ export function CreateEventForm() {
                   <label className="text-xs font-medium text-fg">Quota (Places) *</label>
                   <input
                     type="number"
-                    min={1}
-                    required
+                    step={1}
                     value={ticket.quantity}
-                    onChange={(e) => handleUpdateTicket(index, "quantity", Math.max(1, Number(e.target.value)))}
+                    onChange={(e) => handleUpdateTicket(index, "quantity", e.target.value === "" ? "" : Number(e.target.value))}
                     className="w-full rounded-md border border-border bg-transparent px-3 py-1.5 text-sm focus:border-border-focus focus:outline-none"
                   />
                 </div>

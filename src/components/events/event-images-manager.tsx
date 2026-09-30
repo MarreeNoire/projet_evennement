@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LIMITS } from "@/lib/constants";
 import { updateEventCoverAction, updateEventGalleryAction } from "@/lib/events/actions";
-import { MAX_GALLERY_IMAGES, uploadEventCover } from "@/lib/events/upload-cover";
+import { getSupportedImageType, MAX_GALLERY_IMAGES, uploadEventCover } from "@/lib/events/upload-cover";
 import { cn } from "@/lib/utils";
 
 const ACCEPT = LIMITS.ACCEPTED_IMAGE_TYPES.join(",");
@@ -47,11 +47,11 @@ export function EventImagesManager({
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   function checkFile(file: File): string | null {
-    if (!(LIMITS.ACCEPTED_IMAGE_TYPES as readonly string[]).includes(file.type)) {
+    if (!getSupportedImageType(file)) {
       return "Format non pris en charge : utilisez JPG, PNG, WebP ou AVIF.";
     }
-    if (file.size > LIMITS.MAX_COVER_BYTES) {
-      return "Image trop lourde : 5 Mo maximum par image.";
+    if (file.size > 20 * 1024 * 1024) {
+      return "Image trop lourde : 20 Mo maximum avant optimisation.";
     }
     return null;
   }

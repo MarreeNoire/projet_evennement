@@ -19,8 +19,23 @@ import { STORAGE_BUCKETS } from "@/lib/constants";
 
 /** Limite alignée sur `file_size_limit` du bucket (5 Mo). */
 const MAX_COVER_SIZE = 5 * 1024 * 1024;
+const MAX_SOURCE_SIZE = 20 * 1024 * 1024;
 
 const ACCEPTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+
+export function getSupportedImageType(file: File): string | null {
+  if (ACCEPTED_MIME_TYPES.includes(file.type)) return file.type;
+  if (file.type) return null;
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  const types: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    avif: "image/avif",
+  };
+  return types[extension ?? ""] ?? null;
+}
 
 export interface UploadCoverResult {
   ok: boolean;
@@ -41,18 +56,44 @@ export async function uploadEventCover(file: File, eventId: string): Promise<Upl
     return { ok: false, error: "Aucun fichier sélectionné." };
   }
 
-  if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
+  const contentType = getSupportedImageType(file);
+  if (!contentType) {
     return {
       ok: false,
       error: "Format non pris en charge : utilisez une image JPG, PNG, WebP ou AVIF.",
     };
   }
 
-  if (file.size > MAX_COVER_SIZE) {
-    return { ok: false, error: "Image trop lourde : 5 Mo maximum." };
+  if (file.size > MAX_SOURCE_SIZE) {
+    return { ok: false, error: "Image trop lourde : 20 Mo maximum avant optimisation." };
   }
 
   try {
+    let uploadFile = file;
+    if (uploadFile.size > MAX_COVER_SIZE) {
+      try {
+        const bitmap = await createImageBitmap(uploadFile);
+        const scale = Math.min(1, 1920 / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Le navigateur ne peut pas optimiser cette image.");
+        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        bitmap.close();
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.82));
+        if (!blob || blob.size > MAX_COVER_SIZE) {
+          return { ok: false, error: "Image encore trop lourde après optimisation (5 Mo maximum)." };
+        }
+        uploadFile = new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, {
+          type: "image/webp",
+          lastModified: file.lastModified,
+        });
+      } catch {
+        return { ok: false, error: "Cette image ne peut pas être optimisée. Essaie un JPG, PNG, WebP ou AVIF de moins de 5 Mo." };
+      }
+    }
+    const uploadContentType = uploadFile.type || contentType;
     const supabase = createSupabaseBrowserClient();
     const {
       data: { user },
@@ -64,7 +105,7 @@ export async function uploadEventCover(file: File, eventId: string): Promise<Upl
     }
 
     const ext =
-      file.name
+      uploadFile.name
         .split(".")
         .pop()
         ?.toLowerCase()
@@ -73,9 +114,9 @@ export async function uploadEventCover(file: File, eventId: string): Promise<Upl
 
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.EVENT_COVERS)
-      .upload(path, file, {
+      .upload(path, uploadFile, {
         cacheControl: "3600",
-        contentType: file.type,
+        contentType: uploadContentType,
         upsert: false,
       });
 
@@ -83,8 +124,7 @@ export async function uploadEventCover(file: File, eventId: string): Promise<Upl
       console.error("[uploadEventCover]", uploadError.message);
       return {
         ok: false,
-        error:
-          "Envoi impossible : vérifiez que vous gérez bien cet événement et réessayez.",
+        error: `Envoi impossible : ${uploadError.message}`,
       };
     }
 
@@ -123,8 +163,8 @@ export async function uploadEventGalleryImages(
   let firstError: string | undefined;
 
   for (const file of selected) {
-    if (file.size > MAX_COVER_SIZE) {
-      firstError ??= `« ${file.name} » dépasse 5 Mo et a été ignorée.`;
+    if (file.size > MAX_SOURCE_SIZE) {
+      firstError ??= `« ${file.name} » dépasse 20 Mo et a été ignorée.`;
       continue;
     }
 

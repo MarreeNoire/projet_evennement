@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, LoaderCircle, MessageCircle, Send, Share2 } from "lucide-react";
+import { Heart, LoaderCircle, MessageCircle, Send } from "lucide-react";
 
 import { createComment, toggleReaction } from "@/lib/salons/actions";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
    Actions de publication façon Réseau Social
    --------------------------------------------------------------------------
    Boutons d'interactions directs, compteur dynamique, action "J'aime" / Heart
-   et partage en un clic.
+   et réponse au fil.
    ========================================================================== */
 
 export function PostActions({
@@ -30,7 +30,6 @@ export function PostActions({
   const [count, setCount] = useState(reactionCount);
   const [replyOpen, setReplyOpen] = useState(false);
   const [reply, setReply] = useState("");
-  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -48,14 +47,6 @@ export function PostActions({
         setError(result.error ?? "Impossible d'enregistrer ta réaction.");
       }
     });
-  }
-
-  function handleShare() {
-    if (navigator?.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
   }
 
   function sendReply(event: React.FormEvent) {
@@ -78,7 +69,7 @@ export function PostActions({
 
   return (
     <div className="mt-3 pt-2">
-      <div className="border-border/40 flex items-center justify-between border-t pt-2 text-sm">
+      <div className="border-border/40 flex items-center border-t pt-2 text-sm">
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -120,16 +111,6 @@ export function PostActions({
             <span>{commentCount > 0 ? commentCount : "Commenter"}</span>
           </button>
         </div>
-
-        <button
-          type="button"
-          onClick={handleShare}
-          className="text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all"
-          title="Copier le lien"
-        >
-          <Share2 className="size-3.5" aria-hidden="true" />
-          <span>{copied ? "Copié !" : "Partager"}</span>
-        </button>
       </div>
 
       {replyOpen ? (

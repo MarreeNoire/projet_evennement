@@ -67,6 +67,15 @@ export async function saveEventDraftAction(
     return { ok: false, error: "La date et l'heure de début sont obligatoires." };
   }
 
+  for (const [index, ticket] of (input.tickets ?? []).entries()) {
+    if (!Number.isFinite(ticket.price) || ticket.price < 0) {
+      return { ok: false, error: `Le prix de la formule n°${index + 1} doit être un nombre positif ou nul.` };
+    }
+    if (!Number.isInteger(ticket.quantity) || ticket.quantity < 1) {
+      return { ok: false, error: `Le quota de la formule n°${index + 1} doit être un entier supérieur à 0.` };
+    }
+  }
+
   try {
     const supabase = await createSupabaseServerClient();
     const {
