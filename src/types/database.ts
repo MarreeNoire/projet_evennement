@@ -441,6 +441,7 @@ export type TontineRow = {
   contribution_amount: number;
   frequency: "monthly";
   starts_on: string;
+  cover_url: string | null;
   currency: string;
   status: TontineStatus;
   created_at: string;
@@ -486,6 +487,7 @@ export type CotisationCampaignRow = {
   creator_id: string;
   title: string;
   description: string;
+  cover_url: string | null;
   target_amount: number | null;
   fixed_amount: number | null;
   ends_at: string | null;
@@ -695,13 +697,34 @@ export type DatabaseFunctions = {
     }[];
   };
   become_organizer: { Args: { p_org_name: string }; Returns: OrganizationRow };
-  is_tontine_participant: { Args: { target_tontine_id: string; target_user_id?: string }; Returns: boolean };
-  tontine_ensure_current_period: { Args: { p_tontine_id: string; p_requested_by: string }; Returns: TontineCycleRow };
-  draw_tontine_beneficiary: { Args: { p_tontine_id: string; p_requested_by: string }; Returns: TontineCycleRow };
-  tontine_mark_payment_paid: { Args: { p_payment_id: string; p_marked_by: string }; Returns: TontinePaymentRow };
-  tontine_respond_invitation: { Args: { p_tontine_id: string; p_user_id: string; p_accept: boolean }; Returns: TontineMemberRow };
-  cotisation_campaign_totals: { Args: { p_campaign_id: string }; Returns: { total_amount: number; contributor_count: number }[] };
-  cotisation_confirm_contribution: { Args: { p_transaction_id: string; p_expected_amount: number; p_currency: string }; Returns: boolean };
+  is_tontine_participant: {
+    Args: { target_tontine_id: string; target_user_id?: string };
+    Returns: boolean;
+  };
+  tontine_ensure_current_period: {
+    Args: { p_tontine_id: string; p_requested_by: string };
+    Returns: TontineCycleRow;
+  };
+  draw_tontine_beneficiary: {
+    Args: { p_tontine_id: string; p_requested_by: string };
+    Returns: TontineCycleRow;
+  };
+  tontine_mark_payment_paid: {
+    Args: { p_payment_id: string; p_marked_by: string };
+    Returns: TontinePaymentRow;
+  };
+  tontine_respond_invitation: {
+    Args: { p_tontine_id: string; p_user_id: string; p_accept: boolean };
+    Returns: TontineMemberRow;
+  };
+  cotisation_campaign_totals: {
+    Args: { p_campaign_id: string };
+    Returns: { total_amount: number; contributor_count: number }[];
+  };
+  cotisation_confirm_contribution: {
+    Args: { p_transaction_id: string; p_expected_amount: number; p_currency: string };
+    Returns: boolean;
+  };
 };
 
 export type Database = {

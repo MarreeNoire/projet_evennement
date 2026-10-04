@@ -273,6 +273,7 @@ export const LIMITS = {
 export const STORAGE_BUCKETS = {
   AVATARS: "avatars",
   EVENT_COVERS: "event-covers",
+  COMMUNITY_COVERS: "community-covers",
   SALON_PHOTOS: "salon-photos",
 } as const;
 

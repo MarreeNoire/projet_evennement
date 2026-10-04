@@ -17,6 +17,24 @@ export function parseJson(request: Request) {
 }
 
 export function isUuid(value: unknown): value is string {
-  return typeof value === "string" &&
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+  );
+}
+
+export function isOwnedCommunityCoverPath(
+  path: string,
+  userId: string,
+  kind: "tontines" | "cotisations",
+) {
+  const [ownerId, pathKind, filename, ...extra] = path.split("/");
+  return (
+    ownerId === userId &&
+    pathKind === kind &&
+    extra.length === 0 &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp|avif)$/i.test(
+      filename ?? "",
+    )
+  );
 }

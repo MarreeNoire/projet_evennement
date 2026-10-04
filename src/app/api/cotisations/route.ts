@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { apiError, getApiUser, parseJson } from "@/lib/community-finance/api";
+import {
+  apiError,
+  getApiUser,
+  isOwnedCommunityCoverPath,
+  parseJson,
+} from "@/lib/community-finance/api";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const createSchema = z.object({
@@ -10,21 +15,36 @@ const createSchema = z.object({
   targetAmount: z.number().int().positive().max(10_000_000_000).nullable(),
   fixedAmount: z.number().int().positive().max(10_000_000).nullable(),
   endsAt: z.string().datetime().nullable(),
+  coverPath: z.string().nullable().optional(),
 });
 
 export async function GET() {
   const admin = createSupabaseAdminClient();
-  const { data: campaigns, error } = await admin.from("cotisation_campaigns").select("*")
-    .eq("status", "open").or(`ends_at.is.null,ends_at.gte.${new Date().toISOString()}`)
+  const { data: campaigns, error } = await admin
+    .from("cotisation_campaigns")
+    .select("*")
+    .eq("status", "open")
+    .or(`ends_at.is.null,ends_at.gte.${new Date().toISOString()}`)
     .order("created_at", { ascending: false });
   if (error) return apiError("Les collectes ne sont pas disponibles pour le moment.", 500);
-  const rows = await Promise.all((campaigns ?? []).map(async (campaign) => {
-    const [{ data: totals }, { data: creator }] = await Promise.all([
-      admin.rpc("cotisation_campaign_totals", { p_campaign_id: campaign.id }),
-      admin.from("profiles").select("display_name, avatar_url").eq("id", campaign.creator_id).maybeSingle(),
-    ]);
-    return { ...campaign, totalAmount: totals?.[0]?.total_amount ?? 0, contributorCount: totals?.[0]?.contributor_count ?? 0, creator };
-  }));
+  const rows = await Promise.all(
+    (campaigns ?? []).map(async (campaign) => {
+      const [{ data: totals }, { data: creator }] = await Promise.all([
+        admin.rpc("cotisation_campaign_totals", { p_campaign_id: campaign.id }),
+        admin
+          .from("profiles")
+          .select("display_name, avatar_url")
+          .eq("id", campaign.creator_id)
+          .maybeSingle(),
+      ]);
+      return {
+        ...campaign,
+        totalAmount: totals?.[0]?.total_amount ?? 0,
+        contributorCount: totals?.[0]?.contributor_count ?? 0,
+        creator,
+      };
+    }),
+  );
   return NextResponse.json({ campaigns: rows });
 }
 
@@ -32,11 +52,19 @@ export async function POST(request: Request) {
   const user = await getApiUser();
   if (!user) return apiError("Connecte-toi pour créer une collecte.", 401);
   const parsed = createSchema.safeParse(await parseJson(request));
-  if (!parsed.success) return apiError(parsed.error.issues[0]?.message ?? "Informations invalides.");
+  if (!parsed.success)
+    return apiError(parsed.error.issues[0]?.message ?? "Informations invalides.");
   const values = parsed.data;
-  if (values.endsAt && new Date(values.endsAt) <= new Date()) return apiError("La date de fin doit être dans le futur.");
+  if (values.endsAt && new Date(values.endsAt) <= new Date())
+    return apiError("La date de fin doit être dans le futur.");
+  if (values.coverPath && !isOwnedCommunityCoverPath(values.coverPath, user.id, "cotisations")) {
+    return apiError("L’image de couverture n’est pas valide.");
+  }
 
   const admin = createSupabaseAdminClient();
+  const coverUrl = values.coverPath
+    ? admin.storage.from("community-covers").getPublicUrl(values.coverPath).data.publicUrl
+    : null;
   const { data, error } = await admin
     .from("cotisation_campaigns")
     .insert({
@@ -46,6 +74,7 @@ export async function POST(request: Request) {
       target_amount: values.targetAmount,
       fixed_amount: values.fixedAmount,
       ends_at: values.endsAt,
+      cover_url: coverUrl,
     })
     .select("*")
     .single();
