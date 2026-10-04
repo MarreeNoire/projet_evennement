@@ -37,14 +37,34 @@ export async function POST(request: Request) {
   if (values.endsAt && new Date(values.endsAt) <= new Date()) return apiError("La date de fin doit être dans le futur.");
 
   const admin = createSupabaseAdminClient();
-  const { data, error } = await admin.from("cotisation_campaigns").insert({
-    creator_id: user.id,
-    title: values.title,
-    description: values.description,
-    target_amount: values.targetAmount,
-    fixed_amount: values.fixedAmount,
-    ends_at: values.endsAt,
-  }).select("*").single();
-  if (error || !data) return apiError("La collecte n’a pas pu être créée.", 500);
+  const { data, error } = await admin
+    .from("cotisation_campaigns")
+    .insert({
+      creator_id: user.id,
+      title: values.title,
+      description: values.description,
+      target_amount: values.targetAmount,
+      fixed_amount: values.fixedAmount,
+      ends_at: values.endsAt,
+    })
+    .select("*")
+    .single();
+  if (error || !data) {
+    if (error) {
+      console.error("[POST /api/cotisations] Supabase insert failed", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
+    }
+    const schemaMissing = error?.code === "42P01" || error?.code === "PGRST205";
+    return apiError(
+      schemaMissing
+        ? "Le module Cotisations n’est pas encore activé sur la base de données. Applique la migration Supabase des cotisations."
+        : "La collecte n’a pas pu être créée. Réessaie dans un instant ou contacte le support si le problème persiste.",
+      500,
+    );
+  }
   return NextResponse.json({ campaign: data }, { status: 201 });
 }
