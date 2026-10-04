@@ -44,7 +44,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       orderReference: `COT-${contribution.id}`,
       amount: Number(contribution.amount),
       currency: contribution.currency,
-      description: `Contribution · ${campaign.title}`,
+      description: `Contribution - ${campaign.title}`,
       customer: {
         name: profile?.display_name,
         email: profile?.email ?? user.email ?? undefined,

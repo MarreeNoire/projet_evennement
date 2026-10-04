@@ -104,6 +104,27 @@ export function TontineDetail({ id }: { id: string }) {
   const availableInvitees = invitees.filter((person) => !activeMemberIds.has(person.id));
   const currentCycle = data?.cycles[0] ?? null;
 
+  async function payOnline(paymentId: string) {
+    setBusy(`pay-${paymentId}`);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/tontines/${id}/payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId }),
+      });
+      const result = (await response.json()) as { checkoutUrl?: string; error?: string };
+      if (!response.ok || !result.checkoutUrl)
+        throw new Error(result.error ?? "Le paiement n'a pas pu démarrer.");
+      window.location.assign(result.checkoutUrl);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Le paiement n'a pas pu démarrer.");
+    } finally {
+      setBusy("");
+    }
+  }
+
   async function action(
     key: string,
     path: string,
@@ -296,20 +317,32 @@ export function TontineDetail({ id }: { id: string }) {
                   <span className="text-fg-muted text-xs">
                     {payment.status === "paid" ? "Réglé" : "En attente"}
                   </span>
-                  {data.isOwner && payment.status === "pending" ? (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      loading={busy === payment.id}
-                      onClick={() =>
-                        void action(payment.id, `/api/tontines/${id}/payments`, "PATCH", {
-                          paymentId: payment.id,
-                          status: "paid",
-                        })
-                      }
-                    >
-                      Confirmer
-                    </Button>
+                  {payment.status === "pending" ? (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        loading={busy === `pay-${payment.id}`}
+                        onClick={() => void payOnline(payment.id)}
+                      >
+                        Payer
+                      </Button>
+                      {data.isOwner ? (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          loading={busy === payment.id}
+                          onClick={() =>
+                            void action(payment.id, `/api/tontines/${id}/payments`, "PATCH", {
+                              paymentId: payment.id,
+                              status: "paid",
+                            })
+                          }
+                        >
+                          Confirmer
+                        </Button>
+                      ) : null}
+                    </div>
                   ) : null}
                 </li>
               ))}

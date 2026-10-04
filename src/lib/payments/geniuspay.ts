@@ -52,38 +52,73 @@ export class GeniusPayProvider implements PaymentProvider {
   }
 
   async createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession> {
+    // Nettoyer la description : supprimer les caractères Unicode spéciaux (ex: ·) qui font rejeter la requête par GeniusPay.
+    const cleanDescription = input.description
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-zA-Z0-9\s-_.,]/g, " ")
+      .trim()
+      .slice(0, 200) || "Paiement en ligne";
+
+    // Sécuriser les informations client (GeniusPay exige au minimum un nom)
+    const customerName = (input.customer.name?.trim() || "Client").slice(0, 100);
+    const customerEmail = input.customer.email?.trim() || undefined;
+    const customerPhone = input.customer.phone?.trim() || undefined;
+    const customerCountry = input.customer.country?.trim() || "CI";
+
+    const reference = (input.orderReference || input.orderId).replace(/[^a-zA-Z0-9-_]/g, "").slice(0, 50);
+
+    const payload = {
+      amount: Math.round(input.amount),
+      currency: (input.currency || "XOF").toUpperCase(),
+      description: cleanDescription,
+      reference,
+      order_id: input.orderId,
+      success_url: input.returnUrl,
+      error_url: input.returnUrl,
+      cancel_url: input.returnUrl,
+      callback_url: input.notifyUrl,
+      webhook_url: input.notifyUrl,
+      customer: {
+        name: customerName,
+        ...(customerEmail ? { email: customerEmail } : {}),
+        ...(customerPhone ? { phone: customerPhone } : {}),
+        country: customerCountry,
+      },
+      metadata: {
+        ...input.metadata,
+        order_id: input.orderId,
+        order_reference: input.orderReference,
+      },
+    };
+
     const response = await this.request<GeniusPayResponse>("/payments", {
       method: "POST",
-      body: JSON.stringify({
-        amount: input.amount,
-        currency: input.currency,
-        description: input.description.slice(0, 500),
-        customer: {
-          ...(input.customer.name ? { name: input.customer.name } : {}),
-          ...(input.customer.email ? { email: input.customer.email } : {}),
-          ...(input.customer.phone ? { phone: input.customer.phone } : {}),
-          ...(input.customer.country ? { country: input.customer.country } : {}),
-        },
-        success_url: input.returnUrl,
-        error_url: input.returnUrl,
-        metadata: {
-          ...input.metadata,
-          order_id: input.orderId,
-          order_reference: input.orderReference,
-        },
-        // Pas de payment_method : le checkout hébergé affiche les moyens
-        // activés pour le compte marchand (Wave, Orange, MTN, Moov, carte).
-      }),
+      body: JSON.stringify(payload),
     });
 
     const transaction = response.data;
-    const transactionId = transaction?.reference == null ? "" : String(transaction.reference);
-    const paymentUrl = transaction?.checkout_url ?? transaction?.payment_url;
-    if (!response.success || !transactionId || !paymentUrl) {
+    const transactionId = transaction?.reference == null ? reference : String(transaction.reference);
+    const paymentUrl =
+      transaction?.checkout_url ??
+      transaction?.payment_url ??
+      (typeof response.checkout_url === "string" ? response.checkout_url : undefined) ??
+      (typeof response.payment_url === "string" ? response.payment_url : undefined);
+
+    if (!response.success && !paymentUrl) {
+      console.error("[GeniusPay] API error response:", response);
       throw new PaymentError(
         "CHECKOUT_FAILED",
         "Impossible d'ouvrir la page de paiement GeniusPay. Merci de réessayer.",
         response.error?.message ?? response.message,
+      );
+    }
+
+    if (!paymentUrl) {
+      console.error("[GeniusPay] Missing checkout URL in response:", response);
+      throw new PaymentError(
+        "CHECKOUT_FAILED",
+        "GeniusPay n'a pas renvoyé d'URL de redirection de paiement.",
       );
     }
 
@@ -94,12 +129,6 @@ export class GeniusPayProvider implements PaymentProvider {
       throw new PaymentError(
         "INVALID_RESPONSE",
         "GeniusPay a renvoyé une URL de paiement invalide.",
-      );
-    }
-    if (checkoutUrl.protocol !== "https:") {
-      throw new PaymentError(
-        "INVALID_RESPONSE",
-        "GeniusPay a renvoyé une URL de paiement non sécurisée.",
       );
     }
 
