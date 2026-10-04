@@ -6,7 +6,7 @@ import {
   Ticket,
 } from "lucide-react";
 
-import { EventCard } from "@/components/events/event-card";
+import { EventHorizontalList } from "@/components/events/event-horizontal-list";
 import { HomeHero } from "@/components/home/home-hero";
 import { ModulesSection } from "@/components/home/modules-section";
 import { TontinesHomeSection } from "@/components/home/tontines-home-section";
@@ -25,7 +25,7 @@ export default async function HomePage() {
 
   try {
     const [eventsRes, prof] = await Promise.all([
-      getFeaturedEvents(6).catch(() => []),
+      getFeaturedEvents(10).catch(() => []),
       getCurrentProfile().catch(() => null),
     ]);
     featured = eventsRes;
@@ -48,8 +48,8 @@ export default async function HomePage() {
         <section aria-labelledby="events-section-title" className="border-border border-b bg-bg-subtle/50 py-10 md:py-14">
           <div className="container-page py-4">
             <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-16">
-              {/* Colonne Principale : Événements */}
-              <div className="flex flex-col gap-8">
+              {/* Colonne Principale : Événements en défilement horizontal */}
+              <div className="flex flex-col gap-8 min-w-0">
                 <div className="border-primary flex flex-col gap-4 border-l-4 pl-4 md:flex-row md:items-end md:justify-between">
                   <div>
                     <span className="bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold">
@@ -59,7 +59,7 @@ export default async function HomePage() {
                       Gestion d&apos;Événements & Billetterie
                     </h2>
                     <p className="text-fg-muted mt-1 text-sm leading-relaxed">
-                      Découvre les événements à venir, réserve tes billets et accède aux salons d&apos;échanges des participants.
+                      Fais défiler la liste des événements à venir, réserve tes billets et accède aux salons d&apos;échanges.
                     </p>
                   </div>
                   <Link
@@ -89,7 +89,7 @@ export default async function HomePage() {
                   </Link>
                 </div>
 
-                {/* Événements à la une */}
+                {/* Événements sous forme de carrousel/défilement horizontal */}
                 {featured.length === 0 ? (
                   <EmptyState
                     title="Aucun événement pour le moment"
@@ -99,11 +99,7 @@ export default async function HomePage() {
                     }
                   />
                 ) : (
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    {featured.slice(0, 4).map((event) => (
-                      <EventCard key={event.id} event={event} />
-                    ))}
-                  </div>
+                  <EventHorizontalList events={featured} />
                 )}
               </div>
 
