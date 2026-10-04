@@ -39,12 +39,18 @@ export type NotificationType =
   | "connection_accepted"
   | "ticket_confirmed"
   | "message"
-  | "report_resolved";
+  | "report_resolved"
+  | "tontine_invitation";
 export type ReportTarget = "post" | "comment" | "user" | "event" | "message";
 export type ReportReason =
   "spam" | "harassment" | "hate" | "violence" | "nudity" | "misinformation" | "other";
 export type ReportStatus = "open" | "reviewing" | "resolved" | "dismissed";
 export type MediaKind = "image" | "video";
+export type TontineStatus = "active" | "completed" | "cancelled";
+export type TontineMemberStatus = "invited" | "active" | "declined";
+export type TontinePaymentStatus = "pending" | "paid";
+export type CotisationCampaignStatus = "open" | "closed" | "completed";
+export type CotisationContributionStatus = "pending" | "paid" | "failed" | "cancelled";
 export type DiscountKind = "percentage" | "fixed";
 export type CheckinResult =
   "valid" | "invalid" | "already_used" | "wrong_event" | "cancelled" | "refunded" | "unpaid";
@@ -428,6 +434,82 @@ export type PayoutRow = {
   updated_at: string;
 };
 
+export type TontineRow = {
+  id: string;
+  creator_id: string;
+  title: string;
+  contribution_amount: number;
+  frequency: "monthly";
+  starts_on: string;
+  currency: string;
+  status: TontineStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TontineMemberRow = {
+  id: string;
+  tontine_id: string;
+  user_id: string;
+  invited_by: string;
+  role: "owner" | "member";
+  status: TontineMemberStatus;
+  joined_at: string | null;
+  created_at: string;
+};
+
+export type TontineCycleRow = {
+  id: string;
+  tontine_id: string;
+  cycle_number: number;
+  due_on: string;
+  beneficiary_user_id: string | null;
+  drawn_at: string | null;
+  status: "pending" | "drawn";
+  created_at: string;
+};
+
+export type TontinePaymentRow = {
+  id: string;
+  cycle_id: string;
+  tontine_id: string;
+  user_id: string;
+  amount: number;
+  status: TontinePaymentStatus;
+  paid_at: string | null;
+  marked_paid_by: string | null;
+  created_at: string;
+};
+
+export type CotisationCampaignRow = {
+  id: string;
+  creator_id: string;
+  title: string;
+  description: string;
+  target_amount: number | null;
+  fixed_amount: number | null;
+  ends_at: string | null;
+  currency: string;
+  status: CotisationCampaignStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CotisationContributionRow = {
+  id: string;
+  campaign_id: string;
+  contributor_id: string;
+  amount: number;
+  currency: string;
+  is_anonymous: boolean;
+  status: CotisationContributionStatus;
+  provider: string | null;
+  provider_transaction_id: string | null;
+  provider_payment_url: string | null;
+  paid_at: string | null;
+  created_at: string;
+};
+
 /* ---------------------------------- Vues ---------------------------------- */
 
 /** Vue publique des Ã©vÃ©nements Ã  venir. */
@@ -613,6 +695,13 @@ export type DatabaseFunctions = {
     }[];
   };
   become_organizer: { Args: { p_org_name: string }; Returns: OrganizationRow };
+  is_tontine_participant: { Args: { target_tontine_id: string; target_user_id?: string }; Returns: boolean };
+  tontine_ensure_current_period: { Args: { p_tontine_id: string; p_requested_by: string }; Returns: TontineCycleRow };
+  draw_tontine_beneficiary: { Args: { p_tontine_id: string; p_requested_by: string }; Returns: TontineCycleRow };
+  tontine_mark_payment_paid: { Args: { p_payment_id: string; p_marked_by: string }; Returns: TontinePaymentRow };
+  tontine_respond_invitation: { Args: { p_tontine_id: string; p_user_id: string; p_accept: boolean }; Returns: TontineMemberRow };
+  cotisation_campaign_totals: { Args: { p_campaign_id: string }; Returns: { total_amount: number; contributor_count: number }[] };
+  cotisation_confirm_contribution: { Args: { p_transaction_id: string; p_expected_amount: number; p_currency: string }; Returns: boolean };
 };
 
 export type Database = {
@@ -651,6 +740,12 @@ export type Database = {
       audit_logs: TableDefinition<AuditLogRow>;
       platform_settings: TableDefinition<PlatformSettingRow>;
       payouts: TableDefinition<PayoutRow>;
+      tontines: TableDefinition<TontineRow>;
+      tontine_members: TableDefinition<TontineMemberRow>;
+      tontine_cycles: TableDefinition<TontineCycleRow>;
+      tontine_payments: TableDefinition<TontinePaymentRow>;
+      cotisation_campaigns: TableDefinition<CotisationCampaignRow>;
+      cotisation_contributions: TableDefinition<CotisationContributionRow>;
     };
     Views: {
       published_events: ViewDefinition<PublishedEventView>;

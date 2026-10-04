@@ -14,7 +14,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 import type { HeaderUser } from "./header-types";
-import { getNavItems } from "./nav-config";
+import { getNavGroups } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
 
 /* =============================================================================
@@ -57,7 +57,7 @@ export function MobileNav({
 
   if (!open) return null;
 
-  const navItems = getNavItems(user);
+  const navGroups = getNavGroups(user);
 
   async function handleSignOut() {
     if (isSupabaseConfigured) {
@@ -112,31 +112,48 @@ export function MobileNav({
           />
         </form>
 
-        <ul className="flex flex-col gap-1">
-          {navItems.map((item) => {
-            const active =
-              item.href === ROUTES.home
-                ? pathname === "/"
-                : pathname === item.href || pathname.startsWith(`${item.href}/`);
-
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "flex h-12 items-center border-b border-border px-4 text-base font-medium",
-                    active
-                      ? "bg-primary-subtle text-primary-subtle-fg"
-                      : "text-fg hover:bg-bg-muted",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="flex flex-col gap-5">
+          {user ? (
+            <Link
+              href={ROUTES.home}
+              aria-current={pathname === "/" ? "page" : undefined}
+              className={cn(
+                "flex h-12 items-center px-4 text-base font-semibold",
+                pathname === "/" ? "bg-primary-subtle text-primary-subtle-fg" : "text-fg hover:bg-bg-muted",
+              )}
+            >
+              Accueil
+            </Link>
+          ) : null}
+          {navGroups.map((group) => (
+            <section key={group.label} aria-label={group.label}>
+              <h2
+                className="mb-1 px-3 py-1 text-xs font-semibold tracking-wide text-fg-subtle"
+              >
+                {group.label}
+              </h2>
+              <ul className="flex flex-col">
+                {group.items.map((item) => {
+                  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "flex min-h-11 items-center rounded-lg px-3 text-base font-medium",
+                          active ? "bg-primary-subtle text-primary-subtle-fg" : "text-fg hover:bg-bg-muted",
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
 
         {user ? (
           <div className="mt-4 flex flex-col gap-1 border-t border-border pt-4">

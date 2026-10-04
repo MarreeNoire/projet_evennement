@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Compass, MessageSquare, QrCode, Ticket, User, Users } from "lucide-react";
+import { Bell, Coins, Compass, MessageSquare, QrCode, Repeat2, Ticket, User, Users } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { SiteHeader } from "@/components/layout/site-header";
@@ -21,16 +21,35 @@ export type SocialSection =
   | "reseau"
   | "notifications"
   | "badge"
-  | "profil";
+  | "profil"
+  | "tontines"
+  | "cotisations";
 
-const SECTIONS: { key: SocialSection; href: string; label: string; icon: typeof Compass }[] = [
-  { key: "explorer", href: ROUTES.explore, label: "Explorer", icon: Compass },
-  { key: "salons", href: ROUTES.mySalons, label: "Salons", icon: MessageSquare },
-  { key: "billets", href: ROUTES.myTickets, label: "Billets", icon: Ticket },
-  { key: "reseau", href: ROUTES.connections, label: "Réseau", icon: Users },
-  { key: "notifications", href: ROUTES.notifications, label: "Alertes", icon: Bell },
-  { key: "badge", href: ROUTES.myBadge, label: "Mon badge", icon: QrCode },
-  { key: "profil", href: ROUTES.profile, label: "Profil", icon: User },
+const SECTION_GROUPS: { label: string; items: { key: SocialSection; href: string; label: string; icon: typeof Compass }[] }[] = [
+  {
+    label: "Événements",
+    items: [
+      { key: "explorer", href: ROUTES.explore, label: "Explorer", icon: Compass },
+      { key: "billets", href: ROUTES.myTickets, label: "Billets", icon: Ticket },
+      { key: "salons", href: ROUTES.mySalons, label: "Salons", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Finances collectives",
+    items: [
+      { key: "tontines", href: ROUTES.tontines, label: "Tontines", icon: Repeat2 },
+      { key: "cotisations", href: ROUTES.cotisations, label: "Cotisations", icon: Coins },
+    ],
+  },
+  {
+    label: "Mon espace",
+    items: [
+      { key: "reseau", href: ROUTES.connections, label: "Réseau", icon: Users },
+      { key: "notifications", href: ROUTES.notifications, label: "Alertes", icon: Bell },
+      { key: "badge", href: ROUTES.myBadge, label: "Mon badge", icon: QrCode },
+      { key: "profil", href: ROUTES.profile, label: "Profil", icon: User },
+    ],
+  },
 ];
 
 export function SocialShell({
@@ -51,29 +70,38 @@ export function SocialShell({
         {/* Rail (ordinateur uniquement) */}
         <nav aria-label="Espace membre" className="hidden lg:block">
           <div className="sticky top-24">
-            <p className="eyebrow mb-3">Mon espace</p>
-            <ul className="flex flex-col">
-              {SECTIONS.map(({ key, href, label, icon: Icon }) => {
-                const isActive = key === active;
-                return (
-                  <li key={key}>
-                    <Link
-                      href={href}
-                      aria-current={isActive ? "page" : undefined}
-                      className={cn(
-                        "flex items-center gap-3 border-l-2 py-2.5 pl-4 text-[15px] transition-colors duration-150",
-                        isActive
-                          ? "border-primary font-semibold text-fg"
-                          : "border-border font-medium text-fg-muted hover:border-border hover:text-fg",
-                      )}
-                    >
-                      <Icon className="size-[18px]" aria-hidden="true" />
-                      {label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <p className="eyebrow mb-4">Mon espace</p>
+            <div className="flex flex-col gap-6">
+              {SECTION_GROUPS.map((group) => (
+                <section key={group.label} aria-label={group.label}>
+                  <h2 className="mb-2 px-3 text-xs font-semibold tracking-wide text-fg-subtle">
+                    {group.label}
+                  </h2>
+                  <ul className="flex flex-col gap-1">
+                    {group.items.map(({ key, href, label, icon: Icon }) => {
+                      const isActive = key === active;
+                      return (
+                        <li key={key}>
+                          <Link
+                            href={href}
+                            aria-current={isActive ? "page" : undefined}
+                            className={cn(
+                              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors duration-150",
+                              isActive
+                                ? "bg-primary-subtle font-semibold text-primary-subtle-fg"
+                                : "font-medium text-fg-muted hover:bg-bg-muted hover:text-fg",
+                            )}
+                          >
+                            <Icon className="size-4" aria-hidden="true" />
+                            {label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              ))}
+            </div>
           </div>
         </nav>
 

@@ -155,6 +155,7 @@ export const NOTIFICATION_TYPES = {
   TICKET_CONFIRMED: "ticket_confirmed",
   MESSAGE: "message",
   REPORT_RESOLVED: "report_resolved",
+  TONTINE_INVITATION: "tontine_invitation",
 } as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];
 
@@ -172,6 +173,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   ticket_confirmed: "Billet confirmé",
   message: "Nouveau message",
   report_resolved: "Signalement traité",
+  tontine_invitation: "Invitation à une tontine",
 };
 
 /** Nature d'une publication du salon. */
@@ -284,6 +286,8 @@ export const ROUTES = {
   myTickets: "/mes-billets",
   myBadge: "/mon-badge",
   mySalons: "/mes-salons",
+  tontines: "/tontines",
+  cotisations: "/cotisations",
   connections: "/connexions",
   notifications: "/notifications",
   profile: "/profil",

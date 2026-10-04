@@ -1,4 +1,5 @@
 import { ROUTES } from "@/lib/constants";
+import { CalendarDays, Coins, Repeat2, Users, type LucideIcon } from "lucide-react";
 
 /* =============================================================================
    Navigation principale
@@ -11,41 +12,74 @@ import { ROUTES } from "@/lib/constants";
 export interface NavItem {
   href: string;
   label: string;
+  icon?: LucideIcon;
   /** Réservé aux utilisateurs connectés. */
   authenticated?: boolean;
   /** Réservé aux organisateurs. */
   organizerOnly?: boolean;
 }
 
-/** Navigation publique (utilisateur non connecté). */
-export const PUBLIC_NAV: NavItem[] = [
-  { href: ROUTES.explore, label: "Explorer" },
-  { href: "/organisateurs", label: "Organisateurs" },
-  { href: "/#principe", label: "Comment ça marche" },
-];
+export interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
 
-/** Navigation de l'application (utilisateur connecté). */
-export const APP_NAV: NavItem[] = [
-  { href: ROUTES.home, label: "Accueil" },
-  { href: ROUTES.explore, label: "Explorer" },
-  { href: ROUTES.myTickets, label: "Mes billets", authenticated: true },
-  { href: ROUTES.mySalons, label: "Mes salons", authenticated: true },
-  { href: ROUTES.connections, label: "Connexions", authenticated: true },
-];
-
-export function getNavItems(user: { isOrganizer?: boolean } | null): NavItem[] {
-  if (!user) return PUBLIC_NAV;
-  const items: NavItem[] = [
-    { href: ROUTES.home, label: "Accueil" },
-    { href: ROUTES.explore, label: "Explorer" },
-    { href: ROUTES.myTickets, label: "Mes billets", authenticated: true },
-    { href: ROUTES.mySalons, label: "Mes salons", authenticated: true },
-    { href: ROUTES.connections, label: "Connexions", authenticated: true },
+/** Les modules principaux restent visibles comme des accès directs dans l'en-tête. */
+export function getPrimaryNavItems(user: { isOrganizer?: boolean } | null): NavItem[] {
+  return [
+    { href: ROUTES.explore, label: "Événements", icon: CalendarDays },
+    ...(user ? [{ href: ROUTES.tontines, label: "Tontines", icon: Repeat2 }] : []),
+    { href: ROUTES.cotisations, label: "Cotisations", icon: Coins },
+    ...(user ? [{ href: ROUTES.connections, label: "Réseau", icon: Users }] : []),
   ];
-  if (user.isOrganizer) {
-    items.push({ href: ROUTES.orgDashboard, label: "Espace Organisateur", organizerOnly: true });
+}
+
+/** Navigation regroupée par besoin pour séparer événements, finances et compte. */
+export function getNavGroups(user: { isOrganizer?: boolean } | null): NavGroup[] {
+  if (!user) {
+    return [
+      { label: "Événements", items: [{ href: ROUTES.explore, label: "Explorer les événements" }] },
+      { label: "Finances collectives", items: [{ href: ROUTES.cotisations, label: "Cotisations" }] },
+      {
+        label: "À découvrir",
+        items: [
+          { href: "/organisateurs", label: "Organisateurs" },
+          { href: "/#principe", label: "Comment ça marche" },
+        ],
+      },
+    ];
   }
-  return items;
+
+  const groups: NavGroup[] = [
+    {
+      label: "Événements",
+      items: [
+        { href: ROUTES.explore, label: "Explorer les événements" },
+        { href: ROUTES.myTickets, label: "Mes billets", authenticated: true },
+        { href: ROUTES.mySalons, label: "Mes salons", authenticated: true },
+      ],
+    },
+    {
+      label: "Finances collectives",
+      items: [
+        { href: ROUTES.tontines, label: "Tontines", authenticated: true },
+        { href: ROUTES.cotisations, label: "Cotisations" },
+      ],
+    },
+    {
+      label: "Réseau",
+      items: [{ href: ROUTES.connections, label: "Mes connexions", authenticated: true }],
+    },
+  ];
+
+  if (user.isOrganizer) {
+    groups.push({
+      label: "Organisation",
+      items: [{ href: ROUTES.orgDashboard, label: "Espace organisateur", organizerOnly: true }],
+    });
+  }
+
+  return groups;
 }
 
 /** Navigation de l'espace organisateur. */
@@ -77,6 +111,7 @@ export const FOOTER_SECTIONS = [
     title: "Découvrir",
     links: [
       { href: ROUTES.explore, label: "Tous les événements" },
+      { href: ROUTES.cotisations, label: "Cotisations solidaires" },
       { href: "/organisateurs", label: "Organisateurs" },
       { href: "/#principe", label: "Comment ça marche" },
     ],

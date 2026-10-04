@@ -16,11 +16,13 @@ export function MockPayWidget({
   orderReference,
   total,
   transactionId,
+  returnPath,
 }: {
   orderId: string;
   orderReference: string;
   total: number;
   transactionId: string;
+  returnPath?: string;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,9 @@ export function MockPayWidget({
           setError(body?.error ?? "Confirmation impossible. Réessaie.");
           return;
         }
-        if (decision === "accepted") {
+        if (returnPath) {
+          router.push(returnPath);
+        } else if (decision === "accepted") {
           router.push("/mes-billets");
         } else {
           router.push(`/commandes/${orderId}/retour?statut=${decision}`);

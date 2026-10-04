@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { QrCode } from "lucide-react";
+import { QrCode, WifiOff } from "lucide-react";
 
 import { ConnectionActions } from "@/components/social/connection-actions";
+import { ConnectionsRetryButton } from "@/components/social/connections-retry-button";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
@@ -40,10 +41,12 @@ export default async function ConnexionsPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect(`${ROUTES.login}?redirect=${ROUTES.connections}`);
 
-  const all = await getMyConnections();
-  const network = all.filter((entry) => entry.status === "accepted");
-  const received = all.filter((entry) => entry.status === "pending" && entry.direction === "incoming");
-  const sent = all.filter((entry) => entry.status === "pending" && entry.direction === "outgoing");
+  const all = await getMyConnections(profile.id);
+  const loadFailed = all === null;
+  const entries = all ?? [];
+  const network = entries.filter((entry) => entry.status === "accepted");
+  const received = entries.filter((entry) => entry.status === "pending" && entry.direction === "incoming");
+  const sent = entries.filter((entry) => entry.status === "pending" && entry.direction === "outgoing");
 
   return (
     <SocialShell active="reseau">
@@ -61,6 +64,24 @@ export default async function ConnexionsPage() {
           }
         />
 
+        {loadFailed ? (
+          <section
+            role="alert"
+            className="flex flex-col gap-4 rounded-xl border border-border bg-surface-raised p-5 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex items-start gap-3">
+              <WifiOff className="mt-0.5 size-5 shrink-0 text-fg-muted" aria-hidden="true" />
+              <div>
+                <h2 className="font-semibold">Ton réseau est momentanément indisponible</h2>
+                <p className="mt-1 text-sm text-fg-muted">
+                  Les connexions n’ont pas pu être chargées. Réessaie dans un instant.
+                </p>
+              </div>
+            </div>
+            <ConnectionsRetryButton />
+          </section>
+        ) : (
+          <>
         {received.length > 0 ? (
           <section aria-labelledby="recues" className="flex flex-col gap-4">
             <div className="border-t border-border pt-4">
@@ -125,6 +146,8 @@ export default async function ConnexionsPage() {
             </ul>
           </section>
         ) : null}
+          </>
+        )}
       </div>
     </SocialShell>
   );

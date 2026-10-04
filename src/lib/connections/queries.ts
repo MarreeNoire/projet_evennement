@@ -23,29 +23,53 @@ export interface ConnectionEntry {
   person: ConnectionPerson | null;
 }
 
-export async function getMyConnections(): Promise<ConnectionEntry[]> {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+function isNetworkFailure(error: { message?: string; cause?: unknown }): boolean {
+  const details = `${error.message ?? ""} ${error.cause instanceof Error ? error.cause.message : ""}`.toLowerCase();
+  return details.includes("fetch failed") || details.includes("failed to fetch") || details.includes("networkerror");
+}
 
-  const { data, error } = await supabase
+function waitForRetry(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 300));
+}
+
+export async function getMyConnections(userId?: string): Promise<ConnectionEntry[] | null> {
+  const supabase = await createSupabaseServerClient();
+  let currentUserId = userId;
+  if (!currentUserId) {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError) {
+      console.warn("[getMyConnections] Unable to validate the current session.", authError.message);
+      return null;
+    }
+    currentUserId = authData.user?.id;
+  }
+  if (!currentUserId) return [];
+
+  const loadConnections = () => supabase
     .from("connections")
     .select("id, requester_id, addressee_id, status, message, origin, event_id, created_at")
-    .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+    .or(`requester_id.eq.${currentUserId},addressee_id.eq.${currentUserId}`)
     .neq("status", "declined")
     .order("created_at", { ascending: false })
     .limit(200);
 
+  let { data, error } = await loadConnections();
+  if (error && isNetworkFailure(error)) {
+    await waitForRetry();
+    ({ data, error } = await loadConnections());
+  }
+
   if (error) {
-    console.error("[getMyConnections]", error.message);
-    return [];
+    console.warn("[getMyConnections] Connection records could not be loaded.", {
+      code: error.code,
+      message: error.message,
+    });
+    return null;
   }
 
   const rows = data ?? [];
   const otherIds = [
-    ...new Set(rows.map((row) => (row.requester_id === user.id ? row.addressee_id : row.requester_id))),
+    ...new Set(rows.map((row) => (row.requester_id === currentUserId ? row.addressee_id : row.requester_id))),
   ];
   const eventIds = rows.map((row) => row.event_id).filter((id): id is string => Boolean(id));
 
@@ -65,7 +89,7 @@ export async function getMyConnections(): Promise<ConnectionEntry[]> {
   }
 
   return rows.map((row) => {
-    const outgoing = row.requester_id === user.id;
+    const outgoing = row.requester_id === currentUserId;
     const otherId = outgoing ? row.addressee_id : row.requester_id;
 
     return {

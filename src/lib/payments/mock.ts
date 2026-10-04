@@ -39,6 +39,10 @@ export class MockPaymentProvider implements PaymentProvider {
     const url = new URL(`/paiement/simulation/${input.orderId}`, env.appUrl);
     url.searchParams.set("tx", transactionId);
     url.searchParams.set("montant", String(input.amount));
+    if (input.metadata?.contribution_id && input.metadata.campaign_id) {
+      url.searchParams.set("type", "contribution");
+      url.searchParams.set("campaign", input.metadata.campaign_id);
+    }
 
     return {
       provider: this.name,

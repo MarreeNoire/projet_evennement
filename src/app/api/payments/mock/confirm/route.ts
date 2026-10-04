@@ -44,7 +44,18 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!order) {
-    return NextResponse.json({ ok: false, error: "Commande introuvable." }, { status: 404 });
+    const { data: contribution } = await admin.from("cotisation_contributions")
+      .select("id, status, provider_transaction_id")
+      .eq("id", orderId).eq("contributor_id", user.id).eq("provider", "mock")
+      .eq("provider_transaction_id", transactionId).maybeSingle();
+    if (!contribution) return NextResponse.json({ ok: false, error: "Commande introuvable." }, { status: 404 });
+    if (contribution.status !== "pending") return NextResponse.json({ ok: contribution.status === "paid" });
+    const { error } = await admin.from("cotisation_contributions").update({
+      status: decision === "accepted" ? "paid" : decision === "refused" ? "failed" : "cancelled",
+      paid_at: decision === "accepted" ? new Date().toISOString() : null,
+    }).eq("id", contribution.id).eq("status", "pending");
+    if (error) return NextResponse.json({ ok: false, error: "Confirmation impossible." }, { status: 422 });
+    return NextResponse.json({ ok: true });
   }
 
   await admin

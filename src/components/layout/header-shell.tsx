@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 import type { HeaderUser } from "./header-types";
 import { MobileNav } from "./mobile-nav";
-import { getNavItems } from "./nav-config";
+import { getPrimaryNavItems } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 
@@ -39,7 +39,7 @@ export function HeaderShell({
     (count, change: number) => Math.max(0, count + change),
   );
   const [, startTransition] = useTransition();
-  const navItems = getNavItems(user);
+  const primaryNavItems = getPrimaryNavItems(user);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -167,26 +167,33 @@ export function HeaderShell({
           <Logo />
         </Link>
 
-        <nav aria-label="Navigation principale" className="hidden items-center gap-7 lg:flex">
-          {navItems.map((item) => {
-            const active = isActive(pathname, item.href);
+        <nav aria-label="Modules principaux" className="hidden lg:block">
+          <ul className="flex items-center gap-1 rounded-full border border-border bg-bg-muted p-1">
+            {primaryNavItems.map((item) => {
+              const active =
+                isActive(pathname, item.href) ||
+                (item.href === ROUTES.explore && pathname.startsWith("/evenements/"));
+              const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "rounded-none border-b-2 border-transparent px-2 py-3 text-sm font-semibold transition-colors duration-150",
-                  active
-                    ? "border-primary text-primary"
-                    : "text-fg-muted hover:bg-bg-muted hover:text-fg",
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex h-9 items-center gap-2 rounded-full px-3 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus",
+                      active
+                        ? "bg-surface-raised text-primary shadow-sm"
+                        : "text-fg-muted hover:bg-surface hover:text-fg",
+                    )}
+                  >
+                    {Icon ? <Icon className="size-4" aria-hidden="true" /> : null}
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
 
         <div className="ml-auto flex items-center gap-2">

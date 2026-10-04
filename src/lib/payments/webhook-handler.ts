@@ -41,7 +41,50 @@ export async function handlePaymentWebhook(request: Request, provider: PaymentPr
     .eq("provider", notification.provider)
     .maybeSingle();
 
-  if (!payment) return NextResponse.json({ received: true, matched: false });
+  if (!payment) {
+    const { data: contribution } = await admin
+      .from("cotisation_contributions")
+      .select("id, amount, currency, status")
+      .eq("provider_transaction_id", notification.transactionId)
+      .eq("provider", notification.provider)
+      .maybeSingle();
+
+    if (!contribution) return NextResponse.json({ received: true, matched: false });
+
+    if (isPaidStatus(notification.status)) {
+      try {
+        const verification = await provider.verify(notification.transactionId);
+        const matches =
+          isPaidStatus(verification.status) &&
+          verification.amount === Math.round(Number(contribution.amount)) &&
+          verification.currency?.toUpperCase() === contribution.currency.toUpperCase();
+        if (!matches) {
+          await admin.from("cotisation_contributions").update({ status: "failed" }).eq("id", contribution.id);
+          return NextResponse.json({ received: true, confirmed: false, reason: "verify_mismatch" });
+        }
+
+        const { data: confirmed, error } = await admin.rpc("cotisation_confirm_contribution", {
+          p_transaction_id: notification.transactionId,
+          p_expected_amount: Number(contribution.amount),
+          p_currency: contribution.currency,
+        });
+        if (error || !confirmed) {
+          return NextResponse.json({ received: true, confirmed: false, reason: "confirm_failed" });
+        }
+        return NextResponse.json({ received: true, confirmed: true });
+      } catch {
+        return NextResponse.json({ received: true, confirmed: false, reason: "verify_failed" });
+      }
+    }
+
+    if (notification.status === "refused" || notification.status === "cancelled") {
+      await admin.from("cotisation_contributions")
+        .update({ status: notification.status === "refused" ? "failed" : "cancelled" })
+        .eq("id", contribution.id)
+        .eq("status", "pending");
+    }
+    return NextResponse.json({ received: true, confirmed: false });
+  }
 
   await admin
     .from("payments")

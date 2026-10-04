@@ -59,7 +59,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
             <PublicStorageImage
               src={imageUrl}
               alt=""
-              className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-[1.02]"
+              className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-[1.05] motion-reduce:transform-none motion-reduce:transition-none"
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               fill
               quality={68}
@@ -99,18 +99,22 @@ export function EventCard({ event }: { event: PublishedEventView }) {
 
           {/* Gallery preview */}
           {gallery.length > 0 && (
-            <div className="mb-2 flex gap-1">
+              <div className="mb-2 flex gap-1">
               {gallery.slice(0, 3).map((url, index) => (
-                <PublicStorageImage
-                  key={`${event.id}-gallery-${index}`}
-                  src={url}
-                  alt=""
-                  width={40}
-                  height={40}
-                  sizes="40px"
-                  quality={48}
-                  className="border-border/50 bg-bg-muted rounded-md border object-cover"
-                />
+                  <span
+                    key={`${event.id}-gallery-${index}`}
+                    className="border-border/50 bg-bg-muted size-10 shrink-0 overflow-hidden rounded-md border"
+                  >
+                    <PublicStorageImage
+                      src={url}
+                      alt=""
+                      width={40}
+                      height={40}
+                      sizes="40px"
+                      quality={48}
+                      className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
+                    />
+                  </span>
               ))}
             </div>
           )}

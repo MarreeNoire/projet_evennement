@@ -8,6 +8,7 @@ import { PostCard } from "@/components/social/post-card";
 import { SocialShell } from "@/components/social/social-shell";
 import { Avatar, AvatarGroup } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
+import { ImageCarousel } from "@/components/ui/image-carousel";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { EmptyState } from "@/components/ui/states";
 import { ROUTES, SALON_PRIVACY_LABELS, SALON_TABS } from "@/lib/constants";
@@ -244,24 +245,17 @@ export default async function SalonDetailPage({
                 description="Les photos publiées dans la discussion apparaîtront ici."
               />
             ) : (
-              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {photos.map((photo) => (
-                  <li
-                    key={photo.id}
-                    className="border-border bg-bg-muted relative aspect-square overflow-hidden border"
-                  >
-                    {/* URL signée vers le bucket privé du salon. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photo.url}
-                      alt={photo.caption || "Photo partagée dans le salon"}
-                      className="size-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </li>
-                ))}
-              </ul>
+              <ImageCarousel
+                images={photos.map((photo) => ({
+                  id: photo.id,
+                  src: photo.url,
+                  alt: photo.caption || "Photo partagée dans le salon",
+                }))}
+                label={`Photos partagées dans ${salon.name}`}
+                slideClassName="aspect-square basis-[82%] sm:basis-[48%] lg:basis-[31%]"
+                sizes="(min-width: 1024px) 31vw, (min-width: 640px) 48vw, 82vw"
+                quality={65}
+              />
             )
           ) : null}
 
