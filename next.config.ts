@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
 
+  experimental: {
+    // Étend la durée du cache côté client du routeur Next.js.
+    // Par défaut à 0 s (Next 15+) pour les pages dynamiques, ce qui entraîne
+    // un rechargement complet des Server Components à chaque retour sur l'app PWA.
+    // Avec 300 s, le contenu affiché reste intact si l'utilisateur revient
+    // dans les 5 minutes — comportement standard des apps mobiles natives.
+    staleTimes: {
+      dynamic: 300, // 5 minutes
+      static: 600,  // 10 minutes
+    },
+  },
+
   images: {
     remotePatterns: [
       ...(supabaseHost
@@ -24,7 +36,6 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
 
-  // En-têtes de sécurité appliqués à toutes les réponses
   async headers() {
     return [
       {
@@ -41,6 +52,15 @@ const nextConfig: NextConfig = {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
           },
+        ],
+      },
+      {
+        // Le service worker ne doit jamais être mis en cache HTTP —
+        // le navigateur doit toujours le télécharger pour détecter les mises à jour.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
         ],
       },
     ];

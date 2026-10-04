@@ -31,8 +31,29 @@ function persistRoute(route: string) {
   }
 }
 
+/** Enregistre le service worker PWA une seule fois. */
+function registerServiceWorker() {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+
+  navigator.serviceWorker
+    .register("/sw.js", { scope: "/" })
+    .then((registration) => {
+      // Vérifier silencieusement les mises à jour du SW
+      registration.update().catch(() => {});
+    })
+    .catch((err) => {
+      // Ne pas bloquer l'app si le SW ne s'enregistre pas
+      console.warn("[PWA] Service worker non enregistré :", err);
+    });
+}
+
 export function PwaRouteRestoration() {
   const pathname = usePathname();
+
+  // Enregistrer le service worker une seule fois au montage
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   useEffect(() => {
     if (!isStandalonePwa()) return;
@@ -55,8 +76,14 @@ export function PwaRouteRestoration() {
       }
     };
 
+    // Sauvegarder la route quand la page est masquée (mise en arrière-plan).
+    // IMPORTANT : ne jamais appeler router.refresh() ou router.push() ici —
+    // cela provoquerait le rechargement visible que l'on cherche à éviter.
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") saveCurrentRoute();
+      // Quand l'app revient au premier plan (visible), on NE rafraîchit PAS.
+      // Le service worker (sw.js) retourne le contenu mis en cache immédiatement,
+      // et Next.js revalide en arrière-plan grâce à staleTimes.
     };
 
     saveCurrentRoute();
