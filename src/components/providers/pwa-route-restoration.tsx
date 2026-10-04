@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const LAST_ROUTE_KEY = "event:pwa:last-route";
-const ROUTE_TTL_MS = 24 * 60 * 60 * 1000;
+const LAST_ROUTE_COOKIE = "event_pwa_last_route";
+const ROUTE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 function isStandalonePwa() {
   return (
@@ -13,64 +14,44 @@ function isStandalonePwa() {
   );
 }
 
-function readSavedRoute() {
+function persistRoute(route: string) {
+  const savedAt = Date.now();
+  const value = JSON.stringify({ route, savedAt });
   try {
-    const saved = localStorage.getItem(LAST_ROUTE_KEY);
-    if (!saved) return null;
-    const parsed = JSON.parse(saved) as { route?: unknown; savedAt?: unknown };
-    if (
-      typeof parsed.route !== "string" ||
-      !parsed.route.startsWith("/") ||
-      parsed.route.startsWith("//") ||
-      typeof parsed.savedAt !== "number" ||
-      Date.now() - parsed.savedAt > ROUTE_TTL_MS
-    ) {
-      localStorage.removeItem(LAST_ROUTE_KEY);
-      return null;
-    }
-    return parsed.route;
+    localStorage.setItem(LAST_ROUTE_KEY, value);
   } catch {
-    return null;
+    // Le cookie suffit à rétablir la route au démarrage de la PWA.
+  }
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  const encodedRoute = encodeURIComponent(route);
+  if (encodedRoute.length <= 3800) {
+    document.cookie = `${LAST_ROUTE_COOKIE}=${encodedRoute}; Path=/; Max-Age=${Math.floor(ROUTE_TTL_MS / 1000)}; SameSite=Lax${secure}`;
+  } else {
+    document.cookie = `${LAST_ROUTE_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${secure}`;
   }
 }
 
 export function PwaRouteRestoration() {
   const pathname = usePathname();
-  const router = useRouter();
-  const restored = useRef(false);
 
   useEffect(() => {
-    if (!isStandalonePwa()) {
-      restored.current = true;
-      return;
-    }
-
-    if (pathname === "/") {
-      const savedRoute = readSavedRoute();
-      if (savedRoute && savedRoute !== "/") {
-        router.replace(savedRoute);
-        return;
-      }
-    }
-
-    restored.current = true;
-  }, [pathname, router]);
-
-  useEffect(() => {
-    if (!restored.current || !isStandalonePwa()) return;
+    if (!isStandalonePwa()) return;
 
     const saveCurrentRoute = () => {
       try {
-        const route = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+        const url = new URL(window.location.href);
+        url.searchParams.delete("pwa_start");
+        const route = `${url.pathname}${url.search}${url.hash}`;
         if (
           !route.startsWith("//") &&
           !route.startsWith("/auth/") &&
-          !route.startsWith("/nouveau-mot-de-passe")
+          !route.startsWith("/nouveau-mot-de-passe") &&
+          route.length <= 3500
         ) {
-          localStorage.setItem(LAST_ROUTE_KEY, JSON.stringify({ route, savedAt: Date.now() }));
+          persistRoute(route);
         }
       } catch {
-        // La PWA doit rester utilisable si le stockage du navigateur est bloqué.
+        // La PWA reste utilisable si le stockage du navigateur est bloqué.
       }
     };
 

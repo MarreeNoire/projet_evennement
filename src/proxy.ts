@@ -1,6 +1,49 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+const LAST_ROUTE_COOKIE = "event_pwa_last_route";
+const START_PARAM = "pwa_start";
+
+function getSafeSavedRoute(request: NextRequest) {
+  const cookieValue = request.cookies.get(LAST_ROUTE_COOKIE)?.value;
+  if (!cookieValue || cookieValue.length > 10_500) return null;
+
+  try {
+    const value = decodeURIComponent(cookieValue);
+    if (value.length > 3500 || !value.startsWith("/") || value.startsWith("//")) {
+      return null;
+    }
+
+    const route = new URL(value, request.url);
+    if (
+      route.origin !== request.nextUrl.origin ||
+      route.pathname === "/auth" ||
+      route.pathname.startsWith("/auth/") ||
+      route.pathname.startsWith("/nouveau-mot-de-passe")
+    ) {
+      return null;
+    }
+
+    route.searchParams.delete(START_PARAM);
+    return `${route.pathname}${route.search}${route.hash}`;
+  } catch {
+    return null;
+  }
+}
+
+/*
+ * PWA launch URLs carry a marker so a normal navigation to `/` remains the
+ * home page. Android may recreate a suspended WebView; restore its last route
+ * with a server redirect before rendering the home page.
+ */
+function redirectPwaLaunch(request: NextRequest) {
+  if (request.nextUrl.searchParams.get(START_PARAM) !== "1") return null;
+
+  const target = getSafeSavedRoute(request);
+  const destination = new URL(target && target !== "/" ? target : "/", request.url);
+  return NextResponse.redirect(destination, 307);
+}
+
 /* =============================================================================
    Proxy de session Supabase (convention Next.js 16 : `src/proxy.ts`)
    --------------------------------------------------------------------------
@@ -12,6 +55,9 @@ import { createServerClient } from "@supabase/ssr";
    ========================================================================== */
 
 export default async function proxy(request: NextRequest) {
+  const launchRedirect = redirectPwaLaunch(request);
+  if (launchRedirect) return launchRedirect;
+
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
