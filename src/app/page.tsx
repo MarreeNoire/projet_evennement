@@ -1,8 +1,16 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, Users } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  Users,
+  Wallet,
+  PiggyBank,
+  Ticket,
+} from "lucide-react";
 
 import { EventCard } from "@/components/events/event-card";
 import { HomeHero } from "@/components/home/home-hero";
+import { ModulesSection } from "@/components/home/modules-section";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { EmptyState } from "@/components/ui/states";
@@ -33,6 +41,10 @@ export default async function HomePage() {
       <main id="contenu" className="flex flex-col">
         <HomeHero />
 
+        {/* ── Section Modules ─────────────────────────────────────────── */}
+        <ModulesSection />
+
+        {/* ── Feed principal + Sidebar ─────────────────────────────────── */}
         <div className="container-page py-8 md:py-12">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-16">
             {/* Colonne Principale : Feed Hybride */}
@@ -59,7 +71,7 @@ export default async function HomePage() {
 
                 <div className="no-scrollbar flex gap-2 overflow-x-auto pt-1">
                   <span className="bg-primary shrink-0 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white">
-                    Fil d’actualité
+                    Fil d&apos;actualité
                   </span>
                   <Link
                     href="/explorer"
