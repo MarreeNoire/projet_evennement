@@ -1,4 +1,4 @@
-import { ArrowRight, Wallet, Plus, Coins } from "lucide-react";
+import { ArrowRight, Plus, Coins } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
 import {
@@ -8,16 +8,13 @@ import {
 
 export function CotisationsHomeSection({ campaigns }: { campaigns: CotisationItem[] }) {
   return (
-    <section aria-labelledby="cotisations-section-title" className="border-border border-b bg-bg-subtle py-10 md:py-14">
-      <div className="container-page flex flex-col gap-8">
+    <section aria-labelledby="cotisations-section-title" className="border-border border-b bg-bg-subtle py-8 md:py-10">
+      <div className="container-page flex flex-col gap-6">
         {/* En-tête de section */}
-        <div className="border-success flex flex-col gap-4 border-l-4 pl-4 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <span className="bg-success/10 text-success inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold">
-              <Wallet className="size-3.5" /> Module 3 · Cotisations
-            </span>
-            <h2 id="cotisations-section-title" className="font-display mt-2 text-2xl font-bold md:text-3xl">
-              Gestion des Cotisations & Collectes de fonds
+            <h2 id="cotisations-section-title" className="font-display text-2xl font-bold md:text-3xl">
+              Collectes de cotisations
             </h2>
             <p className="text-fg-muted mt-1 max-w-2xl text-sm leading-relaxed">
               Fais défiler les collectes ouvertes. Collecte des fonds pour vos projets de groupe et événements avec suivi en temps réel.
@@ -37,15 +34,12 @@ export function CotisationsHomeSection({ campaigns }: { campaigns: CotisationIte
         {campaigns.length > 0 ? (
           <CotisationHorizontalList cotisations={campaigns} />
         ) : (
-          <div className="border-border bg-surface flex flex-col items-center justify-center rounded-xl border py-8 px-4 text-center">
+          <div className="border-border bg-surface flex flex-col items-center justify-center rounded-xl border px-4 py-6 text-center">
             <Coins className="text-success mb-3 size-10 opacity-70" />
             <h3 className="font-display text-base font-bold">Lance ta première collecte</h3>
             <p className="text-fg-muted mt-1 max-w-md text-xs leading-relaxed">
               Crée une cagnotte en quelques clics et partage le lien pour recevoir les contributions en Mobile Money.
             </p>
-            <ButtonLink href="/cotisations/nouvelle" size="sm" className="bg-success text-white hover:bg-success/90 mt-4">
-              Démarrer une collecte
-            </ButtonLink>
           </div>
         )}
       </div>

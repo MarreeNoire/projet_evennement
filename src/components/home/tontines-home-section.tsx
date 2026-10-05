@@ -8,16 +8,13 @@ import {
 
 export function TontinesHomeSection({ tontines }: { tontines: TontineItem[] }) {
   return (
-    <section aria-labelledby="tontines-section-title" className="border-border border-b bg-surface py-10 md:py-14">
-      <div className="container-page flex flex-col gap-8">
+    <section aria-labelledby="tontines-section-title" className="border-border border-b bg-surface py-8 md:py-10">
+      <div className="container-page flex flex-col gap-6">
         {/* En-tête de section */}
-        <div className="border-accent flex flex-col gap-4 border-l-4 pl-4 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <span className="bg-accent-subtle text-accent-subtle-fg inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold">
-              <PiggyBank className="size-3.5" /> Module 2 · Tontines
-            </span>
-            <h2 id="tontines-section-title" className="font-display mt-2 text-2xl font-bold md:text-3xl">
-              Gestion des Tontines & Épargne collective
+            <h2 id="tontines-section-title" className="font-display text-2xl font-bold md:text-3xl">
+              Tontines et épargne collective
             </h2>
             <p className="text-fg-muted mt-1 max-w-2xl text-sm leading-relaxed">
               Fais défiler les tontines actives. Crée et gère tes groupes avec tirages de rotation et cotisations mensuelles.
@@ -37,15 +34,12 @@ export function TontinesHomeSection({ tontines }: { tontines: TontineItem[] }) {
         {tontines.length > 0 ? (
           <TontineHorizontalList tontines={tontines} />
         ) : (
-          <div className="border-border bg-bg-subtle flex flex-col items-center justify-center rounded-xl border py-8 px-4 text-center">
+          <div className="border-border bg-bg-subtle flex flex-col items-center justify-center rounded-xl border px-4 py-6 text-center">
             <PiggyBank className="text-accent mb-3 size-10 opacity-70" />
             <h3 className="font-display text-base font-bold">Lance ta première tontine</h3>
             <p className="text-fg-muted mt-1 max-w-md text-xs leading-relaxed">
               Rassemble tes proches ou collègues, choisis le montant de la cotisation et commence l&apos;épargne collective.
             </p>
-            <ButtonLink href="/tontines/nouvelle" size="sm" className="bg-accent-solid text-accent-solid-fg hover:brightness-95 mt-4">
-              Créer un groupe de tontine
-            </ButtonLink>
           </div>
         )}
       </div>

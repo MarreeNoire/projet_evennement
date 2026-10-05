@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   Users,
-  Ticket,
 } from "lucide-react";
 
 import { EventHorizontalList } from "@/components/events/event-horizontal-list";
@@ -48,22 +47,16 @@ export default async function HomePage() {
         <HomeHero />
 
         {/* ── MODULE 1 : GESTION D'ÉVÉNEMENTS & BILLETTERIE ────────────────── */}
-        <section aria-labelledby="events-section-title" className="border-border border-b bg-bg-subtle/50 py-10 md:py-14">
-          <div className="container-page py-4">
-            <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-16">
+        <section aria-labelledby="events-section-title" className="border-border border-b bg-bg-subtle/50 py-8 md:py-10">
+          <div className="container-page">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-12">
               {/* Colonne Principale : Événements en défilement horizontal */}
-              <div className="flex flex-col gap-8 min-w-0">
-                <div className="border-primary flex flex-col gap-4 border-l-4 pl-4 md:flex-row md:items-end md:justify-between">
+              <div className="flex min-w-0 flex-col gap-6">
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <span className="bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold">
-                      <Ticket className="size-3.5" /> Module 1 · Événements
-                    </span>
-                    <h2 id="events-section-title" className="font-display mt-2 text-2xl font-bold md:text-3xl">
-                      Gestion d&apos;Événements & Billetterie
+                    <h2 id="events-section-title" className="font-display text-2xl font-bold md:text-3xl">
+                      Événements à venir
                     </h2>
-                    <p className="text-fg-muted mt-1 text-sm leading-relaxed">
-                      Fais défiler la liste des événements à venir, réserve tes billets et accède aux salons d&apos;échanges.
-                    </p>
                   </div>
                   <Link
                     href={ROUTES.explore}
@@ -74,13 +67,7 @@ export default async function HomePage() {
                   </Link>
                 </div>
 
-                <div className="no-scrollbar flex gap-2 overflow-x-auto pt-1">
-                  <Link
-                    href="/explorer"
-                    className="border-border bg-surface text-fg-muted hover:border-border hover:text-fg shrink-0 rounded-md border px-3.5 py-1 text-xs font-medium transition-colors"
-                  >
-                    Recherche par catégorie
-                  </Link>
+                <div className="no-scrollbar flex gap-2 overflow-x-auto">
                   <Link
                     href="/mes-salons"
                     className="border-border bg-surface text-fg-muted hover:border-border hover:text-fg shrink-0 rounded-md border px-3.5 py-1 text-xs font-medium transition-colors"
@@ -105,7 +92,7 @@ export default async function HomePage() {
 
               {/* Sidebar Droite : Profile & Suggestions */}
               <aside className="hidden flex-col gap-6 lg:flex">
-                <div className="border-fg bg-surface border-t-2 p-5 rounded-lg border">
+                <div className="border-border bg-surface rounded-lg border p-5">
                   {profile ? (
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-3">
@@ -156,7 +143,7 @@ export default async function HomePage() {
                 </div>
 
                 {/* Suggestions événements */}
-                <div className="border-fg bg-surface border-t-2 p-5 rounded-lg border">
+                <div className="border-border bg-surface rounded-lg border p-5">
                   <h3 className="text-fg-subtle mb-4 text-xs font-bold tracking-wider uppercase">
                     Accès rapides
                   </h3>

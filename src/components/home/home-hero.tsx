@@ -6,7 +6,7 @@ import { APP_NAME, CATEGORIES } from "@/lib/constants";
 export function HomeHero() {
   return (
     <section className="border-border bg-bg-subtle border-b">
-      <div className="container-page grid gap-6 py-8 md:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] lg:items-center lg:gap-8 xl:gap-12">
+      <div className="container-page grid gap-5 py-6 md:py-8 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] lg:items-center lg:gap-8 xl:gap-12">
         <div className="flex flex-col gap-3">
           <h1 className="font-display max-w-3xl text-3xl font-bold md:text-4xl">
             Le fil des événements et des rencontres
@@ -65,7 +65,7 @@ export function HomeHero() {
 
 function TicketArtwork() {
   return (
-    <div className="mx-auto w-full max-w-48 sm:max-w-xs lg:max-w-none" aria-hidden="true">
+    <div className="mx-auto hidden w-full max-w-48 sm:max-w-xs lg:block lg:max-w-none" aria-hidden="true">
       <svg viewBox="0 0 360 270" className="h-auto w-full" fill="none">
         <circle cx="181" cy="133" r="116" fill="var(--primary-subtle)" />
         <circle
