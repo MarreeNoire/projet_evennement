@@ -7,7 +7,6 @@ import {
 
 import { EventHorizontalList } from "@/components/events/event-horizontal-list";
 import { HomeHero } from "@/components/home/home-hero";
-import { ModulesSection } from "@/components/home/modules-section";
 import { TontinesHomeSection } from "@/components/home/tontines-home-section";
 import { CotisationsHomeSection } from "@/components/home/cotisations-home-section";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -47,9 +46,6 @@ export default async function HomePage() {
 
       <main id="contenu" className="flex flex-col">
         <HomeHero />
-
-        {/* ── Aperçu global des 3 modules ───────────────────────────────── */}
-        <ModulesSection />
 
         {/* ── MODULE 1 : GESTION D'ÉVÉNEMENTS & BILLETTERIE ────────────────── */}
         <section aria-labelledby="events-section-title" className="border-border border-b bg-bg-subtle/50 py-10 md:py-14">
