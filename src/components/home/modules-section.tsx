@@ -46,8 +46,8 @@ const MODULES: Module[] = [
     href: "/tontines",
     cta: "Accéder aux tontines",
     accentClass: "bg-accent/5 border-accent/15",
-    tagClass: "bg-accent/10 text-accent-fg",
-    ctaClass: "bg-accent text-accent-fg hover:bg-accent/90",
+    tagClass: "bg-accent-subtle text-accent-subtle-fg",
+    ctaClass: "bg-accent-solid text-accent-solid-fg hover:brightness-95",
     artwork: <TontineArtwork />,
   },
   {
@@ -189,19 +189,19 @@ function TontineArtwork() {
       {/* Haut */}
       <circle cx="80" cy="16" r="10" fill="var(--accent)" fillOpacity=".25" />
       <circle cx="80" cy="16" r="10" stroke="var(--accent)" strokeWidth="1.5" />
-      <text x="80" y="20" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--accent-fg)">A</text>
+      <text x="80" y="20" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--accent-solid-fg)">A</text>
       {/* Droite */}
       <circle cx="120" cy="56" r="10" fill="var(--accent)" fillOpacity=".25" />
       <circle cx="120" cy="56" r="10" stroke="var(--accent)" strokeWidth="1.5" />
-      <text x="120" y="60" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--accent-fg)">B</text>
+      <text x="120" y="60" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--accent-solid-fg)">B</text>
       {/* Bas */}
       <circle cx="80" cy="96" r="10" fill="var(--accent)" fillOpacity=".25" />
       <circle cx="80" cy="96" r="10" stroke="var(--accent)" strokeWidth="1.5" />
-      <text x="80" y="100" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--accent-fg)">C</text>
+      <text x="80" y="100" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--accent-solid-fg)">C</text>
       {/* Gauche */}
       <circle cx="40" cy="56" r="10" fill="var(--accent)" fillOpacity=".25" />
       <circle cx="40" cy="56" r="10" stroke="var(--accent)" strokeWidth="1.5" />
-      <text x="40" y="60" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--accent-fg)">D</text>
+      <text x="40" y="60" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--accent-solid-fg)">D</text>
       {/* Centre : pile de pièces */}
       <ellipse cx="80" cy="60" rx="14" ry="5" fill="var(--accent)" fillOpacity=".4" />
       <ellipse cx="80" cy="56" rx="14" ry="5" fill="var(--accent)" fillOpacity=".6" />

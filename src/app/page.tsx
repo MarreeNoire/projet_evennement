@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  CalendarDays,
   Users,
   Ticket,
 } from "lucide-react";
@@ -13,6 +12,7 @@ import { TontinesHomeSection } from "@/components/home/tontines-home-section";
 import { CotisationsHomeSection } from "@/components/home/cotisations-home-section";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
 import { getFeaturedEvents } from "@/lib/events/queries";
@@ -72,9 +72,6 @@ export default async function HomePage() {
                 </div>
 
                 <div className="no-scrollbar flex gap-2 overflow-x-auto pt-1">
-                  <span className="bg-primary shrink-0 rounded-md px-3.5 py-1.5 text-xs font-semibold text-white">
-                    Événements publiés
-                  </span>
                   <Link
                     href="/explorer"
                     className="border-border bg-surface text-fg-muted hover:border-border hover:text-fg shrink-0 rounded-md border px-3.5 py-1 text-xs font-medium transition-colors"
@@ -95,7 +92,7 @@ export default async function HomePage() {
                     title="Aucun événement pour le moment"
                     description="Reviens bientôt pour découvrir les prochains rendez-vous."
                     action={
-                      <ButtonLink href="/devenir-organisateur">Créer un événement</ButtonLink>
+                      <ButtonLink href="/devenir-organisateur">Devenir organisateur</ButtonLink>
                     }
                   />
                 ) : (
@@ -109,9 +106,7 @@ export default async function HomePage() {
                   {profile ? (
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="bg-primary/10 text-primary flex size-12 items-center justify-center overflow-hidden rounded-full font-bold">
-                          {profile.display_name?.charAt(0).toUpperCase()}
-                        </div>
+                        <Avatar src={profile.avatar_url} name={profile.display_name} size="md" />
                         <div className="min-w-0">
                           <p className="text-fg truncate font-bold">{profile.display_name}</p>
                           <p className="text-fg-subtle truncate text-xs">
@@ -160,28 +155,36 @@ export default async function HomePage() {
                 {/* Suggestions événements */}
                 <div className="border-fg bg-surface border-t-2 p-5 rounded-lg border">
                   <h3 className="text-fg-subtle mb-4 text-xs font-bold tracking-wider uppercase">
-                    Prochains rendez-vous
+                    Accès rapides
                   </h3>
-                  <ul className="flex flex-col gap-3">
-                    {featured.slice(0, 3).map((ev) => (
-                      <li key={ev.id} className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <Link
-                            href={`/evenements/${ev.slug}`}
-                            className="text-fg hover:text-primary block truncate text-xs font-semibold transition-colors"
-                          >
-                            {ev.title}
-                          </Link>
-                          <span className="text-2xs text-fg-subtle block">{ev.city}</span>
-                        </div>
-                        <Link
-                          href={`/evenements/${ev.slug}`}
-                          className="bg-primary/10 text-2xs text-primary hover:bg-primary/20 shrink-0 rounded-md px-2.5 py-1 font-bold transition-colors"
-                        >
-                          Voir
-                        </Link>
-                      </li>
-                    ))}
+                  <ul className="flex flex-col gap-2">
+                    <li>
+                      <Link
+                        href={ROUTES.explore}
+                        className="border-border bg-bg-muted hover:border-primary flex items-center justify-between rounded border p-2.5 text-xs font-semibold transition-colors"
+                      >
+                        Tout l&apos;agenda
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href={ROUTES.tontines}
+                        className="border-border bg-bg-muted hover:border-primary flex items-center justify-between rounded border p-2.5 text-xs font-semibold transition-colors"
+                      >
+                        Mes tontines
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href={ROUTES.cotisations}
+                        className="border-border bg-bg-muted hover:border-primary flex items-center justify-between rounded border p-2.5 text-xs font-semibold transition-colors"
+                      >
+                        Mes cotisations
+                        <ArrowRight className="size-3.5" aria-hidden="true" />
+                      </Link>
+                    </li>
                   </ul>
                 </div>
               </aside>

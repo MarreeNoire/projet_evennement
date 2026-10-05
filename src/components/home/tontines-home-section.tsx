@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, PiggyBank, Plus } from "lucide-react";
 
@@ -37,7 +36,7 @@ export function TontinesHomeSection() {
         {/* En-tête de section */}
         <div className="border-accent flex flex-col gap-4 border-l-4 pl-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <span className="bg-accent/10 text-accent-fg inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold">
+            <span className="bg-accent-subtle text-accent-subtle-fg inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold">
               <PiggyBank className="size-3.5" /> Module 2 · Tontines
             </span>
             <h2 id="tontines-section-title" className="font-display mt-2 text-2xl font-bold md:text-3xl">
@@ -48,7 +47,7 @@ export function TontinesHomeSection() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <ButtonLink href="/tontines/nouvelle" size="sm" className="bg-accent text-accent-fg hover:bg-accent/90">
+            <ButtonLink href="/tontines/nouvelle" size="sm" className="bg-accent-solid text-accent-solid-fg hover:brightness-95">
               <Plus className="mr-1.5 size-4" /> Créer une tontine
             </ButtonLink>
             <ButtonLink href="/tontines" variant="secondary" size="sm">
@@ -66,12 +65,12 @@ export function TontinesHomeSection() {
           <TontineHorizontalList tontines={tontines} />
         ) : (
           <div className="border-border bg-bg-subtle flex flex-col items-center justify-center rounded-xl border py-8 px-4 text-center">
-            <PiggyBank className="text-accent-fg mb-3 size-10 opacity-70" />
+            <PiggyBank className="text-accent mb-3 size-10 opacity-70" />
             <h3 className="font-display text-base font-bold">Lance ta première tontine</h3>
             <p className="text-fg-muted mt-1 max-w-md text-xs leading-relaxed">
               Rassemble tes proches ou collègues, choisis le montant de la cotisation et commence l&apos;épargne collective.
             </p>
-            <ButtonLink href="/tontines/nouvelle" size="sm" className="bg-accent text-accent-fg hover:bg-accent/90 mt-4">
+            <ButtonLink href="/tontines/nouvelle" size="sm" className="bg-accent-solid text-accent-solid-fg hover:brightness-95 mt-4">
               Créer un groupe de tontine
             </ButtonLink>
           </div>

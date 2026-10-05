@@ -168,7 +168,7 @@ export function HeaderShell({
         </Link>
 
         <nav aria-label="Modules principaux" className="hidden lg:block">
-          <ul className="flex items-center gap-1 rounded-full border border-border bg-bg-muted p-1">
+          <ul className="flex items-center gap-1 rounded-lg border border-border bg-bg-muted p-1">
             {primaryNavItems.map((item) => {
               const active =
                 isActive(pathname, item.href) ||
@@ -181,7 +181,7 @@ export function HeaderShell({
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex h-9 items-center gap-2 rounded-full px-3 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus",
+                      "flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus",
                       active
                         ? "bg-surface-raised text-primary shadow-sm"
                         : "text-fg-muted hover:bg-surface hover:text-fg",
