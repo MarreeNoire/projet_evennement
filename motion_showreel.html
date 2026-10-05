@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event — Motion Graphics Showreel 15s</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0d0c0b;
+      color: #eee8de;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    #container {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #171615;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #controls {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #201f1d;
+      padding: 10px 24px;
+      border-radius: 30px;
+      border: 1px solid #443e38;
+      font-size: 14px;
+    }
+    button {
+      background: #60352c;
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    button:hover { background: #874d3d; }
+    #timeline {
+      width: 400px;
+      accent-color: #a26350;
+      cursor: pointer;
+    }
+    #time-display {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: #c9b58c;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container">
+    <canvas id="canvas" width="1920" height="1080"></canvas>
+  </div>
+
+  <div id="controls">
+    <button id="btn-play">Pause</button>
+    <button id="btn-restart">Rejouer</button>
+    <input type="range" id="timeline" min="0" max="450" value="0">
+    <span id="time-display">00:00 / 15:00 (Frame 0)</span>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const W = 1920, H = 1080;
+    const TOTAL_FRAMES = 450;
+    const FPS = 30;
+    const DURATION = 15.0;
+
+    // Palette officielle Event (DESIGN.md & globals.css)
+    const PALETTE = {
+      brandDark: '#171615',
+      nightInk: '#201f1d',
+      raisedInk: '#292723',
+      borderDark: '#443e38',
+      rustDark: '#4d2c26',
+      rust: '#60352c',
+      rustMid: '#874d3d',
+      rustLight: '#a26350',
+      rustPale: '#e5d5ca',
+      goldDark: '#4d4434',
+      goldBrass: '#85714e',
+      goldLight: '#c9b58c',
+      goldPale: '#eee5cf',
+      paperDark: '#cec3b4',
+      paperPage: '#e4ddd1',
+      paperWarm: '#eee8de',
+      paperRaised: '#f4eee4',
+      pureWhite: '#ffffff',
+      moss: '#3d5c47',
+      mossLight: '#53725d',
+      charcoalText: '#282622',
+      mutedText: '#686056',
+    };
+
+    // Easing functions
+    function easeOutQuad(x) { return 1 - (1 - x) * (1 - x); }
+    function easeInOutQuad(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+    function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+    function easeInOutCubic(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+    function easeOutBack(x) {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+    function easeOutElastic(x) {
+      const c4 = (2 * Math.PI) / 3;
+      return x === 0 ? 0 : x === 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
+    }
+    function clamp(val, min = 0, max = 1) { return Math.max(min, Math.min(max, val)); }
+
+    // Floating particles state
+    const particles = [];
+    for (let i = 0; i < 80; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        r: Math.random() * 2.5 + 1,
+        color: Math.random() > 0.5 ? PALETTE.goldLight : PALETTE.rustLight,
+        alpha: Math.random() * 0.45 + 0.1
+      });
+    }
+
+    // Helper: Rounded rectangle
+    function drawRoundedRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(x, y, w, h, r);
+      } else {
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+      }
+    }
+
+    // Draw Event Logo Mark with vector draw progress
+    // Arc gauche : M6 27V5h9
+    // Arc droit  : M26 27V5h-9
+    // Carré      : M12 21h8v8h-8z
+    function drawLogoMark(ctx, cx, cy, size, strokeProgress = 1.0, squareScale = 1.0, arcColor = PALETTE.rust, squareColor = PALETTE.rust) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      const scale = size / 32;
+      ctx.scale(scale, scale);
+      ctx.translate(-16, -16); // Center at (0,0) in 32x32
+
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Arc gauche (length = 22 + 9 = 31)
+      const fullLen = 31;
+      const curLen = fullLen * strokeProgress;
+      ctx.strokeStyle = arcColor;
+
+      let tipX1 = 6, tipY1 = 27;
+      let tipX2 = 26, tipY2 = 27;
+
+      ctx.beginPath();
+      if (curLen <= 22) {
+        tipY1 = 27 - curLen;
+        ctx.moveTo(6, 27);
+        ctx.lineTo(6, tipY1);
+      } else {
+        tipX1 = 6 + (curLen - 22);
+        tipY1 = 5;
+        ctx.moveTo(6, 27);
+        ctx.lineTo(6, 5);
+        ctx.lineTo(tipX1, 5);
+      }
+      ctx.stroke();
+
+      // Arc droit M26 27V5h-9
+      ctx.beginPath();
+      if (curLen <= 22) {
+        tipY2 = 27 - curLen;
+        ctx.moveTo(26, 27);
+        ctx.lineTo(26, tipY2);
+      } else {
+        tipX2 = 26 - (curLen - 22);
+        tipY2 = 5;
+        ctx.moveTo(26, 27);
+        ctx.lineTo(26, 5);
+        ctx.lineTo(tipX2, 5);
+      }
+      ctx.stroke();
+
+      // Glowing tips if drawing in progress
+      if (strokeProgress > 0 && strokeProgress < 1.0) {
+        ctx.fillStyle = PALETTE.goldLight;
+        ctx.beginPath();
+        ctx.arc(tipX1, tipY1, 2.5, 0, Math.PI * 2);
+        ctx.arc(tipX2, tipY2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Center square M12 21h8v8h-8z
+      if (squareScale > 0) {
+        ctx.save();
+        ctx.translate(16, 25);
+        ctx.scale(squareScale, squareScale);
+        ctx.fillStyle = squareColor;
+        ctx.fillRect(-4, -4, 8, 8);
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    // MAIN RENDER FUNCTION FOR ANY FRAME
+    window.renderFrame = function(frameIndex) {
+      const t = frameIndex / FPS; // Time in seconds (0.0 to 15.0)
+
+      // ==========================================
+      // SCENE 1: THE BRAND GENESIS (0.0s - 3.2s)
+      // ==========================================
+      if (t < 3.2) {
+        // Deep luxury dark background
+        const bgGrad = ctx.createRadialGradient(W/2, H/2, 40, W/2, H/2, 920);
+        bgGrad.addColorStop(0, '#27221e');
+        bgGrad.addColorStop(0.7, '#1b1917');
+        bgGrad.addColorStop(1, PALETTE.brandDark);
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Technical drafting grid lines
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(133, 113, 78, 0.12)';
+        const gridSize = 64;
+        const gridOffset = (t * 12) % gridSize;
+        ctx.beginPath();
+        for (let x = gridOffset; x < W; x += gridSize) {
+          ctx.moveTo(x, 0); ctx.lineTo(x, H);
+        }
+        for (let y = gridOffset; y < H; y += gridSize) {
+          ctx.moveTo(0, y); ctx.lineTo(W, y);
+        }
+        ctx.stroke();
+
+        // Technical HUD metadata
+        ctx.fillStyle = 'rgba(201, 181, 140, 0.6)';
+        ctx.font = '600 13px Inter, sans-serif';
+        ctx.fillText('EVENT // ARCHITECTURE DE MARQUE 2026', 80, 80);
+        ctx.fillText('LOC: ABIDJAN, CI · 05°20\'N 04°01\'W', 80, 102);
+        ctx.textAlign = 'right';
+        ctx.fillText('MOTION DESIGN SHOWREEL // PORTFOLIO', W - 80, 80);
+        ctx.fillText(`FRAME [${String(frameIndex).padStart(3, '0')} / 450]`, W - 80, 102);
+        ctx.textAlign = 'left';
+
+        // Floating ambient dust particles
+        for (let p of particles) {
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha;
+          ctx.beginPath();
+          ctx.arc(p.x + Math.sin(t + p.y) * 15, p.y + Math.cos(t + p.x) * 15, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
+
+        // Concentric measurement rings
+        const ringProgress = easeOutCubic(clamp(t / 0.8, 0, 1));
+        ctx.save();
+        ctx.translate(W/2, H/2 - 20);
+
+        // Rotating dashed circle
+        ctx.rotate(t * 0.35);
+        ctx.strokeStyle = 'rgba(162, 99, 80, ' + (0.35 * ringProgress) + ')';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 10]);
+        ctx.beginPath();
+        ctx.arc(0, 0, 190 * ringProgress, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Outer brass ring
+        ctx.strokeStyle = 'rgba(201, 181, 140, ' + (0.2 * ringProgress) + ')';
+        ctx.beginPath();
+        ctx.arc(0, 0, 270 * ringProgress, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Vector drawing of Logo Arcs (0.5s to 2.0s)
+        const drawT = clamp((t - 0.4) / 1.5, 0, 1);
+        const strokeP = easeInOutCubic(drawT);
+
+        // Center square snap and shockwave (2.0s to 3.2s)
+        const lockT = clamp((t - 2.0) / 0.5, 0, 1);
+        const squareScale = lockT > 0 ? easeOutBack(lockT) : 0;
+
+        // Shockwave rings at t >= 2.0
+        if (t >= 2.0) {
+          const swT = (t - 2.0) / 0.9;
+          const swR = easeOutCubic(clamp(swT, 0, 1)) * 520;
+          const swAlpha = Math.max(0, 1 - swT);
+          ctx.save();
+          ctx.strokeStyle = `rgba(201, 181, 140, ${swAlpha * 0.75})`;
+          ctx.lineWidth = 3.5 * (1 - swT);
+          ctx.beginPath();
+          ctx.arc(W/2, H/2 - 20, swR, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Terracotta inner shockwave
+          ctx.strokeStyle = `rgba(162, 99, 80, ${swAlpha * 0.55})`;
+          ctx.beginPath();
+          ctx.arc(W/2, H/2 - 20, swR * 0.75, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Camera zoom during 2.8s to 3.2s
+        let zoom = 1.0;
+        if (t > 2.8) {
+          const zt = (t - 2.8) / 0.4;
+          zoom = 1.0 + easeInOutCubic(zt) * 3.8;
+        }
+
+        ctx.save();
+        ctx.translate(W/2, H/2 - 20);
+        ctx.scale(zoom, zoom);
+
+        // Core glow behind logo
+        if (t >= 1.2) {
+          const glowAlpha = clamp((t - 1.2) / 0.6, 0, 1) * 0.65;
+          const glow = ctx.createRadialGradient(0, 0, 10, 0, 0, 240);
+          glow.addColorStop(0, 'rgba(162, 99, 80, ' + glowAlpha + ')');
+          glow.addColorStop(0.5, 'rgba(133, 113, 78, ' + (glowAlpha * 0.35) + ')');
+          glow.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = glow;
+          ctx.fillRect(-260, -260, 520, 520);
+        }
+
+        // Render Animated Logo Mark
+        const arcColor = t < 2.0 ? PALETTE.rustLight : (t >= 2.0 && t < 2.3 ? PALETTE.goldLight : PALETTE.rustMid);
+        drawLogoMark(ctx, 0, -20, 230, strokeP, squareScale, arcColor, PALETTE.goldLight);
+
+        // Text reveal at t >= 2.0
+        if (t >= 2.0) {
+          const textT = easeOutCubic(clamp((t - 2.0) / 0.5, 0, 1));
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.fillStyle = PALETTE.paperWarm;
+          ctx.font = '900 70px Inter, sans-serif';
+          ctx.letterSpacing = `${(24 * textT)}px`;
+          ctx.globalAlpha = textT;
+          ctx.fillText('EVENT', 0, 175);
+
+          ctx.fillStyle = PALETTE.goldLight;
+          ctx.font = '700 20px Inter, sans-serif';
+          ctx.letterSpacing = '6px';
+          ctx.fillText('LE CARNET DES SORTIES', 0, 222);
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+
+      // ==========================================
+      // SCENE 2: THE TICKET REIMAGINED (3.2s - 6.8s)
+      // ==========================================
+      else if (t >= 3.2 && t < 6.8) {
+        const s2T = t - 3.2; // 0.0 to 3.6s
+
+        // Background: Warm editorial paper with delicate border texture
+        ctx.fillStyle = PALETTE.paperPage;
+        ctx.fillRect(0, 0, W, H);
+
+        const vignette = ctx.createRadialGradient(W/2, H/2, 200, W/2, H/2, 960);
+        vignette.addColorStop(0, 'rgba(244, 238, 228, 0.95)');
+        vignette.addColorStop(1, 'rgba(206, 195, 180, 0.75)');
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, W, H);
+
+        // Background framing borders
+        ctx.save();
+        ctx.strokeStyle = 'rgba(96, 53, 44, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 8]);
+        ctx.strokeRect(90, 70, W - 180, H - 140);
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // Scene headline
+        ctx.fillStyle = PALETTE.rust;
+        ctx.font = '700 24px Inter, sans-serif';
+        ctx.letterSpacing = '4px';
+        ctx.fillText('BILLETTERIE ÉDITORIALE & CONTRÔLE D\'ACCÈS', 130, 120);
+
+        ctx.fillStyle = PALETTE.mutedText;
+        ctx.font = '400 16px Inter, sans-serif';
+        ctx.letterSpacing = '1px';
+        ctx.fillText('Génération instantanée de billets certifiés · FCFA & Mobile Money', 130, 150);
+
+        // 3D-tilted Animated Ticket Stub
+        const entryProgress = easeOutBack(clamp(s2T / 1.0, 0, 1));
+        const ticketW = 1060;
+        const ticketH = 470;
+        const splitX = 320; // Stub width
+
+        // Kinetic tear at 3.0s
+        const isTorn = s2T > 2.8;
+        const tearT = clamp((s2T - 2.8) / 0.6, 0, 1);
+        const tearOffset = easeInOutCubic(tearT) * 140;
+        const tearRotate = easeInOutCubic(tearT) * 0.18;
+
+        ctx.save();
+        ctx.translate(W/2, H/2 + 25);
+
+        // Tilt angle
+        const baseTilt = -0.05;
+        ctx.rotate(baseTilt * (1 - entryProgress * 0.1));
+        const scaleVal = 0.82 + 0.18 * entryProgress;
+        ctx.scale(scaleVal, scaleVal);
+
+        // Shadow behind ticket
+        ctx.shadowColor = 'rgba(33, 31, 29, 0.28)';
+        ctx.shadowBlur = 45;
+        ctx.shadowOffsetY = 22;
+
+        const stubX = -ticketW / 2;
+        const stubY = -ticketH / 2;
+
+        // --- LEFT STUB ---
+        ctx.save();
+        if (isTorn) {
+          ctx.translate(-tearOffset, tearOffset * 0.5);
+          ctx.rotate(-tearRotate);
+        }
+
+        ctx.fillStyle = PALETTE.rust;
+        drawRoundedRect(ctx, stubX, stubY, splitX, ticketH, 14);
+        ctx.fill();
+
+        // Stub Header
+        ctx.fillStyle = PALETTE.paperRaised;
+        ctx.font = '700 13px Inter, sans-serif';
+        ctx.letterSpacing = '3px';
+        ctx.fillText('EVENT · BILLET OFFICIEL', stubX + 35, stubY + 55);
+
+        // Date circle badge
+        ctx.beginPath();
+        ctx.arc(stubX + splitX/2, stubY + 160, 54, 0, Math.PI * 2);
+        ctx.fillStyle = PALETTE.rustDark;
+        ctx.fill();
+        ctx.strokeStyle = PALETTE.goldLight;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.fillStyle = PALETTE.goldPale;
+        ctx.textAlign = 'center';
+        ctx.font = '800 38px Inter, sans-serif';
+        ctx.fillText('14', stubX + splitX/2, stubY + 160);
+        ctx.font = '600 14px Inter, sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('NOV · 20:00', stubX + splitX/2, stubY + 185);
+
+        // Stub location
+        ctx.textAlign = 'center';
+        ctx.fillStyle = PALETTE.rustPale;
+        ctx.font = '500 13px Inter, sans-serif';
+        ctx.letterSpacing = '1px';
+        ctx.fillText('PALAIS DE LA CULTURE', stubX + splitX/2, stubY + 255);
+        ctx.fillText('TREICHVILLE, ABIDJAN', stubX + splitX/2, stubY + 278);
+
+        // Barcode lines
+        ctx.strokeStyle = PALETTE.paperRaised;
+        const barY = stubY + 340;
+        const barStartX = stubX + 45;
+        for (let b = 0; b < 30; b++) {
+          const bw = (b % 3 === 0 ? 4 : (b % 2 === 0 ? 2 : 1));
+          ctx.lineWidth = bw;
+          const bx = barStartX + b * 7.5;
+          ctx.beginPath();
+          ctx.moveTo(bx, barY);
+          ctx.lineTo(bx, barY + 50);
+          ctx.stroke();
+        }
+        ctx.fillStyle = PALETTE.goldLight;
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('N° 2026-ABJ-8849', stubX + splitX/2, barY + 75);
+        ctx.restore();
+
+        // --- PERFORATION LINE ---
+        ctx.save();
+        ctx.strokeStyle = PALETTE.paperPage;
+        ctx.lineWidth = 3;
+        ctx.setLineDash([6, 8]);
+        ctx.beginPath();
+        ctx.moveTo(stubX + splitX, stubY);
+        ctx.lineTo(stubX + splitX, stubY + ticketH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Cutout notches
+        ctx.fillStyle = PALETTE.paperPage;
+        ctx.beginPath();
+        ctx.arc(stubX + splitX, stubY, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(stubX + splitX, stubY + ticketH, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // --- RIGHT MAIN BODY ---
+        ctx.save();
+        const mainX = stubX + splitX;
+        const mainW = ticketW - splitX;
+        ctx.fillStyle = PALETTE.paperWarm;
+        drawRoundedRect(ctx, mainX, stubY, mainW, ticketH, 14);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(201, 190, 175, 0.85)';
+        ctx.lineWidth = 1.5;
+        drawRoundedRect(ctx, mainX, stubY, mainW, ticketH, 14);
+        ctx.stroke();
+
+        // Left Content Area inside Main Body
+        ctx.textAlign = 'left';
+        ctx.fillStyle = PALETTE.rust;
+        ctx.font = '700 12px Inter, sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('● CONCERT & FESTIVAL LIVE', mainX + 45, stubY + 65);
+
+        // Big Event Title
+        ctx.fillStyle = PALETTE.charcoalText;
+        ctx.font = '900 32px Inter, sans-serif';
+        ctx.letterSpacing = '-0.5px';
+        ctx.fillText('FESTIVAL ACOUSTIC', mainX + 45, stubY + 115);
+        ctx.fillText('ABIDJAN 2026', mainX + 45, stubY + 155);
+
+        // Golden VIP Badge
+        const badgeX = mainX + 45;
+        const badgeY = stubY + 185;
+        ctx.fillStyle = PALETTE.goldPale;
+        drawRoundedRect(ctx, badgeX, badgeY, 160, 36, 4);
+        ctx.fill();
+        ctx.strokeStyle = PALETTE.goldBrass;
+        ctx.lineWidth = 1;
+        drawRoundedRect(ctx, badgeX, badgeY, 160, 36, 4);
+        ctx.stroke();
+
+        ctx.fillStyle = PALETTE.goldDark;
+        ctx.font = '700 12px Inter, sans-serif';
+        ctx.letterSpacing = '1.5px';
+        ctx.fillText('★ PASS VIP GOLD', badgeX + 16, badgeY + 23);
+
+        // Price Tag
+        ctx.fillStyle = PALETTE.rust;
+        ctx.font = '800 28px Inter, sans-serif';
+        ctx.fillText('15 000 FCFA', mainX + 225, badgeY + 27);
+
+        // Additional Meta
+        ctx.fillStyle = PALETTE.mutedText;
+        ctx.font = '500 13px Inter, sans-serif';
+        ctx.fillText('Organisé par Acoustic Sessions CI · Entrée Porte B', mainX + 45, stubY + 265);
+
+        // Dedicated QR Coupon Box on Right Side
+        const qrBoxW = 220;
+        const qrBoxH = 340;
+        const qrBoxX = mainX + mainW - qrBoxW - 40;
+        const qrBoxY = stubY + 50;
+
+        ctx.fillStyle = '#ffffff';
+        drawRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxW, qrBoxH, 10);
+        ctx.fill();
+        ctx.strokeStyle = PALETTE.borderDark;
+        ctx.lineWidth = 1;
+        drawRoundedRect(ctx, qrBoxX, qrBoxY, qrBoxW, qrBoxH, 10);
+        ctx.stroke();
+
+        // QR Code itself inside box
+        const qrSize = 160;
+        const qrX = qrBoxX + (qrBoxW - qrSize) / 2;
+        const qrY = qrBoxY + 30;
+
+        ctx.fillStyle = PALETTE.charcoalText;
+        const gridCells = 8;
+        const cellSize = qrSize / gridCells;
+        for (let r = 0; r < gridCells; r++) {
+          for (let c = 0; c < gridCells; c++) {
+            const isCorner = (r < 3 && c < 3) || (r < 3 && c >= 5) || (r >= 5 && c < 3);
+            if (isCorner) {
+              ctx.fillRect(qrX + c * cellSize, qrY + r * cellSize, cellSize - 1, cellSize - 1);
+            } else if ((r * 7 + c * 13 + 3) % 4 === 0) {
+              ctx.fillRect(qrX + c * cellSize, qrY + r * cellSize, cellSize - 1, cellSize - 1);
+            }
+          }
+        }
+
+        // Center mini Event mark on QR
+        ctx.fillStyle = PALETTE.rust;
+        ctx.fillRect(qrX + qrSize/2 - 12, qrY + qrSize/2 - 12, 24, 24);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(qrX + qrSize/2 - 5, qrY + qrSize/2 - 5, 10, 10);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = PALETTE.mutedText;
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.letterSpacing = '1px';
+        ctx.fillText('SCANNER AU CHECK-IN', qrBoxX + qrBoxW/2, qrBoxY + 225);
+
+        // Laser Scan Sweep (s2T: 1.0s to 2.4s)
+        if (s2T >= 0.8 && s2T <= 2.4) {
+          const scanT = (s2T - 0.8) / 1.6;
+          const beamY = qrY + (scanT * qrSize);
+
+          ctx.save();
+          ctx.strokeStyle = PALETTE.goldLight;
+          ctx.lineWidth = 4;
+          ctx.shadowColor = PALETTE.goldLight;
+          ctx.shadowBlur = 18;
+          ctx.beginPath();
+          ctx.moveTo(qrX - 15, beamY);
+          ctx.lineTo(qrX + qrSize + 15, beamY);
+          ctx.stroke();
+
+          const aura = ctx.createLinearGradient(0, beamY - 25, 0, beamY);
+          aura.addColorStop(0, 'rgba(201, 181, 140, 0)');
+          aura.addColorStop(1, 'rgba(201, 181, 140, 0.4)');
+          ctx.fillStyle = aura;
+          ctx.fillRect(qrX - 10, beamY - 25, qrSize + 20, 25);
+          ctx.restore();
+        }
+
+        // Stamp confirmation (s2T >= 2.0s)
+        if (s2T >= 2.0) {
+          const stampT = easeOutBack(clamp((s2T - 2.0) / 0.4, 0, 1));
+          ctx.save();
+          ctx.translate(mainX + 220, stubY + 360);
+          ctx.rotate(-0.06);
+          ctx.scale(stampT, stampT);
+
+          ctx.fillStyle = PALETTE.moss;
+          drawRoundedRect(ctx, -180, -32, 360, 64, 8);
+          ctx.fill();
+
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '800 17px Inter, sans-serif';
+          ctx.letterSpacing = '2px';
+          ctx.fillText('✓ CONTRÔLE RÉUSSI · ACCÈS VIP', 0, 8);
+          ctx.restore();
+        }
+
+        ctx.restore();
+        ctx.restore();
+      }
+
+      // ==========================================
+      // SCENE 3: APP IN MOTION & SALONS (6.8s - 11.0s)
+      // ==========================================
+      else if (t >= 6.8 && t < 11.0) {
+        const s3T = t - 6.8; // 0.0 to 4.2s
+
+        // Split background
+        ctx.fillStyle = PALETTE.brandDark;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(W * 0.45, 0);
+        ctx.lineTo(W, 0);
+        ctx.lineTo(W, H);
+        ctx.lineTo(W * 0.35, H);
+        ctx.closePath();
+        const sideGrad = ctx.createLinearGradient(W*0.4, 0, W, H);
+        sideGrad.addColorStop(0, '#292723');
+        sideGrad.addColorStop(1, '#201f1d');
+        ctx.fillStyle = sideGrad;
+        ctx.fill();
+        ctx.restore();
+
+        // Left Section Typography
+        ctx.fillStyle = PALETTE.goldLight;
+        ctx.font = '700 14px Inter, sans-serif';
+        ctx.letterSpacing = '3px';
+        ctx.fillText('COMMUNAUTÉ EN DIRECT // SALONS & ÉCHANGES', 100, 100);
+
+        ctx.fillStyle = PALETTE.paperWarm;
+        ctx.font = '900 48px Inter, sans-serif';
+        ctx.letterSpacing = '-1px';
+        ctx.fillText('Vivre l\'événement', 100, 160);
+        ctx.fillText('avant, pendant et après.', 100, 215);
+
+        ctx.fillStyle = PALETTE.paperDark;
+        ctx.font = '400 18px Inter, sans-serif';
+        ctx.fillText('Chaque événement possède son salon dédié pour échanger,', 100, 265);
+        ctx.fillText('partager des moments et élargir son réseau.', 100, 292);
+
+        // Feature Badges popping in cascade
+        const badgeList = [
+          { text: '⚡ Billetterie 100% Mobile Money', color: PALETTE.rust, tOffset: 0.3 },
+          { text: '💬 Salons de discussion temps-réel', color: PALETTE.goldBrass, tOffset: 0.6 },
+          { text: '🎟️ Check-in QR Code sécurisé', color: PALETTE.moss, tOffset: 0.9 },
+          { text: '👥 +12 400 Utilisateurs connectés', color: PALETTE.rustMid, tOffset: 1.2 },
+        ];
+
+        badgeList.forEach((b, idx) => {
+          if (s3T > b.tOffset) {
+            const bT = easeOutBack(clamp((s3T - b.tOffset) / 0.4, 0, 1));
+            const by = 350 + idx * 60;
+            ctx.save();
+            ctx.translate(100, by);
+            ctx.scale(bT, bT);
+
+            ctx.fillStyle = 'rgba(41, 39, 35, 0.92)';
+            drawRoundedRect(ctx, 0, 0, 390, 46, 6);
+            ctx.fill();
+            ctx.strokeStyle = b.color;
+            ctx.lineWidth = 1.5;
+            drawRoundedRect(ctx, 0, 0, 390, 46, 6);
+            ctx.stroke();
+
+            ctx.fillStyle = PALETTE.paperWarm;
+            ctx.font = '600 15px Inter, sans-serif';
+            ctx.fillText(b.text, 20, 28);
+            ctx.restore();
+          }
+        });
+
+        // Mobile Phone UI Mockup on the right
+        const phoneEntry = easeOutCubic(clamp(s3T / 0.8, 0, 1));
+        const phoneX = W - 680 + (1 - phoneEntry) * 300;
+        const phoneY = 120;
+        const phoneW = 540;
+        const phoneH = 840;
+
+        ctx.save();
+        ctx.translate(phoneX, phoneY);
+
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 50;
+        ctx.shadowOffsetY = 25;
+
+        // Phone body bezel
+        ctx.fillStyle = '#0d0c0b';
+        drawRoundedRect(ctx, 0, 0, phoneW, phoneH, 36);
+        ctx.fill();
+        ctx.strokeStyle = '#443e38';
+        ctx.lineWidth = 2;
+        drawRoundedRect(ctx, 0, 0, phoneW, phoneH, 36);
+        ctx.stroke();
+
+        // Phone Screen inside
+        ctx.save();
+        drawRoundedRect(ctx, 14, 14, phoneW - 28, phoneH - 28, 28);
+        ctx.clip();
+
+        // App Screen Background
+        ctx.fillStyle = PALETTE.paperWarm;
+        ctx.fillRect(14, 14, phoneW - 28, phoneH - 28);
+
+        // App Header
+        ctx.fillStyle = PALETTE.paperRaised;
+        ctx.fillRect(14, 14, phoneW - 28, 70);
+        ctx.strokeStyle = PALETTE.paperDark;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(14, 84);
+        ctx.lineTo(phoneW - 14, 84);
+        ctx.stroke();
+
+        // App Header Logo & Title
+        drawLogoMark(ctx, 45, 48, 30, 1.0, 1.0, PALETTE.rust, PALETTE.rust);
+        ctx.fillStyle = PALETTE.charcoalText;
+        ctx.font = '700 20px Inter, sans-serif';
+        ctx.fillText('Event', 75, 55);
+
+        ctx.fillStyle = PALETTE.rust;
+        ctx.font = '600 12px Inter, sans-serif';
+        ctx.fillText('SALON EN DIRECT', phoneW - 160, 54);
+
+        // Salon Banner
+        const bannerY = 100;
+        ctx.fillStyle = PALETTE.rustDark;
+        drawRoundedRect(ctx, 30, bannerY, phoneW - 60, 95, 8);
+        ctx.fill();
+
+        ctx.fillStyle = PALETTE.goldLight;
+        ctx.font = '700 11px Inter, sans-serif';
+        ctx.letterSpacing = '1px';
+        ctx.fillText('SALON OFFICIEL · 1 240 MEMBRES', 50, bannerY + 28);
+
+        ctx.fillStyle = PALETTE.pureWhite;
+        ctx.font = '800 19px Inter, sans-serif';
+        ctx.fillText('Festival Acoustic Abidjan', 50, bannerY + 56);
+        ctx.fillStyle = PALETTE.paperDark;
+        ctx.font = '400 13px Inter, sans-serif';
+        ctx.fillText('Conversations et rencontres en direct', 50, bannerY + 78);
+
+        // Chat Bubbles with Avatar Circles
+        const chatBubbles = [
+          { sender: 'Aminata K.', initials: 'AK', text: 'Qui est déjà sur place au Palais ? La scène est incroyable !', isMe: false, delay: 1.0 },
+          { sender: 'Jean-Marc D.', initials: 'JM', text: 'Billet acheté en 10s via Orange Money, je viens d\'entrer ! 🎟️', isMe: false, delay: 1.6 },
+          { sender: 'Moi', initials: 'VOUS', text: 'On se retrouve devant la scène VIP à 20h30 ? 🔥', isMe: true, delay: 2.2 },
+          { sender: 'Sarah B.', initials: 'SB', text: 'Yes, je rejoins le groupe dans 5 minutes !', isMe: false, delay: 2.8 },
+        ];
+
+        let curChatY = bannerY + 115;
+        chatBubbles.forEach((msg) => {
+          if (s3T > msg.delay) {
+            const msgT = easeOutBack(clamp((s3T - msg.delay) / 0.4, 0, 1));
+            const bubbleW = 360;
+            const bubbleH = 64;
+            const bx = msg.isMe ? (phoneW - 30 - bubbleW) : 30;
+
+            ctx.save();
+            ctx.translate(bx, curChatY);
+            ctx.scale(msgT, msgT);
+
+            ctx.fillStyle = msg.isMe ? PALETTE.rust : '#ffffff';
+            drawRoundedRect(ctx, 0, 0, bubbleW, bubbleH, 10);
+            ctx.fill();
+
+            if (!msg.isMe) {
+              ctx.strokeStyle = PALETTE.paperDark;
+              ctx.lineWidth = 1;
+              drawRoundedRect(ctx, 0, 0, bubbleW, bubbleH, 10);
+              ctx.stroke();
+            }
+
+            // Avatar circle
+            ctx.beginPath();
+            ctx.arc(24, 32, 16, 0, Math.PI * 2);
+            ctx.fillStyle = msg.isMe ? PALETTE.goldLight : PALETTE.rustLight;
+            ctx.fill();
+
+            ctx.fillStyle = msg.isMe ? PALETTE.charcoalText : '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.font = '700 10px Inter, sans-serif';
+            ctx.fillText(msg.initials, 24, 36);
+
+            // Sender name & text
+            ctx.textAlign = 'left';
+            ctx.fillStyle = msg.isMe ? PALETTE.goldLight : PALETTE.rust;
+            ctx.font = '700 11px Inter, sans-serif';
+            ctx.fillText(msg.sender, 50, 24);
+
+            ctx.fillStyle = msg.isMe ? '#ffffff' : PALETTE.charcoalText;
+            ctx.font = '400 12px Inter, sans-serif';
+            ctx.fillText(msg.text, 50, 44);
+
+            ctx.restore();
+            curChatY += 76;
+          }
+        });
+
+        // Live Audio Spectrum Visualizer at bottom of phone
+        const waveY = phoneH - 95;
+        ctx.fillStyle = 'rgba(238, 232, 222, 0.95)';
+        ctx.fillRect(14, waveY - 20, phoneW - 28, 95);
+
+        ctx.fillStyle = PALETTE.rust;
+        ctx.font = '700 11px Inter, sans-serif';
+        ctx.letterSpacing = '1px';
+        ctx.fillText('LIVE AUDIO // AMBIANCE SALON', 35, waveY);
+
+        const numBars = 32;
+        const barSpacing = (phoneW - 70) / numBars;
+        for (let b = 0; b < numBars; b++) {
+          const freq = Math.sin(t * 8 + b * 0.4) * 0.5 + Math.cos(t * 12 + b * 0.7) * 0.5;
+          const barH = 8 + Math.abs(freq) * 36;
+          ctx.fillStyle = b % 2 === 0 ? PALETTE.rust : PALETTE.goldBrass;
+          ctx.fillRect(35 + b * barSpacing, waveY + 54 - barH, barSpacing - 3, barH);
+        }
+
+        ctx.restore(); // end phone clip
+        ctx.restore(); // end phone translate
+      }
+
+      // ==========================================
+      // SCENE 4: KINETIC TYPOGRAPHY STROBES (11.0s - 13.2s)
+      // ==========================================
+      else if (t >= 11.0 && t < 13.2) {
+        const s4T = t - 11.0; // 0.0 to 2.2s
+
+        // Cut 4A: 0.0s to 0.7s -> "DÉCOUVRIR"
+        if (s4T < 0.7) {
+          const cutT = s4T / 0.7;
+          ctx.fillStyle = PALETTE.rust;
+          ctx.fillRect(0, 0, W, H);
+
+          const lineProg = easeOutCubic(clamp(cutT / 0.4, 0, 1));
+          ctx.strokeStyle = PALETTE.goldLight;
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(100, 240);
+          ctx.lineTo(100 + (W - 200) * lineProg, 240);
+          ctx.stroke();
+
+          const textScale = 0.9 + 0.1 * easeOutBack(clamp(cutT / 0.3, 0, 1));
+          ctx.save();
+          ctx.translate(W/2, H/2 + 20);
+          ctx.scale(textScale, textScale);
+          ctx.textAlign = 'center';
+          ctx.fillStyle = PALETTE.pureWhite;
+          ctx.font = '900 120px Inter, sans-serif';
+          ctx.letterSpacing = '-2px';
+          ctx.fillText('DÉCOUVRIR.', 0, 0);
+
+          ctx.fillStyle = PALETTE.goldLight;
+          ctx.font = '700 28px Inter, sans-serif';
+          ctx.letterSpacing = '8px';
+          ctx.fillText('LES MEILLEURS ÉVÉNEMENTS D\'ABIDJAN', 0, 80);
+          ctx.restore();
+        }
+        // Cut 4B: 0.7s to 1.4s -> "RÉSERVER"
+        else if (s4T >= 0.7 && s4T < 1.4) {
+          const cutT = (s4T - 0.7) / 0.7;
+          ctx.fillStyle = PALETTE.paperWarm;
+          ctx.fillRect(0, 0, W, H);
+
+          ctx.strokeStyle = PALETTE.rust;
+          ctx.lineWidth = 4;
+          const boxProg = easeOutCubic(clamp(cutT / 0.4, 0, 1));
+          ctx.strokeRect(W/2 - 500 * boxProg, H/2 - 160, 1000 * boxProg, 320);
+
+          ctx.save();
+          ctx.translate(W/2, H/2 + 20);
+          ctx.textAlign = 'center';
+          ctx.fillStyle = PALETTE.charcoalText;
+          ctx.font = '900 120px Inter, sans-serif';
+          ctx.letterSpacing = '-2px';
+          ctx.fillText('RÉSERVER.', 0, 0);
+
+          ctx.fillStyle = PALETTE.rust;
+          ctx.font = '700 28px Inter, sans-serif';
+          ctx.letterSpacing = '6px';
+          ctx.fillText('BILLETTERIE INSTANTANÉE & SÉCURISÉE FCFA', 0, 80);
+          ctx.restore();
+        }
+        // Cut 4C: 1.4s to 2.2s -> "RASSEMBLER"
+        else {
+          const cutT = (s4T - 1.4) / 0.8;
+          ctx.fillStyle = PALETTE.brandDark;
+          ctx.fillRect(0, 0, W, H);
+
+          ctx.save();
+          ctx.translate(W/2, H/2);
+          ctx.strokeStyle = 'rgba(201, 181, 140, 0.3)';
+          ctx.lineWidth = 2;
+          for (let r = 100; r <= 600; r += 120) {
+            ctx.beginPath();
+            ctx.arc(0, 0, r * cutT, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.restore();
+
+          ctx.save();
+          ctx.translate(W/2, H/2 + 20);
+          ctx.textAlign = 'center';
+          ctx.fillStyle = PALETTE.goldLight;
+          ctx.font = '900 120px Inter, sans-serif';
+          ctx.letterSpacing = '-2px';
+          ctx.fillText('RASSEMBLER.', 0, 0);
+
+          ctx.fillStyle = PALETTE.paperWarm;
+          ctx.font = '700 28px Inter, sans-serif';
+          ctx.letterSpacing = '8px';
+          ctx.fillText('REJOINS LA COMMUNAUTÉ SUR LES SALONS', 0, 80);
+          ctx.restore();
+        }
+      }
+
+      // ==========================================
+      // SCENE 5: THE CLIMAX & BRAND SIGNATURE (13.2s - 15.0s)
+      // ==========================================
+      else {
+        const s5T = t - 13.2; // 0.0 to 1.8s
+        const finalProgress = easeOutBack(clamp(s5T / 0.8, 0, 1));
+
+        // Luxurious dark stage background
+        const finalBg = ctx.createRadialGradient(W/2, H/2, 50, W/2, H/2, 950);
+        finalBg.addColorStop(0, '#2d2420');
+        finalBg.addColorStop(0.6, '#1a1816');
+        finalBg.addColorStop(1, '#0e0d0c');
+        ctx.fillStyle = finalBg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Orbit rings
+        ctx.save();
+        ctx.translate(W/2, H/2 - 60);
+        ctx.strokeStyle = 'rgba(201, 181, 140, 0.2)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 8]);
+        ctx.beginPath();
+        ctx.arc(0, 0, 220, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // Logo Mark in central glory
+        ctx.save();
+        ctx.translate(W/2, H/2 - 90);
+        const logoScale = 0.82 + 0.18 * finalProgress;
+        ctx.scale(logoScale, logoScale);
+
+        // Radiant halo
+        const halo = ctx.createRadialGradient(0, 0, 20, 0, 0, 210);
+        halo.addColorStop(0, 'rgba(162, 99, 80, 0.55)');
+        halo.addColorStop(0.5, 'rgba(133, 113, 78, 0.22)');
+        halo.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = halo;
+        ctx.fillRect(-220, -220, 440, 440);
+
+        drawLogoMark(ctx, 0, 0, 195, 1.0, 1.0, PALETTE.rustLight, PALETTE.goldLight);
+        ctx.restore();
+
+        // Main Typography Lockup
+        ctx.save();
+        ctx.textAlign = 'center';
+
+        // Product Name "Event"
+        ctx.fillStyle = PALETTE.paperWarm;
+        ctx.font = '900 84px Inter, sans-serif';
+        ctx.letterSpacing = '12px';
+        ctx.fillText('EVENT', W/2 + 6, H/2 + 130);
+
+        // Baseline Slogan
+        ctx.fillStyle = PALETTE.goldLight;
+        ctx.font = '700 24px Inter, sans-serif';
+        ctx.letterSpacing = '8px';
+        ctx.fillText('LE CARNET DES SORTIES', W/2, H/2 + 180);
+
+        // Live URL pill badge
+        const urlW = 540;
+        const urlH = 46;
+        const urlX = W/2 - urlW/2;
+        const urlY = H/2 + 225;
+
+        ctx.fillStyle = 'rgba(41, 39, 35, 0.85)';
+        drawRoundedRect(ctx, urlX, urlY, urlW, urlH, 23);
+        ctx.fill();
+        ctx.strokeStyle = PALETTE.goldBrass;
+        ctx.lineWidth = 1.5;
+        drawRoundedRect(ctx, urlX, urlY, urlW, urlH, 23);
+        ctx.stroke();
+
+        ctx.fillStyle = PALETTE.paperWarm;
+        ctx.font = '600 18px Inter, sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('projetevennement-production.up.railway.app', W/2, urlY + 29);
+
+        // Motion Design Showreel Stamp
+        ctx.fillStyle = PALETTE.rustLight;
+        ctx.font = '700 13px Inter, sans-serif';
+        ctx.letterSpacing = '4px';
+        ctx.fillText('MOTION DESIGN SHOWREEL // PORTFOLIO 2026', W/2, H/2 + 330);
+        ctx.restore();
+
+        // Outro Fade to Black (last 0.4s: 14.6s to 15.0s)
+        if (t >= 14.6) {
+          const fadeT = (t - 14.6) / 0.4;
+          ctx.fillStyle = `rgba(13, 12, 11, ${clamp(fadeT, 0, 1)})`;
+          ctx.fillRect(0, 0, W, H);
+        }
+      }
+
+      // ==========================================
+      // PERSISTENT PROGRESS BAR (BOTTOM EDGE)
+      // ==========================================
+      const progressNorm = clamp(t / DURATION, 0, 1);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.fillRect(0, H - 6, W, 6);
+
+      ctx.fillStyle = PALETTE.rustLight;
+      ctx.fillRect(0, H - 6, W * progressNorm, 6);
+    };
+
+    // Live Player Controls
+    let currentFrame = 0;
+    let isPlaying = true;
+    let animationId = null;
+
+    const btnPlay = document.getElementById('btn-play');
+    const btnRestart = document.getElementById('btn-restart');
+    const timeline = document.getElementById('timeline');
+    const timeDisplay = document.getElementById('time-display');
+
+    function loop() {
+      if (isPlaying) {
+        window.renderFrame(currentFrame);
+        timeline.value = currentFrame;
+        const curSec = (currentFrame / FPS).toFixed(2);
+        timeDisplay.textContent = `${curSec}s / 15.00s (Frame ${currentFrame})`;
+
+        currentFrame++;
+        if (currentFrame >= TOTAL_FRAMES) {
+          currentFrame = 0;
+        }
+      }
+      animationId = requestAnimationFrame(loop);
+    }
+
+    btnPlay.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      btnPlay.textContent = isPlaying ? 'Pause' : 'Play';
+    });
+
+    btnRestart.addEventListener('click', () => {
+      currentFrame = 0;
+      isPlaying = true;
+      btnPlay.textContent = 'Pause';
+    });
+
+    timeline.addEventListener('input', (e) => {
+      currentFrame = parseInt(e.target.value);
+      window.renderFrame(currentFrame);
+      const curSec = (currentFrame / FPS).toFixed(2);
+      timeDisplay.textContent = `${curSec}s / 15.00s (Frame ${currentFrame})`;
+    });
+
+    // Start playback
+    window.renderFrame(0);
+    animationId = requestAnimationFrame(loop);
+
+    // Frame extraction API for headless automation
+    window.getFrameJPEG = function(f) {
+      window.renderFrame(f);
+      return canvas.toDataURL('image/jpeg', 0.92);
+    };
+  </script>
+</body>
+</html>

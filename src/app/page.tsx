@@ -193,10 +193,10 @@ export default async function HomePage() {
         </section>
 
         {/* ── MODULE 2 : GESTION DES TONTINES ───────────────────────────── */}
-        <TontinesHomeSection />
+        <TontinesHomeSection tontines={tontines} />
 
         {/* ── MODULE 3 : GESTION DES COTISATIONS ────────────────────────── */}
-        <CotisationsHomeSection />
+        <CotisationsHomeSection campaigns={campaigns} />
       </main>
 
       <SiteFooter />

@@ -107,7 +107,7 @@ export function TontineHorizontalList({ tontines }: TontineHorizontalListProps) 
                     />
                   ) : (
                     <div className="bg-accent/10 flex size-full items-center justify-center p-6 text-center">
-                      <span className="font-display text-accent-fg text-2xl font-bold">
+                      <span className="font-display text-accent-solid-fg text-2xl font-bold">
                         {tontine.title.slice(0, 2).toUpperCase()}
                       </span>
                     </div>
@@ -124,13 +124,13 @@ export function TontineHorizontalList({ tontines }: TontineHorizontalListProps) 
                 </div>
 
                 <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-                  <h3 className="text-fg group-hover:text-accent-fg line-clamp-2 text-base font-bold transition-colors sm:text-lg">
+                  <h3 className="text-fg group-hover:text-accent line-clamp-2 text-base font-bold transition-colors sm:text-lg">
                     {tontine.title}
                   </h3>
 
                   <div className="text-fg-muted space-y-1.5 text-xs">
                     <div className="flex items-center gap-1.5 font-bold text-fg">
-                      <CircleDollarSign className="size-4 text-accent-fg" />
+                      <CircleDollarSign className="size-4 text-accent" />
                       {Number(tontine.contribution_amount).toLocaleString("fr-FR")} F CFA / mois
                     </div>
                     {activeMembersCount > 0 ? (
@@ -147,7 +147,7 @@ export function TontineHorizontalList({ tontines }: TontineHorizontalListProps) 
 
                   <div className="border-border mt-auto flex items-center justify-between border-t pt-3 text-xs font-semibold">
                     <span className="text-fg-subtle">Tontine collective</span>
-                    <span className="text-accent-fg inline-flex items-center gap-1">
+                    <span className="text-accent inline-flex items-center gap-1">
                       Voir la tontine <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>
@@ -166,7 +166,7 @@ export function TontineHorizontalList({ tontines }: TontineHorizontalListProps) 
             aria-label="Tontines précédentes"
             onClick={() => scroll(-1)}
             disabled={!canGoBack}
-            className="pointer-events-auto inline-flex size-10 items-center justify-center rounded-full border border-border bg-surface/95 shadow-md text-fg transition-all hover:bg-accent hover:text-accent-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-0"
+            className="pointer-events-auto inline-flex size-10 items-center justify-center rounded-full border border-border bg-surface/95 shadow-md text-fg transition-all hover:bg-accent-solid hover:text-accent-solid-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-0"
           >
             <ChevronLeft className="size-5" aria-hidden="true" />
           </button>
@@ -175,7 +175,7 @@ export function TontineHorizontalList({ tontines }: TontineHorizontalListProps) 
             aria-label="Tontines suivantes"
             onClick={() => scroll(1)}
             disabled={!canGoForward}
-            className="pointer-events-auto inline-flex size-10 items-center justify-center rounded-full border border-border bg-surface/95 shadow-md text-fg transition-all hover:bg-accent hover:text-accent-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-0"
+            className="pointer-events-auto inline-flex size-10 items-center justify-center rounded-full border border-border bg-surface/95 shadow-md text-fg transition-all hover:bg-accent-solid hover:text-accent-solid-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-0"
           >
             <ChevronRight className="size-5" aria-hidden="true" />
           </button>

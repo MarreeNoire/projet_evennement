@@ -1,35 +1,12 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { ArrowRight, PiggyBank, Plus } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
-import { TontineHorizontalList, type TontineItem } from "@/components/community-finance/tontine-horizontal-list";
+import {
+  TontineHorizontalList,
+  type TontineItem,
+} from "@/components/community-finance/tontine-horizontal-list";
 
-export function TontinesHomeSection() {
-  const [tontines, setTontines] = useState<TontineItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    fetch("/api/tontines")
-      .then(async (res) => {
-        if (!res.ok) return [];
-        const data = (await res.json()) as { tontines?: TontineItem[] };
-        return data.tontines ?? [];
-      })
-      .then((items) => {
-        if (active) setTontines(items);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
+export function TontinesHomeSection({ tontines }: { tontines: TontineItem[] }) {
   return (
     <section aria-labelledby="tontines-section-title" className="border-border border-b bg-surface py-10 md:py-14">
       <div className="container-page flex flex-col gap-8">
@@ -57,11 +34,7 @@ export function TontinesHomeSection() {
         </div>
 
         {/* Liste sous forme de défilement horizontal */}
-        {loading ? (
-          <div className="border-border bg-bg-subtle flex items-center justify-center rounded-xl border p-8">
-            <p className="text-fg-muted text-sm">Chargement des tontines actives…</p>
-          </div>
-        ) : tontines.length > 0 ? (
+        {tontines.length > 0 ? (
           <TontineHorizontalList tontines={tontines} />
         ) : (
           <div className="border-border bg-bg-subtle flex flex-col items-center justify-center rounded-xl border py-8 px-4 text-center">

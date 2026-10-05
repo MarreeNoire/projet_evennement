@@ -1,35 +1,12 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { ArrowRight, Wallet, Plus, Coins } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
-import { CotisationHorizontalList, type CotisationItem } from "@/components/community-finance/cotisation-horizontal-list";
+import {
+  CotisationHorizontalList,
+  type CotisationItem,
+} from "@/components/community-finance/cotisation-horizontal-list";
 
-export function CotisationsHomeSection() {
-  const [campaigns, setCampaigns] = useState<CotisationItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    fetch("/api/cotisations")
-      .then(async (res) => {
-        if (!res.ok) return [];
-        const data = (await res.json()) as { campaigns?: CotisationItem[] };
-        return data.campaigns ?? [];
-      })
-      .then((items) => {
-        if (active) setCampaigns(items);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
+export function CotisationsHomeSection({ campaigns }: { campaigns: CotisationItem[] }) {
   return (
     <section aria-labelledby="cotisations-section-title" className="border-border border-b bg-bg-subtle py-10 md:py-14">
       <div className="container-page flex flex-col gap-8">
@@ -57,11 +34,7 @@ export function CotisationsHomeSection() {
         </div>
 
         {/* Liste sous forme de défilement horizontal */}
-        {loading ? (
-          <div className="border-border bg-surface flex items-center justify-center rounded-xl border p-8">
-            <p className="text-fg-muted text-sm">Chargement des collectes ouvertes…</p>
-          </div>
-        ) : campaigns.length > 0 ? (
+        {campaigns.length > 0 ? (
           <CotisationHorizontalList cotisations={campaigns} />
         ) : (
           <div className="border-border bg-surface flex flex-col items-center justify-center rounded-xl border py-8 px-4 text-center">

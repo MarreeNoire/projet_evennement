@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Event — Le fil des événements et des rencontres</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root { --paper: #e4ddd1; --paper-light: #f4eee4; --ink: #282622; --muted: #514b43; --clay: #60352c; --clay-light: #b98470; --line: #cec3b4; --white: #fffaf2; --green: #54674d; }
+      * { box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: var(--paper); }
+      body { color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); }
+      .grain { position: absolute; inset: 0; opacity: .12; background-image: radial-gradient(#514b43 0.55px, transparent 0.7px); background-size: 7px 7px; pointer-events: none; }
+      .wash { position: absolute; width: 950px; height: 950px; right: -260px; top: -300px; border-radius: 50%; background: radial-gradient(circle, rgba(185,132,112,.2), rgba(185,132,112,0) 68%); }
+      .scene { position: absolute; inset: 0; overflow: hidden; }
+      .frame { width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; padding: 96px 140px; }
+      .eyebrow { display: inline-flex; align-items: center; gap: 14px; color: var(--clay); text-transform: uppercase; letter-spacing: .18em; font-size: 19px; font-weight: 700; }
+      .eyebrow::before { content: ""; width: 30px; height: 2px; background: var(--clay); }
+      .wordmark { display: flex; align-items: center; gap: 16px; font-weight: 750; font-size: 38px; letter-spacing: -.055em; }
+      .mark { width: 50px; height: 50px; color: var(--clay); }
+      .display { font-weight: 650; letter-spacing: -.065em; line-height: .99; }
+      .scene-inner { width: 100%; max-width: 1580px; }
+
+      /* Scene 1 — signature */
+      .intro-layout { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 36px; }
+      .intro-layout .wordmark { font-size: 44px; }
+      .intro-title { max-width: 1220px; font-size: 86px; margin: 8px 0 0; }
+      .intro-caption { color: var(--muted); font-size: 23px; letter-spacing: .02em; }
+      .intro-orbit { position: absolute; width: 680px; height: 680px; left: 620px; top: 205px; border: 1px solid rgba(96,53,44,.17); border-radius: 50%; }
+      .intro-orbit::before, .intro-orbit::after { content: ""; position: absolute; border: 1px solid rgba(96,53,44,.12); border-radius: 50%; inset: 52px; }
+      .intro-orbit::after { inset: 110px; }
+
+      /* Scene 2 — home search and event card */
+      .discover-layout { display: grid; grid-template-columns: .85fr 1.15fr; gap: 112px; align-items: center; }
+      .discover-copy h2 { font-size: 82px; margin: 22px 0 26px; }
+      .discover-copy p { margin: 0; color: var(--muted); font-size: 27px; line-height: 1.45; max-width: 560px; }
+      .searchbox { margin-top: 40px; height: 70px; border: 1px solid var(--line); border-radius: 12px; background: rgba(244,238,228,.92); display: flex; align-items: center; padding: 0 20px; gap: 16px; color: var(--muted); font-size: 19px; }
+      .search-label { margin-top: 30px; margin-bottom: -30px; color: var(--ink); font-size: 19px; font-weight: 700; }
+      .search-icon { width: 24px; height: 24px; border: 2px solid #80786e; border-radius: 50%; position: relative; flex: none; }
+      .search-icon::after { content: ""; width: 10px; height: 2px; background: #80786e; position: absolute; right: -7px; bottom: -3px; transform: rotate(45deg); }
+      .search-button { margin-left: auto; border-radius: 8px; background: var(--clay); color: var(--white); padding: 15px 23px; font-weight: 700; font-size: 17px; }
+      .event-card { width: 630px; min-height: 590px; margin-left: 30px; background: var(--paper-light); border: 1px solid rgba(40,38,34,.12); border-radius: 20px; padding: 20px; box-shadow: 0 28px 72px rgba(40,31,25,.12); transform: rotate(1.3deg); }
+      .event-image { position: relative; height: 312px; border-radius: 14px; overflow: hidden; background: linear-gradient(135deg, #79816a 0%, #aaa27c 42%, #c67e61 100%); }
+      .event-image::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(37,35,31,.48)); }
+      .sun { position: absolute; width: 96px; height: 96px; border-radius: 50%; right: 96px; top: 40px; background: rgba(247,216,158,.86); }
+      .land { position: absolute; left: -6%; right: -8%; bottom: -62px; height: 210px; border-radius: 50% 50% 0 0; background: #596050; transform: rotate(-5deg); }
+      .land::after { content: ""; position: absolute; left: 38%; right: -4%; top: 36px; height: 180px; background: #4b5046; border-radius: 55% 55% 0 0; }
+      .land2 { position: absolute; left: -8%; right: 48%; bottom: -80px; height: 180px; border-radius: 52% 52% 0 0; background: #777459; }
+      .img-tag { position: absolute; left: 18px; top: 18px; border-radius: 30px; padding: 9px 13px; background: rgba(244,238,228,.92); color: var(--ink); font-size: 13px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+      .card-meta { display: flex; align-items: center; justify-content: space-between; margin: 22px 6px 8px; color: var(--clay); text-transform: uppercase; letter-spacing: .1em; font-size: 13px; font-weight: 750; }
+      .card-title { margin: 7px 6px 20px; font-size: 35px; letter-spacing: -.045em; }
+      .card-bottom { margin: 0 6px; display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 17px; }
+      .card-action { color: var(--white); background: var(--clay); border-radius: 8px; padding: 15px 20px; font-size: 15px; font-weight: 700; }
+      .cursor { position: absolute; width: 35px; height: 41px; left: 1240px; top: 700px; filter: drop-shadow(0 3px 5px rgba(0,0,0,.26)); }
+
+      /* Scene 3 — ticket */
+      .ticket-layout { display: grid; grid-template-columns: .9fr 1.1fr; align-items: center; gap: 100px; }
+      .ticket-copy h2 { margin: 22px 0 24px; font-size: 86px; }
+      .ticket-copy p { font-size: 26px; color: var(--muted); line-height: 1.45; max-width: 570px; }
+      .ticket { position: relative; width: 700px; margin-left: 70px; padding: 37px 42px 34px; background: var(--paper-light); border: 1px solid rgba(40,38,34,.14); border-radius: 18px; box-shadow: 0 30px 80px rgba(40,31,25,.16); }
+      .ticket::before, .ticket::after { content: ""; position: absolute; left: 492px; width: 36px; height: 36px; border-radius: 50%; background: var(--paper); border: 1px solid rgba(40,38,34,.12); }
+      .ticket::before { top: -19px; border-top-color: var(--paper); }
+      .ticket::after { bottom: -19px; border-bottom-color: var(--paper); }
+      .ticket-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 30px; border-bottom: 1px dashed #b8ad9d; }
+      .ticket-top .wordmark { font-size: 27px; gap: 10px; }
+      .ticket-top .mark { width: 34px; height: 34px; }
+      .confirmed { display: inline-flex; align-items: center; gap: 8px; color: #4e6847; background: #e1e8d9; border-radius: 100px; padding: 10px 13px; font-size: 13px; font-weight: 700; }
+      .check { font-size: 16px; }
+      .ticket-mid { display: flex; justify-content: space-between; align-items: center; padding: 30px 0; }
+      .ticket-event { font-size: 31px; font-weight: 700; letter-spacing: -.045em; }
+      .ticket-sub { color: var(--muted); margin-top: 9px; font-size: 16px; }
+      .qrbox { width: 148px; height: 148px; padding: 9px; background: white; border: 1px solid #ded7cb; border-radius: 8px; }
+      .qrbox svg { width: 100%; height: 100%; }
+      .ticket-foot { padding-top: 24px; border-top: 1px dashed #b8ad9d; display: flex; align-items: center; justify-content: space-between; font-size: 16px; color: var(--muted); }
+      .ticket-foot b { color: var(--ink); }
+
+      /* Scene 4 — event salon */
+      .salon-layout { display: grid; grid-template-columns: .9fr 1.1fr; align-items: center; gap: 115px; }
+      .salon-copy h2 { font-size: 84px; margin: 22px 0 24px; }
+      .salon-copy p { max-width: 540px; font-size: 25px; line-height: 1.45; color: var(--muted); }
+      .salon-badges { display: flex; gap: 12px; margin-top: 36px; }
+      .salon-badges span { border: 1px solid #c4b8a7; border-radius: 30px; padding: 12px 17px; font-size: 14px; font-weight: 650; color: var(--clay); }
+      .chat-panel { width: 670px; min-height: 490px; margin-left: 30px; border: 1px solid rgba(40,38,34,.13); border-radius: 18px; background: var(--paper-light); box-shadow: 0 28px 72px rgba(40,31,25,.12); overflow: hidden; }
+      .chat-head { padding: 22px 27px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #dfd6c9; }
+      .chat-avatar { display: flex; width: 44px; height: 44px; border-radius: 50%; background: var(--clay); color: white; align-items: center; justify-content: center; font-weight: 700; }
+      .chat-name { font-size: 19px; font-weight: 750; }
+      .chat-status { margin-top: 4px; color: var(--muted); font-size: 13px; }
+      .live-dot { margin-left: auto; width: 10px; height: 10px; border-radius: 50%; background: #718167; box-shadow: 0 0 0 5px #e3e9dd; }
+      .chat-body { padding: 28px; }
+      .date-chip { display: table; margin: 0 auto 26px; border-radius: 20px; background: #e7dfd3; color: var(--muted); padding: 8px 14px; font-size: 12px; font-weight: 700; letter-spacing: .05em; }
+      .message { max-width: 440px; padding: 17px 19px; border-radius: 7px 17px 17px 17px; background: #e8e0d5; margin-bottom: 18px; font-size: 17px; line-height: 1.4; }
+      .message.mine { margin-left: auto; border-radius: 17px 7px 17px 17px; background: #d9e0d1; }
+      .message small { display: block; margin-bottom: 7px; color: var(--clay); font-size: 12px; font-weight: 750; }
+      .chat-input { height: 48px; border: 1px solid #d0c6b8; border-radius: 24px; color: var(--muted); padding: 13px 19px; margin-top: 10px; font-size: 14px; }
+
+      /* Scene 5 — end card */
+      .outro-layout { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 35px; }
+      .outro-layout .wordmark { font-size: 54px; }
+      .outro-layout .mark { width: 62px; height: 62px; }
+      .outro-title { max-width: 1380px; margin: 12px 0 0; font-size: 73px; }
+      .outro-rule { width: 75px; height: 3px; background: var(--clay-light); }
+      .outro-caption { font-size: 19px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+      @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+    </style>
+  </head>
+  <body>
+    <main id="root" data-composition-id="main" data-start="0" data-duration="22.9" data-width="1920" data-height="1080">
+      <div class="wash"></div><div class="grain"></div>
+      <audio id="music" data-start="0" data-duration="22.9" data-track-index="10" data-volume="0.25" data-fade-in="0.8" data-fade-out="0.9" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+      <audio id="search-sfx" data-start="3.85" data-duration="0.1" data-track-index="11" data-volume="0.42" src="assets/sfx/interface/click_001.ogg"></audio>
+      <audio id="ticket-sfx" data-start="8.74" data-duration="0.11" data-track-index="12" data-volume="0.45" src="assets/sfx/interface/drop_001.ogg"></audio>
+      <audio id="salon-sfx" data-start="13.11" data-duration="0.19" data-track-index="13" data-volume="0.38" src="assets/sfx/interface/drop_002.ogg"></audio>
+
+      <section id="scene-intro" class="scene clip" data-start="0" data-duration="3.2" data-track-index="0">
+        <div class="intro-orbit"></div>
+        <div class="frame"><div class="intro-layout">
+          <div class="wordmark"><svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M6 27V5h9M26 27V5h-9" stroke="currentColor" stroke-width="3"/><path d="M12 21h8v8h-8z" fill="currentColor"/></svg><span>Event</span></div>
+          <h1 class="display intro-title">Le fil des événements<br/>et des rencontres</h1>
+          <div class="intro-caption">Découvrir · vivre · se retrouver</div>
+        </div></div>
+      </section>
+
+      <section id="scene-discover" class="scene clip" data-start="3.2" data-duration="5.5" data-track-index="1">
+        <div class="frame"><div class="scene-inner discover-layout">
+          <div class="discover-copy">
+            <div class="eyebrow">Trouve ton prochain rendez-vous</div>
+            <h2 class="display">Une envie.<br/>Un événement.</h2>
+            <p>Explore les rencontres qui font bouger ta ville.</p>
+            <div class="search-label">Rechercher un événement</div>
+            <div class="searchbox"><span class="search-icon"></span><span>Nom d’un événement ou d’une ville</span><span class="search-button">Rechercher</span></div>
+          </div>
+          <article class="event-card">
+            <div class="event-image"><span class="sun"></span><span class="land" data-layout-allow-overflow="true"></span><span class="land2" data-layout-allow-overflow="true"></span><span class="img-tag">EXEMPLE ILLUSTRATIF</span></div>
+            <div class="card-meta"><span>Culture · Abidjan</span><span>Samedi · 18:00</span></div>
+            <h3 class="card-title">Festival des idées</h3>
+            <div class="card-bottom"><span>Une soirée pour se retrouver</span><span class="card-action">Choisir mes billets&nbsp; →</span></div>
+          </article>
+          <svg class="cursor" viewBox="0 0 36 42" aria-hidden="true"><path d="M3 2v32l8-8 5 12 6-2-5-12h12L3 2z" fill="#282622" stroke="#fffaf2" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div></div>
+      </section>
+
+      <section id="scene-ticket" class="scene clip" data-start="8.7" data-duration="4.4" data-track-index="2">
+        <div class="frame"><div class="scene-inner ticket-layout">
+          <div class="ticket-copy"><div class="eyebrow">Ton billet numérique</div><h2 class="display">Tout près<br/>du moment.</h2><p>Un billet prêt à présenter à l’entrée de l’événement.</p></div>
+          <article class="ticket">
+            <div class="ticket-top"><div class="wordmark"><svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M6 27V5h9M26 27V5h-9" stroke="currentColor" stroke-width="3"/><path d="M12 21h8v8h-8z" fill="currentColor"/></svg><span>Event</span></div><span class="confirmed"><span class="check">✓</span> EXEMPLE · NON VALIDE</span></div>
+            <div class="ticket-mid"><div><div class="ticket-event">Festival des idées</div><div class="ticket-sub">Samedi · Abidjan · Accès général</div><div class="ticket-sub" style="margin-top:24px;color:#60352c;font-weight:700;">Accès à l’événement</div></div>
+              <div class="qrbox" aria-label="Motif QR décoratif non scannable"><svg viewBox="0 0 21 21" shape-rendering="crispEdges" aria-hidden="true"><rect width="21" height="21" fill="#fff"/><path fill="#282622" d="M1 1h7v7H1zM3 3v3h3V3zM13 1h7v7h-7zM15 3v3h3V3zM1 13h7v7H1zM3 15v3h3v-3zM10 1h2v2h-2zM9 5h2v2H9zM11 9h3v2h-3zM15 9h2v2h-2zM9 12h2v3H9zM12 13h2v2h-2zM16 13h4v2h-4zM11 17h2v3h-2zM15 17h2v2h-2zM18 17h2v3h-2zM8 9h2v2H8zM5 10h2v2H5zM19 11h1v2h-1z"/></svg></div>
+            </div>
+            <div class="ticket-foot"><span>CODE D’ACCÈS</span><b>EXEMPLE — NON SCANNABLE</b></div>
+          </article>
+        </div></div>
+      </section>
+
+      <section id="scene-salon" class="scene clip" data-start="13.1" data-duration="5.5" data-track-index="3">
+        <div class="frame"><div class="scene-inner salon-layout">
+          <div class="salon-copy"><div class="eyebrow">Le salon de l’événement</div><h2 class="display">Avant,<br/>pendant,<br/>après.</h2><p>Les échanges continuent autour du moment partagé.</p><div class="salon-badges"><span>Avant</span><span>Pendant</span><span>Après</span></div></div>
+          <article class="chat-panel">
+            <div class="chat-head"><span class="chat-avatar">F</span><div><div class="chat-name">Festival des idées</div><div class="chat-status">Salon de l’événement · Exemple illustratif</div></div><span class="live-dot"></span></div>
+            <div class="chat-body"><div class="date-chip">LE SALON EST OUVERT</div><div class="message"><small>Awa · message d’exemple</small>On se retrouve à l’entrée principale ?</div><div class="message mine"><small>Toi · message d’exemple</small>Oui, à tout à l’heure !</div><div class="chat-input">Écrire dans le salon…</div></div>
+          </article>
+        </div></div>
+      </section>
+
+      <section id="scene-outro" class="scene clip" data-start="18.6" data-duration="4.3" data-track-index="4">
+        <div class="frame"><div class="outro-layout">
+          <div class="wordmark"><svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M6 27V5h9M26 27V5h-9" stroke="currentColor" stroke-width="3"/><path d="M12 21h8v8h-8z" fill="currentColor"/></svg><span>Event</span></div>
+          <div class="outro-rule"></div>
+          <h2 class="display outro-title">Suis les échanges dans les salons et découvre les événements publiés sur Event.</h2>
+          <div class="outro-caption">Le fil des événements et des rencontres</div>
+        </div></div>
+      </section>
+    </main>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines = window.__timelines || {};
+      window.__timelines.main = tl;
+      const reveal = (id, start, end) => {
+        const content = `${id} > .frame`;
+        tl.fromTo(content, { opacity: 0 }, { opacity: 1, duration: 0.52, ease: "power2.out" }, start);
+        tl.to(content, { opacity: 0, duration: 0.42, ease: "power1.in" }, end - 0.42);
+      };
+      reveal("#scene-intro", 0, 3.2);
+      tl.fromTo("#scene-intro .wordmark", { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.18);
+      tl.fromTo("#scene-intro .intro-title", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out" }, 0.56);
+      tl.fromTo("#scene-intro .intro-caption", { opacity: 0 }, { opacity: 1, duration: 0.45 }, 1.18);
+      reveal("#scene-discover", 3.2, 8.7);
+      tl.fromTo("#scene-discover .discover-copy", { opacity: 0, x: -22 }, { opacity: 1, x: 0, duration: 0.55, ease: "power2.out" }, 3.45);
+      tl.fromTo("#scene-discover .event-card", { opacity: 0, y: 28, rotation: 0 }, { opacity: 1, y: 0, rotation: 1.3, duration: 0.7, ease: "power2.out" }, 4.15);
+      tl.fromTo("#scene-discover .cursor", { opacity: 0, x: 32, y: 14 }, { opacity: 1, x: 0, y: 0, duration: 0.35, ease: "power2.out" }, 7.55);
+      // beat-locked: 8.74s — illustrative ticket reveal, while copy holds.
+      reveal("#scene-ticket", 8.7, 13.1);
+      tl.fromTo("#scene-ticket .ticket-copy", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.55, ease: "power2.out" }, 8.94);
+      tl.fromTo("#scene-ticket .ticket", { opacity: 0, y: 24, rotation: -1.4 }, { opacity: 1, y: 0, rotation: 0, duration: 0.72, ease: "power2.out" }, 9.12);
+      tl.fromTo("#scene-ticket .qrbox", { scale: 0.92 }, { scale: 1, duration: 0.4, ease: "power1.out" }, 9.92);
+      reveal("#scene-salon", 13.1, 18.6);
+      tl.fromTo("#scene-salon .salon-copy", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.55, ease: "power2.out" }, 13.32);
+      // beat-locked: 13.11s — the salon scene opens with the music cue.
+      tl.fromTo("#scene-salon .chat-panel", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 13.65);
+      tl.fromTo("#scene-salon .message", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.18, ease: "power2.out" }, 14.25);
+      reveal("#scene-outro", 18.6, 22.9);
+      tl.fromTo("#scene-outro .wordmark", { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 18.9);
+      tl.fromTo("#scene-outro .outro-rule", { opacity: 0, width: 0 }, { opacity: 1, width: 75, duration: 0.4 }, 19.22);
+      tl.fromTo("#scene-outro .outro-title", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 19.38);
+      tl.fromTo("#scene-outro .outro-caption", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 20.2);
+      tl.seek(0);
+    </script>
+  </body>
+</html>
