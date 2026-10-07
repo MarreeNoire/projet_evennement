@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { PwaRouteRestoration } from "@/components/providers/pwa-route-restoration";
+import { SiteMotionTicker } from "@/components/layout/site-motion-ticker";
 import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
@@ -103,6 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Aller au contenu principal
         </a>
         <AppProviders>
+          <SiteMotionTicker />
           <div id="contenu">{children}</div>
         </AppProviders>
         <PwaRouteRestoration />
