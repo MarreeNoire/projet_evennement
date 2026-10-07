@@ -6,34 +6,25 @@ import {
 
 import { EventHorizontalList } from "@/components/events/event-horizontal-list";
 import { HomeHero } from "@/components/home/home-hero";
-import { TontinesHomeSection } from "@/components/home/tontines-home-section";
-import { CotisationsHomeSection } from "@/components/home/cotisations-home-section";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
 import { getFeaturedEvents } from "@/lib/events/queries";
-import { getHomeTontines, getOpenCotisations } from "@/lib/community-finance/queries";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { ROUTES } from "@/lib/constants";
 
 export default async function HomePage() {
   let featured: Awaited<ReturnType<typeof getFeaturedEvents>> = [];
-  let tontines: Awaited<ReturnType<typeof getHomeTontines>> = [];
-  let campaigns: Awaited<ReturnType<typeof getOpenCotisations>> = [];
   let profile = null;
 
   try {
-    const [eventsRes, tontinesRes, campaignsRes, prof] = await Promise.all([
+    const [eventsRes, prof] = await Promise.all([
       getFeaturedEvents(10).catch(() => []),
-      getHomeTontines(10).catch(() => []),
-      getOpenCotisations(10).catch(() => []),
       getCurrentProfile().catch(() => null),
     ]);
     featured = eventsRes;
-    tontines = tontinesRes;
-    campaigns = campaignsRes;
     profile = prof;
   } catch {
     // Mode silencieux
@@ -159,19 +150,10 @@ export default async function HomePage() {
                     </li>
                     <li>
                       <Link
-                        href={ROUTES.tontines}
+                        href={ROUTES.connections}
                         className="border-border bg-bg-muted hover:border-primary flex items-center justify-between rounded border p-2.5 text-xs font-semibold transition-colors"
                       >
-                        Mes tontines
-                        <ArrowRight className="size-3.5" aria-hidden="true" />
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href={ROUTES.cotisations}
-                        className="border-border bg-bg-muted hover:border-primary flex items-center justify-between rounded border p-2.5 text-xs font-semibold transition-colors"
-                      >
-                        Mes cotisations
+                        Mes connexions
                         <ArrowRight className="size-3.5" aria-hidden="true" />
                       </Link>
                     </li>
@@ -181,12 +163,6 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ── MODULE 2 : GESTION DES TONTINES ───────────────────────────── */}
-        <TontinesHomeSection tontines={tontines} />
-
-        {/* ── MODULE 3 : GESTION DES COTISATIONS ────────────────────────── */}
-        <CotisationsHomeSection campaigns={campaigns} />
       </main>
 
       <SiteFooter />

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Bell, Coins, Megaphone, MessageCircle, Sparkles, Ticket, UserPlus } from "lucide-react";
+import { Bell, Megaphone, MessageCircle, Sparkles, Ticket, UserPlus } from "lucide-react";
 import type { ComponentType } from "react";
 
 import { MarkAllReadButton } from "@/components/social/mark-all-read-button";
@@ -41,7 +41,6 @@ const ICONS: Record<NotificationType, ComponentType<{ className?: string }>> = {
   ticket_confirmed: Ticket,
   message: MessageCircle,
   report_resolved: Bell,
-  tontine_invitation: Coins,
 };
 
 export default async function NotificationsPage() {

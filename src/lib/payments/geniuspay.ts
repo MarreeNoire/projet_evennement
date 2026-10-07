@@ -30,7 +30,7 @@ interface GeniusPayResponse extends Record<string, unknown> {
   success?: boolean;
   message?: string;
   data?: GeniusPayTransaction;
-  error?: { message?: string };
+  error?: { code?: string; message?: string };
 }
 
 export class GeniusPayProvider implements PaymentProvider {
@@ -52,6 +52,13 @@ export class GeniusPayProvider implements PaymentProvider {
   }
 
   async createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession> {
+    if (Math.round(input.amount) < 200) {
+      throw new PaymentError(
+        "VALIDATION_ERROR",
+        "GeniusPay accepte les paiements à partir de 200 F CFA.",
+      );
+    }
+
     // Nettoyer la description : supprimer les caractères Unicode spéciaux (ex: ·) qui font rejeter la requête par GeniusPay.
     const cleanDescription = input.description
       .normalize("NFD")
@@ -66,19 +73,12 @@ export class GeniusPayProvider implements PaymentProvider {
     const customerPhone = input.customer.phone?.trim() || undefined;
     const customerCountry = input.customer.country?.trim() || "CI";
 
-    const reference = (input.orderReference || input.orderId).replace(/[^a-zA-Z0-9-_]/g, "").slice(0, 50);
-
     const payload = {
       amount: Math.round(input.amount),
       currency: (input.currency || "XOF").toUpperCase(),
       description: cleanDescription,
-      reference,
-      order_id: input.orderId,
       success_url: input.returnUrl,
       error_url: input.returnUrl,
-      cancel_url: input.returnUrl,
-      callback_url: input.notifyUrl,
-      webhook_url: input.notifyUrl,
       customer: {
         name: customerName,
         ...(customerEmail ? { email: customerEmail } : {}),
@@ -98,27 +98,23 @@ export class GeniusPayProvider implements PaymentProvider {
     });
 
     const transaction = response.data;
-    const transactionId = transaction?.reference == null ? reference : String(transaction.reference);
+    const transactionId = transaction?.reference == null ? "" : String(transaction.reference);
     const paymentUrl =
       transaction?.checkout_url ??
       transaction?.payment_url ??
       (typeof response.checkout_url === "string" ? response.checkout_url : undefined) ??
       (typeof response.payment_url === "string" ? response.payment_url : undefined);
 
-    if (!response.success && !paymentUrl) {
-      console.error("[GeniusPay] API error response:", response);
+    if (response.success !== true || !transactionId || !paymentUrl) {
+      console.error("[GeniusPay] Checkout creation rejected", {
+        providerCode: response.error?.code ?? "PAYMENT_INIT_FAILED",
+        hasReference: Boolean(transactionId),
+        hasCheckoutUrl: Boolean(paymentUrl),
+      });
       throw new PaymentError(
         "CHECKOUT_FAILED",
-        "Impossible d'ouvrir la page de paiement GeniusPay. Merci de réessayer.",
+        "GeniusPay n'a pas accepté la demande de paiement. Vérifie le montant ou réessaie plus tard.",
         response.error?.message ?? response.message,
-      );
-    }
-
-    if (!paymentUrl) {
-      console.error("[GeniusPay] Missing checkout URL in response:", response);
-      throw new PaymentError(
-        "CHECKOUT_FAILED",
-        "GeniusPay n'a pas renvoyé d'URL de redirection de paiement.",
       );
     }
 
@@ -129,6 +125,12 @@ export class GeniusPayProvider implements PaymentProvider {
       throw new PaymentError(
         "INVALID_RESPONSE",
         "GeniusPay a renvoyé une URL de paiement invalide.",
+      );
+    }
+    if (checkoutUrl.protocol !== "https:") {
+      throw new PaymentError(
+        "INVALID_RESPONSE",
+        "GeniusPay a renvoyé une URL de paiement non sécurisée.",
       );
     }
 
@@ -265,10 +267,21 @@ export class GeniusPayProvider implements PaymentProvider {
     }
 
     if (!response.ok) {
-      const errorBody = body as { error?: { message?: string }; message?: string };
+      const errorBody = body as { error?: { code?: string; message?: string }; message?: string };
+      const providerCode = errorBody.error?.code ?? `HTTP_${response.status}`;
+      console.error("[GeniusPay] API request rejected", {
+        status: response.status,
+        providerCode,
+      });
       throw new PaymentError(
-        "PROVIDER_ERROR",
-        "GeniusPay a refusé la requête de paiement.",
+        providerCode,
+        response.status === 401
+          ? "Les identifiants GeniusPay sont refusés. Contacte l'administrateur."
+          : response.status === 403
+            ? "Le compte marchand GeniusPay n'est pas actif. Contacte l'administrateur."
+            : response.status === 422
+              ? "Les informations ou le montant de ce paiement ne sont pas acceptés par GeniusPay."
+              : "GeniusPay n'a pas accepté la demande de paiement. Réessaie plus tard.",
         errorBody.error?.message ?? errorBody.message ?? `HTTP ${response.status}`,
       );
     }

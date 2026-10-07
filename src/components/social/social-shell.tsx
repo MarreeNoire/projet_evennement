@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, Coins, Compass, MessageSquare, QrCode, Repeat2, Ticket, User, Users } from "lucide-react";
+import { Bell, Compass, MessageSquare, QrCode, Ticket, User, Users } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { SiteHeader } from "@/components/layout/site-header";
@@ -21,9 +21,7 @@ export type SocialSection =
   | "reseau"
   | "notifications"
   | "badge"
-  | "profil"
-  | "tontines"
-  | "cotisations";
+  | "profil";
 
 const SECTION_GROUPS: { label: string; items: { key: SocialSection; href: string; label: string; icon: typeof Compass }[] }[] = [
   {
@@ -32,13 +30,6 @@ const SECTION_GROUPS: { label: string; items: { key: SocialSection; href: string
       { key: "explorer", href: ROUTES.explore, label: "Explorer", icon: Compass },
       { key: "billets", href: ROUTES.myTickets, label: "Billets", icon: Ticket },
       { key: "salons", href: ROUTES.mySalons, label: "Salons", icon: MessageSquare },
-    ],
-  },
-  {
-    label: "Finances collectives",
-    items: [
-      { key: "tontines", href: ROUTES.tontines, label: "Tontines", icon: Repeat2 },
-      { key: "cotisations", href: ROUTES.cotisations, label: "Cotisations", icon: Coins },
     ],
   },
   {

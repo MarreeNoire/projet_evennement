@@ -1,5 +1,5 @@
 import { ROUTES } from "@/lib/constants";
-import { CalendarDays, Coins, Repeat2, Users, type LucideIcon } from "lucide-react";
+import { CalendarDays, MessageSquare, Ticket, Users, type LucideIcon } from "lucide-react";
 
 /* =============================================================================
    Navigation principale
@@ -28,18 +28,21 @@ export interface NavGroup {
 export function getPrimaryNavItems(user: { isOrganizer?: boolean } | null): NavItem[] {
   return [
     { href: ROUTES.explore, label: "Événements", icon: CalendarDays },
-    ...(user ? [{ href: ROUTES.tontines, label: "Tontines", icon: Repeat2 }] : []),
-    { href: ROUTES.cotisations, label: "Cotisations", icon: Coins },
-    ...(user ? [{ href: ROUTES.connections, label: "Réseau", icon: Users }] : []),
+    ...(user
+      ? [
+          { href: ROUTES.myTickets, label: "Mes billets", icon: Ticket },
+          { href: ROUTES.mySalons, label: "Mes salons", icon: MessageSquare },
+          { href: ROUTES.connections, label: "Réseau", icon: Users },
+        ]
+      : []),
   ];
 }
 
-/** Navigation regroupée par besoin pour séparer événements, finances et compte. */
+/** Navigation regroupée par besoin pour séparer événements et compte. */
 export function getNavGroups(user: { isOrganizer?: boolean } | null): NavGroup[] {
   if (!user) {
     return [
       { label: "Événements", items: [{ href: ROUTES.explore, label: "Explorer les événements" }] },
-      { label: "Finances collectives", items: [{ href: ROUTES.cotisations, label: "Cotisations" }] },
       {
         label: "À découvrir",
         items: [
@@ -57,13 +60,6 @@ export function getNavGroups(user: { isOrganizer?: boolean } | null): NavGroup[]
         { href: ROUTES.explore, label: "Explorer les événements" },
         { href: ROUTES.myTickets, label: "Mes billets", authenticated: true },
         { href: ROUTES.mySalons, label: "Mes salons", authenticated: true },
-      ],
-    },
-    {
-      label: "Finances collectives",
-      items: [
-        { href: ROUTES.tontines, label: "Tontines", authenticated: true },
-        { href: ROUTES.cotisations, label: "Cotisations" },
       ],
     },
     {
@@ -111,7 +107,6 @@ export const FOOTER_SECTIONS = [
     title: "Découvrir",
     links: [
       { href: ROUTES.explore, label: "Tous les événements" },
-      { href: ROUTES.cotisations, label: "Cotisations solidaires" },
       { href: "/organisateurs", label: "Organisateurs" },
       { href: "/#principe", label: "Comment ça marche" },
     ],
