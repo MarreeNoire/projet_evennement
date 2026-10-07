@@ -1,19 +1,36 @@
 import Link from "next/link";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search, Sparkles } from "lucide-react";
 
-import { APP_NAME, CATEGORIES } from "@/lib/constants";
+import { APP_NAME, CATEGORIES, ROUTES } from "@/lib/constants";
+import { ButtonLink } from "@/components/ui/button";
 
 export function HomeHero() {
   return (
     <section className="border-border bg-bg-subtle border-b">
       <div className="container-page grid gap-5 py-6 md:py-8 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] lg:items-center lg:gap-8 xl:gap-12">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
+          <Link
+            href="/devenir-organisateur"
+            className="inline-flex items-center gap-2 self-start rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+          >
+            <Sparkles className="size-3.5" aria-hidden="true" />
+            Organisateur ? Crée ta billetterie en ligne
+            <ArrowRight className="size-3" aria-hidden="true" />
+          </Link>
           <h1 className="font-display max-w-3xl text-3xl font-bold md:text-4xl">
             Le fil des événements et des rencontres
           </h1>
           <p className="text-fg-muted max-w-2xl text-sm leading-relaxed md:text-base">
             Suis les échanges dans les salons et découvre les événements publiés sur {APP_NAME}.
           </p>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <ButtonLink href={ROUTES.explore} size="sm">
+              Explorer l&apos;agenda
+            </ButtonLink>
+            <ButtonLink href="/devenir-organisateur" variant="secondary" size="sm">
+              Devenir organisateur
+            </ButtonLink>
+          </div>
         </div>
 
         <TicketArtwork />

@@ -1,11 +1,14 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  Sparkles,
   Users,
 } from "lucide-react";
 
 import { EventHorizontalList } from "@/components/events/event-horizontal-list";
 import { HomeHero } from "@/components/home/home-hero";
+import { HowItWorks } from "@/components/home/how-it-works";
+import { OrganizerCtaSection } from "@/components/home/organizer-cta-section";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Avatar } from "@/components/ui/avatar";
@@ -37,7 +40,7 @@ export default async function HomePage() {
       <main id="contenu" className="flex flex-col">
         <HomeHero />
 
-        {/* ── MODULE 1 : GESTION D'ÉVÉNEMENTS & BILLETTERIE ────────────────── */}
+        {/* ── MODULE ÉVÉNEMENTS & SALONS EN DIRECT ────────────────────────── */}
         <section aria-labelledby="events-section-title" className="border-border border-b bg-bg-subtle/50 py-8 md:py-10">
           <div className="container-page">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-12">
@@ -46,8 +49,11 @@ export default async function HomePage() {
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
                     <h2 id="events-section-title" className="font-display text-2xl font-bold md:text-3xl">
-                      Événements à venir
+                      Événements à la une
                     </h2>
+                    <p className="text-fg-muted mt-1 text-xs md:text-sm">
+                      Fais défiler les événements du moment et réserve tes places.
+                    </p>
                   </div>
                   <Link
                     href={ROUTES.explore}
@@ -133,6 +139,22 @@ export default async function HomePage() {
                   )}
                 </div>
 
+                {/* Bloc Organisateur en avant */}
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-5 flex flex-col gap-3">
+                  <span className="inline-flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-wider">
+                    <Sparkles className="size-3.5" aria-hidden="true" /> Espace Organisateur
+                  </span>
+                  <h3 className="font-display text-base font-bold text-fg">
+                    Tu organises un événement ?
+                  </h3>
+                  <p className="text-xs text-fg-muted leading-relaxed">
+                    Crée ta billetterie en ligne, vends tes billets en Mobile Money et gère tes accès facilement.
+                  </p>
+                  <ButtonLink href="/devenir-organisateur" size="sm" className="mt-1 w-full justify-center">
+                    Devenir organisateur
+                  </ButtonLink>
+                </div>
+
                 {/* Suggestions événements */}
                 <div className="border-border bg-surface rounded-lg border p-5">
                   <h3 className="text-fg-subtle mb-4 text-xs font-bold tracking-wider uppercase">
@@ -163,6 +185,12 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ── SECTION DÉDIÉE ORGANISATEUR (MISE EN AVANT FORTE) ───────────── */}
+        <OrganizerCtaSection />
+
+        {/* ── PRINCIPE DE FONCTIONNEMENT ──────────────────────────────────── */}
+        <HowItWorks />
       </main>
 
       <SiteFooter />
