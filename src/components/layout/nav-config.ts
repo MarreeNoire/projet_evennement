@@ -45,10 +45,7 @@ export function getNavGroups(user: { isOrganizer?: boolean } | null): NavGroup[]
       { label: "Événements", items: [{ href: ROUTES.explore, label: "Explorer les événements" }] },
       {
         label: "À découvrir",
-        items: [
-          { href: "/organisateurs", label: "Organisateurs" },
-          { href: "/#principe", label: "Comment ça marche" },
-        ],
+        items: [{ href: "/organisateurs", label: "Organisateurs" }],
       },
     ];
   }
@@ -108,7 +105,6 @@ export const FOOTER_SECTIONS = [
     links: [
       { href: ROUTES.explore, label: "Tous les événements" },
       { href: "/organisateurs", label: "Organisateurs" },
-      { href: "/#principe", label: "Comment ça marche" },
     ],
   },
   {

@@ -54,7 +54,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
       aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
     >
       <article className="border-border-strong/70 bg-surface group-hover:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-[transform,border-color] duration-300 ease-[var(--ease-out-soft)] group-hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none">
-        <div className="border-border relative aspect-16/10 overflow-hidden border-b bg-bg-muted">
+        <div className="border-border bg-bg-muted relative aspect-[16/8] overflow-hidden border-b">
           {imageUrl ? (
             <PublicStorageImage
               src={imageUrl}
@@ -99,22 +99,22 @@ export function EventCard({ event }: { event: PublishedEventView }) {
 
           {/* Gallery preview */}
           {gallery.length > 0 && (
-              <div className="mb-2 flex gap-1">
+            <div className="mb-2 flex gap-1">
               {gallery.slice(0, 3).map((url, index) => (
-                  <span
-                    key={`${event.id}-gallery-${index}`}
-                    className="border-border/50 bg-bg-muted size-10 shrink-0 overflow-hidden rounded-md border"
-                  >
-                    <PublicStorageImage
-                      src={url}
-                      alt=""
-                      width={40}
-                      height={40}
-                      sizes="40px"
-                      quality={48}
-                      className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
-                    />
-                  </span>
+                <span
+                  key={`${event.id}-gallery-${index}`}
+                  className="border-border/50 bg-bg-muted size-10 shrink-0 overflow-hidden rounded-md border"
+                >
+                  <PublicStorageImage
+                    src={url}
+                    alt=""
+                    width={40}
+                    height={40}
+                    sizes="40px"
+                    quality={48}
+                    className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none"
+                  />
+                </span>
               ))}
             </div>
           )}

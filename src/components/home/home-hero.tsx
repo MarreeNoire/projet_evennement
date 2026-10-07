@@ -7,11 +7,11 @@ import { ButtonLink } from "@/components/ui/button";
 export function HomeHero() {
   return (
     <section className="border-border bg-bg-subtle border-b">
-      <div className="container-page grid gap-5 py-6 md:py-8 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] lg:items-center lg:gap-8 xl:gap-12">
+      <div className="container-page grid gap-5 py-6 md:grid-cols-[minmax(0,1fr)_12rem] md:items-center md:gap-8 md:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] xl:gap-12">
         <div className="flex flex-col gap-4">
           <Link
             href="/devenir-organisateur"
-            className="inline-flex items-center gap-2 self-start rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+            className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-2 self-start rounded-md border px-3 py-1 text-xs font-semibold transition-colors"
           >
             <Sparkles className="size-3.5" aria-hidden="true" />
             Organisateur ? Crée ta billetterie en ligne
@@ -35,7 +35,7 @@ export function HomeHero() {
 
         <TicketArtwork />
 
-        <div className="border-border bg-surface rounded-lg border p-4 sm:p-5">
+        <div className="border-border bg-surface rounded-lg border p-4 sm:p-5 md:col-span-2 lg:col-span-1">
           <form action="/explorer" method="get" role="search" className="flex flex-col gap-2">
             <label htmlFor="home-search" className="text-fg text-sm font-semibold">
               Rechercher un événement
@@ -82,7 +82,10 @@ export function HomeHero() {
 
 function TicketArtwork() {
   return (
-    <div className="mx-auto hidden w-full max-w-48 sm:max-w-xs lg:block lg:max-w-none" aria-hidden="true">
+    <div
+      className="mx-auto block w-32 max-w-full md:w-full md:max-w-[12rem] lg:max-w-none"
+      aria-hidden="true"
+    >
       <svg viewBox="0 0 360 270" className="h-auto w-full" fill="none">
         <circle cx="181" cy="133" r="116" fill="var(--primary-subtle)" />
         <circle
@@ -93,6 +96,14 @@ function TicketArtwork() {
           strokeWidth="1.5"
           strokeDasharray="3 8"
         />
+        <circle className="hero-ticket-orbit" cx="181" cy="17" r="4.5" fill="var(--accent-solid)" />
+        <circle
+          className="hero-ticket-orbit hero-ticket-orbit-slow"
+          cx="181"
+          cy="249"
+          r="3"
+          fill="var(--brand-500)"
+        />
         <path
           d="M65 219 90 194M266 64l25-25M72 67 51 46"
           stroke="var(--brand-400)"
@@ -101,59 +112,61 @@ function TicketArtwork() {
         <circle cx="294" cy="206" r="7" fill="var(--accent-solid)" />
         <circle cx="76" cy="177" r="5" fill="var(--brand-500)" />
 
-        <g transform="rotate(8 180 135)">
-          <path
-            d="M67 59h226v45c-21 1-21 29 0 30v78H67v-43c21-1 21-29 0-30V59Z"
-            fill="var(--accent-solid)"
-          />
-          <path
-            d="M59 48h226v45c-21 1-21 29 0 30v78H59v-43c21-1 21-29 0-30V48Z"
-            fill="var(--primary-solid)"
-          />
-          <path
-            d="M235 96v105"
-            stroke="var(--primary-solid-fg)"
-            strokeOpacity=".56"
-            strokeDasharray="3 6"
-            strokeWidth="2"
-          />
-          <circle cx="147" cy="113" r="21" stroke="var(--brand-200)" strokeWidth="2" />
-          <path
-            d="M147 101v12l8 5M110 151h68M110 161h51"
-            stroke="var(--surface-raised)"
-            strokeLinecap="round"
-            strokeWidth="3"
-          />
-          <text
-            x="94"
-            y="84"
-            fill="var(--fg)"
-            fontFamily="Inter, sans-serif"
-            fontSize="10"
-            fontWeight="700"
-            letterSpacing="2"
-          >
-            EVENT
-          </text>
-          <text
-            x="255"
-            y="122"
-            fill="var(--primary-solid-fg)"
-            fontFamily="Inter, sans-serif"
-            fontSize="9"
-            fontWeight="700"
-            letterSpacing="1.5"
-            transform="rotate(90 255 122)"
-          >
-            BILLET
-          </text>
-          <path
-            d="M256 164h14m-14 8h9m-9 8h14"
-            stroke="var(--brand-200)"
-            strokeLinecap="round"
-            strokeWidth="2"
-          />
-          <circle cx="263" cy="84" r="3" fill="var(--accent-solid)" />
+        <g className="hero-ticket-float">
+          <g transform="rotate(8 180 135)">
+            <path
+              d="M67 59h226v45c-21 1-21 29 0 30v78H67v-43c21-1 21-29 0-30V59Z"
+              fill="var(--accent-solid)"
+            />
+            <path
+              d="M59 48h226v45c-21 1-21 29 0 30v78H59v-43c21-1 21-29 0-30V48Z"
+              fill="var(--primary-solid)"
+            />
+            <path
+              d="M235 96v105"
+              stroke="var(--primary-solid-fg)"
+              strokeOpacity=".56"
+              strokeDasharray="3 6"
+              strokeWidth="2"
+            />
+            <circle cx="147" cy="113" r="21" stroke="var(--brand-200)" strokeWidth="2" />
+            <path
+              d="M147 101v12l8 5M110 151h68M110 161h51"
+              stroke="var(--surface-raised)"
+              strokeLinecap="round"
+              strokeWidth="3"
+            />
+            <text
+              x="94"
+              y="84"
+              fill="var(--fg)"
+              fontFamily="Inter, sans-serif"
+              fontSize="10"
+              fontWeight="700"
+              letterSpacing="2"
+            >
+              EVENT
+            </text>
+            <text
+              x="255"
+              y="122"
+              fill="var(--primary-solid-fg)"
+              fontFamily="Inter, sans-serif"
+              fontSize="9"
+              fontWeight="700"
+              letterSpacing="1.5"
+              transform="rotate(90 255 122)"
+            >
+              BILLET
+            </text>
+            <path
+              d="M256 164h14m-14 8h9m-9 8h14"
+              stroke="var(--brand-200)"
+              strokeLinecap="round"
+              strokeWidth="2"
+            />
+            <circle cx="263" cy="84" r="3" fill="var(--accent-solid)" />
+          </g>
         </g>
       </svg>
     </div>

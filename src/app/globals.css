@@ -545,12 +545,51 @@
   }
 }
 
+@keyframes hero-ticket-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-7px) rotate(-1deg);
+  }
+}
+
+@keyframes hero-ticket-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hero-ticket-float {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hero-ticket-float 6s ease-in-out infinite;
+}
+
+.hero-ticket-orbit {
+  transform-box: view-box;
+  transform-origin: 181px 133px;
+  animation: hero-ticket-orbit 18s linear infinite;
+}
+
+.hero-ticket-orbit-slow {
+  animation-duration: 27s;
+  animation-direction: reverse;
+}
+
 .event-card-reveal {
   animation: event-card-arrive 560ms var(--ease-out-soft) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .event-card-reveal {
+    animation: none;
+  }
+
+  .hero-ticket-float,
+  .hero-ticket-orbit {
     animation: none;
   }
 }
