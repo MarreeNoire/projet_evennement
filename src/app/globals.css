@@ -533,6 +533,28 @@
 /* =============================================================================
    UTILITAIRES MÉTIER
    ========================================================================== */
+@keyframes event-card-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.event-card-reveal {
+  animation: event-card-arrive 560ms var(--ease-out-soft) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-card-reveal {
+    animation: none;
+  }
+}
+
 @utility container-page {
   width: 100%;
   margin-inline: auto;

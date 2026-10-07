@@ -64,10 +64,11 @@ export function EventHorizontalList({ events }: EventHorizontalListProps) {
         tabIndex={0}
         className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-2 pt-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:scroll-auto"
       >
-        {events.map((event) => (
+        {events.map((event, index) => (
           <div
             key={event.id}
-            className="w-[84vw] min-w-[17rem] sm:w-[22rem] md:w-[24rem] shrink-0 snap-start"
+            className="event-card-reveal w-[84vw] min-w-[17rem] shrink-0 snap-start sm:w-[22rem] md:w-[24rem]"
+            style={{ animationDelay: `${Math.min(index * 65, 390)}ms` }}
           >
             <EventCard event={event} />
           </div>

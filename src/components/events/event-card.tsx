@@ -53,8 +53,8 @@ export function EventCard({ event }: { event: PublishedEventView }) {
       className="group block h-full focus-visible:outline-2 focus-visible:outline-offset-2"
       aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
     >
-      <article className="border-border border-t-primary bg-surface group-hover:border-primary flex h-full flex-col overflow-hidden border border-t-2 transition-colors duration-150">
-        <div className="border-border bg-bg-muted relative aspect-16/10 overflow-hidden border-b">
+      <article className="border-border-strong/70 bg-surface group-hover:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-[transform,border-color] duration-300 ease-[var(--ease-out-soft)] group-hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none">
+        <div className="border-border relative aspect-16/10 overflow-hidden border-b bg-bg-muted">
           {imageUrl ? (
             <PublicStorageImage
               src={imageUrl}
@@ -72,7 +72,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
 
           {/* Badges en superposition */}
           <div className="absolute top-3 left-3 flex gap-1.5">
-            <span className="border-border bg-surface text-2xs text-fg border px-2 py-1 font-semibold tracking-wide uppercase">
+            <span className="border-border bg-surface/95 text-2xs text-fg rounded-md border px-2 py-1 font-semibold tracking-wide uppercase">
               {getCategoryLabel(event.category)}
             </span>
           </div>
@@ -85,7 +85,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
             </h3>
             <time
               dateTime={event.start_at}
-              className="border-border-strong flex shrink-0 flex-col border-l pl-3 text-right"
+              className="border-border-strong flex shrink-0 flex-col rounded-md border px-2.5 py-1 text-right"
               aria-label={`${day} ${month} ${year}`}
             >
               <span className="font-display text-primary text-xl leading-none font-bold tabular-nums">
