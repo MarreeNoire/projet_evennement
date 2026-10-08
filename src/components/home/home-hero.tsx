@@ -1,13 +1,21 @@
 import Link from "next/link";
-import { ArrowRight, Search, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  MessageCircle,
+  Search,
+  Sparkles,
+  TicketCheck,
+} from "lucide-react";
 
 import { APP_NAME, CATEGORIES, ROUTES } from "@/lib/constants";
 import { ButtonLink } from "@/components/ui/button";
+import { HomeHeroMotionScope } from "@/components/home/home-hero-motion-scope";
 
 export function HomeHero() {
   return (
     <section className="border-border bg-bg-subtle border-b">
-      <div className="container-page grid gap-5 py-6 md:grid-cols-[minmax(0,1fr)_12rem] md:items-center md:gap-8 md:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] xl:gap-12">
+      <HomeHeroMotionScope className="container-page grid gap-5 py-6 md:grid-cols-[minmax(0,1fr)_12rem] md:items-center md:gap-8 md:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] xl:gap-12">
         <div className="flex flex-col gap-4">
           <Link
             href="/devenir-organisateur"
@@ -17,8 +25,22 @@ export function HomeHero() {
             Organisateur ? Crée ta billetterie en ligne
             <ArrowRight className="size-3" aria-hidden="true" />
           </Link>
-          <h1 className="font-display max-w-3xl text-3xl font-bold md:text-4xl">
-            Le fil des événements et des rencontres
+          <h1
+            aria-label="Le fil des événements et des rencontres"
+            className="home-hero-title font-display max-w-3xl text-3xl leading-[1.08] font-bold md:text-4xl"
+          >
+            <span aria-hidden="true" className="block">
+              Le fil des
+            </span>
+            <span aria-hidden="true" className="home-hero-word-slot">
+              <span className="home-hero-word-rail">
+                <span>événements</span>
+                <span>rencontres</span>
+                <span>festivals</span>
+                <span>concerts</span>
+                <span>événements</span>
+              </span>
+            </span>
           </h1>
           <p className="text-fg-muted max-w-2xl text-sm leading-relaxed md:text-base">
             Suis les échanges dans les salons et découvre les événements publiés sur {APP_NAME}.
@@ -75,18 +97,33 @@ export function HomeHero() {
             </ul>
           </nav>
         </div>
-      </div>
+      </HomeHeroMotionScope>
     </section>
   );
 }
 
 function TicketArtwork() {
   return (
-    <div
-      className="mx-auto block w-32 max-w-full md:w-full md:max-w-[12rem] lg:max-w-none"
-      aria-hidden="true"
-    >
-      <svg viewBox="0 0 360 270" className="h-auto w-full" fill="none">
+    <div className="event-motion-scene" aria-hidden="true">
+      <div className="event-motion-orbit" />
+      <div className="event-motion-orbit event-motion-orbit--inner" />
+      <div className="event-motion-spark event-motion-spark--one" />
+      <div className="event-motion-spark event-motion-spark--two" />
+
+      <div className="event-motion-card event-motion-card--calendar">
+        <CalendarDays aria-hidden="true" />
+        <span>Événements</span>
+      </div>
+      <div className="event-motion-card event-motion-card--ticket">
+        <TicketCheck aria-hidden="true" />
+        <span>Billetterie</span>
+      </div>
+      <div className="event-motion-card event-motion-card--salon">
+        <MessageCircle aria-hidden="true" />
+        <span>Salon communautaire</span>
+      </div>
+
+      <svg viewBox="0 0 360 270" className="event-motion-ticket" fill="none">
         <circle cx="181" cy="133" r="116" fill="var(--primary-subtle)" />
         <circle
           cx="181"
@@ -112,7 +149,7 @@ function TicketArtwork() {
         <circle cx="294" cy="206" r="7" fill="var(--accent-solid)" />
         <circle cx="76" cy="177" r="5" fill="var(--brand-500)" />
 
-        <g className="hero-ticket-float">
+        <g>
           <g transform="rotate(8 180 135)">
             <path
               d="M67 59h226v45c-21 1-21 29 0 30v78H67v-43c21-1 21-29 0-30V59Z"
