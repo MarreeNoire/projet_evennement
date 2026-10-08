@@ -236,7 +236,8 @@ export type ReportTarget = (typeof REPORT_TARGETS)[number];
 /** Onglets du salon événementiel (cf. §13 du cahier). */
 export const SALON_TABS = [
   { slug: "accueil", label: "Accueil" },
-  { slug: "discussion", label: "Discussion" },
+  { slug: "discussion", label: "Chat en direct" },
+  { slug: "fil", label: "Publications" },
   { slug: "participants", label: "Participants" },
   { slug: "photos", label: "Photos" },
   { slug: "programme", label: "Programme" },

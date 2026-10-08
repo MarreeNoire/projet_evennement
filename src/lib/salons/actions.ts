@@ -4,9 +4,10 @@
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ReactionType } from "@/types/database";
-import { STORAGE_BUCKETS } from "@/lib/constants";
 
 const NOT_SIGNED_IN = "Connecte-toi pour participer.";
+const SALON_CHAT_REACTIONS = ["heart", "laugh", "fire", "clap", "wow"] as const;
+type SalonChatReaction = (typeof SALON_CHAT_REACTIONS)[number];
 
 /** Identifiant de l'utilisateur connecté (les politiques RLS exigent author_id / user_id = auth.uid()). */
 async function getUserId(
@@ -16,6 +17,122 @@ async function getUserId(
     data: { user },
   } = await supabase.auth.getUser();
   return user?.id ?? null;
+}
+
+/** Envoie un message dans le chat instantané du salon. */
+export async function sendSalonChatMessage(
+  salonId: string,
+  content: string,
+  replyTo?: string | null,
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const normalized = content.trim();
+  if (!normalized || normalized.length > 4000) {
+    return { success: false, error: "Le message doit contenir entre 1 et 4 000 caractères." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data, error } = await supabase
+    .from("salon_chat_messages")
+    .insert({
+      salon_id: salonId,
+      author_id: userId,
+      content: normalized,
+      reply_to: replyTo || null,
+    })
+    .select("id")
+    .single();
+
+  if (error) return { success: false, error: "Le message n'a pas pu être envoyé. Réessaie." };
+  return { success: true, messageId: data.id };
+}
+
+/** Modifie un message appartenant à l'utilisateur courant. */
+export async function editSalonChatMessage(
+  messageId: string,
+  content: string,
+): Promise<{ success: boolean; error?: string }> {
+  const normalized = content.trim();
+  if (!normalized || normalized.length > 4000) {
+    return { success: false, error: "Le message doit contenir entre 1 et 4 000 caractères." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data, error } = await supabase
+    .from("salon_chat_messages")
+    .update({ content: normalized, edited_at: new Date().toISOString() })
+    .eq("id", messageId)
+    .eq("author_id", userId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) return { success: false, error: "La modification du message a échoué." };
+  if (!data) return { success: false, error: "Ce message ne peut plus être modifié." };
+  return { success: true };
+}
+
+/** Supprime un message appartenant à l'utilisateur courant. */
+export async function deleteSalonChatMessage(
+  messageId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data, error } = await supabase
+    .from("salon_chat_messages")
+    .delete()
+    .eq("id", messageId)
+    .eq("author_id", userId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) return { success: false, error: "La suppression du message a échoué." };
+  if (!data) return { success: false, error: "Ce message ne peut plus être supprimé." };
+  return { success: true };
+}
+
+/** Ajoute ou retire une réaction rapide sur un message du chat. */
+export async function toggleSalonChatReaction(
+  salonId: string,
+  messageId: string,
+  reaction: SalonChatReaction,
+): Promise<{ success: boolean; error?: string }> {
+  if (!SALON_CHAT_REACTIONS.includes(reaction)) {
+    return { success: false, error: "Cette réaction n'est pas disponible." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: existing, error: readError } = await supabase
+    .from("salon_chat_reactions")
+    .select("id")
+    .eq("salon_id", salonId)
+    .eq("message_id", messageId)
+    .eq("user_id", userId)
+    .eq("reaction", reaction)
+    .maybeSingle();
+
+  if (readError) return { success: false, error: "La réaction n'a pas pu être enregistrée." };
+
+  const result = existing
+    ? await supabase.from("salon_chat_reactions").delete().eq("id", existing.id)
+    : await supabase.from("salon_chat_reactions").insert({
+        salon_id: salonId,
+        message_id: messageId,
+        user_id: userId,
+        reaction,
+      });
+
+  if (result.error) return { success: false, error: "La réaction n'a pas pu être enregistrée." };
+  return { success: true };
 }
 
 /**

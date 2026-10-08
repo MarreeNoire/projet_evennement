@@ -353,6 +353,27 @@ export type MessageRow = {
   created_at: string;
 };
 
+export type SalonChatMessageRow = {
+  id: string;
+  salon_id: string;
+  author_id: string | null;
+  reply_to: string | null;
+  content: string;
+  edited_at: string | null;
+  is_hidden: boolean;
+  hidden_by: string | null;
+  created_at: string;
+};
+
+export type SalonChatReactionRow = {
+  id: string;
+  salon_id: string;
+  message_id: string;
+  user_id: string;
+  reaction: "heart" | "laugh" | "fire" | "clap" | "wow";
+  created_at: string;
+};
+
 export type NotificationRow = {
   id: string;
   user_id: string;
@@ -646,6 +667,8 @@ export type Database = {
       conversations: TableDefinition<ConversationRow>;
       conversation_participants: TableDefinition<ConversationParticipantRow>;
       messages: TableDefinition<MessageRow>;
+      salon_chat_messages: TableDefinition<SalonChatMessageRow>;
+      salon_chat_reactions: TableDefinition<SalonChatReactionRow>;
       notifications: TableDefinition<NotificationRow>;
       notification_preferences: TableDefinition<NotificationPreferenceRow>;
       audit_logs: TableDefinition<AuditLogRow>;

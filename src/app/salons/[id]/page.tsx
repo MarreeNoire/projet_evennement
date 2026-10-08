@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CalendarDays, MapPin, Pin, Users } from "lucide-react";
 
 import { SalonPostForm } from "@/components/salons/salon-post-form";
+import { SalonLiveChat } from "@/components/salons/salon-live-chat";
 import { PhaseTag } from "@/components/social/phase-tag";
 import { PostCard } from "@/components/social/post-card";
 import { SocialShell } from "@/components/social/social-shell";
@@ -16,6 +17,7 @@ import {
   getCommentsByPost,
   getEventsByIds,
   getSalonById,
+  getSalonChatMessages,
   getSalonMembers,
   getSalonMedia,
   getSalonPosts,
@@ -66,7 +68,7 @@ export default async function SalonDetailPage({
   const salon = await getSalonById(id);
   if (!salon) notFound();
 
-  const [posts, members, profile, events, photos] = await Promise.all([
+  const [posts, members, profile, events, photos, chatMessages] = await Promise.all([
     getSalonPosts(id),
     getSalonMembers(id, 40),
     getCurrentProfile(),
@@ -74,6 +76,7 @@ export default async function SalonDetailPage({
       ? getEventsByIds([salon.event_id])
       : Promise.resolve(new Map<string, SalonEventInfo>()),
     activeTab === "photos" ? getSalonMedia(id) : Promise.resolve([]),
+    activeTab === "discussion" ? getSalonChatMessages(id) : Promise.resolve([]),
   ]);
 
   const event = salon.event_id ? (events.get(salon.event_id) ?? null) : null;
@@ -165,6 +168,10 @@ export default async function SalonDetailPage({
       <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0">
           {activeTab === "discussion" ? (
+            <SalonLiveChat salonId={id} messages={chatMessages} profile={profile} />
+          ) : null}
+
+          {activeTab === "fil" ? (
             <Discussion
               salonId={id}
               posts={posts}

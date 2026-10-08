@@ -1,13 +1,14 @@
 /** Requetes de lecture pour le salon communautaire. */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { SalonRow, ReactionType } from "@/types/database";
+import type { ReactionType, ProfileRow } from "@/types/database";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import type {
   PostWithAuthor,
   CommentWithAuthor,
   SalonMemberWithProfile,
   SalonWithMemberCount,
+  SalonChatMessageWithAuthor,
 } from "@/lib/salons/types";
 
 /**
@@ -97,6 +98,61 @@ export async function getSalonPosts(
     my_reaction: post.id && reactionMap.has(post.id) ? (reactionMap.get(post.id) ?? null) : null,
     has_reacted: post.id ? reactionMap.has(post.id) : false,
   })) as PostWithAuthor[];
+}
+
+/** Charge les 80 messages les plus récents du chat, enrichis des profils et réactions. */
+export async function getSalonChatMessages(salonId: string): Promise<SalonChatMessageWithAuthor[]> {
+  const supabase = await createSupabaseServerClient();
+  const [messageResult, userResult] = await Promise.all([
+    supabase
+      .from("salon_chat_messages")
+      .select("*")
+      .eq("salon_id", salonId)
+      .eq("is_hidden", false)
+      .order("created_at", { ascending: false })
+      .limit(80),
+    supabase.auth.getUser(),
+  ]);
+
+  if (messageResult.error) {
+    console.error("[getSalonChatMessages]", messageResult.error.message);
+    return [];
+  }
+
+  const messages = (messageResult.data ?? []).reverse();
+  if (!messages.length) return [];
+
+  const authorIds = [
+    ...new Set(messages.flatMap((message) => (message.author_id ? [message.author_id] : []))),
+  ];
+  const messageIds = messages.map((message) => message.id);
+  const [{ data: profiles }, { data: reactions }] = await Promise.all([
+    authorIds.length
+      ? supabase
+          .from("profiles")
+          .select("id, display_name, avatar_url, is_verified")
+          .in("id", authorIds)
+      : Promise.resolve({
+          data: [] as Pick<ProfileRow, "id" | "display_name" | "avatar_url" | "is_verified">[],
+        }),
+    supabase.from("salon_chat_reactions").select("*").in("message_id", messageIds),
+  ]);
+
+  const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+  const reactionList = reactions ?? [];
+  const currentUserId = userResult.data.user?.id;
+
+  return messages.map((message) => {
+    const messageReactions = reactionList.filter((reaction) => reaction.message_id === message.id);
+    return {
+      ...message,
+      author: message.author_id ? (profileMap.get(message.author_id) ?? null) : null,
+      reactions: messageReactions,
+      my_reactions: messageReactions
+        .filter((reaction) => reaction.user_id === currentUserId)
+        .map((reaction) => reaction.reaction),
+    };
+  });
 }
 
 /** Photos visibles du salon, avec une URL temporaire vers le bucket privé. */
