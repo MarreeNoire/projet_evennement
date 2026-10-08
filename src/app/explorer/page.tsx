@@ -83,7 +83,7 @@ export default async function ExplorePage({
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
-      <main id="contenu" className="container-page flex flex-col gap-8 py-10">
+      <main id="contenu" className="explorer-page container-page flex flex-col gap-8 py-10">
         <div className="border-border border-t pt-4">
           <p className="eyebrow">Agenda</p>
           <h1 className="font-display mt-2 text-4xl leading-[1.02] font-semibold md:text-5xl">
@@ -112,8 +112,9 @@ export default async function ExplorePage({
         ) : (
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-fg-muted">
-                Fais défiler horizontalement pour parcourir les {total} événement{total > 1 ? "s" : ""}.
+              <p className="text-fg-muted text-xs">
+                Fais défiler horizontalement pour parcourir les {total} événement
+                {total > 1 ? "s" : ""}.
               </p>
             </div>
             <EventHorizontalList events={events} />

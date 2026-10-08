@@ -50,6 +50,10 @@ function registerServiceWorker() {
 export function PwaRouteRestoration() {
   const pathname = usePathname();
 
+  useEffect(() => {
+    document.body.classList.toggle("pwa-standalone", isStandalonePwa());
+  }, []);
+
   // Enregistrer le service worker une seule fois au montage
   useEffect(() => {
     registerServiceWorker();

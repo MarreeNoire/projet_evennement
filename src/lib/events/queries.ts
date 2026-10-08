@@ -127,7 +127,11 @@ export async function getPublishedEventBySlug(slug: string) {
   // Programme + intervenants.
   const [{ data: detail }, { data: ticketTypes }, { data: sessions }, { data: speakers }] =
     await Promise.all([
-      supabase.from("events").select("description").eq("id", typed.id).maybeSingle(),
+      supabase
+        .from("events")
+        .select("description, cover_url, gallery")
+        .eq("id", typed.id)
+        .maybeSingle(),
       supabase
         .from("ticket_types")
         .select("*")
@@ -144,8 +148,16 @@ export async function getPublishedEventBySlug(slug: string) {
     ]);
 
   return {
-    event: typed,
-    description: (detail as { description: string | null } | null)?.description ?? null,
+    event: {
+      ...typed,
+      cover_url: typed.cover_url ?? detail?.cover_url ?? null,
+      gallery: typed.gallery.length
+        ? typed.gallery
+        : Array.isArray(detail?.gallery)
+          ? detail.gallery
+          : [],
+    },
+    description: detail?.description ?? null,
     ticketTypes: ticketTypes ?? [],
     sessions: sessions ?? [],
     speakers: speakers ?? [],
@@ -313,7 +325,9 @@ export interface AdminEventListItem {
 export async function getRecentEvents(limit = 20): Promise<AdminEventListItem[]> {
   try {
     const sessionClient = await createSupabaseServerClient();
-    const { data: { user } } = await sessionClient.auth.getUser();
+    const {
+      data: { user },
+    } = await sessionClient.auth.getUser();
     if (!user) return [];
     const { data: adminRole } = await sessionClient
       .from("user_roles")

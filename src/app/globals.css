@@ -893,6 +893,79 @@ main h1:not(.home-hero-title) {
   }
 }
 
+/* Compacte les espaces uniquement dans l'application installée. */
+body.pwa-standalone main.container-page {
+  gap: 1.25rem;
+  padding-block: 1.5rem;
+}
+
+body.pwa-standalone footer > .container-page {
+  padding-block: 1.25rem;
+}
+
+body.pwa-standalone footer .grid {
+  gap: 1.25rem 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.pwa-standalone footer .grid > :first-child {
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+}
+
+body.pwa-standalone footer nav h2 {
+  margin-bottom: 0.4rem;
+}
+
+body.pwa-standalone footer nav ul {
+  gap: 0.35rem;
+}
+
+body.pwa-standalone footer > .container-page > div:last-child {
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+}
+
+body.pwa-standalone footer nav a,
+body.pwa-standalone footer > .container-page > div:first-child > p {
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+body.pwa-standalone .explorer-page > div:first-child {
+  padding-top: 0.6rem;
+}
+
+body.pwa-standalone .explorer-page > div:first-child h1 {
+  margin-top: 0.25rem;
+  font-size: 2rem;
+}
+
+body.pwa-standalone .explorer-page form[role="search"] {
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+body.pwa-standalone .explorer-page form[role="search"] > div:first-child {
+  gap: 0.65rem;
+}
+
+body.pwa-standalone .explorer-page form[role="search"] label {
+  margin-bottom: 0.25rem;
+}
+
+@media (width >= 64rem) {
+  body.pwa-standalone footer .grid {
+    grid-template-columns: 1.35fr repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  body.pwa-standalone footer .grid > :first-child {
+    grid-column: auto;
+  }
+}
+
 /* Petit intitulé de rubrique : capitales espacées, façon programme imprimé */
 @utility eyebrow {
   font-size: 0.6875rem;

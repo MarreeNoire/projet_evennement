@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { LoginForm } from "@/components/auth/login-form";
+import { BackButton } from "@/components/auth/back-button";
 import { Spinner } from "@/components/ui/skeleton";
 import { APP_NAME } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/supabase/server";
@@ -18,10 +19,11 @@ export default async function LoginPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-12">
-      <div className="border-t border-border pt-4">
+      <BackButton />
+      <div className="border-border border-t pt-4">
         <p className="eyebrow">Connexion</p>
-        <h1 className="mt-2 font-display text-4xl leading-[1.02] font-semibold">Bon retour.</h1>
-        <p className="mt-2 text-sm text-fg-muted">
+        <h1 className="font-display mt-2 text-4xl leading-[1.02] font-semibold">Bon retour.</h1>
+        <p className="text-fg-muted mt-2 text-sm">
           Connecte-toi pour retrouver tes billets et tes salons {APP_NAME}.
         </p>
       </div>
@@ -29,9 +31,9 @@ export default async function LoginPage() {
       <Suspense fallback={<Spinner label="Chargement du formulaire…" />}>
         <LoginForm />
       </Suspense>
-      <p className="text-center text-sm text-fg-muted">
+      <p className="text-fg-muted text-center text-sm">
         Pas encore de compte ?{" "}
-        <Link href="/inscription" className="font-medium text-primary hover:underline">
+        <Link href="/inscription" className="text-primary font-medium hover:underline">
           Créer un compte
         </Link>
       </p>
