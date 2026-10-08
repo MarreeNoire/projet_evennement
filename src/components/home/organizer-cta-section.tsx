@@ -35,7 +35,7 @@ export function OrganizerCtaSection() {
       className="border-border bg-bg-subtle border-b py-8 md:py-11"
     >
       <div className="container-page grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-12">
-        <div className="max-w-2xl">
+        <div className="home-scroll-reveal max-w-2xl">
           <h2
             id="organizer-section-title"
             className="font-display max-w-xl text-xl leading-tight font-bold md:text-2xl lg:text-3xl"

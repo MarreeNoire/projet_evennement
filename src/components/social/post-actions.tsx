@@ -78,7 +78,7 @@ export function PostActions({
             aria-pressed={reacted}
             aria-busy={pending}
             className={cn(
-              "group inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95 disabled:cursor-progress disabled:opacity-70",
+              "group inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-[background-color,color,transform] duration-150 active:scale-95 disabled:cursor-progress disabled:opacity-70 motion-reduce:transform-none motion-reduce:transition-none",
               reacted
                 ? "bg-danger-subtle text-danger"
                 : "text-fg-muted hover:bg-bg-muted hover:text-fg",
@@ -89,7 +89,8 @@ export function PostActions({
             ) : (
               <Heart
                 className={cn(
-                  "size-4 transition-transform duration-200 group-hover:scale-110",
+                  "size-4 transition-transform duration-200 motion-reduce:transition-none",
+                  reacted && !pending && "animate-like-confirm",
                   reacted && "scale-110 fill-current",
                 )}
                 aria-hidden="true"
@@ -102,7 +103,7 @@ export function PostActions({
             type="button"
             onClick={() => setReplyOpen((open) => !open)}
             aria-expanded={replyOpen}
-            className="group text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95"
+            className="group text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-[background-color,color,transform] duration-150 active:scale-95 motion-reduce:transform-none motion-reduce:transition-none"
           >
             <MessageCircle
               className="size-4 transition-transform duration-200 group-hover:scale-110"
@@ -132,7 +133,7 @@ export function PostActions({
             disabled={pending || reply.trim().length === 0}
             aria-label={pending ? "Envoi de la réponse" : "Envoyer la réponse"}
             aria-busy={pending}
-            className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex h-11 min-w-11 shrink-0 items-center justify-center rounded-sm px-4 text-xs font-semibold transition-colors disabled:cursor-progress disabled:opacity-60"
+            className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex h-11 min-w-11 shrink-0 items-center justify-center rounded-sm px-4 text-xs font-semibold transition-[background-color,transform] duration-150 active:scale-95 disabled:cursor-progress disabled:opacity-60 motion-reduce:transform-none motion-reduce:transition-none"
           >
             {pending ? (
               <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />

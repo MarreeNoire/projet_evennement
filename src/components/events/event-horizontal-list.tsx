@@ -68,7 +68,7 @@ export function EventHorizontalList({ events }: EventHorizontalListProps) {
           <div
             key={event.id}
             className="event-card-reveal w-[78vw] min-w-[16rem] shrink-0 snap-start sm:w-[20rem] md:w-[21rem]"
-            style={{ animationDelay: `${Math.min(index * 65, 390)}ms` }}
+            style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
           >
             <EventCard event={event} />
           </div>

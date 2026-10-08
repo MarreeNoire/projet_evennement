@@ -1,5 +1,6 @@
 import { Avatar } from "@/components/ui/avatar";
 import { ImageCarousel } from "@/components/ui/image-carousel";
+import { EventCountdown } from "@/components/events/event-countdown";
 import { ViewTransition } from "react";
 import { getCategoryLabel } from "@/lib/constants";
 import { formatDateRange } from "@/lib/utils";
@@ -69,7 +70,10 @@ export function EventHero({ event }: { event: PublishedEventView }) {
         <dl className="border-border flex flex-col self-start border-t text-sm">
           <div className="border-border flex flex-col gap-1 border-b py-4">
             <dt className="eyebrow">Date</dt>
-            <dd className="font-medium">{formatDateRange(event.start_at, event.end_at)}</dd>
+            <dd className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium">
+              <span>{formatDateRange(event.start_at, event.end_at)}</span>
+              <EventCountdown startAt={event.start_at} />
+            </dd>
           </div>
           <div className="border-border flex flex-col gap-1 border-b py-4">
             <dt className="eyebrow">Lieu</dt>

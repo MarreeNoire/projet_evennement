@@ -1,16 +1,12 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  CalendarDays,
-  MessageCircle,
-  Search,
-  Sparkles,
-  TicketCheck,
-} from "lucide-react";
+import { ArrowRight, Search, Sparkles } from "lucide-react";
 
 import { APP_NAME, CATEGORIES, ROUTES } from "@/lib/constants";
 import { ButtonLink } from "@/components/ui/button";
-import { HomeHeroMotionScope } from "@/components/home/home-hero-motion-scope";
+import {
+  HomeHeroMotionScope,
+  HomeHeroMotionToggle,
+} from "@/components/home/home-hero-motion-scope";
 
 export function HomeHero() {
   return (
@@ -25,23 +21,26 @@ export function HomeHero() {
             Organisateur ? Crée ta billetterie en ligne
             <ArrowRight className="size-3" aria-hidden="true" />
           </Link>
-          <h1
-            aria-label="Le fil des événements et des rencontres"
-            className="home-hero-title font-display max-w-3xl text-3xl leading-[1.08] font-bold md:text-4xl"
-          >
-            <span aria-hidden="true" className="block">
-              Le fil des
-            </span>
-            <span aria-hidden="true" className="home-hero-word-slot">
-              <span className="home-hero-word-rail">
-                <span>événements</span>
-                <span>rencontres</span>
-                <span>festivals</span>
-                <span>concerts</span>
-                <span>événements</span>
+          <div className="home-hero-heading flex max-w-3xl items-end justify-start gap-2">
+            <h1
+              aria-label="Le fil des événements et des rencontres"
+              className="home-hero-title font-display w-fit min-w-0 text-3xl leading-[1.08] font-bold md:text-4xl"
+            >
+              <span aria-hidden="true" className="block">
+                Le fil des
               </span>
-            </span>
-          </h1>
+              <span aria-hidden="true" className="home-hero-word-slot">
+                <span className="home-hero-word-rail">
+                  <span>événements</span>
+                  <span>rencontres</span>
+                  <span>festivals</span>
+                  <span>concerts</span>
+                  <span>événements</span>
+                </span>
+              </span>
+            </h1>
+            <HomeHeroMotionToggle />
+          </div>
           <p className="text-fg-muted max-w-2xl text-sm leading-relaxed md:text-base">
             Suis les échanges dans les salons et découvre les événements publiés sur {APP_NAME}.
           </p>
@@ -105,49 +104,8 @@ export function HomeHero() {
 function TicketArtwork() {
   return (
     <div className="event-motion-scene" aria-hidden="true">
-      <div className="event-motion-orbit" />
-      <div className="event-motion-orbit event-motion-orbit--inner" />
-      <div className="event-motion-spark event-motion-spark--one" />
-      <div className="event-motion-spark event-motion-spark--two" />
-
-      <div className="event-motion-card event-motion-card--calendar">
-        <CalendarDays aria-hidden="true" />
-        <span>Événements</span>
-      </div>
-      <div className="event-motion-card event-motion-card--ticket">
-        <TicketCheck aria-hidden="true" />
-        <span>Billetterie</span>
-      </div>
-      <div className="event-motion-card event-motion-card--salon">
-        <MessageCircle aria-hidden="true" />
-        <span>Salon communautaire</span>
-      </div>
-
       <svg viewBox="0 0 360 270" className="event-motion-ticket" fill="none">
         <circle cx="181" cy="133" r="116" fill="var(--primary-subtle)" />
-        <circle
-          cx="181"
-          cy="133"
-          r="92"
-          stroke="var(--brand-300)"
-          strokeWidth="1.5"
-          strokeDasharray="3 8"
-        />
-        <circle className="hero-ticket-orbit" cx="181" cy="17" r="4.5" fill="var(--accent-solid)" />
-        <circle
-          className="hero-ticket-orbit hero-ticket-orbit-slow"
-          cx="181"
-          cy="249"
-          r="3"
-          fill="var(--brand-500)"
-        />
-        <path
-          d="M65 219 90 194M266 64l25-25M72 67 51 46"
-          stroke="var(--brand-400)"
-          strokeWidth="3"
-        />
-        <circle cx="294" cy="206" r="7" fill="var(--accent-solid)" />
-        <circle cx="76" cy="177" r="5" fill="var(--brand-500)" />
 
         <g>
           <g transform="rotate(8 180 135)">

@@ -1,10 +1,9 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 
 import { EventHorizontalList } from "@/components/events/event-horizontal-list";
 import { ExploreFiltersBar } from "@/components/events/explore-filters";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { EventRouteTransition } from "@/components/layout/event-route-transition";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
 import { getCategoryLabel } from "@/lib/constants";
@@ -85,7 +84,6 @@ export default async function ExplorePage({
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main id="contenu" className="explorer-page container-page flex flex-col gap-8 py-10">
-        <EventRouteTransition>
           <div className="border-border border-t pt-4">
             <p className="eyebrow">Agenda</p>
             <h1 className="font-display mt-2 text-4xl leading-[1.02] font-semibold md:text-5xl">
@@ -142,7 +140,6 @@ export default async function ExplorePage({
               ) : null}
             </div>
           )}
-        </EventRouteTransition>
       </main>
       <SiteFooter />
     </div>

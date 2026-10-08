@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -6,7 +6,6 @@ import { EventHero } from "@/components/events/event-hero";
 import { EventProgram, EventSpeakers } from "@/components/events/event-program";
 import { SalonTeaser, TicketPicker } from "@/components/events/event-ticketing";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { EventRouteTransition } from "@/components/layout/event-route-transition";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getPublishedEventBySlug } from "@/lib/events/queries";
 
@@ -37,11 +36,9 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main id="contenu" className="container-page flex flex-col gap-8 py-8">
-        <EventRouteTransition>
           <nav aria-label="Fil d'Ariane" className="text-fg-muted min-w-0 text-sm">
             <Link
               href="/explorer"
-              transitionTypes={["event-back"]}
               className="hover:text-fg hover:underline"
             >
               Explorer
@@ -75,7 +72,6 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
               <TicketPicker ticketTypes={ticketTypes} slug={event.slug} />
             </aside>
           </div>
-        </EventRouteTransition>
       </main>
       <SiteFooter />
     </div>

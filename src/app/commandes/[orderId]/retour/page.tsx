@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { PaymentSuccessMark } from "@/components/checkout/payment-success-mark";
 import { Alert } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
 import { getCurrentUser, createSupabaseServerClient } from "@/lib/supabase/server";
@@ -79,6 +80,7 @@ export default async function PaymentReturnPage({
       <main id="contenu" className="container-page flex max-w-xl flex-col gap-6 py-12 text-center">
         {status === "paid" ? (
           <>
+            <PaymentSuccessMark />
             <p className="eyebrow">Commande {order.reference}</p>
             <h1 className="font-display text-4xl leading-[1.02] font-semibold">Paiement confirmé.</h1>
             <Alert tone="success" title={`Commande ${order.reference} payée`}>
