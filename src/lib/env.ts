@@ -136,7 +136,7 @@ export const env = {
       apiKey: raw.GENIUSPAY_API_KEY ?? "",
       apiSecret: raw.GENIUSPAY_API_SECRET ?? "",
       webhookSecret: raw.GENIUSPAY_WEBHOOK_SECRET ?? "",
-      baseUrl: (raw.GENIUSPAY_BASE_URL ?? "https://geniuspay.ci/api/v1/merchant").replace(
+      baseUrl: (raw.GENIUSPAY_BASE_URL ?? "https://pay.genius.ci/api/v1/merchant").replace(
         /\/+$/,
         "",
       ),
