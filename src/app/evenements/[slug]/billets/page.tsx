@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { Alert } from "@/components/ui/states";
 import { getCurrentUser, createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPublishedEventBySlug } from "@/lib/events/queries";
+import { env } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Commander des billets" };
 
@@ -44,7 +45,7 @@ export default async function CheckoutPage({
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main id="contenu" className="container-page flex flex-col gap-6 py-8">
-        <nav aria-label="Fil d'Ariane" className="text-sm text-fg-muted">
+        <nav aria-label="Fil d'Ariane" className="text-fg-muted text-sm">
           <Link href={`/evenements/${slug}`} className="hover:text-fg hover:underline">
             {data.event.title}
           </Link>
@@ -56,7 +57,7 @@ export default async function CheckoutPage({
 
         <div>
           <h1 className="font-display text-2xl font-bold md:text-3xl">Commander des billets</h1>
-          <p className="mt-1 text-sm text-fg-muted">
+          <p className="text-fg-muted mt-1 text-sm">
             {data.event.title}. Consulte les moyens de paiement proposés avant de confirmer.
           </p>
         </div>
@@ -70,6 +71,7 @@ export default async function CheckoutPage({
             eventId={data.event.id}
             ticketTypes={ticketTypes}
             preselectedId={preselected}
+            paymentProvider={env.payment.provider}
           />
         )}
       </main>

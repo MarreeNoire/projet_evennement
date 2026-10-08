@@ -60,12 +60,13 @@ export class GeniusPayProvider implements PaymentProvider {
     }
 
     // Nettoyer la description : supprimer les caractères Unicode spéciaux (ex: ·) qui font rejeter la requête par GeniusPay.
-    const cleanDescription = input.description
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-zA-Z0-9\s-_.,]/g, " ")
-      .trim()
-      .slice(0, 200) || "Paiement en ligne";
+    const cleanDescription =
+      input.description
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9\s-_.,]/g, " ")
+        .trim()
+        .slice(0, 200) || "Paiement en ligne";
 
     // Sécuriser les informations client (GeniusPay exige au minimum un nom)
     const customerName = (input.customer.name?.trim() || "Client").slice(0, 100);
@@ -259,11 +260,20 @@ export class GeniusPayProvider implements PaymentProvider {
       );
     }
 
+    const contentType = response.headers.get("content-type") ?? "type de contenu inconnu";
     let body: T;
     try {
-      body = (await response.json()) as T;
+      body = JSON.parse(await response.text()) as T;
     } catch {
-      throw new PaymentError("INVALID_RESPONSE", "Réponse illisible du service GeniusPay.");
+      console.error("[GeniusPay] Réponse non JSON", {
+        status: response.status,
+        contentType,
+      });
+      throw new PaymentError(
+        "INVALID_RESPONSE",
+        `GeniusPay a renvoyé une réponse inattendue (HTTP ${response.status}). Vérifie la configuration du service ou réessaie plus tard.`,
+        `${response.status} ${contentType}`,
+      );
     }
 
     if (!response.ok) {

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OrderPricing } from "@/lib/orders/pricing";
 import { formatPrice } from "@/lib/utils";
 import { Alert } from "@/components/ui/states";
+import type { PaymentProviderName } from "@/lib/payments/types";
 
 /* Récapitulatif de commande (colonne latérale du tunnel d'achat). */
 
@@ -12,10 +13,12 @@ export function OrderSummary({
   pricing,
   pending,
   error,
+  paymentProvider,
 }: {
   pricing: OrderPricing;
   pending: boolean;
   error: string | null;
+  paymentProvider: PaymentProviderName;
 }) {
   return (
     <Card>
@@ -24,7 +27,7 @@ export function OrderSummary({
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         {pricing.lines.length === 0 ? (
-          <p className="text-sm text-fg-muted">Sélectionne au moins un billet.</p>
+          <p className="text-fg-muted text-sm">Sélectionne au moins un billet.</p>
         ) : (
           <ul className="flex flex-col gap-2 text-sm">
             {pricing.lines.map((line) => (
@@ -37,7 +40,7 @@ export function OrderSummary({
             ))}
           </ul>
         )}
-        <dl className="flex flex-col gap-1.5 border-t border-border pt-3 text-sm">
+        <dl className="border-border flex flex-col gap-1.5 border-t pt-3 text-sm">
           <div className="flex justify-between">
             <dt className="text-fg-muted">Sous-total</dt>
             <dd className="tabular-nums">{formatPrice(pricing.subtotal)}</dd>
@@ -49,7 +52,9 @@ export function OrderSummary({
         </dl>
         {error ? (
           <div role="alert" aria-live="assertive">
-            <Alert tone="danger" title="Le paiement n’a pas démarré">{error}</Alert>
+            <Alert tone="danger" title="Le paiement n’a pas démarré">
+              {error}
+            </Alert>
           </div>
         ) : null}
         <Button
@@ -61,8 +66,12 @@ export function OrderSummary({
         >
           {pricing.total === 0 ? "Obtenir mes billets" : `Payer ${formatPrice(pricing.total)}`}
         </Button>
-        <p className="text-xs text-fg-subtle">
-          Wave · Orange Money · MTN MoMo · Moov · Visa · Mastercard.
+        <p className="text-fg-subtle text-xs">
+          {paymentProvider === "geniuspay"
+            ? "Tu choisiras ton moyen de paiement sur la page sécurisée GeniusPay."
+            : paymentProvider === "cinetpay"
+              ? "Tu choisiras ton moyen de paiement sur la page sécurisée CinetPay."
+              : "Mode de simulation : aucun montant réel ne sera débité."}
         </p>
       </CardContent>
     </Card>
