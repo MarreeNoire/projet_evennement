@@ -265,14 +265,23 @@ export class GeniusPayProvider implements PaymentProvider {
     try {
       body = JSON.parse(await response.text()) as T;
     } catch {
+      const allow = response.headers.get("allow");
+      const requestUrl = new URL(`${this.baseUrl}${path}`);
+      const safeEndpoint = `${requestUrl.origin}${requestUrl.pathname}`;
       console.error("[GeniusPay] Réponse non JSON", {
         status: response.status,
         contentType,
+        endpoint: safeEndpoint,
+        allow,
       });
+      const message =
+        response.status === 405
+          ? "GeniusPay refuse la méthode HTTP utilisée sur l’URL configurée. Vérifie GENIUSPAY_BASE_URL et contacte GeniusPay si l’URL correspond bien à leur API."
+          : `GeniusPay a renvoyé une réponse inattendue (HTTP ${response.status}). Vérifie la configuration du service ou réessaie plus tard.`;
       throw new PaymentError(
         "INVALID_RESPONSE",
-        `GeniusPay a renvoyé une réponse inattendue (HTTP ${response.status}). Vérifie la configuration du service ou réessaie plus tard.`,
-        `${response.status} ${contentType}`,
+        message,
+        `${response.status} ${contentType}${allow ? `; méthodes autorisées : ${allow}` : ""}`,
       );
     }
 
