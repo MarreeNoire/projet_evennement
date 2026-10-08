@@ -62,8 +62,14 @@ export function OrganizerCtaSection() {
 
         <ul className="grid grid-cols-2 gap-x-4 sm:gap-x-8">
           {highlights.map(({ icon: Icon, title, description }) => (
-            <li key={title} className="border-border flex gap-2 border-t py-3 sm:gap-3 sm:py-3.5">
-              <Icon className="text-primary mt-0.5 size-4 shrink-0 sm:size-[18px]" aria-hidden="true" />
+            <li
+              key={title}
+              className="organizer-highlight border-border flex gap-2 border-t py-3 sm:gap-3 sm:py-3.5"
+            >
+              <Icon
+                className="organizer-highlight-icon text-primary mt-0.5 size-4 shrink-0 sm:size-[18px]"
+                aria-hidden="true"
+              />
               <div className="min-w-0">
                 <h3 className="text-fg text-xs leading-snug font-semibold sm:text-sm">{title}</h3>
                 <p className="text-fg-muted mt-1 text-xs leading-snug">{description}</p>
