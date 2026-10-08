@@ -93,7 +93,7 @@ export function ImageCarousel({
         role="region"
         aria-label={label}
         tabIndex={0}
-        className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:scroll-auto"
+        className="no-scrollbar flex h-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:scroll-auto"
       >
         {images.map((image, index) => (
           <div

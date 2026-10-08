@@ -850,7 +850,83 @@ main h1:not(.home-hero-title) {
   animation: event-card-arrive 560ms var(--ease-out-soft) both;
 }
 
+::view-transition-group(.morph) {
+  animation-duration: 380ms;
+}
+
+::view-transition-old(.event-route-forward) {
+  animation: 180ms ease-in both event-page-leave-left;
+}
+
+::view-transition-new(.event-route-forward) {
+  animation: 340ms var(--ease-out-soft) both event-page-enter-right;
+}
+
+::view-transition-old(.event-route-back) {
+  animation: 180ms ease-in both event-page-leave-right;
+}
+
+::view-transition-new(.event-route-back) {
+  animation: 340ms var(--ease-out-soft) both event-page-enter-left;
+}
+
+@keyframes event-page-leave-left {
+  to {
+    opacity: 0;
+    translate: -1rem 0;
+  }
+}
+
+@keyframes event-page-enter-right {
+  from {
+    opacity: 0;
+    translate: 1rem 0;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes event-page-leave-right {
+  to {
+    opacity: 0;
+    translate: 1rem 0;
+  }
+}
+
+@keyframes event-page-enter-left {
+  from {
+    opacity: 0;
+    translate: -1rem 0;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+::view-transition-image-pair(.morph) {
+  animation-name: event-cover-morph;
+}
+
+@keyframes event-cover-morph {
+  30% {
+    filter: blur(1.5px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.event-route-forward),
+  ::view-transition-new(.event-route-forward),
+  ::view-transition-old(.event-route-back),
+  ::view-transition-new(.event-route-back),
+  ::view-transition-image-pair(.morph) {
+    animation: none !important;
+  }
+
   main h1:not(.home-hero-title) {
     animation: none;
   }

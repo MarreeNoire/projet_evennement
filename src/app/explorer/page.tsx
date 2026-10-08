@@ -4,6 +4,7 @@ import { EventHorizontalList } from "@/components/events/event-horizontal-list";
 import { ExploreFiltersBar } from "@/components/events/explore-filters";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { EventRouteTransition } from "@/components/layout/event-route-transition";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
 import { getCategoryLabel } from "@/lib/constants";
@@ -84,59 +85,64 @@ export default async function ExplorePage({
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main id="contenu" className="explorer-page container-page flex flex-col gap-8 py-10">
-        <div className="border-border border-t pt-4">
-          <p className="eyebrow">Agenda</p>
-          <h1 className="font-display mt-2 text-4xl leading-[1.02] font-semibold md:text-5xl">
-            Explorer
-          </h1>
-          <p className="text-fg-muted mt-2 text-sm">
-            {filters.category
-              ? `Catégorie : ${getCategoryLabel(filters.category)}`
-              : "Tous les événements à venir."}
-          </p>
-        </div>
-
-        <ExploreFiltersBar cities={cities} total={total} />
-
-        {loadError ? (
-          <EmptyState
-            title="Recherche momentanément indisponible"
-            description="Réessaie dans un instant."
-          />
-        ) : events.length === 0 ? (
-          <EmptyState
-            title="Aucun événement trouvé"
-            description="Essaie d'autres mots-clés ou réinitialise les filtres."
-            action={<ButtonLink href="/explorer">Voir tous les événements</ButtonLink>}
-          />
-        ) : (
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <p className="text-fg-muted text-xs">
-                Fais défiler horizontalement pour parcourir les {total} événement
-                {total > 1 ? "s" : ""}.
-              </p>
-            </div>
-            <EventHorizontalList events={events} />
-            {totalPages > 1 ? (
-              <nav aria-label="Pagination" className="flex items-center justify-center gap-2 pt-2">
-                {page > 1 ? (
-                  <ButtonLink href={pageHref(page - 1)} variant="secondary" size="sm">
-                    ← Page précédente
-                  </ButtonLink>
-                ) : null}
-                <span className="text-fg-muted text-sm" role="status">
-                  Page {page} sur {totalPages}
-                </span>
-                {page < totalPages ? (
-                  <ButtonLink href={pageHref(page + 1)} variant="secondary" size="sm">
-                    Page suivante →
-                  </ButtonLink>
-                ) : null}
-              </nav>
-            ) : null}
+        <EventRouteTransition>
+          <div className="border-border border-t pt-4">
+            <p className="eyebrow">Agenda</p>
+            <h1 className="font-display mt-2 text-4xl leading-[1.02] font-semibold md:text-5xl">
+              Explorer
+            </h1>
+            <p className="text-fg-muted mt-2 text-sm">
+              {filters.category
+                ? `Catégorie : ${getCategoryLabel(filters.category)}`
+                : "Tous les événements à venir."}
+            </p>
           </div>
-        )}
+
+          <ExploreFiltersBar cities={cities} total={total} />
+
+          {loadError ? (
+            <EmptyState
+              title="Recherche momentanément indisponible"
+              description="Réessaie dans un instant."
+            />
+          ) : events.length === 0 ? (
+            <EmptyState
+              title="Aucun événement trouvé"
+              description="Essaie d'autres mots-clés ou réinitialise les filtres."
+              action={<ButtonLink href="/explorer">Voir tous les événements</ButtonLink>}
+            />
+          ) : (
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between">
+                <p className="text-fg-muted text-xs">
+                  Fais défiler horizontalement pour parcourir les {total} événement
+                  {total > 1 ? "s" : ""}.
+                </p>
+              </div>
+              <EventHorizontalList events={events} />
+              {totalPages > 1 ? (
+                <nav
+                  aria-label="Pagination"
+                  className="flex items-center justify-center gap-2 pt-2"
+                >
+                  {page > 1 ? (
+                    <ButtonLink href={pageHref(page - 1)} variant="secondary" size="sm">
+                      ← Page précédente
+                    </ButtonLink>
+                  ) : null}
+                  <span className="text-fg-muted text-sm" role="status">
+                    Page {page} sur {totalPages}
+                  </span>
+                  {page < totalPages ? (
+                    <ButtonLink href={pageHref(page + 1)} variant="secondary" size="sm">
+                      Page suivante →
+                    </ButtonLink>
+                  ) : null}
+                </nav>
+              ) : null}
+            </div>
+          )}
+        </EventRouteTransition>
       </main>
       <SiteFooter />
     </div>

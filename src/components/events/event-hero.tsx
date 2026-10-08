@@ -1,5 +1,6 @@
 import { Avatar } from "@/components/ui/avatar";
 import { ImageCarousel } from "@/components/ui/image-carousel";
+import { ViewTransition } from "react";
 import { getCategoryLabel } from "@/lib/constants";
 import { formatDateRange } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
@@ -17,27 +18,29 @@ import { priceLabel } from "./event-card";
 
 export function EventHero({ event }: { event: PublishedEventView }) {
   const gallery = Array.isArray(event.gallery) ? event.gallery : [];
-  const images = [...new Set([event.cover_url, ...gallery].filter((url): url is string => Boolean(url)))].map(
-    (src, index) => ({
-      id: `${event.id}-image-${index}`,
-      src,
-      alt: `${event.title}, photo ${index + 1}`,
-    }),
-  );
+  const images = [
+    ...new Set([event.cover_url, ...gallery].filter((url): url is string => Boolean(url))),
+  ].map((src, index) => ({
+    id: `${event.id}-image-${index}`,
+    src,
+    alt: `${event.title}, photo ${index + 1}`,
+  }));
 
   return (
     <section aria-labelledby="titre-evenement" className="flex flex-col gap-8">
       <div className="bg-bg-muted relative aspect-[4/3] overflow-hidden sm:aspect-21/9">
         {images.length > 0 ? (
-          <ImageCarousel
-            images={images}
-            label={`Photos de ${event.title}`}
-            slideClassName="h-full w-full basis-full"
-            sizes="100vw"
-            quality={72}
-            preloadFirstImage
-            className="size-full"
-          />
+          <ViewTransition name={`event-cover-${event.id}`} share="morph" default="none">
+            <ImageCarousel
+              images={images}
+              label={`Photos de ${event.title}`}
+              slideClassName="h-full w-full basis-full"
+              sizes="100vw"
+              quality={72}
+              preloadFirstImage
+              className="size-full"
+            />
+          </ViewTransition>
         ) : (
           <div className="text-fg-subtle flex size-full items-center justify-center text-sm">
             Aucune image

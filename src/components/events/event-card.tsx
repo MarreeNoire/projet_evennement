@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { BadgeCheck, MapPin } from "lucide-react";
 
 import { AccessLevelBadge } from "@/components/ui/badge";
@@ -50,20 +51,23 @@ export function EventCard({ event }: { event: PublishedEventView }) {
   return (
     <Link
       href={`/evenements/${event.slug}`}
+      transitionTypes={["event-forward"]}
       className="group block h-full focus-visible:outline-2 focus-visible:outline-offset-2"
       aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
     >
-      <article className="border-border-strong/70 bg-surface group-hover:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-[transform,border-color] duration-300 ease-[var(--ease-out-soft)] group-hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none">
+      <article className="border-border-strong/70 bg-surface group-hover:border-primary group-focus-visible:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-[transform,border-color] duration-300 ease-[var(--ease-out-soft)] group-hover:-translate-y-1 group-focus-visible:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none">
         <div className="border-border bg-bg-muted relative aspect-[16/8] overflow-hidden border-b">
           {imageUrl ? (
-            <PublicStorageImage
-              src={imageUrl}
-              alt=""
-              className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-[1.05] motion-reduce:transform-none motion-reduce:transition-none"
-              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              fill
-              quality={68}
-            />
+            <ViewTransition name={`event-cover-${event.id}`} share="morph" default="none">
+              <PublicStorageImage
+                src={imageUrl}
+                alt=""
+                className="size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover:scale-[1.05] group-focus-visible:scale-[1.05] motion-reduce:transform-none motion-reduce:transition-none"
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                fill
+                quality={68}
+              />
+            </ViewTransition>
           ) : (
             <div className="text-fg-subtle flex size-full items-center justify-center text-sm">
               Aucune image

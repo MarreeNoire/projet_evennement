@@ -63,13 +63,19 @@ export function BottomNav({ user }: { user: HeaderUser | null }) {
                 href={item.href}
                 aria-current={item.active ? "page" : undefined}
                 className={cn(
-                  "-mt-px flex h-14 flex-col items-center justify-center gap-1 border-t-2",
+                  "-mt-px flex h-14 flex-col items-center justify-center gap-1 border-t-2 transition-colors duration-200",
                   item.active
                     ? "border-primary text-primary font-semibold"
                     : "text-fg-muted hover:text-fg border-transparent",
                 )}
               >
-                <Icon className="size-5" aria-hidden="true" />
+                <Icon
+                  className={cn(
+                    "size-5 transition-transform duration-200 motion-reduce:transform-none motion-reduce:transition-none",
+                    item.active && "-translate-y-0.5 scale-110",
+                  )}
+                  aria-hidden="true"
+                />
                 <span className="text-2xs leading-none tracking-tight">{item.label}</span>
               </Link>
             </li>
