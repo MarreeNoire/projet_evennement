@@ -19,9 +19,11 @@ export interface CreateOrderResult {
   currency: string;
   /** `true` si billets déjà générés (commande gratuite). */
   confirmed: boolean;
+  reused?: boolean;
+  retryWithNewAttempt?: boolean;
 }
 
-export async function createOrder(input: CheckoutInput): Promise<CreateOrderResult> {
+export async function createOrder(input: CheckoutInput, idempotencyKey: string): Promise<CreateOrderResult> {
   const parsed = checkoutSchema.safeParse(input);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Commande invalide.");
@@ -37,6 +39,58 @@ export async function createOrder(input: CheckoutInput): Promise<CreateOrderResu
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Connecte-toi pour commander.");
+  const { data: maintenanceSetting } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "platform.maintenance_mode")
+    .maybeSingle();
+  if (maintenanceSetting?.value === true) {
+    throw new Error("Les commandes sont momentanément suspendues pendant une maintenance.");
+  }
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey)) {
+    throw new Error("Session de paiement invalide. Actualise la page puis réessaie.");
+  }
+
+  // Une même intention de paiement retrouve toujours la même commande, même
+  // si le navigateur renvoie la requête après une coupure réseau.
+  const { data: previousOrder } = await supabase
+    .from("orders")
+    .select("id, reference, total, currency, status")
+    .eq("user_id", user.id)
+    .eq("checkout_key", idempotencyKey)
+    .maybeSingle();
+  if (previousOrder) {
+    if (previousOrder.status === "paid") {
+      return {
+        orderId: previousOrder.id,
+        reference: previousOrder.reference,
+        total: previousOrder.total,
+        currency: previousOrder.currency,
+        confirmed: true,
+        reused: true,
+      };
+    }
+    if (previousOrder.status !== "pending") {
+      // Le client peut repartir avec une nouvelle clé après l'échec confirmé.
+      return {
+        orderId: previousOrder.id,
+        reference: previousOrder.reference,
+        total: previousOrder.total,
+        currency: previousOrder.currency,
+        confirmed: false,
+        retryWithNewAttempt: true,
+      };
+    } else {
+      return {
+        orderId: previousOrder.id,
+        reference: previousOrder.reference,
+        total: previousOrder.total,
+        currency: previousOrder.currency,
+        confirmed: false,
+        reused: true,
+      };
+    }
+  }
 
   // Événement publié + organisation (montants jamais issus du client).
   const { data: event } = await supabase
@@ -134,6 +188,7 @@ export async function createOrder(input: CheckoutInput): Promise<CreateOrderResu
     .from("orders")
     .insert({
       reference,
+      checkout_key: idempotencyKey,
       user_id: user.id,
       event_id: values.eventId,
       organization_id: event.organization_id,
@@ -154,6 +209,24 @@ export async function createOrder(input: CheckoutInput): Promise<CreateOrderResu
     .single();
 
   if (error || !order) {
+    // Une requête concurrente peut avoir gagné l'index unique. Réutilise sa
+    // commande au lieu d'en créer une autre au prochain envoi.
+    const { data: concurrentOrder } = await supabase
+      .from("orders")
+      .select("id, reference, total, currency, status")
+      .eq("user_id", user.id)
+      .eq("checkout_key", idempotencyKey)
+      .maybeSingle();
+    if (concurrentOrder?.status === "pending" || concurrentOrder?.status === "paid") {
+      return {
+        orderId: concurrentOrder.id,
+        reference: concurrentOrder.reference,
+        total: concurrentOrder.total,
+        currency: concurrentOrder.currency,
+        confirmed: concurrentOrder.status === "paid",
+        reused: true,
+      };
+    }
     throw new Error("Création de la commande impossible. Réessaie.");
   }
 

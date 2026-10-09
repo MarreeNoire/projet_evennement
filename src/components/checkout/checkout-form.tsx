@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,7 @@ export function CheckoutForm({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const checkoutAttempt = useRef<{ fingerprint: string; key: string } | null>(null);
   const initialTicket =
     ticketTypes.find(
       (ticket) =>
@@ -98,12 +99,40 @@ export function CheckoutForm({
         return;
       }
       try {
-        const result = await startCheckout({ ...values, eventId, items });
+        const fingerprint = JSON.stringify({ ...values, eventId, items });
+        if (!checkoutAttempt.current) {
+          try {
+            const saved = window.sessionStorage.getItem(`rassemble_checkout_${eventId}`);
+            if (saved) checkoutAttempt.current = JSON.parse(saved) as { fingerprint: string; key: string };
+          } catch {
+            // Le formulaire reste utilisable si le navigateur bloque le stockage local.
+          }
+        }
+        if (checkoutAttempt.current?.fingerprint !== fingerprint) {
+          checkoutAttempt.current = { fingerprint, key: crypto.randomUUID() };
+          try {
+            window.sessionStorage.setItem(`rassemble_checkout_${eventId}`, JSON.stringify(checkoutAttempt.current));
+          } catch {
+            // La clé en mémoire protège au moins les répétitions dans cette page.
+          }
+        }
+        const result = await startCheckout(
+          { ...values, eventId, items },
+          checkoutAttempt.current.key,
+        );
         if (!result.ok || !result.paymentUrl) {
+          if (result.retryWithNewAttempt) {
+            checkoutAttempt.current = null;
+            window.sessionStorage.removeItem(`rassemble_checkout_${eventId}`);
+          }
           setServerError(result.error ?? "Commande impossible. Réessaie.");
           return;
         }
         if (result.paymentUrl.startsWith("/")) {
+          if (result.completed) {
+            checkoutAttempt.current = null;
+            window.sessionStorage.removeItem(`rassemble_checkout_${eventId}`);
+          }
           router.push(result.paymentUrl);
         } else {
           window.location.assign(result.paymentUrl);

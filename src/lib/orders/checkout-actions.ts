@@ -36,10 +36,12 @@ export interface StartCheckoutResult {
   ok: boolean;
   paymentUrl?: string;
   orderReference?: string;
+  completed?: boolean;
+  retryWithNewAttempt?: boolean;
   error?: string;
 }
 
-export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> {
+export async function startCheckout(raw: unknown, idempotencyKey: string): Promise<StartCheckoutResult> {
   const parsed = checkoutSchema.safeParse(raw);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Commande invalide." };
@@ -47,9 +49,17 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
 
   let order;
   try {
-    order = await createOrder(parsed.data);
+    order = await createOrder(parsed.data, idempotencyKey);
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Commande impossible." };
+  }
+
+  if (order.retryWithNewAttempt) {
+    return {
+      ok: false,
+      retryWithNewAttempt: true,
+      error: "Le paiement précédent n'a pas abouti. Tu peux lancer une nouvelle tentative.",
+    };
   }
 
   // Commande gratuite : billets déjà générés.
@@ -72,7 +82,25 @@ export async function startCheckout(raw: unknown): Promise<StartCheckoutResult> 
     } catch {
       // La réservation est confirmée : un échec de recherche du salon ne doit pas la bloquer.
     }
-    return { ok: true, paymentUrl, orderReference: order.reference };
+    return { ok: true, paymentUrl, orderReference: order.reference, completed: true };
+  }
+
+  if (order.reused) {
+    const supabase = await createSupabaseServerClient();
+    const { data: payment } = await supabase
+      .from("payments")
+      .select("provider_payment_url, status")
+      .eq("order_id", order.orderId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (payment?.status === "initiated" && payment.provider_payment_url) {
+      return { ok: true, paymentUrl: payment.provider_payment_url, orderReference: order.reference };
+    }
+    return {
+      ok: false,
+      error: "Cette commande est déjà en cours de traitement. Vérifie tes billets avant de relancer un paiement.",
+    };
   }
 
   // Ouvre le paiement (simulation ou checkout hébergé par le prestataire actif).

@@ -49,9 +49,8 @@ function redirectPwaLaunch(request: NextRequest) {
    --------------------------------------------------------------------------
    * Rafraîchit les cookies de session à chaque requête (obligatoire avec
      @supabase/ssr, sinon la session expire côté serveur).
-   * Ne bloque AUCUNE route ici : la protection se fait page par page avec
-     `getCurrentUser()` + `redirect()`, pour garder des messages d'erreur
-     clairs et des pages publiques ultra-rapides.
+   * Le mode maintenance redirige les visiteurs vers une page dédiée, tout en
+     laissant l'administration et les webhooks accessibles.
    ========================================================================== */
 
 export default async function proxy(request: NextRequest) {
@@ -82,7 +81,43 @@ export default async function proxy(request: NextRequest) {
   });
 
   // Valide / rafraîchit la session (ne lève jamais : les pages gèrent le cas).
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  const maintenanceExempt =
+    pathname === "/maintenance" ||
+    pathname.startsWith("/api/webhooks/") ||
+    pathname.startsWith("/auth/") ||
+    pathname.startsWith("/_next/");
+  if (maintenanceExempt) return response;
+
+  const { data: maintenanceSetting } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "platform.maintenance_mode")
+    .maybeSingle();
+  const maintenanceEnabled = maintenanceSetting?.value === true;
+
+  if (maintenanceEnabled && !pathname.startsWith("/admin")) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { error: "Le site est temporairement en maintenance." },
+        { status: 503, headers: { "Retry-After": "300" } },
+      );
+    }
+    return NextResponse.redirect(new URL("/maintenance", request.url), 307);
+  }
+
+  if (maintenanceEnabled && pathname.startsWith("/admin")) {
+    if (!user) return NextResponse.redirect(new URL("/maintenance", request.url), 307);
+    const { data: adminRole } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!adminRole) return NextResponse.redirect(new URL("/maintenance", request.url), 307);
+  }
 
   return response;
 }

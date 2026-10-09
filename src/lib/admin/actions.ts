@@ -43,6 +43,37 @@ export async function savePlatformCommissionAction(percent: number) {
   };
 }
 
+export async function setPlatformMaintenanceAction(enabled: boolean) {
+  const profile = await requireAdmin();
+  if (typeof enabled !== "boolean") return { error: "État de maintenance invalide." };
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.from("platform_settings").upsert({
+    key: "platform.maintenance_mode",
+    value: enabled,
+    description: "Suspend temporairement l’accès visiteur pendant une opération de maintenance.",
+    is_public: true,
+    updated_by: profile.id,
+  });
+  if (error) return { error: "Impossible de modifier le mode maintenance. Réessaie." };
+
+  const { error: auditError } = await supabase.rpc("log_audit", {
+    p_action: enabled ? "platform.maintenance.enable" : "platform.maintenance.disable",
+    p_entity_type: "platform_setting",
+    p_entity_id: null as unknown as string,
+    p_after: { key: "platform.maintenance_mode", enabled },
+  });
+  revalidatePath("/admin/parametres");
+  revalidatePath("/maintenance");
+  return {
+    success: auditError
+      ? "Mode maintenance modifié, mais l’écriture du journal a échoué."
+      : enabled
+        ? "Mode maintenance activé. Les visiteurs verront la page dédiée."
+        : "Mode maintenance désactivé. Le site est de nouveau accessible.",
+  };
+}
+
 export async function resolveReportAction(
   reportId: string,
   status: "resolved" | "dismissed",

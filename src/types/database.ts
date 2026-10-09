@@ -750,6 +750,7 @@ export type PromoCodeRow = {
 export type OrderRow = {
   id: string;
   reference: string;
+  checkout_key: string | null;
   user_id: string;
   event_id: string;
   organization_id: string;

@@ -8,7 +8,10 @@ export const metadata = {
 
 export default async function AdminParametresPage() {
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.from("platform_settings").select("value").eq("key", "platform.commission_rate").maybeSingle();
+  const [{ data }, { data: maintenance }] = await Promise.all([
+    supabase.from("platform_settings").select("value").eq("key", "platform.commission_rate").maybeSingle(),
+    supabase.from("platform_settings").select("value").eq("key", "platform.maintenance_mode").maybeSingle(),
+  ]);
   const rawRate = data?.value;
   const initialCommissionPercent = typeof rawRate === "number" && rawRate >= 0 && rawRate <= 1 ? rawRate * 100 : 5;
   return (
@@ -20,7 +23,10 @@ export default async function AdminParametresPage() {
         </p>
       </div>
 
-      <AdminSettingsForm initialCommissionPercent={initialCommissionPercent} />
+      <AdminSettingsForm
+        initialCommissionPercent={initialCommissionPercent}
+        initialMaintenanceMode={maintenance?.value === true}
+      />
     </div>
   );
 }
