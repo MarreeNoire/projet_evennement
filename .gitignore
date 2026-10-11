@@ -9,12 +9,16 @@ out/
 build/
 dist/
 .swc/
+.open-next/
+.wrangler/
 
 # Environnement (JAMAIS committé)
 .env
 .env.local
 .env.*.local
 !.env.example
+.dev.vars*
+!.dev.vars.example
 
 # Tests
 coverage/
