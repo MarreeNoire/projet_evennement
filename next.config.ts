@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  output: "standalone",
 
   experimental: {
     // Étend la durée du cache côté client du routeur Next.js.
