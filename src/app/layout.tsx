@@ -87,6 +87,10 @@ export const viewport: Viewport = {
   ],
 };
 
+// Les pages partagées lisent la session via cookies(). Le rendu doit donc
+// avoir lieu à la requête plutôt que pendant la génération statique.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning : next-themes écrit la classe de thème sur <html>
