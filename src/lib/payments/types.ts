@@ -70,6 +70,8 @@ export interface PaymentVerification {
 /** Notification (webhook) reçue du prestataire, déjà normalisée. */
 export interface PaymentNotification {
   provider: PaymentProviderName;
+  /** Environnement du webhook, quand le prestataire le transmet. */
+  environment?: "sandbox" | "live";
   transactionId: string;
   /** Référence de commande interne, si le prestataire la renvoie. */
   orderReference: string | null;
@@ -88,6 +90,7 @@ export interface PaymentNotification {
 /** Contrat que doit respecter chaque prestataire. */
 export interface PaymentProvider {
   readonly name: PaymentProviderName;
+  readonly environment?: "sandbox" | "live" | null;
 
   /** Ouvre un paiement et renvoie l'URL de redirection. */
   createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession>;

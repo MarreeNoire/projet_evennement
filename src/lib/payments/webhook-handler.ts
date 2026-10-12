@@ -33,6 +33,17 @@ export async function handlePaymentWebhook(request: Request, provider: PaymentPr
     return NextResponse.json({ received: false, error: "bad_signature" }, { status: 401 });
   }
 
+  if (
+    notification.provider === "geniuspay" &&
+    notification.environment &&
+    notification.environment !== provider.environment
+  ) {
+    return NextResponse.json(
+      { received: false, error: "environment_mismatch" },
+      { status: 400 },
+    );
+  }
+
   if (notification.testEvent) {
     return NextResponse.json({ received: true, test: true });
   }

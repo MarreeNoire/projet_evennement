@@ -354,8 +354,9 @@ checkout laisse GeniusPay afficher les moyens activés sur le compte marchand ;
 aucun `payment_method` n'est envoyé par l'application. Active dans le tableau de
 bord marchand **Wave, Orange Money, MTN, Moov et cartes** pour le site concerné.
 
-Dans **Paramètres → API**, récupère les clés Sandbox, puis ajoute-les aux
-variables d'environnement du serveur (pas dans le navigateur ni dans Git) :
+Dans **Paramètres → API**, sélectionne **Sandbox** et récupère les clés de test,
+puis ajoute-les aux variables d'environnement du serveur (pas dans le navigateur
+ni dans Git) :
 
 ```dotenv
 PAYMENT_PROVIDER=geniuspay
@@ -365,8 +366,11 @@ GENIUSPAY_WEBHOOK_SECRET=whsec_...
 GENIUSPAY_BASE_URL=https://geniuspay.ci/api/v1/merchant
 ```
 
-Si le tableau de bord GeniusPay fournit une URL API Sandbox dédiée, renseigne-la
-dans `GENIUSPAY_BASE_URL`. Les clés et le secret webhook ne doivent jamais être
+L'application déduit le mode depuis les préfixes des clés et vérifie qu'elles
+appartiennent à la même paire (`pk_sandbox_` avec `sk_sandbox_`, ou `pk_live_`
+avec `sk_live_`). Pour tester sans débit réel, conserve la paire Sandbox et le
+secret webhook associé. L'API Marchand utilise le même endpoint en Sandbox et
+Live ; les clés déterminent l'environnement. Les secrets ne doivent jamais être
 copiés dans le chat ni dans une variable `NEXT_PUBLIC_*`.
 
 Après déploiement, crée un webhook GeniusPay vers :
@@ -381,9 +385,9 @@ son horodatage, puis relit le statut, le montant et la devise via l'API GeniusPa
 avant de confirmer la commande et de générer les billets.
 
 Teste d'abord un paiement accepté, un refus et une annulation en Sandbox. Après
-validation, remplace les trois secrets par ceux de Production, garde
-`GENIUSPAY_BASE_URL` selon l'URL de production fournie par GeniusPay, puis
-redéploie avec `PAYMENT_PROVIDER=geniuspay`.
+validation et décision de mise en production, remplace ensemble les clés API et
+le secret webhook par ceux de Live, puis redéploie. La paire Live peut effectuer
+de vrais débits.
 
 ---
 

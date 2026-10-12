@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import { env } from "@/lib/env";
+import { env, isGeniusPayCredentialPairValid } from "@/lib/env";
 
 import {
   PaymentError,
@@ -35,6 +35,7 @@ interface GeniusPayResponse extends Record<string, unknown> {
 
 export class GeniusPayProvider implements PaymentProvider {
   readonly name = "geniuspay" as const;
+  readonly environment = env.payment.geniuspay.environment;
 
   private readonly apiKey = env.payment.geniuspay.apiKey;
   private readonly apiSecret = env.payment.geniuspay.apiSecret;
@@ -47,6 +48,12 @@ export class GeniusPayProvider implements PaymentProvider {
         "NOT_CONFIGURED",
         "GeniusPay n'est pas configuré : renseigne GENIUSPAY_API_KEY, " +
           "GENIUSPAY_API_SECRET et GENIUSPAY_WEBHOOK_SECRET, puis définis PAYMENT_PROVIDER=geniuspay.",
+      );
+    }
+    if (!isGeniusPayCredentialPairValid() || !this.environment) {
+      throw new PaymentError(
+        "INVALID_CONFIGURATION",
+        "Les clés GeniusPay ne correspondent pas à un même environnement. Utilise la paire Sandbox (pk_sandbox_ / sk_sandbox_) pour les tests ou la paire Live (pk_live_ / sk_live_) pour la production.",
       );
     }
   }
@@ -184,6 +191,15 @@ export class GeniusPayProvider implements PaymentProvider {
       typeof payload.event === "string"
         ? payload.event
         : headers["x-webhook-event"] ?? "";
+    const payloadEnvironment = normalizeGeniusPayEnvironment(payload.environment);
+    const headerEnvironment = normalizeGeniusPayEnvironment(headers["x-webhook-environment"]);
+    if (payloadEnvironment && headerEnvironment && payloadEnvironment !== headerEnvironment) {
+      throw new PaymentError(
+        "ENVIRONMENT_MISMATCH",
+        "Les environnements indiqués par GeniusPay dans le webhook ne correspondent pas.",
+      );
+    }
+    const notificationEnvironment = payloadEnvironment ?? headerEnvironment;
     const signature = headers["x-webhook-signature"] ?? "";
     const timestamp = headers["x-webhook-timestamp"] ?? "";
     const signatureValid = this.isValidWebhookSignature(rawBody, timestamp, signature);
@@ -191,6 +207,7 @@ export class GeniusPayProvider implements PaymentProvider {
     if (event === "webhook.test") {
       return {
         provider: this.name,
+        environment: notificationEnvironment,
         transactionId,
         orderReference: null,
         status: "pending",
@@ -215,6 +232,7 @@ export class GeniusPayProvider implements PaymentProvider {
 
     return {
       provider: this.name,
+      environment: notificationEnvironment,
       transactionId,
       orderReference:
         typeof metadata.order_reference === "string" ? metadata.order_reference : null,
@@ -327,6 +345,14 @@ export class GeniusPayProvider implements PaymentProvider {
 
     return body;
   }
+}
+
+function normalizeGeniusPayEnvironment(value: unknown): "sandbox" | "live" | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "sandbox" || normalized === "test") return "sandbox";
+  if (normalized === "live" || normalized === "production") return "live";
+  return undefined;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

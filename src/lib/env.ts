@@ -55,6 +55,20 @@ const rawEnvSchema = z.object({
 
 export type RawEnv = z.infer<typeof rawEnvSchema>;
 
+/**
+ * Normalise GENIUSPAY_BASE_URL : la documentation GeniusPay affiche
+ * "Base URL" en incluant déjà `/payments` à la fin
+ * (https://pay.genius.ci/api/v1/merchant/payments), ce qui pousse à coller
+ * ce suffixe par erreur dans la variable d'environnement. Le code ajoutant
+ * lui-même `/payments` à chaque appel, on retire ce suffixe s'il est présent
+ * pour toujours retomber sur la vraie racine (`.../merchant`).
+ */
+function normalizeGeniusPayBaseUrl(value: string | undefined): string {
+  let url = (value ?? "https://pay.genius.ci/api/v1/merchant").trim().replace(/\/+$/, "");
+  url = url.replace(/\/payments?$/i, "");
+  return url;
+}
+
 function readRawEnv(): RawEnv {
   // IMPORTANT : Next.js n'inline les variables NEXT_PUBLIC_* dans le bundle
   // navigateur que par remplacement textuel statique de `process.env.NEXT_PUBLIC_X`.
@@ -136,10 +150,12 @@ export const env = {
       apiKey: raw.GENIUSPAY_API_KEY ?? "",
       apiSecret: raw.GENIUSPAY_API_SECRET ?? "",
       webhookSecret: raw.GENIUSPAY_WEBHOOK_SECRET ?? "",
-      baseUrl: (raw.GENIUSPAY_BASE_URL ?? "https://pay.genius.ci/api/v1/merchant").replace(
-        /\/+$/,
-        "",
-      ),
+      environment: raw.GENIUSPAY_API_KEY?.startsWith("pk_sandbox_")
+        ? ("sandbox" as const)
+        : raw.GENIUSPAY_API_KEY?.startsWith("pk_live_")
+          ? ("live" as const)
+          : null,
+      baseUrl: normalizeGeniusPayBaseUrl(raw.GENIUSPAY_BASE_URL),
     },
   },
 
@@ -161,6 +177,14 @@ export const env = {
   cronSecret: raw.CRON_SECRET ?? "",
 } as const;
 
+/** Vérifie que les deux clés GeniusPay appartiennent au même environnement. */
+export function isGeniusPayCredentialPairValid(): boolean {
+  const { apiKey, apiSecret, environment } = env.payment.geniuspay;
+  if (environment === "sandbox") return apiSecret.startsWith("sk_sandbox_");
+  if (environment === "live") return apiSecret.startsWith("sk_live_");
+  return false;
+}
+
 /* ---------------------------------------------------------------------------
    Disponibilité des services
    L'UI affiche un bandeau « mode démo » au lieu de planter lorsque Supabase
@@ -180,7 +204,8 @@ export const isPaymentsLive =
   (env.payment.provider === "geniuspay" &&
     Boolean(env.payment.geniuspay.apiKey) &&
     Boolean(env.payment.geniuspay.apiSecret) &&
-    Boolean(env.payment.geniuspay.webhookSecret));
+    Boolean(env.payment.geniuspay.webhookSecret) &&
+    isGeniusPayCredentialPairValid());
 
 export const isEmailLive = env.email.provider === "resend" && Boolean(env.email.resend.apiKey);
 
@@ -207,6 +232,11 @@ export function getMissingEnv(): string[] {
     if (!env.payment.geniuspay.apiKey) missing.push("GENIUSPAY_API_KEY");
     if (!env.payment.geniuspay.apiSecret) missing.push("GENIUSPAY_API_SECRET");
     if (!env.payment.geniuspay.webhookSecret) missing.push("GENIUSPAY_WEBHOOK_SECRET");
+    if (env.payment.geniuspay.apiKey && !env.payment.geniuspay.environment) {
+      missing.push("GENIUSPAY_API_KEY (préfixe pk_sandbox_ ou pk_live_ attendu)");
+    } else if (env.payment.geniuspay.apiSecret && !isGeniusPayCredentialPairValid()) {
+      missing.push("GENIUSPAY_API_SECRET (doit correspondre à l'environnement de la clé API)");
+    }
   }
 
   if (env.email.provider === "resend" && !env.email.resend.apiKey) {
