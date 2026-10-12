@@ -5,42 +5,49 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-type AdminSupabaseClient = ReturnType<typeof createSupabaseAdminClient>;
-
-async function canManageOrganizationWithAdmin(
-  admin: AdminSupabaseClient,
+async function canManageOrganization(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
   organizationId: string,
   userId: string,
 ): Promise<boolean> {
-  const [
-    { data: organization, error: organizationError },
-    { data: memberships, error: membershipError },
-    { data: platformAdmins, error: rolesError },
-  ] = await Promise.all([
-    admin.from("organizations").select("id, owner_id").eq("id", organizationId).maybeSingle(),
-    admin
-      .from("organization_members")
-      .select("id")
-      .eq("organization_id", organizationId)
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .in("role", ["owner", "manager"]),
-    admin.from("user_roles").select("user_id").eq("user_id", userId).eq("role", "admin"),
-  ]);
+  // La fonction SECURITY DEFINER applique la même règle que les politiques RLS,
+  // avec auth.uid() issu de la session vérifiée. Cela évite qu'une clé service
+  // absente ou mal configurée refuse à tort les droits d'un propriétaire.
+  const { data, error } = await supabase.rpc("can_manage_org", { org_id: organizationId });
 
-  if (organizationError || membershipError || rolesError) {
-    console.error("[canManageOrganizationWithAdmin] Permission lookup failed:", {
-      organizationError,
-      membershipError,
-      rolesError,
-    });
-    return false;
+  if (error) {
+    console.error("[canManageOrganization] Permission lookup failed:", error);
+    // Compatibilité avec les projets où la fonction RPC n'est pas encore
+    // appliquée : les lectures restent filtrées par les politiques RLS.
+    const [
+      { data: organization, error: organizationError },
+      { data: memberships, error: membershipError },
+      { data: platformAdmins, error: rolesError },
+    ] = await Promise.all([
+      supabase.from("organizations").select("id").eq("id", organizationId).eq("owner_id", userId).maybeSingle(),
+      supabase
+        .from("organization_members")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .in("role", ["owner", "manager"]),
+      supabase.from("user_roles").select("user_id").eq("user_id", userId).eq("role", "admin"),
+    ]);
+
+    if (organizationError || membershipError || rolesError) {
+      console.error("[canManageOrganization] Fallback permission lookup failed:", {
+        organizationError,
+        membershipError,
+        rolesError,
+      });
+      return false;
+    }
+
+    return Boolean(organization || memberships?.length || platformAdmins?.length);
   }
 
-  return Boolean(
-    organization &&
-      (organization.owner_id === userId || memberships?.length || platformAdmins?.length),
-  );
+  return data === true;
 }
 
 export interface CreateEventDraftTicketInput {
@@ -236,14 +243,15 @@ export async function createEventForPublishingAction(
       };
     }
 
-    // La création est exécutée avec la clé serveur uniquement après une
-    // vérification explicite du propriétaire, d'un rôle de gestion actif ou
-    // du rôle administrateur. Cela évite que le contexte RLS du Server Action
-    // bloque une création pourtant autorisée.
-    const admin = createSupabaseAdminClient();
-    if (!(await canManageOrganizationWithAdmin(admin, orgId, user.id))) {
+    // Vérifier les droits avec la session courante : la fonction SQL applique
+    // la règle d'accès et évite un faux refus lié à la clé service.
+    if (!(await canManageOrganization(supabase, orgId, user.id))) {
       return { ok: false, error: "Seul le propriétaire, un gestionnaire actif ou un administrateur peut publier un événement." };
     }
+
+    // La clé serveur ne sert qu'aux écritures ci-dessous, après vérification
+    // des droits du compte connecté.
+    const admin = createSupabaseAdminClient();
 
     // 3. Générer le slug de l'événement
     const titleSlug =
@@ -739,7 +747,7 @@ export async function publishEventWithImagesAction(
     if (eventError || !event) {
       return { ok: false, error: "L'événement n'est pas accessible depuis une organisation que vous gérez." };
     }
-    if (!(await canManageOrganizationWithAdmin(admin, event.organization_id, user.id))) {
+    if (!(await canManageOrganization(supabase, event.organization_id, user.id))) {
       return { ok: false, error: "Vous n'êtes pas autorisé à publier cet événement." };
     }
     if (event.status !== "draft") {
@@ -812,7 +820,7 @@ export async function discardUnpublishedEventAction(eventId: string): Promise<Up
       .eq("id", eventId)
       .eq("status", "draft")
       .maybeSingle();
-    if (eventError || !event || !(await canManageOrganizationWithAdmin(admin, event.organization_id, user.id))) {
+    if (eventError || !event || !(await canManageOrganization(supabase, event.organization_id, user.id))) {
       return { ok: false, error: "L'événement temporaire n'a pas pu être supprimé." };
     }
 
