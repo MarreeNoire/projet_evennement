@@ -33,6 +33,10 @@ export async function handlePaymentWebhook(request: Request, provider: PaymentPr
     return NextResponse.json({ received: false, error: "bad_signature" }, { status: 401 });
   }
 
+  if (notification.testEvent) {
+    return NextResponse.json({ received: true, test: true });
+  }
+
   const admin = createSupabaseAdminClient();
   const { data: payment } = await admin
     .from("payments")

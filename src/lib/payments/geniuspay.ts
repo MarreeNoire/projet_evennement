@@ -180,6 +180,30 @@ export class GeniusPayProvider implements PaymentProvider {
     const data = asRecord(payload.data);
     const metadata = asRecord(data.metadata);
     const transactionId = data.reference == null ? "" : String(data.reference);
+    const event =
+      typeof payload.event === "string"
+        ? payload.event
+        : headers["x-webhook-event"] ?? "";
+    const signature = headers["x-webhook-signature"] ?? "";
+    const timestamp = headers["x-webhook-timestamp"] ?? "";
+    const signatureValid = this.isValidWebhookSignature(rawBody, timestamp, signature);
+
+    if (event === "webhook.test") {
+      return {
+        provider: this.name,
+        transactionId,
+        orderReference: null,
+        status: "pending",
+        amount: null,
+        currency: null,
+        method: null,
+        payerPhone: null,
+        signatureValid,
+        testEvent: true,
+        raw: payload,
+      };
+    }
+
     if (!transactionId) {
       throw new PaymentError(
         "INVALID_NOTIFICATION",
@@ -187,10 +211,6 @@ export class GeniusPayProvider implements PaymentProvider {
       );
     }
 
-    const signature = headers["x-webhook-signature"] ?? "";
-    const timestamp = headers["x-webhook-timestamp"] ?? "";
-    const signatureValid = this.isValidWebhookSignature(rawBody, timestamp, signature);
-    const event = typeof payload.event === "string" ? payload.event : "";
     const status = data.status ?? statusFromEvent(event);
 
     return {

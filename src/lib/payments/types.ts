@@ -80,6 +80,8 @@ export interface PaymentNotification {
   payerPhone: string | null;
   /** `true` si la signature HMAC a été vérifiée avec succès. */
   signatureValid: boolean;
+  /** Événement de test du webhook, sans transaction réelle à rechercher. */
+  testEvent?: boolean;
   raw: Record<string, unknown>;
 }
 
