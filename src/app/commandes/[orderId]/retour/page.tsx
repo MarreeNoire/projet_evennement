@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { PaymentSuccessMark } from "@/components/checkout/payment-success-mark";
 import { ClearCheckoutAttempt } from "@/components/checkout/clear-checkout-attempt";
+import { PaymentStatusPoller } from "@/components/checkout/payment-status-poller";
 import { Alert } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
 import { getCurrentUser, createSupabaseServerClient } from "@/lib/supabase/server";
@@ -54,7 +55,18 @@ export default async function PaymentReturnPage({
     .maybeSingle();
 
   if (payment && (order.status === "pending" || order.status === "paid")) {
-    await verifyAndConfirm(payment.provider_transaction_id).catch(() => null);
+    try {
+      await verifyAndConfirm(payment.provider_transaction_id);
+    } catch (error) {
+      console.error("[PaymentReturn] Payment verification failed", {
+        code:
+          error && typeof error === "object" && "code" in error && typeof error.code === "string"
+            ? error.code
+            : error instanceof Error
+              ? error.name
+              : "UNKNOWN",
+      });
+    }
   }
 
   const { data: fresh } = await supabase
@@ -118,12 +130,13 @@ export default async function PaymentReturnPage({
           </>
         ) : (
           <>
+            <PaymentStatusPoller active={status === "pending" && Boolean(payment)} />
             <p className="eyebrow">Commande {order.reference}</p>
             <h1 className="font-display text-4xl leading-[1.02] font-semibold">Paiement en cours…</h1>
             <Alert tone="info" title="Confirmation en attente">
               {statut === "cancelled"
                 ? "Tu as annulé le paiement. Ta commande reste en attente."
-                : "Le prestataire traite encore ta transaction. Reviens dans quelques instants."}
+                : "Le prestataire traite encore ta transaction. Cette page vérifie automatiquement le statut pendant quelques minutes."}
             </Alert>
             <p className="text-sm text-fg-muted">
               Voir le statut dans <Link href={ROUTES.myTickets} className="text-primary hover:underline">mes billets</Link>.
