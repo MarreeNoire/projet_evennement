@@ -10,6 +10,7 @@ build/
 dist/
 .swc/
 .open-next/
+.netlify/
 .wrangler/
 
 # Environnement (JAMAIS committé)

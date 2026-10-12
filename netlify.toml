@@ -1,0 +1,4 @@
+[build.environment]
+# These values are intentionally public and required by the browser bundle.
+# Keep Netlify's secret scan enabled for all other environment variables.
+SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_APP_URL,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY"
