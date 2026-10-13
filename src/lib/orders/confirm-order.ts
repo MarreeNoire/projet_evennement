@@ -100,6 +100,12 @@ export async function confirmPaidOrder(orderId: string): Promise<ConfirmOrderRes
   }
 
   // 3. Email de confirmation avec billets (jamais bloquant).
+  const appUrl = (
+    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.RAILWAY_PUBLIC_DOMAIN ??
+    ""
+  ).replace(/\/+$/, "");
+
   if (order.buyer_email) {
     const { data: event } = await admin
       .from("events")
@@ -141,7 +147,7 @@ export async function confirmPaidOrder(orderId: string): Promise<ConfirmOrderRes
           ticketTypeName: typeNames.get(ticket.ticket_type_id) ?? "Billet",
           accessLevelLabel: ticket.access_level,
           holderName: ticket.holder_name,
-          ticketUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/mes-billets`,
+          ticketUrl: `${appUrl}/mes-billets`,
         })),
       }),
     );
@@ -160,23 +166,47 @@ export async function verifyAndConfirm(transactionId: string): Promise<ConfirmOr
     .eq("provider_transaction_id", transactionId)
     .maybeSingle();
 
-  if (!payment) return null;
+  if (!payment) {
+    console.warn("[verifyAndConfirm] Aucun paiement trouvé pour la transaction", { transactionId });
+    return null;
+  }
 
   if (!isPaymentProviderName(payment.provider)) {
     throw new Error("Prestataire de paiement inconnu.");
   }
+
   const verification = await getPaymentProvider(payment.provider).verify(transactionId);
+
+  console.info("[verifyAndConfirm] Résultat de la vérification", {
+    transactionId,
+    orderId: payment.order_id,
+    provider: payment.provider,
+    verificationStatus: verification.status,
+    verificationAmount: verification.amount,
+    verificationCurrency: verification.currency,
+    expectedAmount: Math.round(Number(payment.amount)),
+    expectedCurrency: payment.currency,
+  });
+
   const amountMatches = verification.amount === Math.round(Number(payment.amount));
   const currencyMatches = verification.currency?.toUpperCase() === payment.currency.toUpperCase();
 
   if (verification.status === "accepted" && (!amountMatches || !currencyMatches)) {
+    console.error("[verifyAndConfirm] ⚠️ Discordance montant/devise — paiement rejeté", {
+      transactionId,
+      orderId: payment.order_id,
+      expectedAmount: Math.round(Number(payment.amount)),
+      actualAmount: verification.amount,
+      expectedCurrency: payment.currency,
+      actualCurrency: verification.currency,
+    });
     await admin
       .from("payments")
       .update({
         status: "error",
         payload: verification.raw as never,
         error_message:
-          "La vérification du prestataire ne correspond pas au montant ou à la devise attendus.",
+          `Discordance : attendu ${Math.round(Number(payment.amount))} ${payment.currency}, reçu ${verification.amount} ${verification.currency}.`,
       })
       .eq("provider_transaction_id", transactionId)
       .eq("provider", payment.provider);
@@ -195,6 +225,11 @@ export async function verifyAndConfirm(transactionId: string): Promise<ConfirmOr
     .eq("provider", payment.provider);
 
   if (verification.status === "refused" || verification.status === "cancelled") {
+    console.info("[verifyAndConfirm] Paiement refusé/annulé par le prestataire", {
+      transactionId,
+      orderId: payment.order_id,
+      status: verification.status,
+    });
     await admin
       .from("orders")
       .update({ status: verification.status === "refused" ? "failed" : "cancelled" })
@@ -203,8 +238,19 @@ export async function verifyAndConfirm(transactionId: string): Promise<ConfirmOr
     return null;
   }
 
-  if (verification.status !== "accepted") return null;
+  if (verification.status !== "accepted") {
+    console.info("[verifyAndConfirm] Statut non final, en attente", {
+      transactionId,
+      orderId: payment.order_id,
+      status: verification.status,
+    });
+    return null;
+  }
 
+  console.info("[verifyAndConfirm] ✅ Paiement accepté, confirmation en cours…", {
+    transactionId,
+    orderId: payment.order_id,
+  });
   return confirmPaidOrder(payment.order_id);
 }
 

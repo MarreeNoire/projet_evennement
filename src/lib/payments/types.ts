@@ -134,23 +134,37 @@ export function normalizePaymentStatus(rawStatus: unknown): PaymentStatus {
     case "SUCCESSFUL":
     case "PAID":
     case "COMPLETED":
+    case "APPROVED":
+    case "SETTLED":
+    case "CAPTURED":
+    case "DONE":
+    case "CONFIRMED":
       return "accepted";
     case "PENDING":
     case "PROCESSING":
     case "INITIATED":
+    case "WAITING":
+    case "CREATED":
+    case "IN_PROGRESS":
+    case "REQUIRES_ACTION":
       return "pending";
     case "REFUSED":
     case "DECLINED":
     case "FAILED":
     case "ERROR":
+    case "REJECTED":
       return "refused";
     case "CANCELLED":
     case "CANCELED":
     case "EXPIRED":
+    case "ABANDONED":
       return "cancelled";
     case "REFUNDED":
       return "refunded";
     default:
+      console.warn(
+        `[normalizePaymentStatus] Statut inconnu reçu du prestataire : "${String(rawStatus)}" → interprété comme "error". Ajouter ce statut au switch si nécessaire.`,
+      );
       return "error";
   }
 }
