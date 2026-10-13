@@ -70,6 +70,8 @@ export interface PaymentVerification {
 /** Notification (webhook) reçue du prestataire, déjà normalisée. */
 export interface PaymentNotification {
   provider: PaymentProviderName;
+  /** Environnement du webhook, quand le prestataire le transmet. */
+  environment?: "sandbox" | "live";
   transactionId: string;
   /** Référence de commande interne, si le prestataire la renvoie. */
   orderReference: string | null;
@@ -88,6 +90,7 @@ export interface PaymentNotification {
 /** Contrat que doit respecter chaque prestataire. */
 export interface PaymentProvider {
   readonly name: PaymentProviderName;
+  readonly environment?: "sandbox" | "live" | null;
 
   /** Ouvre un paiement et renvoie l'URL de redirection. */
   createCheckout(input: CreateCheckoutInput): Promise<CheckoutSession>;
@@ -131,23 +134,37 @@ export function normalizePaymentStatus(rawStatus: unknown): PaymentStatus {
     case "SUCCESSFUL":
     case "PAID":
     case "COMPLETED":
+    case "APPROVED":
+    case "SETTLED":
+    case "CAPTURED":
+    case "DONE":
+    case "CONFIRMED":
       return "accepted";
     case "PENDING":
     case "PROCESSING":
     case "INITIATED":
+    case "WAITING":
+    case "CREATED":
+    case "IN_PROGRESS":
+    case "REQUIRES_ACTION":
       return "pending";
     case "REFUSED":
     case "DECLINED":
     case "FAILED":
     case "ERROR":
+    case "REJECTED":
       return "refused";
     case "CANCELLED":
     case "CANCELED":
     case "EXPIRED":
+    case "ABANDONED":
       return "cancelled";
     case "REFUNDED":
       return "refunded";
     default:
+      console.warn(
+        `[normalizePaymentStatus] Statut inconnu reçu du prestataire : "${String(rawStatus)}" → interprété comme "error". Ajouter ce statut au switch si nécessaire.`,
+      );
       return "error";
   }
 }

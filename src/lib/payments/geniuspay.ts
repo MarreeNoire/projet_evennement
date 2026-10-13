@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import { env } from "@/lib/env";
+import { env, isGeniusPayCredentialPairValid } from "@/lib/env";
 
 import {
   PaymentError,
@@ -35,6 +35,7 @@ interface GeniusPayResponse extends Record<string, unknown> {
 
 export class GeniusPayProvider implements PaymentProvider {
   readonly name = "geniuspay" as const;
+  readonly environment = env.payment.geniuspay.environment;
 
   private readonly apiKey = env.payment.geniuspay.apiKey;
   private readonly apiSecret = env.payment.geniuspay.apiSecret;
@@ -47,6 +48,12 @@ export class GeniusPayProvider implements PaymentProvider {
         "NOT_CONFIGURED",
         "GeniusPay n'est pas configuré : renseigne GENIUSPAY_API_KEY, " +
           "GENIUSPAY_API_SECRET et GENIUSPAY_WEBHOOK_SECRET, puis définis PAYMENT_PROVIDER=geniuspay.",
+      );
+    }
+    if (!isGeniusPayCredentialPairValid() || !this.environment) {
+      throw new PaymentError(
+        "INVALID_CONFIGURATION",
+        "Les clés GeniusPay ne correspondent pas à un même environnement. Utilise la paire Sandbox (pk_sandbox_ / sk_sandbox_) pour les tests ou la paire Live (pk_live_ / sk_live_) pour la production.",
       );
     }
   }
@@ -147,8 +154,11 @@ export class GeniusPayProvider implements PaymentProvider {
     const response = await this.request<GeniusPayResponse>(
       `/payments/${encodeURIComponent(transactionId)}`,
     );
-    const transaction = response.data;
-    if (!response.success || !transaction) {
+    const rawData = asRecord(response.data);
+    const paymentData = asRecord(rawData.payment);
+    const transaction = Object.keys(paymentData).length > 0 ? paymentData : rawData;
+
+    if (!response.success && Object.keys(transaction).length === 0) {
       throw new PaymentError(
         "VERIFICATION_FAILED",
         "Impossible de vérifier le paiement auprès de GeniusPay.",
@@ -158,16 +168,25 @@ export class GeniusPayProvider implements PaymentProvider {
 
     return {
       provider: this.name,
-      transactionId: String(transaction.reference ?? transactionId),
-      status: normalizePaymentStatus(transaction.status),
-      amount: toAmount(transaction.amount),
-      currency: typeof transaction.currency === "string" ? transaction.currency : null,
+      transactionId: String(transaction.reference ?? rawData.reference ?? transactionId),
+      status: normalizePaymentStatus(transaction.status ?? rawData.status),
+      amount: toAmount(transaction.amount ?? rawData.amount),
+      currency:
+        typeof transaction.currency === "string"
+          ? transaction.currency
+          : typeof rawData.currency === "string"
+            ? rawData.currency
+            : null,
       method:
         typeof transaction.payment_method === "string"
           ? transaction.payment_method
           : typeof transaction.provider === "string"
             ? transaction.provider
-            : null,
+            : typeof rawData.payment_method === "string"
+              ? rawData.payment_method
+              : typeof rawData.provider === "string"
+                ? rawData.provider
+                : null,
       raw: response,
     };
   }
@@ -177,13 +196,31 @@ export class GeniusPayProvider implements PaymentProvider {
     headers: Record<string, string> = {},
     rawBody = JSON.stringify(payload),
   ): Promise<PaymentNotification> {
-    const data = asRecord(payload.data);
-    const metadata = asRecord(data.metadata);
-    const transactionId = data.reference == null ? "" : String(data.reference);
+    const rawData = asRecord(payload.data);
+    const paymentData = asRecord(rawData.payment);
+    const data = Object.keys(paymentData).length > 0 ? paymentData : rawData;
+    const metadata = asRecord(data.metadata ?? rawData.metadata ?? payload.metadata);
+    const transactionId = String(
+      data.reference ??
+        rawData.reference ??
+        payload.reference ??
+        data.id ??
+        rawData.id ??
+        "",
+    );
     const event =
       typeof payload.event === "string"
         ? payload.event
         : headers["x-webhook-event"] ?? "";
+    const payloadEnvironment = normalizeGeniusPayEnvironment(payload.environment);
+    const headerEnvironment = normalizeGeniusPayEnvironment(headers["x-webhook-environment"]);
+    if (payloadEnvironment && headerEnvironment && payloadEnvironment !== headerEnvironment) {
+      throw new PaymentError(
+        "ENVIRONMENT_MISMATCH",
+        "Les environnements indiqués par GeniusPay dans le webhook ne correspondent pas.",
+      );
+    }
+    const notificationEnvironment = payloadEnvironment ?? headerEnvironment;
     const signature = headers["x-webhook-signature"] ?? "";
     const timestamp = headers["x-webhook-timestamp"] ?? "";
     const signatureValid = this.isValidWebhookSignature(rawBody, timestamp, signature);
@@ -191,6 +228,7 @@ export class GeniusPayProvider implements PaymentProvider {
     if (event === "webhook.test") {
       return {
         provider: this.name,
+        environment: notificationEnvironment,
         transactionId,
         orderReference: null,
         status: "pending",
@@ -211,23 +249,38 @@ export class GeniusPayProvider implements PaymentProvider {
       );
     }
 
-    const status = data.status ?? statusFromEvent(event);
+    const status = data.status ?? rawData.status ?? statusFromEvent(event);
 
     return {
       provider: this.name,
+      environment: notificationEnvironment,
       transactionId,
       orderReference:
         typeof metadata.order_reference === "string" ? metadata.order_reference : null,
       status: normalizePaymentStatus(status),
-      amount: toAmount(data.amount),
-      currency: typeof data.currency === "string" ? data.currency : null,
+      amount: toAmount(data.amount ?? rawData.amount),
+      currency:
+        typeof data.currency === "string"
+          ? data.currency
+          : typeof rawData.currency === "string"
+            ? rawData.currency
+            : null,
       method:
         typeof data.payment_method === "string"
           ? data.payment_method
           : typeof data.provider === "string"
             ? data.provider
+            : typeof rawData.payment_method === "string"
+              ? rawData.payment_method
+              : typeof rawData.provider === "string"
+                ? rawData.provider
+                : null,
+      payerPhone:
+        typeof data.customer_phone === "string"
+          ? data.customer_phone
+          : typeof rawData.customer_phone === "string"
+            ? rawData.customer_phone
             : null,
-      payerPhone: typeof data.customer_phone === "string" ? data.customer_phone : null,
       signatureValid,
       raw: payload,
     };
@@ -327,6 +380,14 @@ export class GeniusPayProvider implements PaymentProvider {
 
     return body;
   }
+}
+
+function normalizeGeniusPayEnvironment(value: unknown): "sandbox" | "live" | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "sandbox" || normalized === "test") return "sandbox";
+  if (normalized === "live" || normalized === "production") return "live";
+  return undefined;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

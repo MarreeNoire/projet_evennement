@@ -133,6 +133,11 @@ Le modèle complet est dans `.env.example`, à copier en `.env.local`.
 production si une dépendance indispensable manque, en listant précisément les
 variables absentes.
 
+Pour GeniusPay, utilise `pk_sandbox_` avec `sk_sandbox_` et le secret du webhook
+Sandbox pendant les tests. L'application déduit le mode de ces clés et rejette
+une paire mélangée ou un webhook indiquant un autre environnement. Les clés
+`pk_live_` et `sk_live_` sont réservées aux paiements réels.
+
 ---
 
 ## Base de données
