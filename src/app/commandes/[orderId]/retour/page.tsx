@@ -58,13 +58,14 @@ export default async function PaymentReturnPage({
     try {
       await verifyAndConfirm(payment.provider_transaction_id);
     } catch (error) {
-      console.error("[PaymentReturn] Payment verification failed", {
+      console.error("[PaymentReturn] verifyAndConfirm failed", {
+        orderId,
+        transactionId: payment.provider_transaction_id,
+        error: error instanceof Error ? error.message : String(error),
         code:
           error && typeof error === "object" && "code" in error && typeof error.code === "string"
             ? error.code
-            : error instanceof Error
-              ? error.name
-              : "UNKNOWN",
+            : "UNKNOWN",
       });
     }
   }
