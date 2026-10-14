@@ -4,6 +4,7 @@ import { CalendarDays, MapPin, Pin, Users } from "lucide-react";
 
 import { SalonPostForm } from "@/components/salons/salon-post-form";
 import { SalonLiveChat } from "@/components/salons/salon-live-chat";
+import { SalonPolls } from "@/components/salons/salon-polls";
 import { PhaseTag } from "@/components/social/phase-tag";
 import { PostCard } from "@/components/social/post-card";
 import { SocialShell } from "@/components/social/social-shell";
@@ -20,6 +21,7 @@ import {
   getSalonChatMessages,
   getSalonMembers,
   getSalonMedia,
+  getSalonPolls,
   getSalonPosts,
   type SalonEventInfo,
 } from "@/lib/salons/queries";
@@ -78,6 +80,7 @@ export default async function SalonDetailPage({
     activeTab === "photos" ? getSalonMedia(id) : Promise.resolve([]),
     activeTab === "discussion" ? getSalonChatMessages(id) : Promise.resolve([]),
   ]);
+  const polls = activeTab === "sondages" ? await getSalonPolls(id, profile?.id ?? null) : [];
 
   const event = salon.event_id ? (events.get(salon.event_id) ?? null) : null;
   const commentsByPost = await getCommentsByPost(posts.map((post) => post.id));
@@ -169,6 +172,10 @@ export default async function SalonDetailPage({
         <div className="min-w-0">
           {activeTab === "discussion" ? (
             <SalonLiveChat salonId={id} messages={chatMessages} profile={profile} />
+          ) : null}
+
+          {activeTab === "sondages" ? (
+            <SalonPolls salonId={id} polls={polls} profile={profile} />
           ) : null}
 
           {activeTab === "fil" ? (

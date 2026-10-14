@@ -6,7 +6,7 @@ import { CheckoutForm } from "@/components/checkout/checkout-form";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Alert } from "@/components/ui/states";
-import { getCurrentUser, createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentProfile, createSupabaseServerClient } from "@/lib/supabase/server";
 import { getPublishedEventBySlug } from "@/lib/events/queries";
 import { env } from "@/lib/env";
 
@@ -24,18 +24,17 @@ export default async function CheckoutPage({
   const { slug } = await params;
   const { type } = await searchParams;
 
-  const user = await getCurrentUser();
-  if (!user) redirect(`/connexion?redirect=/evenements/${slug}/billets`);
+  const profile = await getCurrentProfile();
+  if (!profile) redirect(`/connexion?redirect=/evenements/${slug}/billets`);
 
   const data = await getPublishedEventBySlug(slug).catch(() => null);
   if (!data) notFound();
 
   const supabase = await createSupabaseServerClient();
-  const { data: full } = await supabase
-    .from("events")
-    .select("id")
-    .eq("id", data.event.id)
-    .maybeSingle();
+  const [{ data: full }, { data: contact }] = await Promise.all([
+    supabase.from("events").select("id").eq("id", data.event.id).maybeSingle(),
+    supabase.from("profile_contacts").select("phone").eq("user_id", profile.id).maybeSingle(),
+  ]);
   if (!full) notFound();
 
   const ticketTypes = data.ticketTypes.filter((t) => t.is_active);
@@ -72,6 +71,11 @@ export default async function CheckoutPage({
             ticketTypes={ticketTypes}
             preselectedId={preselected}
             paymentProvider={env.payment.provider}
+            initialBuyer={{
+              name: profile.full_name?.trim() || profile.display_name,
+              email: profile.email ?? "",
+              phone: contact?.phone ?? "",
+            }}
           />
         )}
       </main>

@@ -42,7 +42,13 @@ export default async function ProfilPublicPage({
           )
           .eq("id", id)
           .maybeSingle()
-      : supabase.from("profiles").select("*").eq("id", id).maybeSingle(),
+      : supabase
+          .from("profiles")
+          .select(
+            "id, username, display_name, avatar_url, city, bio, is_verified, interests, allow_connections",
+          )
+          .eq("id", id)
+          .maybeSingle(),
     getCurrentUser(),
   ]);
   const profile = profileResult.data;

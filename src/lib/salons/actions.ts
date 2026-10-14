@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 /** Mutations pour le salon communautaire (poster, commenter, réagir, join/leave). */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -385,5 +387,123 @@ export async function joinSalon(salonId: string): Promise<{ success: boolean; er
     if (insertError) return { success: false, error: insertError.message };
   }
 
+  return { success: true };
+}
+
+/** Crée un sondage et ses choix dans un salon accessible à l'utilisateur. */
+export async function createSalonPoll(
+  salonId: string,
+  question: string,
+  rawOptions: string[],
+): Promise<{ success: boolean; error?: string }> {
+  const normalizedQuestion = question.trim();
+  const options = rawOptions.map((option) => option.trim());
+  if (!/^[0-9a-f-]{36}$/i.test(salonId)) {
+    return { success: false, error: "Ce salon est invalide." };
+  }
+  if (normalizedQuestion.length < 1 || normalizedQuestion.length > 280) {
+    return { success: false, error: "La question doit contenir au maximum 280 caractères." };
+  }
+  if (
+    options.length < 2 ||
+    options.length > 6 ||
+    options.some((option) => !option || option.length > 120) ||
+    new Set(options.map((option) => option.toLocaleLowerCase())).size !== options.length
+  ) {
+    return { success: false, error: "Ajoute 2 à 6 choix distincts, de 120 caractères maximum." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: poll, error: pollError } = await supabase
+    .from("salon_polls")
+    .insert({ salon_id: salonId, author_id: userId, question: normalizedQuestion })
+    .select("id")
+    .single();
+  if (pollError || !poll) {
+    return { success: false, error: "Impossible de créer le sondage dans ce salon." };
+  }
+
+  const { error: optionsError } = await supabase
+    .from("salon_poll_options")
+    .insert(options.map((label, position) => ({ poll_id: poll.id, label, position })));
+  if (optionsError) {
+    await supabase.from("salon_polls").delete().eq("id", poll.id);
+    return { success: false, error: "Les choix n’ont pas pu être enregistrés. Réessaie." };
+  }
+
+  revalidatePath(`/salons/${salonId}`);
+  return { success: true };
+}
+
+/** Enregistre ou modifie le choix de l'utilisateur tant que le sondage est ouvert. */
+export async function voteSalonPoll(
+  pollId: string,
+  optionId: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (![pollId, optionId].every((value) => /^[0-9a-f-]{36}$/i.test(value))) {
+    return { success: false, error: "Ce choix de vote est invalide." };
+  }
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: poll, error: pollError } = await supabase
+    .from("salon_polls")
+    .select("salon_id, is_closed")
+    .eq("id", pollId)
+    .maybeSingle();
+  if (pollError || !poll || poll.is_closed) {
+    return { success: false, error: "Ce sondage est fermé ou indisponible." };
+  }
+
+  const { error } = await supabase
+    .from("salon_poll_votes")
+    .upsert(
+      { poll_id: pollId, option_id: optionId, user_id: userId },
+      { onConflict: "poll_id,user_id" },
+    );
+  if (error) return { success: false, error: "Ton vote n’a pas pu être enregistré. Réessaie." };
+
+  revalidatePath(`/salons/${poll.salon_id}`);
+  return { success: true };
+}
+
+/** Clôture définitivement un sondage (auteur ou modérateur selon les règles RLS). */
+export async function closeSalonPoll(
+  pollId: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!/^[0-9a-f-]{36}$/i.test(pollId)) {
+    return { success: false, error: "Ce sondage est invalide." };
+  }
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: poll, error: readError } = await supabase
+    .from("salon_polls")
+    .select("salon_id, is_closed")
+    .eq("id", pollId)
+    .maybeSingle();
+  if (readError || !poll) return { success: false, error: "Ce sondage est introuvable." };
+  if (poll.is_closed) return { success: true };
+
+  const { data, error } = await supabase
+    .from("salon_polls")
+    .update({ is_closed: true, closed_at: new Date().toISOString() })
+    .eq("id", pollId)
+    .eq("is_closed", false)
+    .select("id")
+    .maybeSingle();
+  if (error || !data) {
+    return {
+      success: false,
+      error: "Seuls l’auteur ou un modérateur peuvent clôturer ce sondage.",
+    };
+  }
+
+  revalidatePath(`/salons/${poll.salon_id}`);
   return { success: true };
 }

@@ -237,6 +237,7 @@ export type ReportTarget = (typeof REPORT_TARGETS)[number];
 export const SALON_TABS = [
   { slug: "accueil", label: "Accueil" },
   { slug: "discussion", label: "Chat en direct" },
+  { slug: "sondages", label: "Sondages" },
   { slug: "fil", label: "Publications" },
   { slug: "participants", label: "Participants" },
   { slug: "photos", label: "Photos" },

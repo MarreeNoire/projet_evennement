@@ -7,7 +7,8 @@ import { createSupabaseServerClient, getCurrentProfile } from "@/lib/supabase/se
 
 async function requireAdmin() {
   const profile = await getCurrentProfile();
-  if (!profile || !profile.roles.includes("admin")) throw new Error("Accès réservé aux administrateurs.");
+  if (!profile || !profile.roles.includes("admin"))
+    throw new Error("Accès réservé aux administrateurs.");
   return profile;
 }
 
@@ -27,7 +28,8 @@ export async function savePlatformCommissionAction(percent: number) {
     is_public: true,
     updated_by: profile.id,
   });
-  if (error) return { error: "Impossible d'enregistrer le taux. Vérifiez vos droits et réessayez." };
+  if (error)
+    return { error: "Impossible d'enregistrer le taux. Vérifiez vos droits et réessayez." };
 
   const { error: auditError } = await supabase.rpc("log_audit", {
     p_action: "platform.commission.update",
@@ -85,7 +87,8 @@ export async function resolveReportAction(
   const { error } = await supabase.rpc("resolve_report", {
     p_report_id: reportId,
     p_status: status,
-    p_resolution: status === "resolved" ? "Traité par l’administration." : "Signalement examiné et rejeté.",
+    p_resolution:
+      status === "resolved" ? "Traité par l’administration." : "Signalement examiné et rejeté.",
     p_hide_target: hideTarget,
   });
   if (error) return { error: "Le signalement n'a pas pu être traité. Actualisez puis réessayez." };
@@ -101,7 +104,10 @@ export async function updatePayoutAction(
   const profile = await requireAdmin();
   if (!/^[0-9a-f-]{36}$/i.test(payoutId)) return { error: "Reversement invalide." };
   const normalizedReference = reference.trim();
-  if (nextStatus === "paid" && (normalizedReference.length < 3 || normalizedReference.length > 120)) {
+  if (
+    nextStatus === "paid" &&
+    (normalizedReference.length < 3 || normalizedReference.length > 120)
+  ) {
     return { error: "Saisissez la référence de transfert pour confirmer le versement." };
   }
 
@@ -142,13 +148,17 @@ export async function updatePayoutAction(
     .eq("status", payout.status)
     .select("id")
     .maybeSingle();
-  if (updateError || !updated) return { error: "Le reversement a changé entre-temps. Actualisez puis réessayez." };
+  if (updateError || !updated)
+    return { error: "Le reversement a changé entre-temps. Actualisez puis réessayez." };
 
   const { error: auditError } = await supabase.rpc("log_audit", {
     p_action: `payout.${nextStatus}`,
     p_entity_type: "payout",
     p_entity_id: payoutId,
-    p_after: { status: nextStatus, reference: nextStatus === "paid" ? normalizedReference : payout.reference },
+    p_after: {
+      status: nextStatus,
+      reference: nextStatus === "paid" ? normalizedReference : payout.reference,
+    },
   });
   revalidatePath("/admin/paiements");
   return {
@@ -172,7 +182,10 @@ export async function setProfileVerificationAction(userId: string, verified: boo
     .eq("id", userId)
     .maybeSingle();
   if (readError || !profile) return { error: "Profil introuvable ou inaccessible." };
-  const { error } = await supabase.from("profiles").update({ is_verified: verified }).eq("id", userId);
+  const { error } = await createSupabaseAdminClient()
+    .from("profiles")
+    .update({ is_verified: verified })
+    .eq("id", userId);
   if (error) return { error: "La vérification du profil n'a pas pu être mise à jour." };
 
   const { error: auditError } = await supabase.rpc("log_audit", {
@@ -215,7 +228,8 @@ export async function setUserRoleAction(
     if (error.message.includes("LAST_ADMIN")) {
       return { error: "Le dernier administrateur de la plateforme ne peut pas être retiré." };
     }
-    if (error.message.includes("USER_NOT_FOUND")) return { error: "Cet utilisateur n’existe plus." };
+    if (error.message.includes("USER_NOT_FOUND"))
+      return { error: "Cet utilisateur n’existe plus." };
     return { error: "Le rôle n’a pas pu être modifié. Actualisez la page puis réessayez." };
   }
 
@@ -236,10 +250,11 @@ export async function deleteAdminEventAction(
   if (!/^[0-9a-f-]{36}$/i.test(eventId)) return { error: "Événement invalide." };
 
   const admin = createSupabaseAdminClient();
-  const [{ data: event, error: eventError }, { count: orderCount, error: ordersError }] = await Promise.all([
-    admin.from("events").select("id, title, slug, status").eq("id", eventId).maybeSingle(),
-    admin.from("orders").select("id", { count: "exact", head: true }).eq("event_id", eventId),
-  ]);
+  const [{ data: event, error: eventError }, { count: orderCount, error: ordersError }] =
+    await Promise.all([
+      admin.from("events").select("id, title, slug, status").eq("id", eventId).maybeSingle(),
+      admin.from("orders").select("id", { count: "exact", head: true }).eq("event_id", eventId),
+    ]);
 
   if (eventError || !event) return { error: "Événement introuvable." };
   if (ordersError) return { error: "Impossible de vérifier les ventes de cet événement." };
@@ -260,7 +275,10 @@ export async function deleteAdminEventAction(
     const { error } = await admin.from("events").delete().eq("id", eventId);
     if (error) {
       console.error("[deleteAdminEventAction] Suppression refusée:", error);
-      return { error: "L’événement n’a pas pu être supprimé. Vérifiez qu’aucune donnée liée ne bloque l’opération." };
+      return {
+        error:
+          "L’événement n’a pas pu être supprimé. Vérifiez qu’aucune donnée liée ne bloque l’opération.",
+      };
     }
   }
 
@@ -292,15 +310,18 @@ export async function setUserBanAction(
 ): Promise<{ error?: string; success?: string }> {
   const actor = await requireAdmin();
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { error: "Utilisateur invalide." };
-  if (banned && userId === actor.id) return { error: "Vous ne pouvez pas bannir votre propre compte." };
+  if (banned && userId === actor.id)
+    return { error: "Vous ne pouvez pas bannir votre propre compte." };
 
   const admin = createSupabaseAdminClient();
-  const [{ data: target, error: userError }, { data: targetRoles, error: rolesError }] = await Promise.all([
-    admin.auth.admin.getUserById(userId),
-    admin.from("user_roles").select("role").eq("user_id", userId),
-  ]);
+  const [{ data: target, error: userError }, { data: targetRoles, error: rolesError }] =
+    await Promise.all([
+      admin.auth.admin.getUserById(userId),
+      admin.from("user_roles").select("role").eq("user_id", userId),
+    ]);
 
-  if (userError || !target.user) return { error: "Utilisateur introuvable dans les comptes de la plateforme." };
+  if (userError || !target.user)
+    return { error: "Utilisateur introuvable dans les comptes de la plateforme." };
   if (rolesError) return { error: "Impossible de vérifier les rôles de cet utilisateur." };
   if (banned && targetRoles?.some((role) => role.role === "admin")) {
     return { error: "Un compte administrateur ne peut pas être banni depuis cette action." };
@@ -319,7 +340,11 @@ export async function setUserBanAction(
     p_action: banned ? "user.ban" : "user.unban",
     p_entity_type: "user",
     p_entity_id: userId,
-    p_before: { banned: Boolean(target.user.banned_until && Date.parse(target.user.banned_until) > Date.now()) },
+    p_before: {
+      banned: Boolean(
+        target.user.banned_until && Date.parse(target.user.banned_until) > Date.now(),
+      ),
+    },
     p_after: { banned, by: actor.id },
   });
 

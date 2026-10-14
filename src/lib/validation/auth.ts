@@ -22,9 +22,25 @@ const emailSchema = z
   .email("Adresse email invalide.")
   .max(254, "Adresse email trop longue.");
 
+export const phoneSchema = z
+  .string({ error: "Ton numéro de téléphone est requis." })
+  .trim()
+  .min(8, "Indique un numéro avec l'indicatif du pays, par exemple +225 07 00 00 00.")
+  .max(25, "Numéro de téléphone trop long.")
+  .regex(
+    /^\+[1-9][\d\s().-]*$/,
+    "Indique le numéro avec l'indicatif du pays, par exemple +225 07 00 00 00.",
+  )
+  .refine((value) => {
+    const digits = value.replace(/\D/g, "");
+    return digits.length >= 8 && digits.length <= 15;
+  }, "Le numéro doit contenir entre 8 et 15 chiffres.");
+
 export const loginSchema = z.object({
   email: emailSchema,
-  password: z.string({ error: "Le mot de passe est requis." }).min(1, "Le mot de passe est requis."),
+  password: z
+    .string({ error: "Le mot de passe est requis." })
+    .min(1, "Le mot de passe est requis."),
   rememberMe: z.boolean().optional().default(false),
 });
 
@@ -39,6 +55,7 @@ export const registerSchema = z
       .min(2, "2 caractères minimum.")
       .max(80, "80 caractères maximum."),
     email: emailSchema,
+    phone: phoneSchema,
     password: passwordSchema,
     confirmPassword: z.string({ error: "Confirme ton mot de passe." }),
     acceptTerms: z.literal(true, {

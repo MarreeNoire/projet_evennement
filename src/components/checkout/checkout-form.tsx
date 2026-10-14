@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, fieldAriaProps } from "@/components/ui/field";
@@ -12,7 +12,6 @@ import { priceOrder } from "@/lib/orders/pricing";
 import {
   checkoutItemsFromQuantities,
   checkoutSchema,
-  hasContact,
   type CheckoutInput,
 } from "@/lib/validation/checkout";
 import type { TicketTypeRow } from "@/types/database";
@@ -28,15 +27,20 @@ export function CheckoutForm({
   ticketTypes,
   preselectedId,
   paymentProvider,
+  initialBuyer,
 }: {
   eventId: string;
   ticketTypes: TicketTypeRow[];
   preselectedId?: string;
   paymentProvider: PaymentProviderName;
+  initialBuyer: { name: string; email: string; phone: string };
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
-  const checkoutAttempt = useRef<{ fingerprint: string; key: string } | null>(null);
+  const [checkoutAttempt, setCheckoutAttempt] = useState<{
+    fingerprint: string;
+    key: string;
+  } | null>(null);
   const initialTicket =
     ticketTypes.find(
       (ticket) =>
@@ -59,22 +63,18 @@ export function CheckoutForm({
     handleSubmit,
     setValue,
     setFocus,
-    control,
     formState: { errors, isSubmitting: pending },
   } = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       eventId,
       items: checkoutItemsFromQuantities(ticketTypes, initialQuantities),
-      buyerName: "",
-      buyerEmail: "",
-      buyerPhone: "",
+      buyerName: initialBuyer.name,
+      buyerEmail: initialBuyer.email,
+      buyerPhone: initialBuyer.phone,
       promoCode: "",
     },
   });
-
-  const buyerEmail = useWatch({ control, name: "buyerEmail" });
-  const buyerPhone = useWatch({ control, name: "buyerPhone" });
 
   const selectedLines = useMemo(
     () =>
@@ -94,35 +94,30 @@ export function CheckoutForm({
         setServerError("Choisis au moins un billet.");
         return;
       }
-      if (!hasContact(values)) {
-        setServerError("Indique au moins un email ou un numéro pour recevoir tes billets.");
-        return;
-      }
       try {
         const fingerprint = JSON.stringify({ ...values, eventId, items });
-        if (!checkoutAttempt.current) {
+        let attempt = checkoutAttempt;
+        if (!attempt) {
           try {
             const saved = window.sessionStorage.getItem(`rassemble_checkout_${eventId}`);
-            if (saved) checkoutAttempt.current = JSON.parse(saved) as { fingerprint: string; key: string };
+            if (saved) attempt = JSON.parse(saved) as { fingerprint: string; key: string };
           } catch {
             // Le formulaire reste utilisable si le navigateur bloque le stockage local.
           }
         }
-        if (checkoutAttempt.current?.fingerprint !== fingerprint) {
-          checkoutAttempt.current = { fingerprint, key: crypto.randomUUID() };
+        if (attempt?.fingerprint !== fingerprint) {
+          attempt = { fingerprint, key: crypto.randomUUID() };
           try {
-            window.sessionStorage.setItem(`rassemble_checkout_${eventId}`, JSON.stringify(checkoutAttempt.current));
+            window.sessionStorage.setItem(`rassemble_checkout_${eventId}`, JSON.stringify(attempt));
           } catch {
             // La clé en mémoire protège au moins les répétitions dans cette page.
           }
         }
-        const result = await startCheckout(
-          { ...values, eventId, items },
-          checkoutAttempt.current.key,
-        );
+        setCheckoutAttempt(attempt);
+        const result = await startCheckout({ ...values, eventId, items }, attempt.key);
         if (!result.ok || !result.paymentUrl) {
           if (result.retryWithNewAttempt) {
-            checkoutAttempt.current = null;
+            setCheckoutAttempt(null);
             window.sessionStorage.removeItem(`rassemble_checkout_${eventId}`);
           }
           setServerError(result.error ?? "Commande impossible. Réessaie.");
@@ -130,7 +125,7 @@ export function CheckoutForm({
         }
         if (result.paymentUrl.startsWith("/")) {
           if (result.completed) {
-            checkoutAttempt.current = null;
+            setCheckoutAttempt(null);
             window.sessionStorage.removeItem(`rassemble_checkout_${eventId}`);
           }
           router.push(result.paymentUrl);
@@ -209,8 +204,7 @@ export function CheckoutForm({
               <Field
                 label="Email"
                 htmlFor="buyerEmail"
-                required={!buyerPhone?.trim()}
-                hint={buyerPhone?.trim() ? "Facultatif" : "Requis si aucun téléphone"}
+                hint="Facultatif"
                 error={errors.buyerEmail?.message}
               >
                 <Input
@@ -218,8 +212,6 @@ export function CheckoutForm({
                   type="email"
                   autoComplete="email"
                   placeholder="koffi@example.ci"
-                  required={!buyerPhone?.trim()}
-                  aria-required={!buyerPhone?.trim()}
                   invalid={Boolean(errors.buyerEmail)}
                   {...fieldAriaProps("buyerEmail", { error: errors.buyerEmail?.message })}
                   {...register("buyerEmail")}
@@ -228,8 +220,13 @@ export function CheckoutForm({
               <Field
                 label="Téléphone"
                 htmlFor="buyerPhone"
-                required={!buyerEmail?.trim()}
-                hint={buyerEmail?.trim() ? "Facultatif" : "Requis si aucun email"}
+                required
+                hint={
+                  initialBuyer.phone
+                    ? "Prérempli depuis ton profil · modifiable"
+                    : "Avec l'indicatif du pays"
+                }
+                description="Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée."
                 error={errors.buyerPhone?.message}
               >
                 <Input
@@ -237,10 +234,14 @@ export function CheckoutForm({
                   type="tel"
                   autoComplete="tel"
                   placeholder="+225 07 00 00 00"
-                  required={!buyerEmail?.trim()}
-                  aria-required={!buyerEmail?.trim()}
+                  required
+                  aria-required="true"
                   invalid={Boolean(errors.buyerPhone)}
-                  {...fieldAriaProps("buyerPhone", { error: errors.buyerPhone?.message })}
+                  {...fieldAriaProps("buyerPhone", {
+                    error: errors.buyerPhone?.message,
+                    description:
+                      "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée.",
+                  })}
                   {...register("buyerPhone")}
                 />
               </Field>

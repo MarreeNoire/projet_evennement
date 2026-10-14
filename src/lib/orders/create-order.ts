@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { generateReference } from "@/lib/utils";
-import { checkoutSchema, hasContact, type CheckoutInput } from "@/lib/validation/checkout";
+import { checkoutSchema, type CheckoutInput } from "@/lib/validation/checkout";
 import { checkQuantityBounds, checkSaleWindow, priceOrder } from "@/lib/orders/pricing";
 
 /* =============================================================================
@@ -23,17 +23,16 @@ export interface CreateOrderResult {
   retryWithNewAttempt?: boolean;
 }
 
-export async function createOrder(input: CheckoutInput, idempotencyKey: string): Promise<CreateOrderResult> {
+export async function createOrder(
+  input: CheckoutInput,
+  idempotencyKey: string,
+): Promise<CreateOrderResult> {
   const parsed = checkoutSchema.safeParse(input);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? "Commande invalide.");
   }
 
   const values = parsed.data;
-  if (!hasContact(values)) {
-    throw new Error("Indique au moins un email ou un numéro de téléphone.");
-  }
-
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -47,7 +46,9 @@ export async function createOrder(input: CheckoutInput, idempotencyKey: string):
   if (maintenanceSetting?.value === true) {
     throw new Error("Les commandes sont momentanément suspendues pendant une maintenance.");
   }
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey)) {
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idempotencyKey)
+  ) {
     throw new Error("Session de paiement invalide. Actualise la page puis réessaie.");
   }
 
@@ -170,9 +171,10 @@ export async function createOrder(input: CheckoutInput, idempotencyKey: string):
     .eq("key", "platform.commission_rate")
     .maybeSingle();
   const configuredRate = commissionSetting?.value;
-  const commissionRate = typeof configuredRate === "number" && configuredRate >= 0 && configuredRate <= 1
-    ? configuredRate
-    : undefined;
+  const commissionRate =
+    typeof configuredRate === "number" && configuredRate >= 0 && configuredRate <= 1
+      ? configuredRate
+      : undefined;
 
   const pricing = priceOrder(
     values.items.map((item) => ({

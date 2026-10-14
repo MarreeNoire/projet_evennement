@@ -71,12 +71,19 @@ export const getCurrentProfile = cache(async function getCurrentProfile() {
 
   const supabase = await createSupabaseServerClient();
 
-  const [{ data: profile }, { data: roles }, { data: ownedOrgs }, { data: memberOrgs }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-    supabase.from("user_roles").select("role").eq("user_id", user.id),
-    supabase.from("organizations").select("id").eq("owner_id", user.id).limit(1),
-    supabase.from("organization_members").select("id").eq("user_id", user.id).limit(1),
-  ]);
+  const [{ data: profile }, { data: roles }, { data: ownedOrgs }, { data: memberOrgs }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select(
+          "id, username, display_name, full_name, email, avatar_url, bio, city, country, interests, visibility, allow_search, allow_connections, allow_private_messages, is_verified, onboarding_completed, last_seen_at, created_at, updated_at",
+        )
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", user.id),
+      supabase.from("organizations").select("id").eq("owner_id", user.id).limit(1),
+      supabase.from("organization_members").select("id").eq("user_id", user.id).limit(1),
+    ]);
 
   if (!profile) return null;
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Save } from "lucide-react";
 
 import { Stamp } from "@/components/social/stamp";
+import { ProfilePhoneForm } from "@/components/auth/profile-phone-form";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/states";
@@ -23,12 +24,15 @@ export default async function MonProfilPage() {
   if (!profile) redirect(`${ROUTES.login}?redirect=${ROUTES.profile}`);
 
   const supabase = await createSupabaseServerClient();
-  const { data: pastTickets } = await supabase
-    .from("my_tickets")
-    .select("event_title, event_start_at")
-    .lt("event_end_at", new Date().toISOString())
-    .order("event_start_at", { ascending: false })
-    .limit(12);
+  const [{ data: pastTickets }, { data: contact }] = await Promise.all([
+    supabase
+      .from("my_tickets")
+      .select("event_title, event_start_at")
+      .lt("event_end_at", new Date().toISOString())
+      .order("event_start_at", { ascending: false })
+      .limit(12),
+    supabase.from("profile_contacts").select("phone").eq("user_id", profile.id).maybeSingle(),
+  ]);
 
   const stamps = pastTickets ?? [];
 
@@ -38,24 +42,30 @@ export default async function MonProfilPage() {
         <SocialPageHeader eyebrow="Mon profil" title="Carte" accent="d'identité." />
 
         {/* Page d'identité */}
-        <section className="grid gap-6 border-y border-border py-8 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+        <section className="border-border grid gap-6 border-y py-8 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
           <Avatar src={profile.avatar_url} name={profile.display_name} size="xl" />
           <div>
             <h2 className="font-display text-3xl font-semibold">{profile.display_name}</h2>
-            {profile.username ? <p className="text-sm text-fg-subtle">@{profile.username}</p> : null}
-            <p className="mt-2 text-sm font-semibold text-primary">
+            {profile.username ? (
+              <p className="text-fg-subtle text-sm">@{profile.username}</p>
+            ) : null}
+            <p className="text-primary mt-2 text-sm font-semibold">
               {profile.roles.includes("organizer") ? "Organisateur" : "Participant"}
               {profile.is_verified ? " · Vérifié" : ""}
             </p>
-            {profile.bio ? <p className="mt-2 max-w-xl text-sm text-fg-muted">{profile.bio}</p> : null}
+            {profile.bio ? (
+              <p className="text-fg-muted mt-2 max-w-xl text-sm">{profile.bio}</p>
+            ) : null}
           </div>
         </section>
+
+        <ProfilePhoneForm initialPhone={contact?.phone ?? ""} />
 
         {/* Tampons */}
         <section aria-labelledby="tampons" className="flex flex-col gap-5">
           <div>
             <p className="eyebrow">Vécus</p>
-            <h2 id="tampons" className="mt-1 font-display text-2xl font-semibold">
+            <h2 id="tampons" className="font-display mt-1 text-2xl font-semibold">
               Événements tamponnés
             </h2>
           </div>
@@ -77,10 +87,13 @@ export default async function MonProfilPage() {
         </section>
 
         {/* Édition */}
-        <section aria-labelledby="editer" className="flex flex-col gap-5 border-t border-border pt-8">
+        <section
+          aria-labelledby="editer"
+          className="border-border flex flex-col gap-5 border-t pt-8"
+        >
           <div>
             <p className="eyebrow">Modifier</p>
-            <h2 id="editer" className="mt-1 font-display text-2xl font-semibold">
+            <h2 id="editer" className="font-display mt-1 text-2xl font-semibold">
               Informations visibles par les autres
             </h2>
           </div>
@@ -93,7 +106,7 @@ export default async function MonProfilPage() {
                   type="text"
                   name="display_name"
                   defaultValue={profile.display_name}
-                  className="h-11 rounded-md border border-border-strong bg-surface px-3 text-sm focus:border-border-focus focus:ring-1 focus:ring-border-focus focus:outline-none"
+                  className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus h-11 rounded-md border px-3 text-sm focus:ring-1 focus:outline-none"
                 />
               </label>
               <label className="flex flex-col gap-1.5 text-sm">
@@ -103,7 +116,7 @@ export default async function MonProfilPage() {
                   name="username"
                   defaultValue={profile.username ?? ""}
                   placeholder="nom_utilisateur"
-                  className="h-11 rounded-md border border-border-strong bg-surface px-3 text-sm focus:border-border-focus focus:ring-1 focus:ring-border-focus focus:outline-none"
+                  className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus h-11 rounded-md border px-3 text-sm focus:ring-1 focus:outline-none"
                 />
               </label>
             </div>
@@ -115,7 +128,7 @@ export default async function MonProfilPage() {
                 name="city"
                 defaultValue={profile.city ?? ""}
                 placeholder="Abidjan"
-                className="h-11 rounded-md border border-border-strong bg-surface px-3 text-sm focus:border-border-focus focus:ring-1 focus:ring-border-focus focus:outline-none"
+                className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus h-11 rounded-md border px-3 text-sm focus:ring-1 focus:outline-none"
               />
             </label>
 
@@ -126,7 +139,7 @@ export default async function MonProfilPage() {
                 rows={3}
                 defaultValue={profile.bio ?? ""}
                 placeholder="Passionné d'événements et de rencontres à Abidjan…"
-                className="resize-none rounded-md border border-border-strong bg-surface px-3 py-2 text-sm focus:border-border-focus focus:ring-1 focus:ring-border-focus focus:outline-none"
+                className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus resize-none rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
               />
             </label>
 
@@ -134,7 +147,7 @@ export default async function MonProfilPage() {
               type="submit"
               disabled
               title="L'enregistrement arrive bientôt"
-              className="inline-flex h-11 w-fit items-center gap-2 rounded-md bg-primary-solid px-5 text-sm font-semibold text-primary-solid-fg opacity-60"
+              className="bg-primary-solid text-primary-solid-fg inline-flex h-11 w-fit items-center gap-2 rounded-md px-5 text-sm font-semibold opacity-60"
             >
               <Save className="size-4" aria-hidden="true" />
               Enregistrer
