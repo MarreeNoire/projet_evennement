@@ -10,6 +10,7 @@ import type {
   SalonWithMemberCount,
   SalonChatMessageWithAuthor,
 } from "@/lib/salons/types";
+import type { SalonPollOptionRow, SalonPollRow } from "@/types/database";
 
 /**
  * Retourne les publications d'un salon, les plus recentes d'abord.
@@ -295,6 +296,81 @@ export async function getSalonById(salonId: string): Promise<SalonWithMemberCoun
       joined_at: m.joined_at,
     })),
   } as SalonWithMemberCount;
+}
+
+export type SalonPollWithResults = SalonPollRow & {
+  options: (SalonPollOptionRow & { voteCount: number })[];
+  totalVotes: number;
+  myOptionId: string | null;
+  canClose: boolean;
+};
+
+/** Sondages du salon, avec les résultats agrégés et les droits de clôture. */
+export async function getSalonPolls(
+  salonId: string,
+  userId: string | null,
+): Promise<SalonPollWithResults[]> {
+  const supabase = await createSupabaseServerClient();
+  const [{ data: polls, error }, { data: membership }] = await Promise.all([
+    supabase
+      .from("salon_polls")
+      .select("id, salon_id, author_id, question, is_closed, closed_at, created_at")
+      .eq("salon_id", salonId)
+      .order("created_at", { ascending: false }),
+    userId
+      ? supabase
+          .from("salon_members")
+          .select("role")
+          .eq("salon_id", salonId)
+          .eq("user_id", userId)
+          .is("left_at", null)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+
+  if (error) {
+    console.error("[getSalonPolls]", error.message);
+    return [];
+  }
+  if (!polls?.length) return [];
+
+  const pollIds = polls.map((poll) => poll.id);
+  const [{ data: options }, { data: votes }] = await Promise.all([
+    supabase
+      .from("salon_poll_options")
+      .select("id, poll_id, label, position")
+      .in("poll_id", pollIds)
+      .order("position", { ascending: true }),
+    supabase.from("salon_poll_votes").select("poll_id, option_id, user_id").in("poll_id", pollIds),
+  ]);
+
+  const optionsByPoll = new Map<string, SalonPollWithResults["options"]>();
+  for (const option of options ?? []) {
+    const grouped = optionsByPoll.get(option.poll_id) ?? [];
+    grouped.push({ ...option, voteCount: 0 });
+    optionsByPoll.set(option.poll_id, grouped);
+  }
+
+  const votesByOption = new Map<string, number>();
+  const votesByPoll = new Map<string, number>();
+  const myVoteByPoll = new Map<string, string>();
+  for (const vote of votes ?? []) {
+    votesByOption.set(vote.option_id, (votesByOption.get(vote.option_id) ?? 0) + 1);
+    votesByPoll.set(vote.poll_id, (votesByPoll.get(vote.poll_id) ?? 0) + 1);
+    if (userId && vote.user_id === userId) myVoteByPoll.set(vote.poll_id, vote.option_id);
+  }
+
+  const canModerate = membership?.role === "owner" || membership?.role === "moderator";
+  return polls.map((poll) => ({
+    ...poll,
+    options: (optionsByPoll.get(poll.id) ?? []).map((option) => ({
+      ...option,
+      voteCount: votesByOption.get(option.id) ?? 0,
+    })),
+    totalVotes: votesByPoll.get(poll.id) ?? 0,
+    myOptionId: myVoteByPoll.get(poll.id) ?? null,
+    canClose: Boolean(userId && (canModerate || poll.author_id === userId)),
+  }));
 }
 
 /**

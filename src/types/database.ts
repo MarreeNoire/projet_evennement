@@ -74,6 +74,13 @@ export type ProfileRow = {
   updated_at: string;
 };
 
+export type ProfileContactRow = {
+  user_id: string;
+  phone: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type UserRoleRow = {
   id: string;
   user_id: string;
@@ -203,6 +210,31 @@ export type PostRow = {
   hidden_reason: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type SalonPollRow = {
+  id: string;
+  salon_id: string;
+  author_id: string | null;
+  question: string;
+  is_closed: boolean;
+  closed_at: string | null;
+  created_at: string;
+};
+
+export type SalonPollOptionRow = {
+  id: string;
+  poll_id: string;
+  label: string;
+  position: number;
+};
+
+export type SalonPollVoteRow = {
+  id: string;
+  poll_id: string;
+  option_id: string;
+  user_id: string;
+  created_at: string;
 };
 
 export type CommentRow = {
@@ -640,6 +672,7 @@ export type Database = {
   public: {
     Tables: {
       profiles: TableDefinition<ProfileRow>;
+      profile_contacts: TableDefinition<ProfileContactRow>;
       user_roles: TableDefinition<UserRoleRow>;
       organizations: TableDefinition<OrganizationRow>;
       organization_members: TableDefinition<OrganizationMemberRow>;
@@ -657,6 +690,9 @@ export type Database = {
       salons: TableDefinition<SalonRow>;
       salon_members: TableDefinition<SalonMemberRow>;
       posts: TableDefinition<PostRow>;
+      salon_polls: TableDefinition<SalonPollRow>;
+      salon_poll_options: TableDefinition<SalonPollOptionRow>;
+      salon_poll_votes: TableDefinition<SalonPollVoteRow>;
       comments: TableDefinition<CommentRow>;
       reactions: TableDefinition<ReactionRow>;
       albums: TableDefinition<AlbumRow>;

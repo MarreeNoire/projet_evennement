@@ -22,13 +22,28 @@ describe("checkoutItemsFromQuantities", () => {
         items,
         buyerName: "Koffi Atta",
         buyerEmail: "koffi@example.ci",
-        buyerPhone: "",
+        buyerPhone: "+225 07 00 00 00",
         promoCode: "",
       }).success,
     ).toBe(true);
   });
 
+  it("requires a phone number for the payment request", () => {
+    const parsed = checkoutSchema.safeParse({
+      eventId: "11111111-1111-4111-8111-111111111111",
+      items: [{ ticketTypeId: "22222222-2222-4222-8222-222222222222", quantity: 1 }],
+      buyerName: "Koffi Atta",
+      buyerEmail: "",
+      buyerPhone: "",
+      promoCode: "",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
   it("omits ticket types with no selected quantity", () => {
-    expect(checkoutItemsFromQuantities([{ id: "22222222-2222-4222-8222-222222222222" }], {})).toEqual([]);
+    expect(
+      checkoutItemsFromQuantities([{ id: "22222222-2222-4222-8222-222222222222" }], {}),
+    ).toEqual([]);
   });
 });
