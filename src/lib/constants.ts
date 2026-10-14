@@ -233,10 +233,9 @@ export type ReportReason = (typeof REPORT_REASONS)[number]["value"];
 export const REPORT_TARGETS = ["post", "comment", "user", "event", "message"] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 
-/** Onglets du salon événementiel (cf. §13 du cahier). */
+/** Sections du salon événementiel. */
 export const SALON_TABS = [
   { slug: "accueil", label: "Accueil" },
-  { slug: "discussion", label: "Chat en direct" },
   { slug: "sondages", label: "Sondages" },
   { slug: "fil", label: "Publications" },
   { slug: "participants", label: "Participants" },

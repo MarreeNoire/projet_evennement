@@ -5,6 +5,7 @@ import { Avatar } from "@/components/ui/avatar";
 import type { CommentWithAuthor, PostWithAuthor } from "@/lib/salons/types";
 import { formatRelative } from "@/lib/social/time";
 
+import { PostEditControl } from "./post-edit-control";
 import { PostActions } from "./post-actions";
 
 /* =============================================================================
@@ -18,9 +19,11 @@ import { PostActions } from "./post-actions";
 export function PostCard({
   post,
   comments = [],
+  currentUserId = null,
 }: {
   post: PostWithAuthor;
   comments?: CommentWithAuthor[];
+  currentUserId?: string | null;
 }) {
   const authorName = post.author?.display_name ?? "Membre du salon";
   const isAnnouncement = post.kind === "announcement";
@@ -29,7 +32,7 @@ export function PostCard({
   );
 
   return (
-    <article className="group border-border bg-surface hover:border-border-strong mb-4 border-y px-4 py-5 transition-colors sm:px-5 sm:py-6">
+    <article className="group border-border bg-surface hover:border-border-strong mb-4 rounded-2xl border px-4 py-5 shadow-sm transition-colors sm:px-6 sm:py-6">
       <div className="flex items-start gap-3">
         {post.author ? (
           <Link
@@ -61,9 +64,18 @@ export function PostCard({
               <BadgeCheck className="text-primary size-4" aria-label="Profil vérifié" />
             ) : null}
             <span className="text-fg-subtle text-xs">· {formatRelative(post.created_at)}</span>
+            {post.updated_at &&
+            new Date(post.updated_at).getTime() > new Date(post.created_at).getTime() + 1000 ? (
+              <span className="text-fg-subtle text-xs">· modifiée</span>
+            ) : null}
             {post.is_pinned ? (
               <span className="bg-primary/10 text-2xs text-primary inline-flex items-center gap-1 rounded-sm px-2 py-0.5 font-bold">
                 Épinglé
+              </span>
+            ) : null}
+            {currentUserId && currentUserId === post.author?.id ? (
+              <span className="ml-auto">
+                <PostEditControl postId={post.id} content={post.content} />
               </span>
             ) : null}
           </header>

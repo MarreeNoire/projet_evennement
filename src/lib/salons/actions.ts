@@ -203,6 +203,35 @@ export async function createPost(
   return { success: true, postId: data.id };
 }
 
+/** Modifie le texte d'une publication appartenant à l'utilisateur courant. */
+export async function updateSalonPost(
+  postId: string,
+  content: string,
+): Promise<{ success: boolean; error?: string }> {
+  const normalized = content.trim();
+  if (!normalized || normalized.length > 5000) {
+    return { success: false, error: "La publication doit contenir entre 1 et 5 000 caractères." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data, error } = await supabase
+    .from("posts")
+    .update({ content: normalized, updated_at: new Date().toISOString() })
+    .eq("id", postId)
+    .eq("author_id", userId)
+    .select("salon_id")
+    .maybeSingle();
+
+  if (error) return { success: false, error: "La modification n'a pas pu être enregistrée." };
+  if (!data) return { success: false, error: "Cette publication ne peut plus être modifiée." };
+
+  revalidatePath(`/salons/${data.salon_id}`);
+  return { success: true };
+}
+
 /**
  * Crée un commentaire (ou réponse à un commentaire).
  * parent_id = null → réponse à un post ; parent_id = commentaire → réponse.

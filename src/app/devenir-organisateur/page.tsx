@@ -18,7 +18,7 @@ const BENEFITS = [
   {
     title: "Un salon pour ta communauté",
     description:
-      "Chaque événement crée automatiquement son salon : discussion, photos, programme et annonces avec les participants.",
+      "Chaque événement crée automatiquement son salon : publications, photos, sondages, programme et annonces pour les participants.",
   },
   {
     title: "Check-in par QR code",
@@ -84,7 +84,12 @@ export default async function BecomeOrganizerPage() {
     const supabase = await createSupabaseServerClient();
     const [{ data: owned }, { data: memberships }] = await Promise.all([
       supabase.from("organizations").select("id").eq("owner_id", profile.id).limit(1),
-      supabase.from("organization_members").select("id").eq("user_id", profile.id).eq("status", "active").limit(1),
+      supabase
+        .from("organization_members")
+        .select("id")
+        .eq("user_id", profile.id)
+        .eq("status", "active")
+        .limit(1),
     ]);
     hasOrganization = Boolean(owned?.length || memberships?.length);
   }
@@ -94,16 +99,16 @@ export default async function BecomeOrganizerPage() {
       <SiteHeader />
       <main id="contenu" className="flex flex-col">
         {/* Hero */}
-        <section className="border-b border-border bg-surface">
+        <section className="border-border bg-surface border-b">
           <div className="container-page grid gap-8 py-14 md:py-20 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:gap-16">
             <div className="flex flex-col gap-6">
               <p className="eyebrow">Pour les organisateurs</p>
               <h1 className="font-display text-4xl leading-[1.02] font-semibold md:text-6xl">
                 Organise ton événement,{" "}
-                <span className="font-normal text-primary italic">{APP_NAME}</span> s&apos;occupe du
+                <span className="text-primary font-normal italic">{APP_NAME}</span> s&apos;occupe du
                 reste.
               </h1>
-              <p className="text-base leading-relaxed text-fg-muted">
+              <p className="text-fg-muted text-base leading-relaxed">
                 Billetterie mobile money, check-in par QR code, salon communautaire et statistiques
                 de vente : tout ce qu&apos;il faut pour vendre des billets et garder le lien avec
                 tes participants, avant, pendant et après.
@@ -113,10 +118,11 @@ export default async function BecomeOrganizerPage() {
             <div className="flex flex-col gap-4">
               {profile ? (
                 hasOrganization ? (
-                  <div className="rounded-xl border border-success/30 bg-success-subtle/20 p-6 space-y-4 text-center">
-                    <p className="font-bold text-lg text-fg">Vous êtes déjà organisateur !</p>
-                    <p className="text-sm text-fg-muted">
-                      Accédez directement à votre tableau de bord pour créer et gérer vos événements.
+                  <div className="border-success/30 bg-success-subtle/20 space-y-4 rounded-xl border p-6 text-center">
+                    <p className="text-fg text-lg font-bold">Vous êtes déjà organisateur !</p>
+                    <p className="text-fg-muted text-sm">
+                      Accédez directement à votre tableau de bord pour créer et gérer vos
+                      événements.
                     </p>
                     <ButtonLink href="/org" size="lg" className="w-full justify-center">
                       Accéder à mon espace organisateur
@@ -126,10 +132,11 @@ export default async function BecomeOrganizerPage() {
                   <BecomeOrganizerForm user={{ displayName: profile.display_name }} />
                 )
               ) : (
-                <div className="rounded-xl border border-border bg-bg-subtle p-6 space-y-4">
-                  <p className="font-bold text-lg text-fg">Prêt à vous lancer ?</p>
-                  <p className="text-sm text-fg-muted">
-                    Créez votre compte gratuit en moins d&apos;une minute pour activer votre espace organisateur.
+                <div className="border-border bg-bg-subtle space-y-4 rounded-xl border p-6">
+                  <p className="text-fg text-lg font-bold">Prêt à vous lancer ?</p>
+                  <p className="text-fg-muted text-sm">
+                    Créez votre compte gratuit en moins d&apos;une minute pour activer votre espace
+                    organisateur.
                   </p>
                   <div className="flex flex-col gap-2">
                     <ButtonLink href={ROUTES.register} size="lg" fullWidth>
@@ -152,20 +159,20 @@ export default async function BecomeOrganizerPage() {
               <p className="eyebrow">Ce qui est inclus</p>
               <h2
                 id="avantages"
-                className="mt-3 font-display text-3xl leading-[1.05] font-semibold md:text-4xl"
+                className="font-display mt-3 text-3xl leading-[1.05] font-semibold md:text-4xl"
               >
                 Tout pour réussir ton événement.
               </h2>
-              <p className="mt-3 text-sm text-fg-muted">
+              <p className="text-fg-muted mt-3 text-sm">
                 De la mise en vente du premier billet aux souvenirs après l&apos;événement.
               </p>
             </div>
 
             <ul className="grid gap-x-10 sm:grid-cols-2">
               {BENEFITS.map(({ title, description }) => (
-                <li key={title} className="border-t border-border py-5">
+                <li key={title} className="border-border border-t py-5">
                   <h3 className="font-display text-lg font-semibold">{title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-fg-muted">{description}</p>
+                  <p className="text-fg-muted mt-1.5 text-sm leading-relaxed">{description}</p>
                 </li>
               ))}
             </ul>
@@ -173,17 +180,17 @@ export default async function BecomeOrganizerPage() {
         </section>
 
         {/* Formules */}
-        <section className="border-y border-border bg-bg-subtle" aria-labelledby="formules">
+        <section className="border-border bg-bg-subtle border-y" aria-labelledby="formules">
           <div className="container-page flex flex-col gap-10 py-16 md:py-20">
             <div className="max-w-2xl">
               <p className="eyebrow">Tarifs</p>
               <h2
                 id="formules"
-                className="mt-3 font-display text-3xl leading-[1.05] font-semibold md:text-4xl"
+                className="font-display mt-3 text-3xl leading-[1.05] font-semibold md:text-4xl"
               >
                 Des formules simples.
               </h2>
-              <p className="mt-3 text-sm text-fg-muted">
+              <p className="text-fg-muted mt-3 text-sm">
                 Commission unique de {Math.round(PLATFORM_COMMISSION_RATE * 100)} % en{" "}
                 {CURRENCY_LABEL} sur les billets payants, sans engagement.
               </p>
@@ -195,8 +202,8 @@ export default async function BecomeOrganizerPage() {
                   key={plan.name}
                   className={
                     plan.highlighted
-                      ? "flex flex-col gap-5 border-t-4 border-primary pt-4"
-                      : "flex flex-col gap-5 border-t-4 border-border pt-4"
+                      ? "border-primary flex flex-col gap-5 border-t-4 pt-4"
+                      : "border-border flex flex-col gap-5 border-t-4 pt-4"
                   }
                 >
                   <div className="flex flex-col gap-1.5">
@@ -205,13 +212,13 @@ export default async function BecomeOrganizerPage() {
                     <p className="font-display text-3xl font-semibold tabular-nums">
                       {plan.price === "0" ? `0 ${CURRENCY_LABEL}` : plan.price}
                     </p>
-                    <p className="text-sm text-fg-muted">{plan.tagline}</p>
+                    <p className="text-fg-muted text-sm">{plan.tagline}</p>
                   </div>
 
-                  <ul className="flex flex-col gap-2 border-t border-dashed border-border-strong pt-4">
+                  <ul className="border-border-strong flex flex-col gap-2 border-t border-dashed pt-4">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-baseline gap-2.5 text-sm">
-                        <span aria-hidden="true" className="font-semibold text-primary">
+                        <span aria-hidden="true" className="text-primary font-semibold">
                           +
                         </span>
                         <span>{feature}</span>

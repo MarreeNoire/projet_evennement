@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { CalendarDays, MapPin, Pin, Users } from "lucide-react";
 
 import { SalonPostForm } from "@/components/salons/salon-post-form";
-import { SalonLiveChat } from "@/components/salons/salon-live-chat";
 import { SalonPolls } from "@/components/salons/salon-polls";
 import { PhaseTag } from "@/components/social/phase-tag";
 import { PostCard } from "@/components/social/post-card";
@@ -18,7 +17,6 @@ import {
   getCommentsByPost,
   getEventsByIds,
   getSalonById,
-  getSalonChatMessages,
   getSalonMembers,
   getSalonMedia,
   getSalonPolls,
@@ -65,12 +63,12 @@ export default async function SalonDetailPage({
 }) {
   const { id } = await params;
   const { tab } = await searchParams;
-  const activeTab: TabSlug = SALON_TABS.find((item) => item.slug === tab)?.slug ?? "discussion";
+  const activeTab: TabSlug = SALON_TABS.find((item) => item.slug === tab)?.slug ?? "fil";
 
   const salon = await getSalonById(id);
   if (!salon) notFound();
 
-  const [posts, members, profile, events, photos, chatMessages] = await Promise.all([
+  const [posts, members, profile, events, photos] = await Promise.all([
     getSalonPosts(id),
     getSalonMembers(id, 40),
     getCurrentProfile(),
@@ -78,7 +76,6 @@ export default async function SalonDetailPage({
       ? getEventsByIds([salon.event_id])
       : Promise.resolve(new Map<string, SalonEventInfo>()),
     activeTab === "photos" ? getSalonMedia(id) : Promise.resolve([]),
-    activeTab === "discussion" ? getSalonChatMessages(id) : Promise.resolve([]),
   ]);
   const polls = activeTab === "sondages" ? await getSalonPolls(id, profile?.id ?? null) : [];
 
@@ -91,20 +88,31 @@ export default async function SalonDetailPage({
   return (
     <SocialShell active="salons">
       {/* Affiche du salon */}
-      <header className="bg-surface-raised relative overflow-hidden rounded-lg p-6 sm:p-10">
+      <header className="bg-surface-raised border-border relative isolate min-h-64 overflow-hidden rounded-2xl border p-6 shadow-sm sm:min-h-80 sm:p-10">
         {event?.cover_url ? (
           <PublicStorageImage
             src={event.cover_url}
             alt=""
-            className="absolute inset-0 size-full object-cover opacity-25"
+            className="absolute inset-0 z-0 size-full object-cover"
             sizes="100vw"
             fill
             quality={55}
           />
         ) : null}
-        <div className="relative">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-2xs font-semibold tracking-[0.14em] uppercase opacity-90">
+        {event?.cover_url ? (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 z-10 bg-gradient-to-r from-black/80 via-black/55 to-black/15"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="from-primary/10 to-accent-subtle/60 absolute inset-0 z-10 bg-gradient-to-br via-transparent"
+          />
+        )}
+        <div className={cn("relative z-10", event?.cover_url ? "text-white" : "text-fg")}>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="bg-surface/15 text-2xs rounded-full px-3 py-1 font-semibold tracking-[0.12em] uppercase backdrop-blur-sm">
               Salon de l&apos;événement
             </span>
             {event && phase ? (
@@ -112,7 +120,7 @@ export default async function SalonDetailPage({
             ) : null}
           </div>
 
-          <h1 className="font-display mt-4 max-w-3xl text-4xl leading-[1.02] font-semibold md:text-6xl">
+          <h1 className="font-display mt-5 max-w-3xl text-4xl leading-[1.02] font-semibold tracking-tight md:text-6xl">
             {salon.name}
           </h1>
           {salon.description ? (
@@ -121,7 +129,7 @@ export default async function SalonDetailPage({
             </p>
           ) : null}
 
-          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+          <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium">
             {event ? (
               <>
                 <li className="flex items-center gap-2">
@@ -146,7 +154,7 @@ export default async function SalonDetailPage({
       {/* Onglets */}
       <nav
         aria-label="Sections du salon"
-        className="no-scrollbar border-border mt-6 flex gap-6 overflow-x-auto border-b"
+        className="no-scrollbar border-border mt-6 flex gap-2 overflow-x-auto border-b pb-2"
       >
         {SALON_TABS.map((item) => {
           const isActive = item.slug === activeTab;
@@ -156,10 +164,10 @@ export default async function SalonDetailPage({
               href={`/salons/${id}?tab=${item.slug}`}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "-mb-px border-b-2 py-3 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
+                "inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
                 isActive
-                  ? "border-primary text-fg"
-                  : "text-fg-muted hover:text-fg border-transparent",
+                  ? "bg-primary-solid text-primary-solid-fg shadow-sm"
+                  : "text-fg-muted hover:bg-bg-muted hover:text-fg",
               )}
             >
               {item.label}
@@ -170,10 +178,6 @@ export default async function SalonDetailPage({
 
       <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0">
-          {activeTab === "discussion" ? (
-            <SalonLiveChat salonId={id} messages={chatMessages} profile={profile} />
-          ) : null}
-
           {activeTab === "sondages" ? (
             <SalonPolls salonId={id} polls={polls} profile={profile} />
           ) : null}
@@ -199,13 +203,18 @@ export default async function SalonDetailPage({
                 </h2>
                 {posts.filter((post) => post.kind === "announcement").length === 0 ? (
                   <p className="text-fg-muted text-sm">
-                    Aucune annonce pour le moment. Elles apparaîtront ici et dans la discussion.
+                    Aucune annonce pour le moment. Elles apparaîtront ici et dans le fil du salon.
                   </p>
                 ) : (
                   posts
                     .filter((post) => post.kind === "announcement")
                     .map((post) => (
-                      <PostCard key={post.id} post={post} comments={commentsByPost.get(post.id)} />
+                      <PostCard
+                        key={post.id}
+                        post={post}
+                        comments={commentsByPost.get(post.id)}
+                        currentUserId={profile?.id}
+                      />
                     ))
                 )}
               </section>
@@ -256,7 +265,7 @@ export default async function SalonDetailPage({
             photos.length === 0 ? (
               <EmptyState
                 title="Pas encore de photos"
-                description="Les photos publiées dans la discussion apparaîtront ici."
+                description="Les photos partagées dans les publications du salon apparaîtront ici."
               />
             ) : (
               <ImageCarousel
@@ -397,7 +406,12 @@ function Discussion({
                 <span aria-hidden="true" className="bg-border h-px flex-1" />
               </div>
               {pinned.map((post) => (
-                <PostCard key={post.id} post={post} comments={commentsByPost.get(post.id)} />
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  comments={commentsByPost.get(post.id)}
+                  currentUserId={profile?.id}
+                />
               ))}
             </section>
           ) : null}
@@ -431,12 +445,13 @@ function Discussion({
                           key={post.id}
                           post={post}
                           comments={commentsByPost.get(post.id)}
+                          currentUserId={profile?.id}
                         />
                       ))
                     ) : (
                       <p className="text-fg-muted border-border border-b py-4 text-sm">
                         {phase === key
-                          ? "Le salon est ouvert à cette étape. Lance la conversation depuis le formulaire ci-dessus."
+                          ? "Le salon est ouvert à cette étape. Partage une publication depuis le formulaire ci-dessus."
                           : "Aucun échange n’est affiché pour cette étape."}
                       </p>
                     )}
@@ -447,7 +462,12 @@ function Discussion({
           ) : regular.length > 0 ? (
             <section aria-label="Publications">
               {regular.map((post) => (
-                <PostCard key={post.id} post={post} comments={commentsByPost.get(post.id)} />
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  comments={commentsByPost.get(post.id)}
+                  currentUserId={profile?.id}
+                />
               ))}
             </section>
           ) : null}

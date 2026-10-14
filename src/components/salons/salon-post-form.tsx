@@ -8,8 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Alert } from "@/components/ui/states";
 import { PhaseTag } from "@/components/social/phase-tag";
 import { createPost } from "@/lib/salons/actions";
-import { LIMITS } from "@/lib/constants";
-import { STORAGE_BUCKETS } from "@/lib/constants";
+import { LIMITS, STORAGE_BUCKETS } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { EventPhase } from "@/lib/social/phase";
 
@@ -40,8 +39,6 @@ export function SalonPostForm({
   const previews = useMemo(() => photos.map((photo) => URL.createObjectURL(photo)), [photos]);
 
   useEffect(() => () => previews.forEach((url) => URL.revokeObjectURL(url)), [previews]);
-
-  const remaining = LIMITS.MAX_POST_LENGTH - content.length;
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -88,7 +85,7 @@ export function SalonPostForm({
     <form
       onSubmit={handleSubmit}
       aria-busy={pending}
-      className="border-border bg-surface mb-6 rounded-sm border p-3 sm:p-4"
+      className="border-border bg-surface mb-6 rounded-2xl border p-4 shadow-sm sm:p-5"
     >
       {error ? (
         <div className="mb-4">
@@ -98,7 +95,7 @@ export function SalonPostForm({
         </div>
       ) : null}
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 sm:gap-4">
         <Avatar src={author.avatarUrl} name={author.name} size="md" />
         <div className="min-w-0 flex-1">
           <label htmlFor="salon-post" className="sr-only">
@@ -109,13 +106,13 @@ export function SalonPostForm({
             value={content}
             onChange={(event) => setContent(event.target.value)}
             maxLength={LIMITS.MAX_POST_LENGTH}
-            rows={3}
-            placeholder="Quoi de neuf ? Pose une question, partage une info ou un bon plan..."
-            className="placeholder:text-fg-subtle w-full resize-none bg-transparent text-base leading-relaxed focus:outline-none"
+            rows={4}
+            placeholder="Partage une question, une idée ou un moment de l’événement…"
+            className="placeholder:text-fg-subtle min-h-28 w-full resize-y bg-transparent text-base leading-relaxed focus:outline-none"
           />
 
           <div className="border-border/60 mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <input
                 ref={inputRef}
                 type="file"
@@ -143,26 +140,23 @@ export function SalonPostForm({
                     ? "L'envoi de photos est désactivé pour cet événement"
                     : "Ajouter des photos"
                 }
-                className="text-fg-subtle hover:bg-bg-muted inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium"
+                className="text-fg-muted hover:bg-bg-muted hover:text-fg border-border inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ImageIcon className="size-4" aria-hidden="true" />
-                Photo
+                {photos.length ? `Photos ${photos.length}/4` : "Ajouter des photos"}
               </button>
-              {photos.length > 0 ? (
-                <span className="text-fg-muted text-xs">{photos.length}/4 photos</span>
-              ) : null}
               {phase ? <PhaseTag phase={phase} /> : null}
             </div>
 
-            <div className="flex items-center gap-3">
-              {remaining < 500 ? (
-                <span className="text-fg-subtle text-xs tabular-nums">{remaining}</span>
-              ) : null}
+            <div className="ml-auto flex items-center gap-3">
+              <span className="text-fg-subtle text-xs tabular-nums" aria-live="polite">
+                {content.length}/{LIMITS.MAX_POST_LENGTH}
+              </span>
               <button
                 type="submit"
                 disabled={pending || content.trim().length === 0}
                 aria-busy={pending}
-                className="bg-primary-solid hover:bg-primary-solid-hover text-primary-solid-fg inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-4 text-xs font-semibold transition-colors disabled:cursor-progress disabled:opacity-60 sm:px-5"
+                className="bg-primary-solid hover:bg-primary-solid-hover text-primary-solid-fg inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold shadow-sm transition-colors disabled:cursor-progress disabled:opacity-60"
               >
                 {pending ? (
                   <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
@@ -191,7 +185,7 @@ export function SalonPostForm({
               <button
                 type="button"
                 onClick={() => setPhotos((current) => current.filter((_, i) => i !== index))}
-                className="border-border bg-surface absolute top-1 right-1 border px-2 py-1 text-xs font-semibold"
+                className="border-border bg-surface/95 hover:bg-surface absolute top-2 right-2 min-h-10 rounded-full border px-3 text-xs font-semibold shadow-sm"
                 aria-label={`Retirer la photo ${index + 1}`}
               >
                 Retirer
