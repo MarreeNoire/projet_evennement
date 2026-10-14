@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Alert } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const {
@@ -91,15 +93,31 @@ export function LoginForm() {
       </Field>
 
       <Field label="Mot de passe" htmlFor="password" required error={errors.password?.message}>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          placeholder="••••••••"
-          invalid={Boolean(errors.password)}
-          {...fieldAriaProps("password", { error: errors.password?.message })}
-          {...register("password")}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            placeholder="••••••••"
+            className="pr-12"
+            invalid={Boolean(errors.password)}
+            {...fieldAriaProps("password", { error: errors.password?.message })}
+            {...register("password")}
+          />
+          <button
+            type="button"
+            className="text-fg-muted hover:text-fg focus-visible:ring-border-focus absolute inset-y-0 right-1 inline-flex min-h-11 min-w-11 items-center justify-center rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((visible) => !visible)}
+          >
+            {showPassword ? (
+              <EyeOff className="size-4" aria-hidden="true" />
+            ) : (
+              <Eye className="size-4" aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </Field>
 
       <div className="flex items-center justify-between text-sm">

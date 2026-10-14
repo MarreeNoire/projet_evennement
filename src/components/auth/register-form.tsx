@@ -4,15 +4,52 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 import { Alert } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
-import { Field, Input, fieldAriaProps } from "@/components/ui/field";
+import { Field, Input, Select, fieldAriaProps } from "@/components/ui/field";
 import { ROUTES } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { registerSchema, type RegisterInput } from "@/lib/validation/auth";
+
+const PHONE_COUNTRIES = [
+  { region: "CI", name: "Côte d’Ivoire", code: "225" },
+  { region: "SN", name: "Sénégal", code: "221" },
+  { region: "BF", name: "Burkina Faso", code: "226" },
+  { region: "ML", name: "Mali", code: "223" },
+  { region: "TG", name: "Togo", code: "228" },
+  { region: "BJ", name: "Bénin", code: "229" },
+  { region: "GN", name: "Guinée", code: "224" },
+  { region: "CM", name: "Cameroun", code: "237" },
+  { region: "CD", name: "RD Congo", code: "243" },
+  { region: "CG", name: "Congo", code: "242" },
+  { region: "GA", name: "Gabon", code: "241" },
+  { region: "NE", name: "Niger", code: "227" },
+  { region: "NG", name: "Nigeria", code: "234" },
+  { region: "GH", name: "Ghana", code: "233" },
+  { region: "KE", name: "Kenya", code: "254" },
+  { region: "ZA", name: "Afrique du Sud", code: "27" },
+  { region: "MA", name: "Maroc", code: "212" },
+  { region: "DZ", name: "Algérie", code: "213" },
+  { region: "TN", name: "Tunisie", code: "216" },
+  { region: "FR", name: "France", code: "33" },
+  { region: "BE", name: "Belgique", code: "32" },
+  { region: "CH", name: "Suisse", code: "41" },
+  { region: "CA", name: "Canada", code: "1" },
+  { region: "US", name: "États-Unis", code: "1" },
+  { region: "GB", name: "Royaume-Uni", code: "44" },
+  { region: "DE", name: "Allemagne", code: "49" },
+  { region: "ES", name: "Espagne", code: "34" },
+  { region: "IT", name: "Italie", code: "39" },
+] as const;
+
+function findPhoneCountry(digits: string) {
+  return [...PHONE_COUNTRIES]
+    .sort((a, b) => b.code.length - a.code.length)
+    .find((country) => digits.startsWith(country.code));
+}
 
 /* Inscription : crée le compte Auth + profil public, gère la confirmation. */
 
@@ -22,11 +59,14 @@ export function RegisterForm() {
   const [emailSent, setEmailSent] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [phoneCountry, setPhoneCountry] = useState<(typeof PHONE_COUNTRIES)[number]>(PHONE_COUNTRIES[0]);
+  const [phoneInput, setPhoneInput] = useState("");
   const [pending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -39,6 +79,53 @@ export function RegisterForm() {
       acceptTerms: false as unknown as true,
     },
   });
+
+  useEffect(() => {
+    const region = navigator.language.match(/-([A-Za-z]{2})(?:-|$)/)?.[1]?.toUpperCase();
+    const detectedCountry = PHONE_COUNTRIES.find((country) => country.region === region);
+    if (detectedCountry) {
+      const timeout = window.setTimeout(() => setPhoneCountry(detectedCountry), 0);
+      return () => window.clearTimeout(timeout);
+    }
+  }, []);
+
+  const phoneField = register("phone");
+
+  function handlePhoneInput(value: string) {
+    setPhoneInput(value);
+    const trimmed = value.trim();
+    const isInternational = trimmed.startsWith("+") || trimmed.startsWith("00");
+    if (isInternational) {
+      const digits = trimmed.replace(/\D/g, "");
+      const internationalDigits = trimmed.startsWith("00") ? digits.slice(2) : digits;
+      const detectedCountry = findPhoneCountry(internationalDigits);
+      if (detectedCountry) {
+        setPhoneCountry(detectedCountry);
+        setPhoneInput(internationalDigits.slice(detectedCountry.code.length));
+      }
+      setValue("phone", `+${internationalDigits}`, { shouldValidate: true, shouldDirty: true });
+      return;
+    }
+
+    const digits = trimmed.replace(/\D/g, "");
+    const nationalDigits = phoneCountry.region === "CI" ? digits : digits.replace(/^0/, "");
+    setValue("phone", `+${phoneCountry.code}${nationalDigits}`, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }
+
+  function handlePhoneCountryChange(region: string) {
+    const selectedCountry = PHONE_COUNTRIES.find((country) => country.region === region);
+    if (!selectedCountry) return;
+    setPhoneCountry(selectedCountry);
+    const digits = phoneInput.replace(/\D/g, "");
+    const nationalDigits = selectedCountry.region === "CI" ? digits : digits.replace(/^0/, "");
+    setValue("phone", `+${selectedCountry.code}${nationalDigits}`, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }
 
   const onSubmit = handleSubmit((values) => {
     setServerError(null);
@@ -123,23 +210,39 @@ export function RegisterForm() {
         label="Numéro de téléphone"
         htmlFor="phone"
         required
-        hint="Avec l'indicatif du pays"
+        hint="Indicatif prérempli selon ta région"
         description="Utilisé pour préremplir tes achats de billets. Il reste privé."
         error={errors.phone?.message}
       >
-        <Input
-          id="phone"
-          type="tel"
-          autoComplete="tel"
-          inputMode="tel"
-          placeholder="+225 07 00 00 00"
-          invalid={Boolean(errors.phone)}
-          {...fieldAriaProps("phone", {
-            error: errors.phone?.message,
-            description: "Utilisé pour préremplir tes achats de billets. Il reste privé.",
-          })}
-          {...register("phone")}
-        />
+        <div className="grid grid-cols-[minmax(9rem,auto)_1fr] gap-2">
+          <Select
+            aria-label="Indicatif téléphonique du pays"
+            autoComplete="tel-country-code"
+            value={phoneCountry.region}
+            onChange={(event) => handlePhoneCountryChange(event.target.value)}
+          >
+            {PHONE_COUNTRIES.map((country) => (
+              <option key={country.region} value={country.region}>
+                {country.name} (+{country.code})
+              </option>
+            ))}
+          </Select>
+          <Input
+            id="phone"
+            type="tel"
+            autoComplete="tel-national"
+            inputMode="tel"
+            placeholder={phoneCountry.region === "CI" ? "07 00 00 00 00" : "Numéro de téléphone"}
+            value={phoneInput}
+            invalid={Boolean(errors.phone)}
+            {...fieldAriaProps("phone", {
+              error: errors.phone?.message,
+              description: "Utilisé pour préremplir tes achats de billets. Il reste privé.",
+            })}
+            {...phoneField}
+            onChange={(event) => handlePhoneInput(event.target.value)}
+          />
+        </div>
       </Field>
 
       <Field
