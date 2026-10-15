@@ -184,9 +184,16 @@ export function CheckoutForm({
   const stepLabels = ["Billets", "Coordonnées", "Paiement", "Confirmation"];
 
   return (
-    <form onSubmit={step === 3 ? onSubmit : (event) => event.preventDefault()} noValidate className="mx-auto w-full max-w-3xl space-y-5">
-      <nav aria-label="Étapes de la commande">
-        <ol className="grid grid-cols-4 gap-2">
+    <form onSubmit={step === 3 ? onSubmit : (event) => event.preventDefault()} noValidate className="mx-auto w-full max-w-3xl space-y-5 sm:space-y-6">
+      <nav aria-label="Étapes de la commande" className="rounded-xl border border-border bg-surface p-4 sm:p-5">
+        <div className="mb-3 flex items-center justify-between gap-3 text-sm">
+          <span className="font-semibold">Étape {step + 1} sur {stepLabels.length}</span>
+          <span className="text-fg-muted">{stepLabels[step]}</span>
+        </div>
+        <div role="progressbar" aria-label="Avancement de la commande" aria-valuemin={1} aria-valuemax={stepLabels.length} aria-valuenow={step + 1} aria-valuetext={`Étape ${step + 1} sur ${stepLabels.length} : ${stepLabels[step]}`} className="h-1.5 overflow-hidden rounded-full bg-bg-muted">
+          <div className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${((step + 1) / stepLabels.length) * 100}%` }} />
+        </div>
+        <ol className="mt-4 hidden grid-cols-4 gap-2 sm:grid">
           {stepLabels.map((label, index) => (
             <li key={label}>
               <button type="button" disabled={index > step || pending} onClick={() => setStep(index)} aria-current={step === index ? "step" : undefined} className={`flex min-h-12 w-full items-center gap-2 rounded-md border px-2 text-left text-xs font-semibold sm:px-3 sm:text-sm ${step === index ? "border-primary bg-primary-subtle text-primary" : index < step ? "border-border bg-surface text-fg" : "border-border bg-bg text-fg-subtle"}`}>
@@ -201,8 +208,8 @@ export function CheckoutForm({
       {serverError && step !== 3 ? <Alert tone="danger" title="Vérifie cette étape">{serverError}</Alert> : null}
 
       {step === 0 ? (
-        <Card>
-          <CardHeader><CardTitle>Choisis tes billets</CardTitle></CardHeader>
+        <Card className="overflow-hidden rounded-xl">
+          <CardHeader className="pb-4"><CardTitle>Choisis tes billets</CardTitle><p className="text-sm text-fg-muted">Ajuste les quantités avant de continuer.</p></CardHeader>
           <CardContent className="flex flex-col gap-3">
             {ticketTypes.map((type) => <QuantityPicker key={type.id} ticketType={type} quantity={quantities[type.id] ?? 0} disabled={pending} onChange={(value) => {
               const next = { ...quantities, [type.id]: value };
@@ -216,8 +223,8 @@ export function CheckoutForm({
       ) : null}
 
       {step === 1 ? (
-        <Card>
-          <CardHeader><CardTitle>Vérifie les coordonnées du participant</CardTitle><p className="text-sm text-fg-muted">Elles sont reprises depuis ton compte et restent modifiables.</p></CardHeader>
+        <Card className="overflow-hidden rounded-xl">
+          <CardHeader className="pb-4"><CardTitle>Vérifie tes coordonnées</CardTitle><p className="text-sm text-fg-muted">Elles sont reprises depuis ton compte et restent modifiables.</p></CardHeader>
           <CardContent className="flex flex-col gap-4">
             <Field label="Nom complet" htmlFor="buyerName" required error={errors.buyerName?.message}>
               <Input id="buyerName" autoComplete="name" placeholder="Koffi Atta" required invalid={Boolean(errors.buyerName)} {...fieldAriaProps("buyerName", { error: errors.buyerName?.message })} {...register("buyerName")} />
@@ -234,14 +241,14 @@ export function CheckoutForm({
 
       {step === 2 ? (
         <div className="space-y-4">
-          <Card>
+          <Card className="overflow-hidden rounded-xl">
             <CardHeader><CardTitle>Prépare ton paiement</CardTitle><p className="text-sm text-fg-muted">Le paiement s’ouvrira sur la page sécurisée du prestataire.</p></CardHeader>
             <CardContent className="flex items-start gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary"><CreditCard className="size-5" aria-hidden="true" /></span>
               <div><p className="font-semibold">{paymentProvider === "geniuspay" ? "GeniusPay" : paymentProvider === "cinetpay" ? "CinetPay" : "Mode de simulation"}</p><p className="mt-1 text-sm text-fg-muted">{paymentProvider === "geniuspay" || paymentProvider === "cinetpay" ? "Tu choisiras Wave, Orange Money ou un autre moyen proposé après avoir continué." : "Aucun montant réel ne sera débité."}</p></div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="overflow-hidden rounded-xl">
             <CardHeader><CardTitle>Numéro de téléphone</CardTitle><p className="text-sm text-fg-muted">Utilisé pour préparer la demande de paiement.</p></CardHeader>
             <CardContent><p className="text-lg font-semibold tabular-nums">{buyerPhone || "Non renseigné"}</p><button type="button" className="mt-2 min-h-10 text-sm font-semibold text-primary underline underline-offset-4" onClick={() => setStep(1)}>Modifier mes coordonnées</button></CardContent>
           </Card>
@@ -253,7 +260,7 @@ export function CheckoutForm({
 
       {step === 3 ? (
         <div className="space-y-4">
-          <Card>
+          <Card className="overflow-hidden rounded-xl">
             <CardHeader><CardTitle>Vérifie ta commande</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <ul className="divide-y divide-border">{pricing.lines.map((line) => <li key={line.ticketTypeId} className="flex justify-between gap-3 py-3 text-sm"><span>{line.quantity} × {line.name}</span><span className="shrink-0 font-semibold tabular-nums">{formatPrice(line.lineTotal)}</span></li>)}</ul>

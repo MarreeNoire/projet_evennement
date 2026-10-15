@@ -21,11 +21,11 @@ export function OrderSummary({
   paymentProvider: PaymentProviderName;
 }) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden rounded-xl">
+      <CardHeader className="pb-4">
         <CardTitle>Récapitulatif</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex flex-col gap-4">
         {pricing.lines.length === 0 ? (
           <p className="text-fg-muted text-sm">Sélectionne au moins un billet.</p>
         ) : (
@@ -40,14 +40,14 @@ export function OrderSummary({
             ))}
           </ul>
         )}
-        <dl className="border-border flex flex-col gap-1.5 border-t pt-3 text-sm">
+        <dl className="border-border flex flex-col gap-1.5 border-t pt-4 text-sm">
           <div className="flex justify-between">
             <dt className="text-fg-muted">Sous-total</dt>
             <dd className="tabular-nums">{formatPrice(pricing.subtotal)}</dd>
           </div>
-          <div className="flex justify-between text-base font-bold">
+          <div className="flex items-baseline justify-between gap-3 rounded-lg bg-bg-muted px-3 py-3 text-base font-bold">
             <dt>Total</dt>
-            <dd className="tabular-nums">{formatPrice(pricing.total)}</dd>
+            <dd className="font-display text-xl tabular-nums">{formatPrice(pricing.total)}</dd>
           </div>
         </dl>
         {error ? (
@@ -62,6 +62,7 @@ export function OrderSummary({
           loading={pending}
           loadingLabel="Création de la commande…"
           fullWidth
+          size="lg"
           disabled={pending || pricing.lines.length === 0}
         >
           {pricing.total === 0 ? "Obtenir mes billets" : `Payer ${formatPrice(pricing.total)}`}
