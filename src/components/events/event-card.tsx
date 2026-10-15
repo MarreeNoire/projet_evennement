@@ -55,14 +55,14 @@ export function EventCard({ event }: { event: PublishedEventView }) {
       className="group block h-full focus-visible:outline-2 focus-visible:outline-offset-2"
       aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
     >
-      <article className="border-border-strong/70 bg-surface group-hover:border-primary group-focus-visible:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-colors duration-150">
+      <article className="border-border-strong/70 bg-surface group-hover:border-primary group-focus-visible:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-[transform,border-color,box-shadow] duration-300 ease-[var(--ease-out-soft)] group-hover:-translate-y-1 group-hover:shadow-lg">
         <div className="border-border bg-bg-muted relative aspect-[16/8] overflow-hidden border-b">
           {imageUrl ? (
             <ViewTransition name={`event-cover-${event.id}`} share="morph" default="none">
               <PublicStorageImage
                 src={imageUrl}
                 alt=""
-                className="size-full object-cover"
+                className="size-full object-cover transition-transform duration-700 ease-[var(--ease-out-soft)] group-hover:scale-[1.045] motion-reduce:transform-none"
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 fill
                 quality={68}

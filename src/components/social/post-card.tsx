@@ -93,7 +93,7 @@ export function PostCard({
   );
 
   return (
-    <article className="group border-border bg-surface hover:border-border-strong mb-4 rounded-2xl border px-4 py-5 shadow-sm transition-colors sm:px-6 sm:py-6">
+    <article className="group border-border bg-surface hover:border-border-strong mb-4 rounded-2xl border px-4 py-5 shadow-sm transition-[transform,border-color,box-shadow] duration-300 ease-[var(--ease-out-soft)] hover:-translate-y-0.5 hover:shadow-md sm:px-6 sm:py-6">
       <div className="flex items-start gap-3">
         {post.author ? (
           <Link

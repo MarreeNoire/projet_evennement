@@ -208,7 +208,7 @@ export function CheckoutForm({
       {serverError && step !== 3 ? <Alert tone="danger" title="Vérifie cette étape">{serverError}</Alert> : null}
 
       {step === 0 ? (
-        <Card className="overflow-hidden rounded-xl">
+        <Card data-checkout-step={step} className="overflow-hidden rounded-xl">
           <CardHeader className="pb-4"><CardTitle>Choisis tes billets</CardTitle><p className="text-sm text-fg-muted">Ajuste les quantités avant de continuer.</p></CardHeader>
           <CardContent className="flex flex-col gap-3">
             {ticketTypes.map((type) => <QuantityPicker key={type.id} ticketType={type} quantity={quantities[type.id] ?? 0} disabled={pending} onChange={(value) => {
@@ -223,7 +223,7 @@ export function CheckoutForm({
       ) : null}
 
       {step === 1 ? (
-        <Card className="overflow-hidden rounded-xl">
+        <Card data-checkout-step={step} className="overflow-hidden rounded-xl">
           <CardHeader className="pb-4"><CardTitle>Vérifie tes coordonnées</CardTitle><p className="text-sm text-fg-muted">Elles sont reprises depuis ton compte et restent modifiables.</p></CardHeader>
           <CardContent className="flex flex-col gap-4">
             <Field label="Nom complet" htmlFor="buyerName" required error={errors.buyerName?.message}>
@@ -240,7 +240,7 @@ export function CheckoutForm({
       ) : null}
 
       {step === 2 ? (
-        <div className="space-y-4">
+        <div data-checkout-step={step} className="space-y-4">
           <Card className="overflow-hidden rounded-xl">
             <CardHeader><CardTitle>Prépare ton paiement</CardTitle><p className="text-sm text-fg-muted">Le paiement s’ouvrira sur la page sécurisée du prestataire.</p></CardHeader>
             <CardContent className="flex items-start gap-3">
@@ -259,7 +259,7 @@ export function CheckoutForm({
       ) : null}
 
       {step === 3 ? (
-        <div className="space-y-4">
+        <div data-checkout-step={step} className="space-y-4">
           <Card className="overflow-hidden rounded-xl">
             <CardHeader><CardTitle>Vérifie ta commande</CardTitle></CardHeader>
             <CardContent className="space-y-4">

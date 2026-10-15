@@ -16,9 +16,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "border-border bg-surface rounded-sm border",
+        "border-border bg-surface rounded-xl border transition-[transform,border-color,background-color,box-shadow] duration-300 ease-[var(--ease-out-soft)]",
         interactive &&
-          "hover:border-primary hover:bg-surface-raised focus-within:border-border-focus transition-[border-color,background-color] duration-150 ease-[var(--ease-out-soft)]",
+          "hover:-translate-y-1 hover:border-transparent hover:bg-surface-raised hover:shadow-md focus-within:border-border-focus",
         className,
       )}
       {...props}

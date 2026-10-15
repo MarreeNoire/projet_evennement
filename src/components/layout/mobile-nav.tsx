@@ -73,7 +73,7 @@ export function MobileNav({
       role="dialog"
       aria-modal="true"
       aria-label="Menu de navigation"
-      className="fixed inset-0 z-50 flex flex-col bg-bg lg:hidden"
+      className="app-mobile-nav-enter fixed inset-0 z-50 flex flex-col bg-bg lg:hidden"
     >
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
         <Logo />

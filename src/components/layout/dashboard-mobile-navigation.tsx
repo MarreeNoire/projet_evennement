@@ -78,7 +78,7 @@ export function DashboardMobileNavigation({
         }}
         className="fixed inset-0 z-50 m-0 h-dvh w-screen max-w-none border-0 bg-transparent p-0 text-fg backdrop:bg-black/50"
       >
-        <section className="flex h-full w-[min(21rem,calc(100vw-2.5rem))] flex-col border-r border-border bg-surface shadow-xl">
+        <section className="dashboard-menu-panel flex h-full w-[min(21rem,calc(100vw-2.5rem))] flex-col border-r border-border bg-surface shadow-xl">
           <header className="flex min-h-16 items-center justify-between gap-3 border-b border-border px-4">
             <div className="min-w-0">
               <h2 className="truncate font-display text-lg font-bold">{title}</h2>

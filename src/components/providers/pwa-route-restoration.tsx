@@ -32,9 +32,9 @@ export function PwaRouteRestoration() {
   useEffect(() => {
     const isPwa = isStandalonePwa();
     document.body.classList.toggle("pwa-standalone", isPwa);
+    document.body.classList.add("app-motion-ready");
 
     if (
-      !isPwa ||
       !("IntersectionObserver" in window) ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) return;
@@ -59,7 +59,7 @@ export function PwaRouteRestoration() {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           const target = entry.target as HTMLElement;
-          target.dataset.pwaReveal = "visible";
+          target.dataset.appReveal = "visible";
           observer.unobserve(target);
         }
       },
@@ -67,10 +67,15 @@ export function PwaRouteRestoration() {
     );
 
     targets.forEach((target) => {
-      if (target.dataset.pwaReveal === "visible") return;
+      if (target.dataset.appReveal === "visible") return;
       const siblingIndex = Array.prototype.indexOf.call(target.parentElement?.children ?? [], target);
-      target.style.setProperty("--pwa-reveal-delay", `${Math.min(siblingIndex * 55, 220)}ms`);
-      target.dataset.pwaReveal = "pending";
+      target.style.setProperty("--app-reveal-delay", `${Math.min(siblingIndex * 65, 325)}ms`);
+      target.dataset.appMotionKind = target.matches(".event-grid > *, .event-card-reveal")
+        ? "ticket"
+        : target.matches("article")
+          ? "post"
+          : "section";
+      target.dataset.appReveal = "pending";
       observer.observe(target);
     });
 

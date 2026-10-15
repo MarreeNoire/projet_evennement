@@ -954,35 +954,142 @@ body.pwa-standalone .explorer-page form[role="search"] label {
   margin-bottom: 0.25rem;
 }
 
-@keyframes pwa-scroll-arrive {
+@keyframes app-section-arrive {
   from {
-    clip-path: inset(0 0 12% 0 round 12px);
+    clip-path: inset(0 0 14% 0 round 16px);
     opacity: 0;
-    transform: translateY(1rem);
+    transform: translateY(1.75rem) scale(0.985);
   }
 
   to {
     clip-path: inset(0 0 0 0 round 12px);
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  body.pwa-standalone main [data-pwa-reveal="pending"] {
-    clip-path: inset(0 0 12% 0 round 12px);
+@keyframes app-ticket-arrive {
+  0% {
+    clip-path: inset(12% 4% 16% 4% round 18px);
     opacity: 0;
-    transform: translateY(1rem);
+    transform: translateY(2.25rem) rotate(1.4deg) scale(0.94);
   }
 
-  body.pwa-standalone main [data-pwa-reveal="visible"] {
-    animation: pwa-scroll-arrive 620ms var(--ease-out-soft) both;
-    animation-delay: var(--pwa-reveal-delay, 0ms);
+  72% {
+    transform: translateY(-0.25rem) rotate(-0.25deg) scale(1.012);
   }
+
+  100% {
+    clip-path: inset(0 0 0 0 round 14px);
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes app-post-arrive {
+  from {
+    clip-path: inset(0 0 0 9% round 16px);
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0 round 16px);
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+body.app-motion-ready main [data-app-reveal="pending"] {
+  clip-path: inset(0 0 14% 0 round 16px);
+  opacity: 0;
+  transform: translateY(1.75rem) scale(0.985);
+}
+
+body.app-motion-ready main [data-app-motion-kind="section"][data-app-reveal="visible"] {
+  animation: app-section-arrive 720ms var(--ease-out-soft) both;
+  animation-delay: var(--app-reveal-delay, 0ms);
+}
+
+body.app-motion-ready main [data-app-motion-kind="ticket"][data-app-reveal="pending"] {
+  clip-path: inset(12% 4% 16% 4% round 18px);
+  transform: translateY(2.25rem) rotate(1.4deg) scale(0.94);
+}
+
+body.app-motion-ready main [data-app-motion-kind="ticket"][data-app-reveal="visible"] {
+  animation: app-ticket-arrive 780ms var(--ease-out-soft) both;
+  animation-delay: var(--app-reveal-delay, 0ms);
+}
+
+body.app-motion-ready main [data-app-motion-kind="post"][data-app-reveal="pending"] {
+  clip-path: inset(0 0 0 9% round 16px);
+  transform: translateX(1.5rem);
+}
+
+body.app-motion-ready main [data-app-motion-kind="post"][data-app-reveal="visible"] {
+  animation: app-post-arrive 560ms var(--ease-out-soft) both;
+  animation-delay: var(--app-reveal-delay, 0ms);
+}
+
+@keyframes checkout-step-arrive {
+  from {
+    clip-path: inset(0 0 12% 0 round 16px);
+    opacity: 0;
+    transform: translateX(1.25rem) scale(0.985);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0 round 16px);
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+[data-checkout-step] {
+  animation: checkout-step-arrive 420ms var(--ease-out-soft) both;
+}
+
+@keyframes mobile-menu-arrive {
+  from {
+    clip-path: inset(0 0 0 100%);
+    opacity: 0.8;
+    transform: translateX(1rem);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.app-mobile-nav-enter {
+  animation: mobile-menu-arrive 300ms var(--ease-out-soft) both;
+}
+
+.app-mobile-nav-enter nav section {
+  animation: app-section-arrive 520ms var(--ease-out-soft) both;
+}
+
+.app-mobile-nav-enter nav section:nth-of-type(2) { animation-delay: 45ms; }
+.app-mobile-nav-enter nav section:nth-of-type(3) { animation-delay: 90ms; }
+.app-mobile-nav-enter nav section:nth-of-type(4) { animation-delay: 135ms; }
+
+@keyframes dashboard-drawer-arrive {
+  from { opacity: 0; transform: translateX(-2rem); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+dialog[open] > .dashboard-menu-panel {
+  animation: dashboard-drawer-arrive 280ms var(--ease-out-soft) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.pwa-standalone main [data-pwa-reveal] {
+  body.app-motion-ready main [data-app-reveal],
+  [data-checkout-step],
+  .app-mobile-nav-enter,
+  .app-mobile-nav-enter nav section,
+  dialog[open] > .dashboard-menu-panel {
     animation: none !important;
     clip-path: none;
     opacity: 1;

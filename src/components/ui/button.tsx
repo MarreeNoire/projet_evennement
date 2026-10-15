@@ -17,11 +17,11 @@ export const buttonVariants = cva(
     "inline-flex items-center justify-center gap-2 whitespace-nowrap",
     "font-semibold",
     "rounded-[3px] border border-transparent",
-    "transition-[background-color,border-color,color,box-shadow,transform] duration-150",
+    "transition-[background-color,border-color,color,box-shadow,transform] duration-250",
     "ease-[var(--ease-out-soft)]",
     "select-none",
     // Feedback immédiat au clic
-    "active:translate-y-px active:scale-[0.985] motion-reduce:transform-none motion-reduce:transition-none",
+    "active:translate-y-px active:scale-[0.975] motion-reduce:transform-none motion-reduce:transition-none",
     // Accessibilité : jamais de contenu masqué par l'état désactivé
     "disabled:pointer-events-none disabled:opacity-50",
     "aria-busy:cursor-progress",
@@ -31,17 +31,17 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         // Action principale : contraste 5.55:1 dans les deux thèmes
-        primary: "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover",
+        primary: "bg-primary-solid text-primary-solid-fg hover:-translate-y-0.5 hover:bg-primary-solid-hover hover:shadow-md",
         // Action secondaire
-        secondary: "bg-bg-muted text-fg hover:bg-border",
+        secondary: "bg-bg-muted text-fg hover:-translate-y-0.5 hover:bg-border hover:shadow-sm",
         // Action discrète
         ghost: "text-fg hover:bg-bg-muted",
         // Lien textuel
         link: "text-primary underline underline-offset-4 decoration-1 hover:decoration-2 px-0",
         // Action destructive (annulation, suppression)
-        danger: "bg-danger-solid text-white hover:bg-danger-solid-hover",
+        danger: "bg-danger-solid text-white hover:-translate-y-0.5 hover:bg-danger-solid-hover hover:shadow-md",
         // Accent chaud : réservé aux mises en avant (VIP, CTA promotionnel)
-        accent: "bg-accent-solid text-accent-solid-fg hover:brightness-95",
+        accent: "bg-accent-solid text-accent-solid-fg hover:-translate-y-0.5 hover:brightness-95 hover:shadow-md",
         // Sur photo de couverture
         overlay: "border-white/30 bg-black/85 text-white hover:bg-black",
       },
