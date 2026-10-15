@@ -954,6 +954,42 @@ body.pwa-standalone .explorer-page form[role="search"] label {
   margin-bottom: 0.25rem;
 }
 
+@keyframes pwa-scroll-arrive {
+  from {
+    clip-path: inset(0 0 12% 0 round 12px);
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0 round 12px);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body.pwa-standalone main [data-pwa-reveal="pending"] {
+    clip-path: inset(0 0 12% 0 round 12px);
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  body.pwa-standalone main [data-pwa-reveal="visible"] {
+    animation: pwa-scroll-arrive 620ms var(--ease-out-soft) both;
+    animation-delay: var(--pwa-reveal-delay, 0ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.pwa-standalone main [data-pwa-reveal] {
+    animation: none !important;
+    clip-path: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (width >= 64rem) {
   body.pwa-standalone footer .grid {
     grid-template-columns: 1.35fr repeat(4, minmax(0, 1fr));
