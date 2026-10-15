@@ -3,15 +3,17 @@ import { ArrowRight, Search, Sparkles } from "lucide-react";
 
 import { APP_NAME, CATEGORIES, ROUTES } from "@/lib/constants";
 import { ButtonLink } from "@/components/ui/button";
+import { PublicStorageImage } from "@/components/ui/public-storage-image";
+import type { PublishedEventView } from "@/types/database";
 import {
   HomeHeroMotionScope,
   HomeHeroMotionToggle,
 } from "@/components/home/home-hero-motion-scope";
 
-export function HomeHero() {
+export function HomeHero({ featuredEvent }: { featuredEvent?: PublishedEventView }) {
   return (
     <section className="border-border bg-bg-subtle border-b">
-      <HomeHeroMotionScope className="container-page grid gap-5 py-6 md:grid-cols-[minmax(0,1fr)_12rem] md:items-center md:gap-8 md:py-10 lg:grid-cols-[minmax(0,1fr)_minmax(13rem,0.62fr)_minmax(20rem,0.9fr)] xl:gap-12">
+      <HomeHeroMotionScope className="container-page grid gap-6 py-7 md:grid-cols-[minmax(0,1fr)_minmax(18rem,0.82fr)] md:items-center md:gap-10 md:py-12 lg:gap-14 lg:py-16">
         <div className="flex flex-col gap-4">
           <Link
             href="/devenir-organisateur"
@@ -24,7 +26,7 @@ export function HomeHero() {
           <div className="home-hero-heading flex max-w-3xl items-end justify-start gap-2">
             <h1
               aria-label="Le fil des événements et des rencontres"
-              className="home-hero-title font-display w-fit min-w-0 text-3xl leading-[1.08] font-bold md:text-4xl"
+              className="home-hero-title font-display w-fit min-w-0 text-4xl leading-[1.02] font-semibold tracking-tight md:text-5xl lg:text-6xl"
             >
               <span aria-hidden="true" className="block">
                 Le fil des
@@ -41,7 +43,7 @@ export function HomeHero() {
             </h1>
             <HomeHeroMotionToggle />
           </div>
-          <p className="text-fg-muted max-w-2xl text-sm leading-relaxed md:text-base">
+          <p className="text-fg-muted max-w-xl text-base leading-relaxed md:text-lg">
             Suis les échanges dans les salons et découvre les événements publiés sur {APP_NAME}.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -54,9 +56,7 @@ export function HomeHero() {
           </div>
         </div>
 
-        <TicketArtwork />
-
-        <div className="border-border bg-surface rounded-lg border p-4 sm:p-5 md:col-span-2 lg:col-span-1">
+        <div className="border-border bg-surface rounded-lg border p-4 sm:p-5 md:col-start-1 md:col-span-1 md:row-start-2">
           <form action="/explorer" method="get" role="search" className="flex flex-col gap-2">
             <label htmlFor="home-search" className="text-fg text-sm font-semibold">
               Rechercher un événement
@@ -96,6 +96,34 @@ export function HomeHero() {
             </ul>
           </nav>
         </div>
+
+        {featuredEvent ? (
+          <Link
+            href={`/evenements/${featuredEvent.slug}`}
+            className="group relative min-h-64 overflow-hidden rounded-lg border border-border-strong bg-bg-muted focus-visible:outline-2 focus-visible:outline-offset-4 md:col-start-2 md:row-start-1 md:row-span-2"
+            aria-label={`Découvrir ${featuredEvent.title}`}
+          >
+            {featuredEvent.cover_url ? (
+              <PublicStorageImage
+                src={featuredEvent.cover_url}
+                alt=""
+                fill
+                preload
+                sizes="(min-width: 1024px) 42vw, 100vw"
+                className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-primary-subtle" />
+            )}
+            <div className="absolute inset-x-0 bottom-0 bg-stone-950 p-5 text-white sm:p-7">
+              <p className="text-xs font-semibold tracking-[0.16em] uppercase">À la une · {featuredEvent.city}</p>
+              <p className="font-display mt-2 max-w-lg text-2xl leading-tight font-semibold sm:text-3xl">{featuredEvent.title}</p>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold">
+                Voir l&apos;événement <ArrowRight className="size-4" aria-hidden="true" />
+              </span>
+            </div>
+          </Link>
+        ) : <TicketArtwork />}
       </HomeHeroMotionScope>
     </section>
   );

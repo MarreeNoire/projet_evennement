@@ -1,6 +1,6 @@
 ﻿import type { Metadata } from "next";
 
-import { EventHorizontalList } from "@/components/events/event-horizontal-list";
+import { EventGrid } from "@/components/events/event-card";
 import { ExploreFiltersBar } from "@/components/events/explore-filters";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -112,12 +112,11 @@ export default async function ExplorePage({
           ) : (
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between">
-                <p className="text-fg-muted text-xs">
-                  Fais défiler horizontalement pour parcourir les {total} événement
-                  {total > 1 ? "s" : ""}.
+                <p className="text-fg-muted text-sm">
+                  {total} événement{total > 1 ? "s" : ""} à découvrir
                 </p>
               </div>
-              <EventHorizontalList events={events} />
+              <EventGrid events={events} />
               {totalPages > 1 ? (
                 <nav
                   aria-label="Pagination"

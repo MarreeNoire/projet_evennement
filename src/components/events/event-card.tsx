@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
+import type { CSSProperties } from "react";
 import { BadgeCheck, MapPin } from "lucide-react";
 
 import { AccessLevelBadge } from "@/components/ui/badge";
@@ -68,14 +69,12 @@ export function EventCard({ event }: { event: PublishedEventView }) {
               />
             </ViewTransition>
           ) : (
-            <div className="text-fg-subtle flex size-full items-center justify-center text-sm">
-              Aucune image
-            </div>
+            <EventPoster event={event} />
           )}
 
           {/* Badges en superposition */}
           <div className="absolute top-3 left-3 flex gap-1.5">
-            <span className="border-border bg-surface/95 text-2xs text-fg rounded-md border px-2 py-1 font-semibold tracking-wide uppercase">
+            <span className="border-border bg-surface text-2xs text-fg rounded-md border px-2 py-1 font-semibold tracking-wide uppercase">
               {getCategoryLabel(event.category)}
             </span>
           </div>
@@ -145,6 +144,32 @@ export function EventCard({ event }: { event: PublishedEventView }) {
         </div>
       </article>
     </Link>
+  );
+}
+
+function EventPoster({ event }: { event: PublishedEventView }) {
+  const palette = 1 + [...event.title].reduce((total, char) => total + char.charCodeAt(0), 0) % 5;
+  const style = {
+    "--poster-bg": `var(--poster-${palette})`,
+    "--poster-text": `var(--poster-${palette}-fg)`,
+  } as CSSProperties;
+
+  return (
+    <div style={style} className="relative flex size-full flex-col justify-between overflow-hidden bg-(--poster-bg) p-5 text-(--poster-text) sm:p-6">
+      <span aria-hidden="true" className="absolute -right-8 -top-10 size-40 rounded-full border-[18px] border-(--poster-text)" />
+      <div className="relative flex items-center justify-between gap-3 text-xs font-semibold tracking-[0.16em] uppercase">
+        <span>{getCategoryLabel(event.category)}</span>
+        <span>{event.city}</span>
+      </div>
+      <div className="relative max-w-[85%]">
+        <span className="font-display block text-5xl leading-none font-semibold sm:text-6xl" aria-hidden="true">
+          {event.title.trim().charAt(0).toLocaleUpperCase("fr-FR")}
+        </span>
+        <span className="mt-3 block line-clamp-2 text-lg leading-tight font-semibold sm:text-xl">
+          {event.title}
+        </span>
+      </div>
+    </div>
   );
 }
 

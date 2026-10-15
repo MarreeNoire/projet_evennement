@@ -33,7 +33,7 @@ export default async function HomePage() {
       <SiteHeader />
 
       <main id="contenu" className="flex flex-col">
-        <HomeHero />
+        <HomeHero featuredEvent={featured[0]} />
 
         {/* ── MODULE ÉVÉNEMENTS & SALONS EN DIRECT ────────────────────────── */}
         <section
