@@ -697,10 +697,25 @@ export async function getCommentsByPost(
     return grouped;
   }
 
-  for (const row of (data ?? []) as unknown as CommentWithAuthor[]) {
-    const list = grouped.get(row.post_id) ?? [];
-    list.push(row);
-    grouped.set(row.post_id, list);
+  const comments = (data ?? []).map((row) => ({
+    ...row,
+    mentions: [],
+    replies: [],
+    my_reaction: null,
+    has_reacted: false,
+  })) as unknown as CommentWithAuthor[];
+  const commentsById = new Map(comments.map((comment) => [comment.id, comment]));
+
+  for (const comment of comments) {
+    if (!comment.parent_id) {
+      const list = grouped.get(comment.post_id) ?? [];
+      list.push(comment);
+      grouped.set(comment.post_id, list);
+      continue;
+    }
+
+    const parent = commentsById.get(comment.parent_id);
+    if (parent) parent.replies.push(comment);
   }
   return grouped;
 }

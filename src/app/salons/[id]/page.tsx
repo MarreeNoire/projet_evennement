@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, MapPin, Pin, Users } from "lucide-react";
+import { CalendarDays, MapPin, Users } from "lucide-react";
 
 import { SalonPostForm } from "@/components/salons/salon-post-form";
 import { SalonPolls } from "@/components/salons/salon-polls";
@@ -24,12 +24,7 @@ import {
   type SalonEventInfo,
 } from "@/lib/salons/queries";
 import type { PostWithAuthor } from "@/lib/salons/types";
-import {
-  getEventPhase,
-  PHASE_DISPLAY_ORDER,
-  phaseStatus,
-  type EventPhase,
-} from "@/lib/social/phase";
+import { getEventPhase, phaseStatus, type EventPhase } from "@/lib/social/phase";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { cn, formatDateRange } from "@/lib/utils";
 
@@ -47,7 +42,12 @@ export const metadata = {
    ========================================================================== */
 
 type TabSlug = (typeof SALON_TABS)[number]["slug"];
-const PHASE_JOURNEY_ORDER: EventPhase[] = ["avant", "live", "apres"];
+const PHASE_FILTER_ORDER: EventPhase[] = ["avant", "live", "apres"];
+const PHASE_SHORT_TITLES: Record<EventPhase, string> = {
+  avant: "Avant",
+  live: "Sur place",
+  apres: "Après",
+};
 const PHASE_TITLES: Record<EventPhase, string> = {
   avant: "Avant l’événement",
   live: "Sur place",
@@ -59,11 +59,12 @@ export default async function SalonDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; phase?: string }>;
 }) {
   const { id } = await params;
-  const { tab } = await searchParams;
+  const { tab, phase: requestedPhase } = await searchParams;
   const activeTab: TabSlug = SALON_TABS.find((item) => item.slug === tab)?.slug ?? "fil";
+  const phaseFilter = PHASE_FILTER_ORDER.find((item) => item === requestedPhase) ?? null;
 
   const salon = await getSalonById(id);
   if (!salon) notFound();
@@ -190,6 +191,7 @@ export default async function SalonDetailPage({
               event={event}
               profile={profile}
               phase={phase}
+              phaseFilter={phaseFilter}
               allowMedia={event?.allow_media_upload ?? true}
             />
           ) : null}
@@ -353,6 +355,7 @@ function Discussion({
   event,
   profile,
   phase,
+  phaseFilter,
   allowMedia,
 }: {
   salonId: string;
@@ -361,17 +364,17 @@ function Discussion({
   event: SalonEventInfo | null;
   profile: Awaited<ReturnType<typeof getCurrentProfile>>;
   phase: EventPhase | null;
+  phaseFilter: EventPhase | null;
   allowMedia: boolean;
 }) {
-  const pinned = posts.filter((post) => post.is_pinned);
-  const regular = posts.filter((post) => !post.is_pinned);
-
   const groups: Record<EventPhase, PostWithAuthor[]> = { avant: [], live: [], apres: [] };
   if (event) {
-    for (const post of regular) {
+    for (const post of posts) {
       groups[getEventPhase(event.start_at, event.end_at, new Date(post.created_at))].push(post);
     }
   }
+  const selectedPhase = phaseFilter ?? phase ?? "avant";
+  const selectedPosts = event ? groups[selectedPhase] : posts;
 
   return (
     <div className="flex flex-col gap-8">
@@ -396,121 +399,85 @@ function Discussion({
           title="Le fil est encore vide"
           description="Sois la première personne à écrire dans ce salon."
         />
-      ) : (
-        <>
-          {pinned.length > 0 ? (
-            <section aria-label="Publications épinglées">
-              <div className="mb-5 flex items-center gap-3">
-                <Pin className="text-primary size-4" aria-hidden="true" />
-                <span className="eyebrow text-primary">Épinglé</span>
-                <span aria-hidden="true" className="bg-border h-px flex-1" />
-              </div>
-              {pinned.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  comments={commentsByPost.get(post.id)}
-                  currentUserId={profile?.id}
-                />
-              ))}
-            </section>
-          ) : null}
-
-          {event ? (
-            <>
-              <PhaseJourney activePhase={phase} />
-              <div className="flex flex-col gap-8">
-                {PHASE_DISPLAY_ORDER.map((key) => (
-                  <section
+      ) : event ? (
+        <div className="flex flex-col gap-5">
+          <nav
+            id="salon-phase-filter"
+            aria-label="Filtrer les publications selon la période de l’événement"
+            className="border-border bg-bg-subtle rounded-2xl border p-1.5"
+          >
+            <div className="grid grid-cols-3 gap-1">
+              {PHASE_FILTER_ORDER.map((key) => {
+                const isActive = selectedPhase === key;
+                const count = groups[key].length;
+                return (
+                  <Link
                     key={key}
-                    id={`salon-phase-${key}`}
-                    aria-labelledby={`salon-phase-title-${key}`}
-                    className="scroll-mt-24"
-                  >
-                    <div className="border-border mb-4 flex items-center gap-3 border-t pt-4">
-                      <h2
-                        id={`salon-phase-title-${key}`}
-                        className="font-display text-xl font-semibold"
-                      >
-                        {PHASE_TITLES[key]}
-                      </h2>
-                      <span aria-hidden="true" className="bg-border h-px flex-1" />
-                      {phase === key ? (
-                        <span className="text-primary text-xs font-semibold">Étape actuelle</span>
-                      ) : null}
-                    </div>
-                    {groups[key].length > 0 ? (
-                      groups[key].map((post) => (
-                        <PostCard
-                          key={post.id}
-                          post={post}
-                          comments={commentsByPost.get(post.id)}
-                          currentUserId={profile?.id}
-                        />
-                      ))
-                    ) : (
-                      <p className="text-fg-muted border-border border-b py-4 text-sm">
-                        {phase === key
-                          ? "Le salon est ouvert à cette étape. Partage une publication depuis le formulaire ci-dessus."
-                          : "Aucun échange n’est affiché pour cette étape."}
-                      </p>
+                    href={`/salons/${salonId}?tab=fil&phase=${key}#salon-phase-filter`}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "flex min-h-12 flex-col items-center justify-center rounded-xl px-2 py-1.5 text-center transition-colors",
+                      isActive
+                        ? "bg-surface text-primary shadow-sm"
+                        : "text-fg-muted hover:bg-surface/70 hover:text-fg",
                     )}
-                  </section>
-                ))}
-              </div>
-            </>
-          ) : regular.length > 0 ? (
-            <section aria-label="Publications">
-              {regular.map((post) => (
+                  >
+                    <span className="text-xs font-semibold sm:text-sm">
+                      {PHASE_SHORT_TITLES[key]}
+                    </span>
+                    <span className="text-2xs text-fg-subtle">
+                      {count} publication{count === 1 ? "" : "s"}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+
+          <section
+            id={`salon-phase-${selectedPhase}`}
+            aria-labelledby="salon-phase-title"
+            className="scroll-mt-24"
+          >
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <h2 id="salon-phase-title" className="font-display text-xl font-semibold sm:text-2xl">
+                {PHASE_TITLES[selectedPhase]}
+              </h2>
+              {phase === selectedPhase ? (
+                <span className="text-primary text-xs font-semibold">Période actuelle</span>
+              ) : null}
+            </div>
+            {selectedPosts.length > 0 ? (
+              selectedPosts.map((post) => (
                 <PostCard
                   key={post.id}
                   post={post}
                   comments={commentsByPost.get(post.id)}
                   currentUserId={profile?.id}
                 />
-              ))}
-            </section>
-          ) : null}
-        </>
+              ))
+            ) : (
+              <p className="text-fg-muted border-border bg-surface rounded-2xl border border-dashed px-4 py-6 text-sm">
+                {phase === selectedPhase
+                  ? "C’est la période actuelle. Sois le premier à publier ici."
+                  : "Aucune publication pour cette période pour le moment."}
+              </p>
+            )}
+          </section>
+        </div>
+      ) : (
+        <section aria-label="Publications" className="flex flex-col gap-3">
+          {selectedPosts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              comments={commentsByPost.get(post.id)}
+              currentUserId={profile?.id}
+            />
+          ))}
+        </section>
       )}
     </div>
-  );
-}
-
-function PhaseJourney({ activePhase }: { activePhase: EventPhase | null }) {
-  return (
-    <nav
-      aria-label="Parcours des échanges autour de l’événement"
-      className="border-border border-y py-4"
-    >
-      <p className="mb-3 text-sm font-semibold">Les échanges suivent l’événement</p>
-      <ol className="grid grid-cols-3 gap-2">
-        {PHASE_JOURNEY_ORDER.map((key) => {
-          const current = activePhase === key;
-          return (
-            <li key={key}>
-              <a
-                href={`#salon-phase-${key}`}
-                aria-current={current ? "step" : undefined}
-                className={cn(
-                  "flex min-h-14 flex-col justify-center border px-2 py-2 text-center transition-colors sm:px-3",
-                  current
-                    ? "border-primary bg-primary-subtle text-fg"
-                    : "border-border bg-surface text-fg-muted hover:border-border-strong hover:text-fg",
-                )}
-              >
-                <span className="text-xs leading-tight font-semibold sm:text-sm">
-                  {PHASE_TITLES[key]}
-                </span>
-                <span className="text-2xs mt-1">
-                  {current ? "Étape actuelle" : "Voir les échanges"}
-                </span>
-              </a>
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
   );
 }
 

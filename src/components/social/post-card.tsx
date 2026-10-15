@@ -7,6 +7,67 @@ import { formatRelative } from "@/lib/social/time";
 
 import { PostEditControl } from "./post-edit-control";
 import { PostActions } from "./post-actions";
+import { CommentReplyControl } from "./comment-reply-control";
+
+function CommentThread({
+  comment,
+  postId,
+  salonId,
+  currentUserId,
+  depth = 0,
+}: {
+  comment: CommentWithAuthor;
+  postId: string;
+  salonId: string;
+  currentUserId: string | null;
+  depth?: number;
+}) {
+  const name = comment.author?.display_name ?? "Membre du salon";
+
+  return (
+    <li className="min-w-0">
+      <div className="flex items-start gap-2.5">
+        <Avatar src={comment.author?.avatar_url} name={name} size="xs" />
+        <div className="min-w-0 flex-1">
+          <div className="bg-surface border-border border px-3 py-2 text-xs">
+            <p className="flex items-center justify-between gap-2">
+              <span className="text-fg font-semibold">{name}</span>
+              <span className="text-2xs text-fg-subtle shrink-0">
+                {formatRelative(comment.created_at)}
+              </span>
+            </p>
+            <p className="text-fg-muted mt-1 leading-relaxed whitespace-pre-line">
+              {comment.content}
+            </p>
+          </div>
+          {depth === 0 ? (
+            <CommentReplyControl
+              postId={postId}
+              parentId={comment.id}
+              salonId={salonId}
+              parentAuthor={name}
+              isAuthenticated={Boolean(currentUserId)}
+            />
+          ) : null}
+        </div>
+      </div>
+      {comment.replies.length > 0 ? (
+        <ul className="border-border mt-2 ml-5 flex flex-col gap-2 border-l pl-3 sm:ml-8 sm:pl-4">
+          {comment.replies.map((reply) => (
+            <CommentThread
+              key={reply.id}
+              comment={reply}
+              postId={postId}
+              salonId={salonId}
+              currentUserId={currentUserId}
+              depth={depth + 1}
+            />
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  );
+}
 
 /* =============================================================================
    Publication du fil d'un salon
@@ -119,31 +180,21 @@ export function PostCard({
           <PostActions
             postId={post.id}
             reactionCount={post.reaction_count ?? 0}
-            commentCount={comments.length || post.comment_count || 0}
+            commentCount={post.comment_count ?? comments.length}
             hasReacted={post.has_reacted}
           />
 
           {comments.length > 0 ? (
             <ul className="bg-bg-subtle border-border mt-4 flex flex-col gap-2.5 border-y px-3 py-3">
-              {comments.map((comment) => {
-                const name = comment.author?.display_name ?? "Membre du salon";
-                return (
-                  <li key={comment.id} className="flex gap-2.5">
-                    <Avatar src={comment.author?.avatar_url} name={name} size="xs" />
-                    <div className="bg-surface border-border min-w-0 flex-1 border px-3 py-2 text-xs">
-                      <p className="flex items-center justify-between">
-                        <span className="text-fg font-semibold">{name}</span>
-                        <span className="text-2xs text-fg-subtle">
-                          {formatRelative(comment.created_at)}
-                        </span>
-                      </p>
-                      <p className="text-fg-muted mt-1 leading-relaxed whitespace-pre-line">
-                        {comment.content}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
+              {comments.map((comment) => (
+                <CommentThread
+                  key={comment.id}
+                  comment={comment}
+                  postId={post.id}
+                  salonId={post.salon_id}
+                  currentUserId={currentUserId}
+                />
+              ))}
             </ul>
           ) : null}
         </div>

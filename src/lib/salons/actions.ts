@@ -241,16 +241,35 @@ export async function createComment(
   content: string,
   parentId?: string,
 ): Promise<{ success: boolean; commentId?: string; error?: string }> {
+  const normalized = content.trim();
+  if (!normalized || normalized.length > 2000) {
+    return { success: false, error: "Le commentaire doit contenir entre 1 et 2 000 caractères." };
+  }
+
   const supabase = await createSupabaseServerClient();
   const userId = await getUserId(supabase);
   if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  if (parentId) {
+    const { data: parent, error: parentError } = await supabase
+      .from("comments")
+      .select("id")
+      .eq("id", parentId)
+      .eq("post_id", postId)
+      .is("parent_id", null)
+      .eq("is_hidden", false)
+      .maybeSingle();
+    if (parentError || !parent) {
+      return { success: false, error: "Ce commentaire ne peut pas recevoir de réponse." };
+    }
+  }
 
   const { data, error } = await supabase
     .from("comments")
     .insert({
       post_id: postId,
       author_id: userId,
-      content: content.trim(),
+      content: normalized,
       parent_id: parentId ?? null,
     })
     .select("id")
