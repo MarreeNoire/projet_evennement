@@ -45,6 +45,12 @@ const PHONE_COUNTRIES = [
   { region: "IT", name: "Italie", code: "39" },
 ] as const;
 
+function countryFlag(region: string) {
+  return String.fromCodePoint(
+    ...[...region.toUpperCase()].map((letter) => letter.charCodeAt(0) + 127397),
+  );
+}
+
 function findPhoneCountry(digits: string) {
   return [...PHONE_COUNTRIES]
     .sort((a, b) => b.code.length - a.code.length)
@@ -59,7 +65,9 @@ export function RegisterForm() {
   const [emailSent, setEmailSent] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [phoneCountry, setPhoneCountry] = useState<(typeof PHONE_COUNTRIES)[number]>(PHONE_COUNTRIES[0]);
+  const [phoneCountry, setPhoneCountry] = useState<(typeof PHONE_COUNTRIES)[number]>(
+    PHONE_COUNTRIES[0],
+  );
   const [phoneInput, setPhoneInput] = useState("");
   const [pending, startTransition] = useTransition();
 
@@ -67,6 +75,7 @@ export function RegisterForm() {
     register,
     handleSubmit,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -103,14 +112,20 @@ export function RegisterForm() {
         setPhoneCountry(detectedCountry);
         setPhoneInput(internationalDigits.slice(detectedCountry.code.length));
       }
-      setValue("phone", `+${internationalDigits}`, { shouldValidate: true, shouldDirty: true });
+      setPhoneValue(`+${internationalDigits}`, internationalDigits.length);
       return;
     }
 
     const digits = trimmed.replace(/\D/g, "");
     const nationalDigits = phoneCountry.region === "CI" ? digits : digits.replace(/^0/, "");
-    setValue("phone", `+${phoneCountry.code}${nationalDigits}`, {
-      shouldValidate: true,
+    const international = nationalDigits ? `+${phoneCountry.code}${nationalDigits}` : "";
+    setPhoneValue(international, phoneCountry.code.length + nationalDigits.length);
+  }
+
+  function setPhoneValue(value: string, digitCount: number) {
+    if (digitCount < 8) clearErrors("phone");
+    setValue("phone", value, {
+      shouldValidate: digitCount >= 8,
       shouldDirty: true,
     });
   }
@@ -121,10 +136,9 @@ export function RegisterForm() {
     setPhoneCountry(selectedCountry);
     const digits = phoneInput.replace(/\D/g, "");
     const nationalDigits = selectedCountry.region === "CI" ? digits : digits.replace(/^0/, "");
-    setValue("phone", `+${selectedCountry.code}${nationalDigits}`, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    const international = nationalDigits ? `+${selectedCountry.code}${nationalDigits}` : "";
+    if (digits.length === 0) clearErrors("phone");
+    setPhoneValue(international, selectedCountry.code.length + nationalDigits.length);
   }
 
   const onSubmit = handleSubmit((values) => {
@@ -214,16 +228,17 @@ export function RegisterForm() {
         description="Utilisé pour préremplir tes achats de billets. Il reste privé."
         error={errors.phone?.message}
       >
-        <div className="grid grid-cols-[minmax(9rem,auto)_1fr] gap-2">
+        <div className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-2">
           <Select
-            aria-label="Indicatif téléphonique du pays"
-            autoComplete="tel-country-code"
+            aria-label={`Indicatif téléphonique — ${phoneCountry.name}`}
+            autoComplete="off"
             value={phoneCountry.region}
             onChange={(event) => handlePhoneCountryChange(event.target.value)}
+            className="min-w-0 px-2 text-sm tabular-nums"
           >
             {PHONE_COUNTRIES.map((country) => (
               <option key={country.region} value={country.region}>
-                {country.name} (+{country.code})
+                {countryFlag(country.region)} +{country.code} · {country.region}
               </option>
             ))}
           </Select>
@@ -242,6 +257,9 @@ export function RegisterForm() {
             {...phoneField}
             onChange={(event) => handlePhoneInput(event.target.value)}
           />
+          <span className="text-2xs text-fg-subtle col-span-2 -mt-1" aria-live="polite">
+            {countryFlag(phoneCountry.region)} {phoneCountry.name} · indicatif +{phoneCountry.code}
+          </span>
         </div>
       </Field>
 
