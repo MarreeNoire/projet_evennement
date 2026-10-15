@@ -81,11 +81,14 @@ export default async function proxy(request: NextRequest) {
   });
 
   // Valide / rafraîchit la session (ne lève jamais : les pages gèrent le cas).
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
   const maintenanceExempt =
     pathname === "/maintenance" ||
+    pathname === "/connexion" ||
     pathname.startsWith("/api/webhooks/") ||
     pathname.startsWith("/auth/") ||
     pathname.startsWith("/_next/");
@@ -98,7 +101,21 @@ export default async function proxy(request: NextRequest) {
     .maybeSingle();
   const maintenanceEnabled = maintenanceSetting?.value === true;
 
-  if (maintenanceEnabled && !pathname.startsWith("/admin")) {
+  if (maintenanceEnabled) {
+    let isAdmin = false;
+    if (user) {
+      const { data: adminRole } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      isAdmin = Boolean(adminRole);
+    }
+
+    // Un administrateur connecté peut vérifier le site complet pendant l'intervention.
+    if (isAdmin) return response;
+
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
         { error: "Le site est temporairement en maintenance." },
@@ -106,17 +123,6 @@ export default async function proxy(request: NextRequest) {
       );
     }
     return NextResponse.redirect(new URL("/maintenance", request.url), 307);
-  }
-
-  if (maintenanceEnabled && pathname.startsWith("/admin")) {
-    if (!user) return NextResponse.redirect(new URL("/maintenance", request.url), 307);
-    const { data: adminRole } = await supabase
-      .from("user_roles")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!adminRole) return NextResponse.redirect(new URL("/maintenance", request.url), 307);
   }
 
   return response;
