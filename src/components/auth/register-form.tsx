@@ -3,13 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { Check, ChevronDown, Eye, EyeOff, Search } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 import { Alert } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
-import { Field, Input, Select, fieldAriaProps } from "@/components/ui/field";
+import { Field, Input, fieldAriaProps } from "@/components/ui/field";
 import { ROUTES } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { registerSchema, type RegisterInput } from "@/lib/validation/auth";
@@ -69,7 +69,20 @@ export function RegisterForm() {
     PHONE_COUNTRIES[0],
   );
   const [phoneInput, setPhoneInput] = useState("");
+  const [countrySearch, setCountrySearch] = useState("");
+  const countryPickerRef = useRef<HTMLDetailsElement>(null);
+  const countrySearchRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
+
+  const filteredPhoneCountries = [...PHONE_COUNTRIES]
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"))
+    .filter((country) => {
+      const query = countrySearch.trim().toLocaleLowerCase("fr");
+      return (
+        !query ||
+        `${country.name} ${country.region} +${country.code}`.toLocaleLowerCase("fr").includes(query)
+      );
+    });
 
   const {
     register,
@@ -139,6 +152,11 @@ export function RegisterForm() {
     const international = nationalDigits ? `+${selectedCountry.code}${nationalDigits}` : "";
     if (digits.length === 0) clearErrors("phone");
     setPhoneValue(international, selectedCountry.code.length + nationalDigits.length);
+  }
+
+  function closeCountryPicker() {
+    if (countryPickerRef.current) countryPickerRef.current.open = false;
+    setCountrySearch("");
   }
 
   const onSubmit = handleSubmit((values) => {
@@ -228,20 +246,88 @@ export function RegisterForm() {
         description="Utilisé pour préremplir tes achats de billets. Il reste privé."
         error={errors.phone?.message}
       >
-        <div className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-2">
-          <Select
-            aria-label={`Indicatif téléphonique — ${phoneCountry.name}`}
-            autoComplete="off"
-            value={phoneCountry.region}
-            onChange={(event) => handlePhoneCountryChange(event.target.value)}
-            className="min-w-0 px-2 text-sm tabular-nums"
+        <div className="grid grid-cols-[6.75rem_minmax(0,1fr)] gap-2 sm:grid-cols-[7.5rem_minmax(0,1fr)]">
+          <details
+            ref={countryPickerRef}
+            className="group relative min-w-0"
+            onToggle={(event) => {
+              if (event.currentTarget.open) {
+                window.setTimeout(() => countrySearchRef.current?.focus(), 0);
+              } else {
+                setCountrySearch("");
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                closeCountryPicker();
+                event.currentTarget.querySelector("summary")?.focus();
+              }
+            }}
           >
-            {PHONE_COUNTRIES.map((country) => (
-              <option key={country.region} value={country.region}>
-                {countryFlag(country.region)} +{country.code} · {country.region}
-              </option>
-            ))}
-          </Select>
+            <summary
+              aria-label={`Choisir un pays et son indicatif. Pays actuel : ${phoneCountry.name}, +${phoneCountry.code}`}
+              className="border-border-strong bg-surface text-fg focus-visible:ring-border-focus hover:border-border flex h-11 cursor-pointer list-none items-center justify-between gap-1 rounded-md border px-2.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden"
+            >
+              <span className="flex min-w-0 items-center gap-1.5 tabular-nums">
+                <span aria-hidden="true" className="text-base leading-none">
+                  {countryFlag(phoneCountry.region)}
+                </span>
+                <span>+{phoneCountry.code}</span>
+              </span>
+              <ChevronDown
+                className="text-fg-muted size-4 shrink-0 transition-transform group-open:rotate-180"
+                aria-hidden="true"
+              />
+            </summary>
+            <div className="border-border-strong bg-surface absolute top-[calc(100%+0.35rem)] left-0 z-30 w-[min(19rem,calc(100vw-3rem))] overflow-hidden rounded-lg border shadow-lg">
+              <label className="border-border flex items-center gap-2 border-b px-3">
+                <Search className="text-fg-muted size-4 shrink-0" aria-hidden="true" />
+                <input
+                  ref={countrySearchRef}
+                  type="search"
+                  autoComplete="off"
+                  value={countrySearch}
+                  onChange={(event) => setCountrySearch(event.target.value)}
+                  placeholder="Rechercher un pays ou un indicatif"
+                  aria-label="Rechercher un pays ou un indicatif"
+                  className="text-fg placeholder:text-fg-subtle h-11 min-w-0 flex-1 bg-transparent text-sm outline-none"
+                />
+              </label>
+              <ul className="max-h-60 overflow-y-auto p-1" aria-label="Pays et indicatifs">
+                {filteredPhoneCountries.length ? (
+                  filteredPhoneCountries.map((country) => {
+                    const selected = phoneCountry.region === country.region;
+                    return (
+                      <li key={country.region}>
+                        <button
+                          type="button"
+                          aria-current={selected ? "true" : undefined}
+                          onClick={() => {
+                            handlePhoneCountryChange(country.region);
+                            closeCountryPicker();
+                          }}
+                          className="hover:bg-bg-muted focus-visible:bg-bg-muted flex min-h-10 w-full items-center gap-2 rounded-md px-2.5 text-left text-sm focus-visible:outline-none"
+                        >
+                          <span aria-hidden="true" className="text-base leading-none">
+                            {countryFlag(country.region)}
+                          </span>
+                          <span className="min-w-0 flex-1 truncate">{country.name}</span>
+                          <span className="text-fg-muted tabular-nums">+{country.code}</span>
+                          {selected ? (
+                            <Check className="text-primary size-4" aria-hidden="true" />
+                          ) : null}
+                        </button>
+                      </li>
+                    );
+                  })
+                ) : (
+                  <li className="text-fg-muted px-3 py-4 text-center text-sm">
+                    Aucun pays ne correspond à cette recherche.
+                  </li>
+                )}
+              </ul>
+            </div>
+          </details>
           <Input
             id="phone"
             type="tel"
@@ -257,9 +343,6 @@ export function RegisterForm() {
             {...phoneField}
             onChange={(event) => handlePhoneInput(event.target.value)}
           />
-          <span className="text-2xs text-fg-subtle col-span-2 -mt-1" aria-live="polite">
-            {countryFlag(phoneCountry.region)} {phoneCountry.name} · indicatif +{phoneCountry.code}
-          </span>
         </div>
       </Field>
 
