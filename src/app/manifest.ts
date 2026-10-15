@@ -9,9 +9,9 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: APP_NAME,
     description: "Événements, billetterie et communautés.",
     lang: "fr-CI",
-    // This marker lets the server distinguish a PWA launch from a normal
-    // navigation to the home page.
-    start_url: "/?pwa_start=1",
+    // Always start from a stable route so an old saved page cannot produce a
+    // 404 when the installed app is reopened.
+    start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait-primary",

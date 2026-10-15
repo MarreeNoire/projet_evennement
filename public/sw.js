@@ -13,7 +13,7 @@
  *     réseau s'effectue silencieusement (stale-while-revalidate pour le shell).
  */
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const SHELL_CACHE = `rassemble-shell-${CACHE_VERSION}`;
 const STATIC_CACHE = `rassemble-static-${CACHE_VERSION}`;
 
@@ -24,12 +24,7 @@ const SHELL_URLS = ["/", "/explorer", "/connexion", "/inscription"];
 const STATIC_PREFIXES = ["/_next/static/"];
 
 /** Origines que l'on ne met jamais en cache (API, Supabase, analytics). */
-const BYPASS_ORIGINS = [
-  "supabase.co",
-  "supabase.com",
-  "googleapis.com",
-  "analytics",
-];
+const BYPASS_ORIGINS = ["supabase.co", "supabase.com", "googleapis.com", "analytics"];
 
 // ---------------------------------------------------------------------------
 // Installation — préchargement du shell
@@ -39,14 +34,10 @@ self.addEventListener("install", (event) => {
     caches
       .open(SHELL_CACHE)
       .then((cache) =>
-        cache.addAll(
-          SHELL_URLS.map(
-            (url) => new Request(url, { credentials: "same-origin" })
-          )
-        )
+        cache.addAll(SHELL_URLS.map((url) => new Request(url, { credentials: "same-origin" }))),
       )
       .then(() => self.skipWaiting())
-      .catch(() => self.skipWaiting()) // Ne pas bloquer si le réseau est absent
+      .catch(() => self.skipWaiting()), // Ne pas bloquer si le réseau est absent
   );
 });
 
@@ -62,10 +53,10 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           cacheNames
             .filter((name) => !currentCaches.includes(name))
-            .map((name) => caches.delete(name))
-        )
+            .map((name) => caches.delete(name)),
+        ),
       )
-      .then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -146,7 +137,7 @@ async function staleWhileRevalidate(request, cacheName) {
   if (cached) return cached;
 
   // Pas de cache : attendre le réseau
-  return networkPromise || new Response("Hors ligne", { status: 503 });
+  return (await networkPromise) || new Response("Hors ligne", { status: 503 });
 }
 
 /**
