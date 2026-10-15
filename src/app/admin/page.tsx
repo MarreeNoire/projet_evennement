@@ -26,6 +26,7 @@ export default async function AdminDashboardPage() {
   ]);
 
   const eventsAvailable = !eventsCount.error;
+  const eventBreakdownAvailable = !publishedCount.error && !draftsCount.error;
   const profilesAvailable = !profilesCount.error;
   const reportsAvailable = !reportsCount.error;
   const payoutsAvailable = !payoutRows.error;
@@ -40,13 +41,18 @@ export default async function AdminDashboardPage() {
         <p className="text-sm text-fg-muted">Indicateurs consolidés de la plateforme et accès aux opérations à traiter.</p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard label="Événements" value={eventsAvailable ? String(eventsCount.count ?? 0) : "—"} hint={eventsAvailable ? `${publishedCount.count ?? 0} publiés · ${draftsCount.count ?? 0} brouillons` : "Données indisponibles"} icon={<Calendar className="size-5" />} />
+      <section aria-labelledby="admin-activity-heading" className="space-y-3">
+        <h2 id="admin-activity-heading" className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">Activité de la plateforme</h2>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Événements" value={eventsAvailable ? String(eventsCount.count ?? 0) : "—"} hint={eventsAvailable ? eventBreakdownAvailable ? `${publishedCount.count ?? 0} publiés · ${draftsCount.count ?? 0} brouillons` : "Répartition indisponible" : "Données indisponibles"} icon={<Calendar className="size-5" />} />
         <StatCard label="Comptes inscrits" value={profilesAvailable ? String(profilesCount.count ?? 0) : "—"} hint="Total des profils enregistrés" icon={<Users className="size-5" />} />
         <StatCard label="Signalements ouverts" value={reportsAvailable ? String(pendingReports) : "—"} hint="À examiner par la modération" icon={<FileWarning className="size-5 text-warning" />} />
         <StatCard label="Reversements en attente" value={payoutsAvailable ? formatPrice(pendingAmount) : "—"} hint={payoutsAvailable ? `${pendingPayoutCount} demande${pendingPayoutCount > 1 ? "s" : ""}` : "Données indisponibles"} icon={<Wallet className="size-5" />} />
       </div>
+      </section>
 
+      <section aria-labelledby="admin-operations-heading" className="space-y-3">
+      <h2 id="admin-operations-heading" className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">Suivi et actions</h2>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3"><CardTitle className="text-base">Événements récents</CardTitle><ButtonLink href="/admin/evenements" variant="ghost" size="sm">Tous les événements</ButtonLink></CardHeader>
@@ -70,6 +76,7 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
+      </section>
 
       <p className="flex items-center gap-2 text-xs text-fg-subtle"><Clock className="size-4" /> Les statistiques sont calculées depuis les données accessibles avec les droits administrateur.</p>
     </div>

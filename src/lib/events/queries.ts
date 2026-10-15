@@ -413,7 +413,7 @@ export async function getOrganizerTicketTypes() {
 
     const { data: tickets, error } = await supabase
       .from("ticket_types")
-      .select("id, event_id, name, description, price, quantity, access_level, is_active")
+      .select("id, event_id, name, description, price, quantity, sold_count, access_level, is_active")
       .in("event_id", eventIds)
       .order("position", { ascending: true });
 
@@ -427,6 +427,7 @@ export async function getOrganizerTicketTypes() {
       description: t.description,
       price: t.price,
       quantity: t.quantity,
+      soldCount: t.sold_count,
       accessLevel: (t.access_level || "standard") as "standard" | "vip" | "vvip",
       isActive: t.is_active,
     }));

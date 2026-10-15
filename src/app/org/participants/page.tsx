@@ -1,83 +1,52 @@
-import Link from "next/link";
-import { Download, Search, Users, CheckCircle, Mail, Filter } from "lucide-react";
+import { Users } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge, AccessLevelBadge } from "@/components/ui/badge";
+import { Alert, EmptyState } from "@/components/ui/states";
+import { OrgParticipantsTable, type ParticipantRow } from "@/components/events/org-participants-table";
+import { getOrganizerEvents } from "@/lib/events/queries";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata = {
-  title: "Liste des Participants | Espace Organisateur | Event",
-  description: "Consultation et export des personnes inscrites à vos événements.",
+  title: "Participants | Espace Organisateur | Event",
+  description: "Consultez et exportez les participants de vos événements.",
 };
 
 export default async function OrgParticipantsPage() {
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">Liste des Participants</h1>
-          <p className="text-sm text-fg-muted">
-            Recherchez des inscrits, vérifiez leur statut ou exportez la liste au format CSV.
-          </p>
-        </div>
-        <Button variant="secondary">
-          <Download className="mr-2 size-4" /> Exporter en CSV
-        </Button>
-      </div>
+  const events = await getOrganizerEvents();
+  const eventIds = events.map((event) => event.id);
 
-      <Card>
-        <CardHeader className="p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-fg-subtle" />
-              <input
-                type="search"
-                placeholder="Nom, email, référence billet…"
-                className="w-full rounded-md border border-border bg-transparent pl-9 pr-3 py-1.5 text-sm focus:border-border-focus focus:outline-none"
-              />
-            </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <select className="rounded-md border border-border bg-transparent px-3 py-1.5 text-xs text-fg-muted">
-                <option value="">Tous les événements</option>
-                <option value="1">Abidjan Tech Forum 2026</option>
-              </select>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0 overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-y border-border bg-bg-muted/50 text-xs font-semibold text-fg-muted uppercase">
-              <tr>
-                <th className="p-3 pl-5">Participant</th>
-                <th className="p-3">Événement</th>
-                <th className="p-3">Formule</th>
-                <th className="p-3">Réf Billet</th>
-                <th className="p-3 pr-5">Check-in</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              <tr className="hover:bg-bg-subtle">
-                <td className="p-3 pl-5 font-semibold text-fg">Kouassi Jean-Marc</td>
-                <td className="p-3 text-xs text-fg-muted">Abidjan Tech Forum 2026</td>
-                <td className="p-3"><AccessLevelBadge level="vip" /></td>
-                <td className="p-3 font-mono text-xs">ATF-98234</td>
-                <td className="p-3 pr-5">
-                  <Badge variant="success">Scanné</Badge>
-                </td>
-              </tr>
-              <tr className="hover:bg-bg-subtle">
-                <td className="p-3 pl-5 font-semibold text-fg">Ahou Marie-Claire</td>
-                <td className="p-3 text-xs text-fg-muted">Abidjan Tech Forum 2026</td>
-                <td className="p-3"><AccessLevelBadge level="standard" /></td>
-                <td className="p-3 font-mono text-xs">ATF-44129</td>
-                <td className="p-3 pr-5">
-                  <Badge variant="neutral">En attente</Badge>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  if (!eventIds.length) {
+    return <EmptyState icon={<Users />} title="Aucun événement" description="Les participants apparaîtront ici dès que vos événements auront des billets." />;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data: tickets, error } = await supabase
+    .from("tickets")
+    .select("id, reference, event_id, ticket_type_id, user_id, status, access_level, holder_name, checked_in_at, created_at")
+    .in("event_id", eventIds)
+    .in("status", ["paid", "used"])
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return <Alert tone="danger" title="Participants indisponibles">Le chargement de la liste a échoué. Réessaie dans quelques instants.</Alert>;
+  }
+
+  const eventNames = new Map(events.map((event) => [event.id, event.title]));
+  const [{ data: types }, { data: profileNames }] = await Promise.all([
+    supabase.from("ticket_types").select("id, name").in("event_id", eventIds),
+    supabase.from("profiles").select("id, display_name, full_name").in("id", [...new Set((tickets ?? []).map((ticket) => ticket.user_id))]),
+  ]);
+  const ticketTypeNames = new Map((types ?? []).map((type) => [type.id, type.name]));
+  const names = new Map((profileNames ?? []).map((profile) => [profile.id, profile.full_name || profile.display_name]));
+
+  const participants: ParticipantRow[] = (tickets ?? []).map((ticket) => ({
+    id: ticket.id,
+    name: ticket.holder_name || names.get(ticket.user_id) || "Participant",
+    eventName: eventNames.get(ticket.event_id) || "Événement",
+    ticketType: ticketTypeNames.get(ticket.ticket_type_id) || "Billet",
+    reference: ticket.reference,
+    accessLevel: ticket.access_level,
+    checkedIn: Boolean(ticket.checked_in_at) || ticket.status === "used",
+  }));
+
+  return <OrgParticipantsTable participants={participants} />;
 }

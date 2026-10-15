@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   ArrowLeft,
   Calendar,
+  ChevronDown,
   Flag,
   LayoutDashboard,
   ScrollText,
@@ -41,27 +42,32 @@ export function AdminNavigation() {
           </div>
         </div>
 
-        <nav aria-label="Navigation administration" className="grid grid-cols-2 gap-2 lg:flex lg:flex-col lg:gap-1">
-          {items.map(({ href, label, icon: Icon }) => {
-            const active = href === "/admin" ? pathname === href : pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex min-h-12 min-w-0 items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition-colors sm:text-sm lg:min-h-11 lg:rounded-md lg:border-0 lg:border-l-2 lg:py-2.5",
-                  active
-                    ? "border-danger/40 bg-danger-subtle text-danger lg:border-danger"
-                    : "border-border bg-bg text-fg-muted hover:bg-bg-muted hover:text-fg lg:border-transparent lg:bg-transparent",
-                )}
-              >
-                <Icon className="size-4 shrink-0" aria-hidden="true" />
-                <span className="min-w-0 leading-tight">{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        {(() => {
+          const current = items.find(({ href }) => href === "/admin" ? pathname === href : pathname.startsWith(href)) ?? items[0]!;
+          const CurrentIcon = current.icon;
+          return (
+            <>
+              <details key={pathname} className="group lg:hidden">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md border border-border bg-bg px-3 text-sm font-semibold text-fg [&::-webkit-details-marker]:hidden">
+                  <span className="flex min-w-0 items-center gap-2"><CurrentIcon className="size-4 shrink-0 text-danger" aria-hidden="true" /><span className="truncate">{current.label}</span></span>
+                  <ChevronDown className="size-4 shrink-0 text-fg-muted transition-transform group-open:rotate-180" aria-hidden="true" />
+                </summary>
+                <nav aria-label="Navigation administration" className="mt-2 grid grid-cols-2 gap-2">
+                  {items.map(({ href, label, icon: Icon }) => {
+                    const active = current.href === href;
+                    return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("flex min-h-11 min-w-0 items-center gap-2 rounded-md border px-3 py-2 text-xs font-semibold sm:text-sm", active ? "border-danger/40 bg-danger-subtle text-danger" : "border-border bg-bg text-fg-muted hover:bg-bg-muted hover:text-fg")}><Icon className="size-4 shrink-0" aria-hidden="true" /><span className="min-w-0 leading-tight">{label}</span></Link>;
+                  })}
+                </nav>
+              </details>
+              <nav aria-label="Navigation administration" className="hidden min-w-0 gap-1 lg:flex lg:flex-col">
+                {items.map(({ href, label, icon: Icon }) => {
+                  const active = current.href === href;
+                  return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("flex min-h-11 min-w-0 items-center gap-3 rounded-md border-l-2 py-2.5 pl-3 text-sm font-semibold transition-colors", active ? "border-danger bg-danger-subtle text-danger" : "border-transparent text-fg-muted hover:bg-bg-muted hover:text-fg")}><Icon className="size-4 shrink-0" aria-hidden="true" /><span className="min-w-0 leading-tight">{label}</span></Link>;
+                })}
+              </nav>
+            </>
+          );
+        })()}
 
         <div className="mt-4 hidden border-t border-border pt-4 lg:block">
           <Link href="/" className="flex items-center gap-2 text-xs font-medium text-fg-subtle hover:text-fg">

@@ -78,7 +78,7 @@ export default async function SalonDetailPage({
       : Promise.resolve(new Map<string, SalonEventInfo>()),
     activeTab === "photos" ? getSalonMedia(id) : Promise.resolve([]),
   ]);
-  const polls = activeTab === "sondages" ? await getSalonPolls(id, profile?.id ?? null) : [];
+  const polls = activeTab === "sondages" ? await getSalonPolls(id) : [];
 
   const event = salon.event_id ? (events.get(salon.event_id) ?? null) : null;
   const commentsByPost = await getCommentsByPost(posts.map((post) => post.id));

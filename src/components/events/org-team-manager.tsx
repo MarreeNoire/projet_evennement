@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { UserPlus, Shield, Mail, CheckCircle2 } from "lucide-react";
+import { UserPlus } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,24 +16,8 @@ export interface TeamMember {
   email: string;
   role: "owner" | "manager" | "checkin_agent" | "moderator";
   roleLabel: string;
+  status?: string;
 }
-
-const DEFAULT_MEMBERS: TeamMember[] = [
-  {
-    id: "1",
-    name: "Organisation Principale",
-    email: "contact@organisation.ci",
-    role: "owner",
-    roleLabel: "Propriétaire (Owner)",
-  },
-  {
-    id: "2",
-    name: "Agent Check-in 1",
-    email: "checkin@organisation.ci",
-    role: "checkin_agent",
-    roleLabel: "Agent de contrôle",
-  },
-];
 
 const ROLE_OPTIONS = [
   { value: "manager", label: "Gestionnaire" },
@@ -41,8 +25,8 @@ const ROLE_OPTIONS = [
   { value: "moderator", label: "Modérateur" },
 ];
 
-export function OrgTeamManager() {
-  const [members, setMembers] = useState<TeamMember[]>(DEFAULT_MEMBERS);
+export function OrgTeamManager({ initialMembers = [] }: { initialMembers?: TeamMember[] }) {
+  const [members, setMembers] = useState<TeamMember[]>(initialMembers);
   const [showModal, setShowModal] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -72,11 +56,13 @@ export function OrgTeamManager() {
           email: email.trim(),
           role,
           roleLabel: roleObj?.label || "Membre",
+          status: "pending",
         };
 
         // Supabase insertion si connecté
         const supabase = createSupabaseBrowserClient();
         const { data: authData } = await supabase.auth.getUser();
+        if (!authData.user) throw new Error("Session expirée");
 
         if (authData?.user) {
           const { data: org } = await supabase
@@ -85,22 +71,25 @@ export function OrgTeamManager() {
             .eq("owner_id", authData.user.id)
             .maybeSingle();
 
+          if (!org) throw new Error("Organisation introuvable");
           if (org) {
-            await supabase.from("organization_members").insert({
+            const { data: inserted, error: insertError } = await supabase.from("organization_members").insert({
               organization_id: org.id,
               invited_email: email.trim(),
               role,
               status: "pending",
               invited_by: authData.user.id,
-            } as any);
+            } as any).select("id").single();
+            if (insertError || !inserted) throw insertError ?? new Error("Invitation non enregistrée");
+            newMember.id = inserted.id;
           }
         }
 
         setMembers((prev) => [...prev, newMember]);
         setShowModal(false);
         setEmail("");
-        setSuccess(`Invitation envoyée avec succès à ${email.trim()} !`);
-      } catch (err: any) {
+        setSuccess(`Invitation enregistrée pour ${email.trim()}. Elle s’activera lorsque la personne rejoindra l’organisation.`);
+      } catch {
         setError("Erreur lors de l'envoi de l'invitation.");
       }
     });
@@ -184,9 +173,10 @@ export function OrgTeamManager() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Membres Actifs & Collaborateurs</CardTitle>
+            <CardTitle className="text-base">Membres et invitations</CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-border p-0">
+          {members.length === 0 ? <p className="p-5 text-sm text-fg-muted">Aucun membre ni invitation pour le moment.</p> : null}
           {members.map((m) => (
             <div key={m.id} className="flex min-w-0 flex-col items-start gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <div className="flex min-w-0 items-center gap-3">
@@ -196,7 +186,7 @@ export function OrgTeamManager() {
                   <p className="break-all text-xs text-fg-subtle">{m.email}</p>
                 </div>
               </div>
-              <Badge variant={m.role === "owner" ? "accent" : "neutral"}>{m.roleLabel}</Badge>
+              <div className="flex shrink-0 flex-wrap gap-2"><Badge variant={m.role === "owner" ? "accent" : "neutral"}>{m.roleLabel}</Badge>{m.status === "pending" ? <Badge variant="warning">En attente</Badge> : null}</div>
             </div>
           ))}
         </CardContent>

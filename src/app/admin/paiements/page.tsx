@@ -106,7 +106,18 @@ export default async function AdminPaiementsPage() {
             {payouts.length === 0 ? (
               <p className="px-5 py-8 text-sm text-fg-muted">Aucun reversement enregistré.</p>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+              <ul className="divide-y divide-border md:hidden">
+                {payouts.map((payout) => {
+                  const status = statusDetails(payout.status);
+                  return <li key={payout.id} className="space-y-3 p-4">
+                    <div className="flex items-start justify-between gap-3"><div><p className="font-semibold tabular-nums text-fg">{formatPrice(payout.net_amount)}</p><p className="mt-1 text-xs text-fg-muted">{formatDate(payout.created_at)} · {payout.method || "Moyen non renseigné"}</p></div><Badge variant={status.variant}>{status.label}</Badge></div>
+                    <p className="break-all text-xs text-fg-subtle">Référence : {payout.reference || "Non renseignée"}</p>
+                    <PayoutControls payoutId={payout.id} status={payout.status} />
+                  </li>;
+                })}
+              </ul>
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[35rem] text-left text-sm">
                   <thead className="bg-bg-muted text-xs font-semibold text-fg-muted uppercase">
                     <tr>
@@ -135,6 +146,7 @@ export default async function AdminPaiementsPage() {
                   </tbody>
                 </table>
               </div>
+              </>
             )}
           </section>
         </>

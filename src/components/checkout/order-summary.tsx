@@ -62,7 +62,7 @@ export function OrderSummary({
           loading={pending}
           loadingLabel="Création de la commande…"
           fullWidth
-          disabled={pricing.lines.length === 0}
+          disabled={pending || pricing.lines.length === 0}
         >
           {pricing.total === 0 ? "Obtenir mes billets" : `Payer ${formatPrice(pricing.total)}`}
         </Button>

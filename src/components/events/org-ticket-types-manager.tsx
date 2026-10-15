@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Edit, Ticket } from "lucide-react";
+import { Plus, Ticket } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,10 @@ export interface TicketTypeItem {
 
 export function OrgTicketTypesManager({
   initialTickets = [],
+  events = [],
 }: {
   initialTickets?: TicketTypeItem[];
+  events?: { id: string; title: string }[];
 }) {
   const [tickets, setTickets] = useState<TicketTypeItem[]>(initialTickets);
   const [showModal, setShowModal] = useState(false);
@@ -36,6 +38,7 @@ export function OrgTicketTypesManager({
   const [price, setPrice] = useState(5000);
   const [quantity, setQuantity] = useState(100);
   const [accessLevel, setAccessLevel] = useState<"standard" | "vip" | "vvip">("standard");
+  const [eventId, setEventId] = useState(events[0]?.id ?? "");
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -51,8 +54,24 @@ export function OrgTicketTypesManager({
     setError(null);
     startTransition(async () => {
       try {
+        if (!eventId) throw new Error("Choisis un événement avant de créer la formule.");
+        const supabase = createSupabaseBrowserClient();
+        const { data: inserted, error: insertError } = await supabase.from("ticket_types").insert({
+          event_id: eventId,
+          name: name.trim(),
+          description: description.trim() || null,
+          price: Number(price),
+          quantity: Number(quantity),
+          access_level: accessLevel,
+          is_active: true,
+          covers_salon: true,
+        } as any).select("id").single();
+        if (insertError || !inserted) throw insertError ?? new Error("Création impossible");
+
         const newTicket: TicketTypeItem = {
-          id: `ticket-${Date.now()}`,
+          id: inserted.id,
+          eventId,
+          eventName: events.find((event) => event.id === eventId)?.title,
           name: name.trim(),
           description: description.trim() || null,
           price: Number(price) || 0,
@@ -63,40 +82,12 @@ export function OrgTicketTypesManager({
         };
 
         // Enregistrer via Supabase si connecté
-        const supabase = createSupabaseBrowserClient();
-        const { data: authData } = await supabase.auth.getUser();
-
-        if (authData?.user) {
-          const { data: events } = await supabase
-            .from("events")
-            .select("id, title")
-            .order("created_at", { ascending: false })
-            .limit(1);
-
-          const latestEvent = events?.[0];
-          if (latestEvent) {
-            newTicket.eventId = latestEvent.id;
-            newTicket.eventName = latestEvent.title;
-
-            await supabase.from("ticket_types").insert({
-              event_id: latestEvent.id,
-              name: name.trim(),
-              description: description.trim() || null,
-              price: Number(price) || 0,
-              quantity: Number(quantity) || 50,
-              access_level: accessLevel,
-              is_active: true,
-              covers_salon: true,
-            } as any);
-          }
-        }
-
         setTickets((prev) => [...prev, newTicket]);
         setShowModal(false);
         setName("");
         setDescription("");
         setSuccess("Nouvelle formule de billet créée avec succès !");
-      } catch (err: any) {
+      } catch {
         setError("Erreur lors de la création de la formule.");
       }
     });
@@ -139,6 +130,13 @@ export function OrgTicketTypesManager({
           <CardContent>
             <form onSubmit={handleCreateTicket} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-xs font-semibold text-fg">Événement *</label>
+                  <select required value={eventId} onChange={(e) => setEventId(e.target.value)} disabled={!events.length} className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm">
+                    <option value="">Choisir un événement</option>
+                    {events.map((event) => <option key={event.id} value={event.id}>{event.title}</option>)}
+                  </select>
+                </div>
                 <div className="space-y-1.5 sm:col-span-2">
                   <label className="text-xs font-semibold text-fg">Nom de la formule *</label>
                   <input

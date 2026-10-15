@@ -137,6 +137,162 @@ export async function toggleSalonChatReaction(
   return { success: true };
 }
 
+/** Nombre minimal et maximal d'options d'un sondage. */
+const POLL_MIN_OPTIONS = 2;
+const POLL_MAX_OPTIONS = 6;
+
+/**
+ * Crée un sondage dans un salon : une question et 2 à 6 options.
+ * Les options sont insérées dans la même transaction logique (insert puis options).
+ * @deprecated Utiliser la version plus complète ci-dessous (createSalonPoll avec validation UUID).
+ */
+async function _createSalonPollLegacy(
+  salonId: string,
+  question: string,
+  options: string[],
+): Promise<{ success: boolean; pollId?: string; error?: string }> {
+  const normalizedQuestion = question.trim();
+  if (!normalizedQuestion || normalizedQuestion.length > 280) {
+    return { success: false, error: "La question doit contenir entre 1 et 280 caractères." };
+  }
+
+  const normalizedOptions = options.map((option) => option.trim()).filter(Boolean);
+  if (normalizedOptions.length < POLL_MIN_OPTIONS || normalizedOptions.length > POLL_MAX_OPTIONS) {
+    return {
+      success: false,
+      error: `Un sondage compte entre ${POLL_MIN_OPTIONS} et ${POLL_MAX_OPTIONS} options.`,
+    };
+  }
+  if (normalizedOptions.some((option) => option.length > 120)) {
+    return { success: false, error: "Chaque option fait au maximum 120 caractères." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: poll, error: pollError } = await supabase
+    .from("salon_polls")
+    .insert({ salon_id: salonId, author_id: userId, question: normalizedQuestion })
+    .select("id")
+    .single();
+
+  if (pollError || !poll) {
+    return { success: false, error: "Le sondage n'a pas pu être créé. Réessaie." };
+  }
+
+  const { error: optionsError } = await supabase.from("salon_poll_options").insert(
+    normalizedOptions.map((label, index) => ({
+      poll_id: poll.id,
+      label,
+      position: index,
+    })),
+  );
+
+  if (optionsError) {
+    await supabase.from("salon_polls").delete().eq("id", poll.id);
+    return { success: false, error: "Le sondage n'a pas pu être créé. Réessaie." };
+  }
+
+  return { success: true, pollId: poll.id };
+}
+
+/**
+ * Vote (ou change de vote) sur un sondage ouvert du salon.
+ * La politique RLS vérifie l'accès au salon, l'option et l'état du sondage.
+ * @deprecated Utiliser voteSalonPoll avec validation UUID ci-dessous.
+ */
+async function _voteSalonPollLegacy(
+  pollId: string,
+  optionId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: existing, error: readError } = await supabase
+    .from("salon_poll_votes")
+    .select("id")
+    .eq("poll_id", pollId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (readError) return { success: false, error: "Le vote n'a pas pu être enregistré." };
+
+  const result = existing
+    ? await supabase.from("salon_poll_votes").update({ option_id: optionId }).eq("id", existing.id)
+    : await supabase.from("salon_poll_votes").insert({ poll_id: pollId, option_id: optionId, user_id: userId });
+
+  if (result.error) {
+    return { success: false, error: "Le vote n'a pas pu être enregistré. Réessaie." };
+  }
+  return { success: true };
+}
+
+/** Retire le vote de l'utilisateur courant sur un sondage ouvert. */
+export async function retractSalonPollVote(
+  pollId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { error } = await supabase
+    .from("salon_poll_votes")
+    .delete()
+    .eq("poll_id", pollId)
+    .eq("user_id", userId);
+
+  if (error) return { success: false, error: "Le vote n'a pas pu être retiré." };
+  return { success: true };
+}
+
+/** Clôt un sondage : l'auteur ou un modérateur du salon.
+ * @deprecated Utiliser closeSalonPoll avec validation UUID ci-dessous.
+ */
+async function _closeSalonPollLegacy(
+  pollId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data, error } = await supabase
+    .from("salon_polls")
+    .update({ is_closed: true, closed_at: new Date().toISOString() })
+    .eq("id", pollId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return { success: false, error: "Seul l'auteur du sondage ou un modérateur peut le clôturer." };
+  }
+  return { success: true };
+}
+
+/** Supprime un sondage : l'auteur ou un modérateur du salon.
+ * @deprecated Utiliser deleteSalonPoll avec validation UUID ci-dessous si créé.
+ */
+async function _deleteSalonPollLegacy(
+  pollId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data, error } = await supabase
+    .from("salon_polls")
+    .delete()
+    .eq("id", pollId)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    return { success: false, error: "Seul l'auteur du sondage ou un modérateur peut le supprimer." };
+  }
+  return { success: true };
+}
+
 /**
  * Crée une publication dans un salon.
  * La contrainte RLS posts_insert vérifie que l'auteur a accès au salon.

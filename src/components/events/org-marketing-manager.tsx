@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Tag, Megaphone, Send, CheckCircle2 } from "lucide-react";
+import { Plus, Tag, Megaphone, Send } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,33 +15,12 @@ export interface PromoCodeItem {
   discountValue: number;
   discountKind: "percentage" | "fixed";
   usedCount: number;
-  maxUses: number;
+  maxUses: number | null;
   isActive: boolean;
 }
 
-const DEFAULT_PROMOS: PromoCodeItem[] = [
-  {
-    id: "1",
-    code: "EARLYBIRD20",
-    discountValue: 20,
-    discountKind: "percentage",
-    usedCount: 42,
-    maxUses: 50,
-    isActive: true,
-  },
-  {
-    id: "2",
-    code: "TECHCOMMUNITY",
-    discountValue: 10,
-    discountKind: "percentage",
-    usedCount: 15,
-    maxUses: 100,
-    isActive: true,
-  },
-];
-
-export function OrgMarketingManager() {
-  const [promos, setPromos] = useState<PromoCodeItem[]>(DEFAULT_PROMOS);
+export function OrgMarketingManager({ events = [], initialPromos = [] }: { events?: { id: string; title: string }[]; initialPromos?: PromoCodeItem[] }) {
+  const [promos, setPromos] = useState<PromoCodeItem[]>(initialPromos);
   const [showPromoModal, setShowPromoModal] = useState(false);
 
   const [code, setCode] = useState("");
@@ -50,6 +29,7 @@ export function OrgMarketingManager() {
   const [maxUses, setMaxUses] = useState(50);
 
   const [announcement, setAnnouncement] = useState("");
+  const [eventId, setEventId] = useState(events[0]?.id ?? "");
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -66,43 +46,31 @@ export function OrgMarketingManager() {
     startTransition(async () => {
       try {
         const cleanCode = code.trim().toUpperCase();
-        const newPromo: PromoCodeItem = {
-          id: `promo-${Date.now()}`,
-          code: cleanCode,
-          discountValue,
-          discountKind,
-          usedCount: 0,
-          maxUses,
-          isActive: true,
-        };
-
         const supabase = createSupabaseBrowserClient();
         const { data: authData } = await supabase.auth.getUser();
-
-        if (authData?.user) {
-          const { data: org } = await supabase
+        if (!authData.user) throw new Error("Session expirée");
+        const { data: org, error: orgError } = await supabase
             .from("organizations")
             .select("id")
             .eq("owner_id", authData.user.id)
             .maybeSingle();
-
-          if (org) {
-            await supabase.from("promo_codes").insert({
+        if (orgError || !org) throw orgError ?? new Error("Organisation introuvable");
+        const { data: inserted, error: insertError } = await supabase.from("promo_codes").insert({
               organization_id: org.id,
               code: cleanCode,
               discount_kind: discountKind,
               discount_value: discountValue,
               max_uses: maxUses,
               created_by: authData.user.id,
-            } as any);
-          }
-        }
+            } as any).select("id").single();
+        if (insertError || !inserted) throw insertError ?? new Error("Code non enregistré");
+        const newPromo: PromoCodeItem = { id: inserted.id, code: cleanCode, discountValue, discountKind, usedCount: 0, maxUses, isActive: true };
 
         setPromos((prev) => [newPromo, ...prev]);
         setShowPromoModal(false);
         setCode("");
         setSuccess(`Code promo ${cleanCode} créé avec succès !`);
-      } catch (err: any) {
+      } catch {
         setError("Erreur lors de la création du code promo.");
       }
     });
@@ -110,8 +78,8 @@ export function OrgMarketingManager() {
 
   function handleSendAnnouncement(e: React.FormEvent) {
     e.preventDefault();
-    if (!announcement.trim()) {
-      setError("Veuillez entrer le texte de l'annonce.");
+    if (!announcement.trim() || !eventId) {
+      setError("Choisis un événement et saisis le texte de l'annonce.");
       return;
     }
 
@@ -119,20 +87,19 @@ export function OrgMarketingManager() {
     startTransition(async () => {
       try {
         const supabase = createSupabaseBrowserClient();
-        const { data: salons } = await supabase.from("salons").select("id").limit(1);
-
-        if (salons && salons.length > 0 && salons[0]) {
-          await supabase.from("posts").insert({
-            salon_id: salons[0].id,
+        const { data: salon, error: salonsError } = await supabase.from("salons").select("id").eq("event_id", eventId).maybeSingle();
+        if (salonsError || !salon) throw salonsError ?? new Error("Aucun salon lié à cet événement");
+        const { error: postError } = await supabase.from("posts").insert({
+            salon_id: salon.id,
             content: announcement.trim(),
             kind: "announcement",
             is_pinned: true,
           } as any);
-        }
+        if (postError) throw postError;
 
         setAnnouncement("");
         setSuccess("Annonce diffusée avec succès dans le salon d'événement !");
-      } catch (err: any) {
+      } catch {
         setError("Erreur lors de la diffusion de l'annonce.");
       }
     });
@@ -243,12 +210,13 @@ export function OrgMarketingManager() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {promos.length === 0 ? <p className="text-sm text-fg-muted">Aucun code promotionnel enregistré.</p> : null}
             {promos.map((p) => (
               <div key={p.id} className="flex items-center justify-between border-b border-border pb-3 last:border-0">
                 <div>
                   <span className="font-mono font-bold text-fg">{p.code}</span>
                   <p className="text-xs text-fg-muted">
-                    {p.discountKind === "percentage" ? `${p.discountValue}%` : `${p.discountValue} FCFA`} de réduction · {p.usedCount}/{p.maxUses} utilisés
+                    {p.discountKind === "percentage" ? `${p.discountValue}%` : `${p.discountValue} FCFA`} de réduction · {p.usedCount}/{p.maxUses ?? "∞"} utilisés
                   </p>
                 </div>
                 <Badge variant="success">Actif</Badge>
@@ -266,6 +234,13 @@ export function OrgMarketingManager() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSendAnnouncement} className="space-y-3">
+              <label className="block space-y-1.5">
+                <span className="text-xs font-semibold text-fg">Événement *</span>
+                <select required value={eventId} onChange={(e) => setEventId(e.target.value)} className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm">
+                  <option value="">Choisir un événement</option>
+                  {events.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
+                </select>
+              </label>
               <textarea
                 rows={3}
                 required

@@ -9,8 +9,9 @@ import type {
   SalonMemberWithProfile,
   SalonWithMemberCount,
   SalonChatMessageWithAuthor,
+  SalonPollOption,
+  SalonPollWithOptions,
 } from "@/lib/salons/types";
-import type { SalonPollOptionRow, SalonPollRow } from "@/types/database";
 
 /**
  * Retourne les publications d'un salon, les plus recentes d'abord.
@@ -298,80 +299,12 @@ export async function getSalonById(salonId: string): Promise<SalonWithMemberCoun
   } as SalonWithMemberCount;
 }
 
-export type SalonPollWithResults = SalonPollRow & {
-  options: (SalonPollOptionRow & { voteCount: number })[];
+export type SalonPollWithResults = Omit<SalonPollWithOptions, "options" | "total_votes" | "my_option_id"> & {
+  options: (SalonPollOption & { voteCount: number })[];
   totalVotes: number;
   myOptionId: string | null;
   canClose: boolean;
 };
-
-/** Sondages du salon, avec les résultats agrégés et les droits de clôture. */
-export async function getSalonPolls(
-  salonId: string,
-  userId: string | null,
-): Promise<SalonPollWithResults[]> {
-  const supabase = await createSupabaseServerClient();
-  const [{ data: polls, error }, { data: membership }] = await Promise.all([
-    supabase
-      .from("salon_polls")
-      .select("id, salon_id, author_id, question, is_closed, closed_at, created_at")
-      .eq("salon_id", salonId)
-      .order("created_at", { ascending: false }),
-    userId
-      ? supabase
-          .from("salon_members")
-          .select("role")
-          .eq("salon_id", salonId)
-          .eq("user_id", userId)
-          .is("left_at", null)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
-  ]);
-
-  if (error) {
-    console.error("[getSalonPolls]", error.message);
-    return [];
-  }
-  if (!polls?.length) return [];
-
-  const pollIds = polls.map((poll) => poll.id);
-  const [{ data: options }, { data: votes }] = await Promise.all([
-    supabase
-      .from("salon_poll_options")
-      .select("id, poll_id, label, position")
-      .in("poll_id", pollIds)
-      .order("position", { ascending: true }),
-    supabase.from("salon_poll_votes").select("poll_id, option_id, user_id").in("poll_id", pollIds),
-  ]);
-
-  const optionsByPoll = new Map<string, SalonPollWithResults["options"]>();
-  for (const option of options ?? []) {
-    const grouped = optionsByPoll.get(option.poll_id) ?? [];
-    grouped.push({ ...option, voteCount: 0 });
-    optionsByPoll.set(option.poll_id, grouped);
-  }
-
-  const votesByOption = new Map<string, number>();
-  const votesByPoll = new Map<string, number>();
-  const myVoteByPoll = new Map<string, string>();
-  for (const vote of votes ?? []) {
-    votesByOption.set(vote.option_id, (votesByOption.get(vote.option_id) ?? 0) + 1);
-    votesByPoll.set(vote.poll_id, (votesByPoll.get(vote.poll_id) ?? 0) + 1);
-    if (userId && vote.user_id === userId) myVoteByPoll.set(vote.poll_id, vote.option_id);
-  }
-
-  const canModerate = membership?.role === "owner" || membership?.role === "moderator";
-  return polls.map((poll) => ({
-    ...poll,
-    options: (optionsByPoll.get(poll.id) ?? []).map((option) => ({
-      ...option,
-      voteCount: votesByOption.get(option.id) ?? 0,
-    })),
-    totalVotes: votesByPoll.get(poll.id) ?? 0,
-    myOptionId: myVoteByPoll.get(poll.id) ?? null,
-    canClose: Boolean(userId && (canModerate || poll.author_id === userId)),
-  }));
-}
 
 /**
  * Retourne la liste des salons disponibles, avec filtres et pagination.
@@ -672,6 +605,84 @@ export async function getEventsByIds(ids: string[]): Promise<Map<string, SalonEv
     result.set(row.id, row);
   }
   return result;
+}
+
+/**
+ * Sondages d'un salon, du plus récent au plus ancien, avec leurs options,
+ * le nombre de votes par option et le choix de l'utilisateur courant.
+ */
+export async function getSalonPolls(
+  salonId: string,
+  { limit = 20 }: { limit?: number } = {},
+): Promise<SalonPollWithResults[]> {
+  const supabase = await createSupabaseServerClient();
+
+  const { data: polls, error } = await supabase
+    .from("salon_polls")
+    .select(
+      `
+      *,
+      author:profiles!salon_polls_author_id_fkey ( id, display_name, avatar_url, is_verified )
+    `,
+    )
+    .eq("salon_id", salonId)
+    .order("is_closed", { ascending: true })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("[getSalonPolls]", error.message);
+    return [];
+  }
+
+  const pollList = (polls ?? []) as any[];
+  if (!pollList.length) return [];
+
+  const pollIds = pollList.map((poll) => poll.id);
+  const [{ data: options }, { data: votes }, { data: userData }] = await Promise.all([
+    supabase
+      .from("salon_poll_options")
+      .select("*")
+      .in("poll_id", pollIds)
+      .order("position", { ascending: true }),
+    supabase.from("salon_poll_votes").select("poll_id, option_id, user_id").in("poll_id", pollIds),
+    supabase.auth.getUser(),
+  ]);
+
+  const currentUserId = userData.user?.id ?? null;
+  const optionList = (options ?? []) as SalonPollOption[];
+  const voteList = (votes ?? []) as { poll_id: string; option_id: string; user_id: string }[];
+
+  const countByOption = new Map<string, number>();
+  for (const vote of voteList) {
+    countByOption.set(vote.option_id, (countByOption.get(vote.option_id) ?? 0) + 1);
+  }
+  const myOptionByPoll = new Map<string, string>();
+  for (const vote of voteList) {
+    if (vote.user_id === currentUserId) myOptionByPoll.set(vote.poll_id, vote.option_id);
+  }
+
+  return pollList.map((poll) => {
+    const pollOptions = optionList
+      .filter((option) => option.poll_id === poll.id)
+      .map((option) => ({ ...option, voteCount: countByOption.get(option.id) ?? 0 }));
+    return {
+      id: poll.id,
+      salon_id: poll.salon_id,
+      author_id: poll.author_id,
+      question: poll.question,
+      is_closed: poll.is_closed,
+      closed_at: poll.closed_at,
+      created_at: poll.created_at,
+      author: poll.author ?? null,
+      options: pollOptions,
+      totalVotes: new Set(
+        voteList.filter((vote) => vote.poll_id === poll.id).map((vote) => vote.user_id),
+      ).size,
+      myOptionId: myOptionByPoll.get(poll.id) ?? null,
+      canClose: Boolean(currentUserId && poll.author_id === currentUserId),
+    } satisfies SalonPollWithResults;
+  });
 }
 
 /** Commentaires de plusieurs publications en une seule requête, groupés par publication. */

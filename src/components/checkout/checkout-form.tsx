@@ -4,9 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { ArrowLeft, ArrowRight, Check, CreditCard, LockKeyhole } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, fieldAriaProps } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/states";
+import { formatPrice } from "@/lib/utils";
 import { startCheckout } from "@/lib/orders/checkout-actions";
 import { priceOrder } from "@/lib/orders/pricing";
 import {
@@ -37,6 +41,7 @@ export function CheckoutForm({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [step, setStep] = useState(0);
   const [checkoutAttempt, setCheckoutAttempt] = useState<{
     fingerprint: string;
     key: string;
@@ -63,6 +68,8 @@ export function CheckoutForm({
     handleSubmit,
     setValue,
     setFocus,
+    trigger,
+    watch,
     formState: { errors, isSubmitting: pending },
   } = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
@@ -85,6 +92,29 @@ export function CheckoutForm({
   );
 
   const pricing = useMemo(() => priceOrder(selectedLines), [selectedLines]);
+  const buyerPhone = watch("buyerPhone");
+
+  async function continueToNextStep() {
+    setServerError(null);
+    if (step === 0) {
+      if (selectedLines.length === 0) {
+        setServerError("Choisis au moins un billet pour continuer.");
+        return;
+      }
+      setStep(1);
+      return;
+    }
+    if (step === 1) {
+      const valid = await trigger(["buyerName", "buyerEmail", "buyerPhone"]);
+      if (!valid) {
+        if (errors.buyerName) setFocus("buyerName");
+        else if (errors.buyerEmail) setFocus("buyerEmail");
+        else if (errors.buyerPhone) setFocus("buyerPhone");
+        return;
+      }
+    }
+    setStep((current) => Math.min(current + 1, 3));
+  }
 
   const onSubmit = handleSubmit(
     async (values) => {
@@ -151,126 +181,97 @@ export function CheckoutForm({
     },
   );
 
+  const stepLabels = ["Billets", "Coordonnées", "Paiement", "Confirmation"];
+
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-      <div className="flex min-w-0 flex-col gap-6">
+    <form onSubmit={step === 3 ? onSubmit : (event) => event.preventDefault()} noValidate className="mx-auto w-full max-w-3xl space-y-5">
+      <nav aria-label="Étapes de la commande">
+        <ol className="grid grid-cols-4 gap-2">
+          {stepLabels.map((label, index) => (
+            <li key={label}>
+              <button type="button" disabled={index > step || pending} onClick={() => setStep(index)} aria-current={step === index ? "step" : undefined} className={`flex min-h-12 w-full items-center gap-2 rounded-md border px-2 text-left text-xs font-semibold sm:px-3 sm:text-sm ${step === index ? "border-primary bg-primary-subtle text-primary" : index < step ? "border-border bg-surface text-fg" : "border-border bg-bg text-fg-subtle"}`}>
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full border text-[11px]">{index < step ? <Check className="size-3.5" aria-hidden="true" /> : index + 1}</span>
+                <span className="truncate">{label}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </nav>
+
+      {serverError && step !== 3 ? <Alert tone="danger" title="Vérifie cette étape">{serverError}</Alert> : null}
+
+      {step === 0 ? (
         <Card>
-          <CardHeader>
-            <CardTitle>1. Tes billets</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Choisis tes billets</CardTitle></CardHeader>
           <CardContent className="flex flex-col gap-3">
-            {ticketTypes.map((type) => (
-              <QuantityPicker
-                key={type.id}
-                ticketType={type}
-                quantity={quantities[type.id] ?? 0}
-                disabled={pending}
-                onChange={(value) => {
-                  const next = { ...quantities, [type.id]: value };
-                  setQuantities(next);
-                  setServerError(null);
-                  setValue("items", checkoutItemsFromQuantities(ticketTypes, next), {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  });
-                }}
-              />
-            ))}
+            {ticketTypes.map((type) => <QuantityPicker key={type.id} ticketType={type} quantity={quantities[type.id] ?? 0} disabled={pending} onChange={(value) => {
+              const next = { ...quantities, [type.id]: value };
+              setQuantities(next);
+              setServerError(null);
+              setValue("items", checkoutItemsFromQuantities(ticketTypes, next), { shouldDirty: true, shouldValidate: true });
+            }} />)}
+            {selectedLines.length ? <p className="border-t border-border pt-3 text-right text-sm font-semibold">{pricing.ticketCount} billet{pricing.ticketCount > 1 ? "s" : ""} · {formatPrice(pricing.total)}</p> : null}
           </CardContent>
         </Card>
+      ) : null}
 
+      {step === 1 ? (
         <Card>
-          <CardHeader>
-            <CardTitle>2. Tes coordonnées</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Vérifie les coordonnées du participant</CardTitle><p className="text-sm text-fg-muted">Elles sont reprises depuis ton compte et restent modifiables.</p></CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <Field
-              label="Nom complet"
-              htmlFor="buyerName"
-              required
-              error={errors.buyerName?.message}
-            >
-              <Input
-                id="buyerName"
-                autoComplete="name"
-                placeholder="Koffi Atta"
-                required
-                invalid={Boolean(errors.buyerName)}
-                {...fieldAriaProps("buyerName", { error: errors.buyerName?.message })}
-                {...register("buyerName")}
-              />
+            <Field label="Nom complet" htmlFor="buyerName" required error={errors.buyerName?.message}>
+              <Input id="buyerName" autoComplete="name" placeholder="Koffi Atta" required invalid={Boolean(errors.buyerName)} {...fieldAriaProps("buyerName", { error: errors.buyerName?.message })} {...register("buyerName")} />
             </Field>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                label="Email"
-                htmlFor="buyerEmail"
-                hint="Facultatif"
-                error={errors.buyerEmail?.message}
-              >
-                <Input
-                  id="buyerEmail"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="koffi@example.ci"
-                  invalid={Boolean(errors.buyerEmail)}
-                  {...fieldAriaProps("buyerEmail", { error: errors.buyerEmail?.message })}
-                  {...register("buyerEmail")}
-                />
-              </Field>
-              <Field
-                label="Téléphone"
-                htmlFor="buyerPhone"
-                required
-                hint={
-                  initialBuyer.phone
-                    ? "Prérempli depuis ton profil · modifiable"
-                    : "Avec l'indicatif du pays"
-                }
-                description="Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée."
-                error={errors.buyerPhone?.message}
-              >
-                <Input
-                  id="buyerPhone"
-                  type="tel"
-                  autoComplete="tel"
-                  placeholder="+225 07 00 00 00"
-                  required
-                  aria-required="true"
-                  invalid={Boolean(errors.buyerPhone)}
-                  {...fieldAriaProps("buyerPhone", {
-                    error: errors.buyerPhone?.message,
-                    description:
-                      "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée.",
-                  })}
-                  {...register("buyerPhone")}
-                />
-              </Field>
-            </div>
-            <Field
-              label="Code promo (optionnel)"
-              htmlFor="promoCode"
-              error={errors.promoCode?.message}
-            >
-              <Input
-                id="promoCode"
-                placeholder="ABIDJAN10"
-                className="uppercase"
-                {...fieldAriaProps("promoCode", { error: errors.promoCode?.message })}
-                {...register("promoCode")}
-              />
+            <Field label="Email" htmlFor="buyerEmail" hint="Facultatif" error={errors.buyerEmail?.message}>
+              <Input id="buyerEmail" type="email" autoComplete="email" placeholder="koffi@example.ci" invalid={Boolean(errors.buyerEmail)} {...fieldAriaProps("buyerEmail", { error: errors.buyerEmail?.message })} {...register("buyerEmail")} />
+            </Field>
+            <Field label="Téléphone" htmlFor="buyerPhone" required hint={initialBuyer.phone ? "Prérempli depuis ton profil · modifiable" : "Avec l'indicatif du pays"} description="Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée." error={errors.buyerPhone?.message}>
+              <Input id="buyerPhone" type="tel" autoComplete="tel" inputMode="tel" placeholder="+225 07 00 00 00" required aria-required="true" invalid={Boolean(errors.buyerPhone)} {...fieldAriaProps("buyerPhone", { error: errors.buyerPhone?.message, description: "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée." })} {...register("buyerPhone")} />
             </Field>
           </CardContent>
         </Card>
-      </div>
+      ) : null}
 
-      <aside className="lg:sticky lg:top-20 lg:self-start">
-        <OrderSummary
-          pricing={pricing}
-          pending={pending}
-          error={serverError}
-          paymentProvider={paymentProvider}
-        />
-      </aside>
+      {step === 2 ? (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader><CardTitle>Prépare ton paiement</CardTitle><p className="text-sm text-fg-muted">Le paiement s’ouvrira sur la page sécurisée du prestataire.</p></CardHeader>
+            <CardContent className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary"><CreditCard className="size-5" aria-hidden="true" /></span>
+              <div><p className="font-semibold">{paymentProvider === "geniuspay" ? "GeniusPay" : paymentProvider === "cinetpay" ? "CinetPay" : "Mode de simulation"}</p><p className="mt-1 text-sm text-fg-muted">{paymentProvider === "geniuspay" || paymentProvider === "cinetpay" ? "Tu choisiras Wave, Orange Money ou un autre moyen proposé après avoir continué." : "Aucun montant réel ne sera débité."}</p></div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Numéro de téléphone</CardTitle><p className="text-sm text-fg-muted">Utilisé pour préparer la demande de paiement.</p></CardHeader>
+            <CardContent><p className="text-lg font-semibold tabular-nums">{buyerPhone || "Non renseigné"}</p><button type="button" className="mt-2 min-h-10 text-sm font-semibold text-primary underline underline-offset-4" onClick={() => setStep(1)}>Modifier mes coordonnées</button></CardContent>
+          </Card>
+          <Field label="Code promo" htmlFor="promoCode" hint="Facultatif" error={errors.promoCode?.message}>
+            <Input id="promoCode" placeholder="ABIDJAN10" className="uppercase" {...fieldAriaProps("promoCode", { error: errors.promoCode?.message })} {...register("promoCode")} />
+          </Field>
+        </div>
+      ) : null}
+
+      {step === 3 ? (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader><CardTitle>Vérifie ta commande</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="divide-y divide-border">{pricing.lines.map((line) => <li key={line.ticketTypeId} className="flex justify-between gap-3 py-3 text-sm"><span>{line.quantity} × {line.name}</span><span className="shrink-0 font-semibold tabular-nums">{formatPrice(line.lineTotal)}</span></li>)}</ul>
+              <dl className="flex justify-between border-t border-border pt-4 text-base font-bold"><dt>Total à payer</dt><dd className="tabular-nums">{formatPrice(pricing.total)}</dd></dl>
+              <div className="rounded-md bg-bg-muted p-3 text-sm"><p className="font-semibold">{watch("buyerName")}</p><p className="text-fg-muted">{watch("buyerEmail") || "Aucun email renseigné"} · {buyerPhone}</p></div>
+            </CardContent>
+          </Card>
+          <OrderSummary pricing={pricing} pending={pending} error={serverError} paymentProvider={paymentProvider} />
+          <p className="flex items-center justify-center gap-2 text-center text-xs text-fg-subtle"><LockKeyhole className="size-3.5" aria-hidden="true" /> Le paiement est traité sur la page sécurisée du prestataire.</p>
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
+        <Button type="button" variant="secondary" disabled={step === 0 || pending} onClick={() => { setServerError(null); setStep((current) => Math.max(current - 1, 0)); }}>
+          <ArrowLeft className="mr-2 size-4" aria-hidden="true" /> Retour
+        </Button>
+        {step < 3 ? <Button type="button" disabled={pending} onClick={() => void continueToNextStep()}>Continuer <ArrowRight className="ml-2 size-4" aria-hidden="true" /></Button> : null}
+      </div>
     </form>
   );
 }

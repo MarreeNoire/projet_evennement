@@ -1,37 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  LayoutDashboard,
-  Calendar,
-  Ticket,
-  Users,
-  QrCode,
-  BarChart3,
-  Megaphone,
-  UserCheck,
-  Wallet,
-  Settings,
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { createSupabaseServerClient, getCurrentProfile } from "@/lib/supabase/server";
 import { BecomeOrganizerForm } from "@/components/auth/become-organizer-form";
 import { OrgMobileNavigation } from "@/components/layout/org-mobile-navigation";
-
-const ORG_MENU_ITEMS = [
-  { href: "/org", label: "Vue d'ensemble", icon: LayoutDashboard },
-  { href: "/org/evenements", label: "Événements", icon: Calendar },
-  { href: "/org/billetterie", label: "Billetterie", icon: Ticket },
-  { href: "/org/participants", label: "Participants", icon: Users },
-  { href: "/org/check-in", label: "Check-in", icon: QrCode },
-  { href: "/org/analytics", label: "Statistiques", icon: BarChart3 },
-  { href: "/org/marketing", label: "Marketing", icon: Megaphone },
-  { href: "/org/equipe", label: "Équipe", icon: UserCheck },
-  { href: "/org/paiements", label: "Paiements", icon: Wallet },
-  { href: "/org/parametres", label: "Paramètres", icon: Settings },
-];
+import { OrgDesktopNavigation } from "@/components/layout/org-desktop-navigation";
 
 export default async function OrgLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
@@ -79,21 +55,7 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
                   </p>
                 </div>
 
-                <nav aria-label="Navigation organisateur" className="hidden min-w-0 gap-1 lg:mx-0 lg:flex lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
-                  {ORG_MENU_ITEMS.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className="flex min-h-11 shrink-0 items-center gap-2 border-b-2 border-transparent px-3 text-sm font-medium text-fg-muted transition-colors hover:border-primary hover:bg-bg-muted hover:text-fg lg:min-h-0 lg:gap-3 lg:border-b-0 lg:border-l-2 lg:py-2.5"
-                      >
-                        <Icon className="size-4 shrink-0 text-fg-subtle" aria-hidden="true" />
-                        <span>{item.label}</span>
-                      </Link>
-                    );
-                  })}
-                </nav>
+                <OrgDesktopNavigation />
 
                 <div className="mt-2 hidden border-t border-border pt-4 lg:mt-6 lg:block">
                   <Link

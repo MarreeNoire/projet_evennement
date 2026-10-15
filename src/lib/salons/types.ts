@@ -43,3 +43,29 @@ export interface SalonMemberWithProfile extends SalonMemberRow {
   profile: Pick<ProfileRow, "id" | "display_name" | "avatar_url" | "city" | "is_verified"> | null;
   is_online: boolean;
 }
+
+/** Une option de sondage, avec son nombre de votes en direct. */
+export interface SalonPollOption {
+  id: string;
+  poll_id: string;
+  label: string;
+  position: number;
+  vote_count: number;
+}
+
+/** Sondage du salon agrégé pour l'UI : options, votes et choix de l'utilisateur courant. */
+export interface SalonPollWithOptions {
+  id: string;
+  salon_id: string;
+  author_id: string | null;
+  question: string;
+  is_closed: boolean;
+  closed_at: string | null;
+  created_at: string;
+  author: Pick<ProfileRow, "id" | "display_name" | "avatar_url" | "is_verified"> | null;
+  options: SalonPollOption[];
+  /** Nombre total de votants (un utilisateur = un vote). */
+  total_votes: number;
+  /** Option choisie par l'utilisateur courant, null s'il n'a pas voté. */
+  my_option_id: string | null;
+}
