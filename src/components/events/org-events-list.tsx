@@ -7,7 +7,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/states";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
 export interface EventListItem {
   id: string;
@@ -53,35 +53,41 @@ export function OrgEventsList({ initialEvents }: { initialEvents?: EventListItem
       <CardHeader className="p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">Liste de vos événements</CardTitle>
-          <div className="flex flex-wrap gap-1 text-xs">
+          <div role="group" aria-label="Filtrer les événements" className="flex flex-wrap gap-1.5 text-xs">
             <button
+              type="button"
+              aria-pressed={filter === "all"}
               onClick={() => {
                 setFilter("all");
                 setPage(1);
               }}
-              className={`rounded px-2.5 py-1 font-semibold transition-colors ${
+              className={`min-h-11 rounded px-3 py-1 font-semibold transition-colors ${
                 filter === "all" ? "bg-primary text-white" : "text-fg-muted hover:bg-bg-muted"
               }`}
             >
               Tous
             </button>
             <button
+              type="button"
+              aria-pressed={filter === "published"}
               onClick={() => {
                 setFilter("published");
                 setPage(1);
               }}
-              className={`rounded px-2.5 py-1 font-semibold transition-colors ${
+              className={`min-h-11 rounded px-3 py-1 font-semibold transition-colors ${
                 filter === "published" ? "bg-primary text-white" : "text-fg-muted hover:bg-bg-muted"
               }`}
             >
               Publiés
             </button>
             <button
+              type="button"
+              aria-pressed={filter === "draft"}
               onClick={() => {
                 setFilter("draft");
                 setPage(1);
               }}
-              className={`rounded px-2.5 py-1 font-semibold transition-colors ${
+              className={`min-h-11 rounded px-3 py-1 font-semibold transition-colors ${
                 filter === "draft" ? "bg-primary text-white" : "text-fg-muted hover:bg-bg-muted"
               }`}
             >
@@ -108,7 +114,7 @@ export function OrgEventsList({ initialEvents }: { initialEvents?: EventListItem
               return (
                 <div
                   key={event.id}
-                  className="hover:bg-bg-subtle flex min-w-0 flex-col items-start gap-3 p-4 transition-colors sm:flex-row sm:items-center sm:justify-between sm:p-5"
+                  className="hover:bg-bg-subtle flex min-w-0 flex-col items-start gap-2.5 p-3 transition-colors sm:flex-row sm:items-center sm:justify-between sm:p-4"
                 >
                   <div className="min-w-0 space-y-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">

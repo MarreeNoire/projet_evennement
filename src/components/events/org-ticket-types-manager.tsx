@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Ticket } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, Ticket } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ export interface TicketTypeItem {
   isActive?: boolean;
 }
 
+const PAGE_SIZE = 6;
+
 export function OrgTicketTypesManager({
   initialTickets = [],
   events = [],
@@ -32,6 +34,8 @@ export function OrgTicketTypesManager({
 }) {
   const [tickets, setTickets] = useState<TicketTypeItem[]>(initialTickets);
   const [showModal, setShowModal] = useState(false);
+  const [filterEventId, setFilterEventId] = useState("");
+  const [page, setPage] = useState(1);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -43,6 +47,10 @@ export function OrgTicketTypesManager({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const filteredTickets = filterEventId ? tickets.filter((ticket) => ticket.eventId === filterEventId) : tickets;
+  const pageCount = Math.max(1, Math.ceil(filteredTickets.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageTickets = filteredTickets.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   function handleCreateTicket(e: React.FormEvent) {
     e.preventDefault();
@@ -83,6 +91,8 @@ export function OrgTicketTypesManager({
 
         // Enregistrer via Supabase si connecté
         setTickets((prev) => [...prev, newTicket]);
+        setFilterEventId(eventId);
+        setPage(Math.ceil((tickets.length + 1) / PAGE_SIZE));
         setShowModal(false);
         setName("");
         setDescription("");
@@ -94,15 +104,15 @@ export function OrgTicketTypesManager({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col justify-between gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold tracking-tight">Gestion de la Billetterie</h1>
           <p className="text-sm text-fg-muted">
             Visualisez et gérez les formules de billets, tarifs en FCFA et quotas configurés.
           </p>
         </div>
-        <Button onClick={() => setShowModal(true)}>
+        <Button onClick={() => setShowModal(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 size-4" /> Créer une formule
         </Button>
       </div>
@@ -225,10 +235,20 @@ export function OrgTicketTypesManager({
           }
         />
       ) : (
-        <div className="grid gap-4">
-          {tickets.map((t) => (
-            <Card key={t.id}>
-              <CardHeader className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="space-y-3">
+          {events.length > 1 ? (
+            <label className="block sm:max-w-sm">
+              <span className="mb-1 block text-xs font-semibold text-fg-muted">Filtrer par événement</span>
+              <select value={filterEventId} onChange={(event) => { setFilterEventId(event.target.value); setPage(1); }} className="min-h-11 w-full rounded-md border border-border bg-surface px-3 text-sm">
+                <option value="">Tous les événements</option>
+                {events.map((event) => <option key={event.id} value={event.id}>{event.title}</option>)}
+              </select>
+            </label>
+          ) : null}
+          {filteredTickets.length ? <div className="grid gap-3 sm:grid-cols-2">
+          {pageTickets.map((t) => (
+            <Card key={t.id} className="overflow-hidden rounded-lg">
+              <CardHeader className="flex flex-col items-start justify-between gap-2 p-3 sm:p-4 sm:pb-3 sm:flex-row sm:items-center">
                 <div className="min-w-0">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <CardTitle className="text-lg">{t.name}</CardTitle>
@@ -245,7 +265,7 @@ export function OrgTicketTypesManager({
                 </div>
                 <p className="font-display text-xl font-bold text-fg sm:shrink-0">{formatPrice(t.price)}</p>
               </CardHeader>
-              <CardContent className="flex flex-col items-start justify-between gap-2 border-t border-border pt-4 text-xs text-fg-muted sm:flex-row sm:items-center">
+              <CardContent className="flex flex-col items-start justify-between gap-2 border-t border-border p-3 pt-3 text-xs text-fg-muted sm:flex-row sm:items-center sm:p-4 sm:pt-3">
                 <span>
                   Quota : <strong>{t.quantity} places</strong> ({t.soldCount ?? 0} vendues)
                 </span>
@@ -255,6 +275,17 @@ export function OrgTicketTypesManager({
               </CardContent>
             </Card>
           ))}
+          </div> : <p className="rounded-lg border border-border bg-surface p-4 text-sm text-fg-muted">Aucune formule pour cet événement.</p>}
+          {filteredTickets.length > PAGE_SIZE ? (
+            <nav aria-label="Pagination des formules de billets" className="flex items-center justify-between gap-3 border-t border-border pt-3">
+              <p className="text-xs text-fg-muted" role="status" aria-live="polite">{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredTickets.length)} sur {filteredTickets.length}</p>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} aria-label="Page précédente" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border disabled:opacity-45"><ArrowLeft className="size-4" aria-hidden="true" /></button>
+                <span className="text-xs tabular-nums text-fg-muted">{currentPage}/{pageCount}</span>
+                <button type="button" onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={currentPage === pageCount} aria-label="Page suivante" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border disabled:opacity-45"><ArrowRight className="size-4" aria-hidden="true" /></button>
+              </div>
+            </nav>
+          ) : null}
         </div>
       )}
     </div>

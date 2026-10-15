@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Tag, Megaphone, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, Tag, Megaphone, Send } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,12 @@ export interface PromoCodeItem {
   isActive: boolean;
 }
 
+const PROMOS_PER_PAGE = 5;
+
 export function OrgMarketingManager({ events = [], initialPromos = [] }: { events?: { id: string; title: string }[]; initialPromos?: PromoCodeItem[] }) {
   const [promos, setPromos] = useState<PromoCodeItem[]>(initialPromos);
   const [showPromoModal, setShowPromoModal] = useState(false);
+  const [promoPage, setPromoPage] = useState(1);
 
   const [code, setCode] = useState("");
   const [discountValue, setDiscountValue] = useState(15);
@@ -34,6 +37,9 @@ export function OrgMarketingManager({ events = [], initialPromos = [] }: { event
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const promoPageCount = Math.max(1, Math.ceil(promos.length / PROMOS_PER_PAGE));
+  const currentPromoPage = Math.min(promoPage, promoPageCount);
+  const pagePromos = promos.slice((currentPromoPage - 1) * PROMOS_PER_PAGE, currentPromoPage * PROMOS_PER_PAGE);
 
   function handleCreatePromo(e: React.FormEvent) {
     e.preventDefault();
@@ -67,6 +73,7 @@ export function OrgMarketingManager({ events = [], initialPromos = [] }: { event
         const newPromo: PromoCodeItem = { id: inserted.id, code: cleanCode, discountValue, discountKind, usedCount: 0, maxUses, isActive: true };
 
         setPromos((prev) => [newPromo, ...prev]);
+        setPromoPage(1);
         setShowPromoModal(false);
         setCode("");
         setSuccess(`Code promo ${cleanCode} créé avec succès !`);
@@ -106,15 +113,15 @@ export function OrgMarketingManager({ events = [], initialPromos = [] }: { event
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col justify-between gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold tracking-tight">Marketing & Codes Promo</h1>
           <p className="text-sm text-fg-muted">
             Boostez les ventes avec des réductions ciblées et des annonces de salon.
           </p>
         </div>
-        <Button onClick={() => setShowPromoModal(true)}>
+        <Button onClick={() => setShowPromoModal(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 size-4" /> Créer un code promo
         </Button>
       </div>
@@ -202,16 +209,16 @@ export function OrgMarketingManager({ events = [], initialPromos = [] }: { event
         </Card>
       ) : null}
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2 lg:gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Tag className="size-4 text-primary" /> Codes Promo Actifs
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 p-4 pt-0">
             {promos.length === 0 ? <p className="text-sm text-fg-muted">Aucun code promotionnel enregistré.</p> : null}
-            {promos.map((p) => (
+            {pagePromos.map((p) => (
               <div key={p.id} className="flex items-center justify-between border-b border-border pb-3 last:border-0">
                 <div>
                   <span className="font-mono font-bold text-fg">{p.code}</span>
@@ -222,17 +229,27 @@ export function OrgMarketingManager({ events = [], initialPromos = [] }: { event
                 <Badge variant="success">Actif</Badge>
               </div>
             ))}
+            {promos.length > PROMOS_PER_PAGE ? (
+              <nav aria-label="Pagination des codes promo" className="flex items-center justify-between gap-3 border-t border-border pt-3">
+                <p className="text-xs text-fg-muted" role="status" aria-live="polite">{(currentPromoPage - 1) * PROMOS_PER_PAGE + 1}–{Math.min(currentPromoPage * PROMOS_PER_PAGE, promos.length)} sur {promos.length}</p>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setPromoPage((value) => Math.max(1, value - 1))} disabled={currentPromoPage === 1} aria-label="Page précédente" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border disabled:opacity-45"><ArrowLeft className="size-4" aria-hidden="true" /></button>
+                  <span className="text-xs tabular-nums text-fg-muted">{currentPromoPage}/{promoPageCount}</span>
+                  <button type="button" onClick={() => setPromoPage((value) => Math.min(promoPageCount, value + 1))} disabled={currentPromoPage === promoPageCount} aria-label="Page suivante" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border disabled:opacity-45"><ArrowRight className="size-4" aria-hidden="true" /></button>
+                </div>
+              </nav>
+            ) : null}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Megaphone className="size-4 text-primary" /> Annonce de Salon
             </CardTitle>
             <CardDescription>Envoyez un message épinglé dans le salon d&apos;un événement.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             <form onSubmit={handleSendAnnouncement} className="space-y-3">
               <label className="block space-y-1.5">
                 <span className="text-xs font-semibold text-fg">Événement *</span>

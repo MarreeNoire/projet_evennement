@@ -42,10 +42,10 @@ export default async function OrgAnalyticsPage() {
   const occupancy = capacity > 0 ? formatPercent(ticketsSold / capacity) : "Non renseigné";
 
   return (
-    <div className="space-y-8">
-      <header className="border-b border-border-strong pb-5">
-        <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Statistiques</h1>
-        <p className="mt-2 text-sm text-fg-muted">
+    <div className="space-y-5 sm:space-y-6">
+      <header className="border-b border-border-strong pb-4">
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">Statistiques</h1>
+        <p className="mt-1.5 text-sm text-fg-muted">
           Ventes et entrées enregistrées pour les événements que vous gérez.
         </p>
       </header>
@@ -61,27 +61,35 @@ export default async function OrgAnalyticsPage() {
           <p className="text-xs font-medium text-fg-subtle">
             {formatNumber(stats.length)} événement{stats.length > 1 ? "s" : ""} avec des données
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 xl:grid-cols-4">
             <StatCard
               label="Revenus bruts"
               value={formatPrice(grossRevenue)}
               icon={<Wallet className="size-5" />}
+              compact
+              className="p-3 sm:p-4"
             />
             <StatCard
               label="Billets vendus"
               value={formatNumber(ticketsSold)}
               icon={<TicketCheck className="size-5" />}
+              compact
+              className="p-3 sm:p-4"
             />
             <StatCard
               label="Entrées contrôlées"
               value={formatNumber(checkedIn)}
               icon={<CalendarDays className="size-5" />}
+              compact
+              className="p-3 sm:p-4"
             />
             <StatCard
               label="Remplissage"
               value={occupancy}
               hint={capacity > 0 ? `${formatNumber(ticketsSold)} sur ${formatNumber(capacity)} places` : undefined}
               icon={<BarChart3 className="size-5" />}
+              compact
+              className="p-3 sm:p-4"
             />
           </div>
         </>

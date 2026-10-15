@@ -44,10 +44,10 @@ export default async function AdminDashboardPage() {
       <section aria-labelledby="admin-activity-heading" className="space-y-2.5 sm:space-y-3">
         <h2 id="admin-activity-heading" className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">Activité de la plateforme</h2>
       <div className="grid grid-cols-2 gap-2.5 sm:gap-4 xl:grid-cols-4">
-        <StatCard label="Événements" value={eventsAvailable ? String(eventsCount.count ?? 0) : "—"} hint={eventsAvailable ? eventBreakdownAvailable ? `${publishedCount.count ?? 0} publiés · ${draftsCount.count ?? 0} brouillons` : "Répartition indisponible" : "Données indisponibles"} icon={<Calendar className="size-5" />} className="p-3 sm:p-4" />
-        <StatCard label="Comptes inscrits" value={profilesAvailable ? String(profilesCount.count ?? 0) : "—"} hint="Total des profils enregistrés" icon={<Users className="size-5" />} className="p-3 sm:p-4" />
-        <StatCard label="Signalements ouverts" value={reportsAvailable ? String(pendingReports) : "—"} hint="À examiner par la modération" icon={<FileWarning className="size-5 text-warning" />} className="p-3 sm:p-4" />
-        <StatCard label="Reversements en attente" value={payoutsAvailable ? formatPrice(pendingAmount) : "—"} hint={payoutsAvailable ? `${pendingPayoutCount} demande${pendingPayoutCount > 1 ? "s" : ""}` : "Données indisponibles"} icon={<Wallet className="size-5" />} className="p-3 sm:p-4" />
+        <StatCard label="Événements" value={eventsAvailable ? String(eventsCount.count ?? 0) : "—"} hint={eventsAvailable ? eventBreakdownAvailable ? `${publishedCount.count ?? 0} publiés · ${draftsCount.count ?? 0} brouillons` : "Répartition indisponible" : "Données indisponibles"} icon={<Calendar className="size-5" />} compact className="p-3 sm:p-4" />
+        <StatCard label="Comptes inscrits" value={profilesAvailable ? String(profilesCount.count ?? 0) : "—"} hint="Total des profils enregistrés" icon={<Users className="size-5" />} compact className="p-3 sm:p-4" />
+        <StatCard label="Signalements ouverts" value={reportsAvailable ? String(pendingReports) : "—"} hint="À examiner par la modération" icon={<FileWarning className="size-5 text-warning" />} compact className="p-3 sm:p-4" />
+        <StatCard label="Reversements en attente" value={payoutsAvailable ? formatPrice(pendingAmount) : "—"} hint={payoutsAvailable ? `${pendingPayoutCount} demande${pendingPayoutCount > 1 ? "s" : ""}` : "Données indisponibles"} icon={<Wallet className="size-5" />} compact className="p-3 sm:p-4" />
       </div>
       </section>
 

@@ -42,6 +42,7 @@ export default async function OrgDashboardPage() {
           value={String(events.length)}
           hint="Brouillons et publiés"
           icon={<Calendar className="size-5" />}
+          compact
           className="p-3 sm:p-4"
         />
         <StatCard
@@ -49,6 +50,7 @@ export default async function OrgDashboardPage() {
           value={String(publishedCount)}
           hint="Statut « publié »"
           icon={<FileText className="size-5" />}
+          compact
           className="p-3 sm:p-4"
         />
         <StatCard
@@ -56,6 +58,7 @@ export default async function OrgDashboardPage() {
           value={String(upcomingCount)}
           hint="Publiés et non terminés"
           icon={<Clock className="size-5" />}
+          compact
           className="p-3 sm:p-4"
         />
         <StatCard
@@ -63,6 +66,7 @@ export default async function OrgDashboardPage() {
           value={String(draftCount)}
           hint="À publier pour être visibles"
           icon={<Ticket className="size-5" />}
+          compact
           className="p-3 sm:p-4"
         />
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { UserPlus } from "lucide-react";
+import { ArrowLeft, ArrowRight, UserPlus } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,10 +24,12 @@ const ROLE_OPTIONS = [
   { value: "checkin_agent", label: "Agent de contrôle" },
   { value: "moderator", label: "Modérateur" },
 ];
+const PAGE_SIZE = 8;
 
 export function OrgTeamManager({ initialMembers = [] }: { initialMembers?: TeamMember[] }) {
   const [members, setMembers] = useState<TeamMember[]>(initialMembers);
   const [showModal, setShowModal] = useState(false);
+  const [page, setPage] = useState(1);
 
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"manager" | "checkin_agent" | "moderator">("checkin_agent");
@@ -35,6 +37,9 @@ export function OrgTeamManager({ initialMembers = [] }: { initialMembers?: TeamM
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const pageCount = Math.max(1, Math.ceil(members.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageMembers = members.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -86,6 +91,7 @@ export function OrgTeamManager({ initialMembers = [] }: { initialMembers?: TeamM
         }
 
         setMembers((prev) => [...prev, newMember]);
+        setPage(Math.ceil((members.length + 1) / PAGE_SIZE));
         setShowModal(false);
         setEmail("");
         setSuccess(`Invitation enregistrée pour ${email.trim()}. Elle s’activera lorsque la personne rejoindra l’organisation.`);
@@ -96,15 +102,15 @@ export function OrgTeamManager({ initialMembers = [] }: { initialMembers?: TeamM
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col justify-between gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold tracking-tight">Membres de l&apos;Équipe</h1>
           <p className="text-sm text-fg-muted">
             Attribuez des rôles (Gestionnaire, Agent de check-in, Modérateur) à vos collaborateurs.
           </p>
         </div>
-        <Button onClick={() => setShowModal(true)}>
+        <Button onClick={() => setShowModal(true)} className="w-full sm:w-auto">
           <UserPlus className="mr-2 size-4" /> Inviter un membre
         </Button>
       </div>
@@ -172,12 +178,12 @@ export function OrgTeamManager({ initialMembers = [] }: { initialMembers?: TeamM
       ) : null}
 
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 pb-3">
             <CardTitle className="text-base">Membres et invitations</CardTitle>
         </CardHeader>
         <CardContent className="divide-y divide-border p-0">
           {members.length === 0 ? <p className="p-5 text-sm text-fg-muted">Aucun membre ni invitation pour le moment.</p> : null}
-          {members.map((m) => (
+          {pageMembers.map((m) => (
             <div key={m.id} className="flex min-w-0 flex-col items-start gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <div className="flex min-w-0 items-center gap-3">
                 <Avatar name={m.name} size="md" />
@@ -189,6 +195,16 @@ export function OrgTeamManager({ initialMembers = [] }: { initialMembers?: TeamM
               <div className="flex shrink-0 flex-wrap gap-2"><Badge variant={m.role === "owner" ? "accent" : "neutral"}>{m.roleLabel}</Badge>{m.status === "pending" ? <Badge variant="warning">En attente</Badge> : null}</div>
             </div>
           ))}
+          {members.length > PAGE_SIZE ? (
+            <nav aria-label="Pagination des membres" className="flex items-center justify-between gap-3 p-3.5">
+              <p className="text-xs text-fg-muted" role="status" aria-live="polite">{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, members.length)} sur {members.length}</p>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} aria-label="Page précédente" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border disabled:opacity-45"><ArrowLeft className="size-4" aria-hidden="true" /></button>
+                <span className="text-xs tabular-nums text-fg-muted">{currentPage}/{pageCount}</span>
+                <button type="button" onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={currentPage === pageCount} aria-label="Page suivante" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border disabled:opacity-45"><ArrowRight className="size-4" aria-hidden="true" /></button>
+              </div>
+            </nav>
+          ) : null}
         </CardContent>
       </Card>
     </div>

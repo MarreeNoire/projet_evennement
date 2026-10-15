@@ -75,10 +75,10 @@ export default async function OrgPaiementsPage() {
   const hasData = stats.length > 0 || payouts.length > 0;
 
   return (
-    <div className="space-y-8">
-      <header className="border-b border-border-strong pb-5">
-        <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Paiements et reversements</h1>
-        <p className="mt-2 text-sm text-fg-muted">Montants calculés à partir des ventes et reversements enregistrés.</p>
+    <div className="space-y-5 sm:space-y-6">
+      <header className="border-b border-border-strong pb-4">
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">Paiements et reversements</h1>
+        <p className="mt-1.5 text-sm text-fg-muted">Montants calculés à partir des ventes et reversements enregistrés.</p>
       </header>
 
       {!hasData ? (
@@ -89,20 +89,44 @@ export default async function OrgPaiementsPage() {
         />
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard label="Revenus bruts" value={formatPrice(grossRevenue)} icon={<CircleDollarSign className="size-5" />} />
-            <StatCard label="Commissions enregistrées" value={formatPrice(commissions)} icon={<ReceiptText className="size-5" />} />
-            <StatCard label="Reversements effectués" value={formatPrice(paidOut)} icon={<Wallet className="size-5" />} />
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3">
+            <StatCard label="Revenus bruts" value={formatPrice(grossRevenue)} icon={<CircleDollarSign className="size-5" />} compact className="p-3 sm:p-4" />
+            <StatCard label="Commissions enregistrées" value={formatPrice(commissions)} icon={<ReceiptText className="size-5" />} compact className="p-3 sm:p-4" />
+            <StatCard label="Reversements effectués" value={formatPrice(paidOut)} icon={<Wallet className="size-5" />} compact className="p-3 sm:p-4" />
           </div>
 
           <section className="overflow-hidden border border-border bg-surface" aria-labelledby="payouts-title">
-            <div className="border-b border-border-strong px-5 py-4">
-              <h2 id="payouts-title" className="font-display text-lg font-bold">Historique des reversements</h2>
+            <div className="border-b border-border-strong px-4 py-3 sm:px-5 sm:py-4">
+              <h2 id="payouts-title" className="font-display text-base font-bold sm:text-lg">Historique des reversements</h2>
             </div>
             {payouts.length === 0 ? (
               <p className="px-5 py-8 text-sm text-fg-muted">Aucun reversement enregistré.</p>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+                <ul className="divide-y divide-border md:hidden">
+                  {payouts.slice(0, 3).map((payout) => {
+                    const status = payoutStatus(payout.status);
+                    return <li key={payout.id} className="space-y-2 p-3.5">
+                      <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-semibold tabular-nums text-fg">{formatPrice(payout.net_amount)}</p><p className="mt-1 text-xs text-fg-muted">{formatDate(payout.created_at)} · {payout.method || "Moyen non renseigné"}</p></div><Badge variant={status.variant}>{status.label}</Badge></div>
+                      <p className="break-all text-xs text-fg-subtle">Référence : {payout.reference || "Non renseignée"}</p>
+                    </li>;
+                  })}
+                </ul>
+                {payouts.length > 3 ? (
+                  <details className="border-t border-border px-4 py-2 md:hidden">
+                    <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">Afficher les {payouts.length - 3} autres reversements</summary>
+                    <ul className="divide-y divide-border">
+                      {payouts.slice(3).map((payout) => {
+                        const status = payoutStatus(payout.status);
+                        return <li key={payout.id} className="space-y-2 py-3">
+                          <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-semibold tabular-nums text-fg">{formatPrice(payout.net_amount)}</p><p className="mt-1 text-xs text-fg-muted">{formatDate(payout.created_at)} · {payout.method || "Moyen non renseigné"}</p></div><Badge variant={status.variant}>{status.label}</Badge></div>
+                          <p className="break-all text-xs text-fg-subtle">Référence : {payout.reference || "Non renseignée"}</p>
+                        </li>;
+                      })}
+                    </ul>
+                  </details>
+                ) : null}
+                <div className="hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[38rem] text-left text-sm">
                   <thead className="bg-bg-muted text-xs font-semibold text-fg-muted uppercase">
                     <tr>
@@ -131,7 +155,8 @@ export default async function OrgPaiementsPage() {
                 <p className="border-t border-border px-5 py-3 text-xs text-fg-subtle">
                   {formatNumber(payouts.length)} reversement{payouts.length > 1 ? "s" : ""} récent{payouts.length > 1 ? "s" : ""}
                 </p>
-              </div>
+                </div>
+              </>
             )}
           </section>
         </>

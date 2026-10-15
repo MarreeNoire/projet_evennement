@@ -64,13 +64,13 @@ export default async function AdminPaiementsPage() {
   const pendingAmount = pendingPayouts.reduce((sum, payout) => sum + payout.net_amount, 0);
 
   return (
-    <div className="space-y-8">
-      <header className="border-b border-border-strong pb-5">
-        <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">Paiements et commissions</h1>
-        <p className="mt-2 text-sm text-fg-muted">Montants issus des commissions et reversements enregistrés.</p>
+    <div className="space-y-5 sm:space-y-6">
+      <header className="border-b border-border-strong pb-4">
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">Paiements et commissions</h1>
+        <p className="mt-1.5 text-sm text-fg-muted">Montants issus des commissions et reversements enregistrés.</p>
       </header>
 
-      <p className="max-w-3xl border border-warning/40 bg-warning-subtle p-3 text-sm text-fg">
+      <p className="max-w-3xl border border-warning/40 bg-warning-subtle p-3 text-xs leading-relaxed text-fg sm:text-sm">
         Les statuts ici servent au suivi des virements manuels. Utilisez « Marquer versé » uniquement après avoir effectué le transfert et saisi sa référence.
       </p>
 
@@ -84,31 +84,35 @@ export default async function AdminPaiementsPage() {
         />
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
             <StatCard
               label="Commissions enregistrées"
               value={formatPrice(commissionTotal)}
               hint={`${formatNumber(commissions.length)} événement${commissions.length > 1 ? "s" : ""} avec données`}
               icon={<CircleDollarSign className="size-5" />}
+              compact
+              className="p-3 sm:p-4"
             />
             <StatCard
               label="Reversements en attente"
               value={formatPrice(pendingAmount)}
               hint={`${formatNumber(pendingPayouts.length)} demande${pendingPayouts.length > 1 ? "s" : ""}`}
               icon={<Clock3 className="size-5" />}
+              compact
+              className="p-3 sm:p-4"
             />
           </div>
 
           <section className="overflow-hidden border border-border bg-surface" aria-labelledby="payouts-title">
-            <div className="border-b border-border-strong px-5 py-4">
-              <h2 id="payouts-title" className="font-display text-lg font-bold">Reversements récents</h2>
+            <div className="border-b border-border-strong px-4 py-3 sm:px-5 sm:py-4">
+              <h2 id="payouts-title" className="font-display text-base font-bold sm:text-lg">Reversements récents</h2>
             </div>
             {payouts.length === 0 ? (
               <p className="px-5 py-8 text-sm text-fg-muted">Aucun reversement enregistré.</p>
             ) : (
               <>
               <ul className="divide-y divide-border md:hidden">
-                {payouts.map((payout) => {
+                {payouts.slice(0, 3).map((payout) => {
                   const status = statusDetails(payout.status);
                   return <li key={payout.id} className="space-y-3 p-4">
                     <div className="flex items-start justify-between gap-3"><div><p className="font-semibold tabular-nums text-fg">{formatPrice(payout.net_amount)}</p><p className="mt-1 text-xs text-fg-muted">{formatDate(payout.created_at)} · {payout.method || "Moyen non renseigné"}</p></div><Badge variant={status.variant}>{status.label}</Badge></div>
@@ -117,6 +121,21 @@ export default async function AdminPaiementsPage() {
                   </li>;
                 })}
               </ul>
+              {payouts.length > 3 ? (
+                <details className="border-t border-border px-4 py-2 md:hidden">
+                  <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">Afficher les {payouts.length - 3} autres demandes</summary>
+                  <ul className="divide-y divide-border">
+                    {payouts.slice(3).map((payout) => {
+                      const status = statusDetails(payout.status);
+                      return <li key={payout.id} className="space-y-3 py-3">
+                        <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-semibold tabular-nums text-fg">{formatPrice(payout.net_amount)}</p><p className="mt-1 text-xs text-fg-muted">{formatDate(payout.created_at)} · {payout.method || "Moyen non renseigné"}</p></div><Badge variant={status.variant}>{status.label}</Badge></div>
+                        <p className="break-all text-xs text-fg-subtle">Référence : {payout.reference || "Non renseignée"}</p>
+                        <PayoutControls payoutId={payout.id} status={payout.status} />
+                      </li>;
+                    })}
+                  </ul>
+                </details>
+              ) : null}
               <div className="hidden overflow-x-auto md:block">
                 <table className="w-full min-w-[35rem] text-left text-sm">
                   <thead className="bg-bg-muted text-xs font-semibold text-fg-muted uppercase">

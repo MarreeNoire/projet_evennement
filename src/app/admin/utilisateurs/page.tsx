@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { Search, Users } from "lucide-react";
+import { Search } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { AdminUsersList } from "@/components/admin/admin-users-list";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -49,24 +48,7 @@ export default async function AdminUtilisateursPage({
         </CardHeader>
         <CardContent className="p-0">
           {error ? <p role="alert" className="p-5 text-sm text-danger">Impossible de charger les utilisateurs. Réessayez.</p> : profiles?.length ? (
-            <ul className="divide-y divide-border">
-              {profiles.map((profile) => {
-                const userRoles = rolesByUser.get(profile.id) ?? [];
-                return (
-                  <li key={profile.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold text-fg">{profile.display_name || profile.full_name || "Compte sans nom"}</p>
-                      <p className="truncate text-xs text-fg-muted">{profile.email || (profile.username ? `@${profile.username}` : "E-mail non renseigné")}</p>
-                      <p className="mt-1 text-xs text-fg-subtle">Inscrit le {new Date(profile.created_at).toLocaleDateString("fr-FR")}{profile.is_verified ? " · Profil vérifié" : ""}</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2" aria-label="Rôles">
-                      {rolesLoadError ? <Badge variant="warning">Rôles indisponibles</Badge> : userRoles.length ? userRoles.map((role) => <Badge key={role} variant={role === "admin" ? "danger" : role === "organizer" ? "accent" : "neutral"}>{role === "admin" ? "Administrateur" : role === "organizer" ? "Organisateur" : "Participant"}</Badge>) : <Badge variant="neutral">Aucun rôle</Badge>}
-                      <Link href={`/admin/utilisateurs/${profile.id}`} className="inline-flex min-h-9 items-center gap-1 rounded-md border border-border px-3 text-xs font-semibold text-fg hover:bg-bg-muted"><Users className="size-3.5" aria-hidden="true" /> Gérer</Link>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+            <AdminUsersList profiles={profiles} rolesByUser={Object.fromEntries(rolesByUser)} rolesLoadError={rolesLoadError} />
           ) : <p className="p-6 text-center text-sm text-fg-muted">Aucun utilisateur correspondant.</p>}
         </CardContent>
       </Card>

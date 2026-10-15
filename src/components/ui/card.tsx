@@ -65,6 +65,7 @@ export function StatCard({
   icon,
   trend,
   className,
+  compact = false,
 }: {
   label: string;
   value: string;
@@ -73,6 +74,8 @@ export function StatCard({
   /** Variation par rapport à la période précédente, ex. « +12 % ». */
   trend?: { value: string; direction: "up" | "down" | "flat" };
   className?: string;
+  /** Metric size for tight two-column dashboard grids. */
+  compact?: boolean;
 }) {
   const trendColor =
     trend?.direction === "up"
@@ -91,7 +94,7 @@ export function StatCard({
           </span>
         ) : null}
       </div>
-      <p className="font-display mt-2 text-2xl font-bold tracking-tight tabular-nums md:text-3xl">
+      <p className={cn("font-display mt-2 font-bold tracking-tight tabular-nums", compact ? "text-xl sm:text-2xl md:text-3xl" : "text-2xl md:text-3xl")}>
         {value}
       </p>
       {(hint || trend) && (

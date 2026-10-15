@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Calendar, Eye, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, Eye, Search } from "lucide-react";
 
 import { AdminEventDeleteControl } from "@/components/admin/admin-event-delete-control";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { formatDateRange, isPast } from "@/lib/utils";
 import type { AdminEventListItem } from "@/lib/events/queries";
 
 type EventFilter = "all" | "published" | "draft" | "finished" | "cancelled";
+const PAGE_SIZE = 8;
 
 const filters: { id: EventFilter; label: string }[] = [
   { id: "all", label: "Tous" },
@@ -33,6 +34,7 @@ function presentation(event: AdminEventListItem) {
 export function AdminPlatformEvents({ events }: { events: AdminEventListItem[] }) {
   const [filter, setFilter] = useState<EventFilter>("all");
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
   const counts = useMemo(() => {
     const grouped = events.map(presentation);
     return {
@@ -53,6 +55,9 @@ export function AdminPlatformEvents({ events }: { events: AdminEventListItem[] }
       return matchesFilter && matchesQuery;
     });
   }, [events, filter, query]);
+  const pageCount = Math.max(1, Math.ceil(visibleEvents.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageEvents = visibleEvents.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -73,21 +78,21 @@ export function AdminPlatformEvents({ events }: { events: AdminEventListItem[] }
             <input
               type="search"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => { setQuery(event.target.value); setPage(1); }}
               placeholder="Événement ou organisation"
               className="h-11 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm"
             />
           </label>
         </div>
 
-        <div aria-label="Filtrer par statut" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+        <div role="group" aria-label="Filtrer par statut" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
           {filters.map(({ id, label }) => (
             <button
               key={id}
               type="button"
               aria-pressed={filter === id}
-              onClick={() => setFilter(id)}
-              className={`inline-flex min-h-10 shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors ${filter === id ? "border-primary bg-primary-subtle text-primary-subtle-fg" : "border-border bg-surface text-fg-muted hover:bg-bg-muted hover:text-fg"}`}
+              onClick={() => { setFilter(id); setPage(1); }}
+              className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors ${filter === id ? "border-primary bg-primary-subtle text-primary-subtle-fg" : "border-border bg-surface text-fg-muted hover:bg-bg-muted hover:text-fg"}`}
             >
               {label}<span className="tabular-nums text-xs opacity-75">{counts[id]}</span>
             </button>
@@ -104,7 +109,7 @@ export function AdminPlatformEvents({ events }: { events: AdminEventListItem[] }
         ) : (
           <div className="overflow-hidden rounded-lg border border-border bg-surface">
             <ul className="divide-y divide-border">
-              {visibleEvents.map((event) => {
+              {pageEvents.map((event) => {
                 const status = presentation(event);
                 const isPublic = status.group === "published";
                 return (
@@ -139,6 +144,18 @@ export function AdminPlatformEvents({ events }: { events: AdminEventListItem[] }
             </ul>
           </div>
         )}
+        {visibleEvents.length > PAGE_SIZE ? (
+          <nav aria-label="Pagination des événements" className="flex items-center justify-between gap-3 border-t border-border pt-3">
+            <p className="text-xs text-fg-muted" role="status" aria-live="polite">
+              {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, visibleEvents.length)} sur {visibleEvents.length}
+            </p>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} aria-label="Page précédente" className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md border border-border px-3 text-sm font-semibold disabled:opacity-45"><ArrowLeft className="size-4" aria-hidden="true" /><span className="hidden sm:inline">Précédent</span></button>
+              <span className="text-xs tabular-nums text-fg-muted">{currentPage}/{pageCount}</span>
+              <button type="button" onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={currentPage === pageCount} aria-label="Page suivante" className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md border border-border px-3 text-sm font-semibold disabled:opacity-45"><span className="hidden sm:inline">Suivant</span><ArrowRight className="size-4" aria-hidden="true" /></button>
+            </div>
+          </nav>
+        ) : null}
         <p className="text-xs leading-5 text-fg-subtle">Un événement apparaît dans Explorer s’il est publié et si sa date de fin est à venir.</p>
       </section>
     </div>
