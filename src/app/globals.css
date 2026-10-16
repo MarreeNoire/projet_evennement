@@ -879,6 +879,25 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
 }
 
 @media (max-width: 767px) {
+  .home-hero-backdrop {
+    inset: 0 0 auto;
+    height: clamp(15rem, 34svh, 19rem);
+  }
+
+  .home-hero-backdrop-image {
+    object-position: center 36%;
+    animation: home-hero-image-fade 500ms ease-out both;
+  }
+
+  .home-hero-backdrop-scrim {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--void-950) 24%, transparent) 0%,
+      color-mix(in srgb, var(--void-950) 72%, transparent) 56%,
+      var(--void-950) 100%
+    );
+  }
+
   .home-hero-motion-scope {
     min-height: 0;
     align-items: stretch;
