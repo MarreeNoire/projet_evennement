@@ -898,10 +898,11 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   }
 
   .home-hero-layout {
-    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "title title"
-      "actions actions";
+      "title"
+      "featured"
+      "actions";
     align-items: center;
     gap: 0.65rem 0.75rem;
   }
@@ -938,7 +939,9 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
     grid-area: featured;
     align-self: stretch;
     min-width: 0;
-    max-width: none;
+    width: min(100%, 24rem);
+    max-width: 100%;
+    justify-self: end;
     gap: 0.55rem;
     padding: 0.75rem;
     background: color-mix(in srgb, var(--void-950) 62%, transparent);
@@ -1013,7 +1016,6 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
 
 @media (max-width: 359px) {
   .home-hero-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
     gap: 0.55rem;
   }
 
