@@ -148,7 +148,7 @@ export function HeaderShell({
   }, []);
 
   return (
-    <header className="glass border-border-strong sticky top-0 z-40 border-b">
+    <header className="bg-bg border-border-strong sticky top-0 z-40 border-b shadow-md">
       {navigating ? (
         <>
           <div aria-hidden="true" className="navigation-progress-track">
