@@ -68,9 +68,6 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
           <div className="home-hero-layout">
             <div className="home-hero-copy">
               <h1 className="home-hero-title font-display">Trouve ton prochain moment à vivre.</h1>
-              <p>
-                Explore les événements, réserve ta place et retrouve ta communauté dans les salons.
-              </p>
               <div className="home-hero-actions">
                 <ButtonLink href={ROUTES.explore} size="sm">
                   Explorer l&apos;agenda
