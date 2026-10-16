@@ -566,6 +566,47 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
     linear-gradient(0deg, color-mix(in srgb, var(--void-950) 76%, transparent) 0%, transparent 54%);
 }
 
+.home-hero-slide-control {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, white 32%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--void-950) 86%, transparent);
+  color: white;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+  transform: translateY(-50%);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms var(--ease-out-soft);
+}
+
+.home-hero-slide-control:hover {
+  border-color: color-mix(in srgb, white 58%, transparent);
+  background: color-mix(in srgb, var(--void-800) 94%, transparent);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.home-hero-slide-control:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+
+.home-hero-slide-control-previous {
+  left: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.home-hero-slide-control-next {
+  right: clamp(0.75rem, 2vw, 1.5rem);
+}
+
 .home-hero-content {
   position: relative;
   z-index: 1;
@@ -891,6 +932,19 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
 
   .home-hero-topline {
     min-height: 2.75rem;
+  }
+
+  .home-hero-slide-control {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .home-hero-slide-control-previous {
+    left: 0.5rem;
+  }
+
+  .home-hero-slide-control-next {
+    right: 0.5rem;
   }
 
   .home-hero-organizer-link {

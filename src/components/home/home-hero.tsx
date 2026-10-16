@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, MapPin, Search, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Search,
+  Sparkles,
+} from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
@@ -17,28 +25,39 @@ import type { PublishedEventView } from "@/types/database";
 
 export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEventView[] }) {
   const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const featuredEvent = featuredEvents[featuredIndex];
   const cover = featuredEvent?.cover_url ?? featuredEvent?.gallery?.[0] ?? null;
+  const canRotate = featuredEvents.length > 1;
+
+  const goToPreviousEvent = () => {
+    setFeaturedIndex((current) => (current - 1 + featuredEvents.length) % featuredEvents.length);
+  };
+
+  const goToNextEvent = () => {
+    setFeaturedIndex((current) => (current + 1) % featuredEvents.length);
+  };
 
   useEffect(() => {
-    if (
-      featuredEvents.length < 2 ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
+    if (!canRotate || isPaused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
     const timer = window.setInterval(() => {
       setFeaturedIndex((current) => (current + 1) % featuredEvents.length);
-    }, 5000);
+    }, 2000);
 
     return () => window.clearInterval(timer);
-  }, [featuredEvents.length]);
+  }, [canRotate, featuredEvents.length, isPaused]);
 
   return (
     <section className="home-hero border-border border-b">
       <HomeHeroPalette src={cover} />
-      <HomeHeroMotionScope className="home-hero-motion-scope">
+      <HomeHeroMotionScope
+        className="home-hero-motion-scope"
+        paused={isPaused}
+        onTogglePause={() => setIsPaused((paused) => !paused)}
+      >
         <div className="home-hero-backdrop" aria-hidden="true">
           {cover ? (
             <PublicStorageImage
@@ -62,8 +81,29 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
               Organisateur ? Crée ta billetterie en ligne
               <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
-            {cover ? <HomeHeroMotionToggle /> : null}
+            {canRotate ? <HomeHeroMotionToggle /> : null}
           </div>
+
+          {canRotate ? (
+            <>
+              <button
+                type="button"
+                aria-label="Événement précédent"
+                onClick={goToPreviousEvent}
+                className="home-hero-slide-control home-hero-slide-control-previous"
+              >
+                <ChevronLeft className="size-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Événement suivant"
+                onClick={goToNextEvent}
+                className="home-hero-slide-control home-hero-slide-control-next"
+              >
+                <ChevronRight className="size-5" aria-hidden="true" />
+              </button>
+            </>
+          ) : null}
 
           <div className="home-hero-layout">
             <div className="home-hero-copy">

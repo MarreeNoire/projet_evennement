@@ -12,13 +12,16 @@ const HomeHeroMotionContext = createContext<HomeHeroMotionControls | null>(null)
 export function HomeHeroMotionScope({
   children,
   className,
+  paused,
+  onTogglePause,
 }: {
   children: ReactNode;
   className: string;
+  paused: boolean;
+  onTogglePause: () => void;
 }) {
   const scopeRef = useRef<HTMLDivElement>(null);
   const [motionActive, setMotionActive] = useState(true);
-  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const scope = scopeRef.current;
@@ -46,9 +49,7 @@ export function HomeHeroMotionScope({
   }, []);
 
   return (
-    <HomeHeroMotionContext.Provider
-      value={{ paused, toggle: () => setPaused((current) => !current) }}
-    >
+    <HomeHeroMotionContext.Provider value={{ paused, toggle: onTogglePause }}>
       <div
         ref={scopeRef}
         className={className}
@@ -70,8 +71,8 @@ export function HomeHeroMotionToggle() {
       type="button"
       aria-label={
         controls.paused
-          ? "Reprendre les animations de l’accueil"
-          : "Mettre en pause les animations de l’accueil"
+          ? "Reprendre le défilement des événements"
+          : "Mettre en pause le défilement des événements"
       }
       aria-pressed={controls.paused}
       onClick={controls.toggle}
