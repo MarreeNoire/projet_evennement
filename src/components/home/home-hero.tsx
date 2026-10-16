@@ -59,7 +59,11 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
         </div>
 
         <div className="container-page home-hero-content">
-          <div className="home-hero-topline">{canRotate ? <HomeHeroMotionToggle /> : null}</div>
+          {canRotate ? (
+            <div className="home-hero-topline">
+              <HomeHeroMotionToggle />
+            </div>
+          ) : null}
 
           <div className="home-hero-layout">
             <div className="home-hero-copy">
