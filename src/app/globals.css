@@ -919,7 +919,13 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   }
 
   .home-hero-layout {
+    display: flex;
+    flex-direction: column;
     gap: 1.25rem;
+  }
+
+  .home-hero-copy {
+    order: 1;
   }
 
   .home-hero-copy {
@@ -943,9 +949,19 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   }
 
   .home-hero-featured-event {
+    order: 0;
     max-width: none;
     gap: 0.65rem;
     padding: 1rem;
+    background: color-mix(in srgb, var(--void-950) 76%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .home-hero-title {
+    max-width: 18ch;
+    font-size: clamp(1.8rem, 9vw, 2.35rem);
+    line-height: 1.04;
   }
 
   .home-hero-featured-title {
