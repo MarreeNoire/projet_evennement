@@ -913,7 +913,7 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   }
 
   .home-hero-content {
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .home-hero-topline {
@@ -930,7 +930,7 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   }
 
   .home-hero-layout {
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
     grid-template-areas:
       "title title"
       "organizer featured"
@@ -974,9 +974,10 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   .home-hero-actions > a {
     min-width: 0;
     flex: 1 1 0;
+    min-height: 2.75rem;
     justify-content: center;
     padding-inline: 0.35rem;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   .home-hero-featured-event {
@@ -1015,6 +1016,7 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   }
 
   .home-hero-search-panel {
+    margin-top: 0.25rem;
     padding: 0.8rem;
   }
 
@@ -1039,6 +1041,19 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
 
   .home-hero-categories > span {
     width: 100%;
+  }
+
+  .home-hero-categories ul {
+    max-width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-hero-categories ul::-webkit-scrollbar {
+    display: none;
   }
 }
 
