@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, ChevronDown, Eye, EyeOff, Search } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import { Alert } from "@/components/ui/states";
 import { Button } from "@/components/ui/button";
@@ -392,6 +392,7 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
+    control,
     setValue,
     clearErrors,
     formState: { errors },
@@ -416,9 +417,7 @@ export function RegisterForm() {
     }
   }, []);
 
-  const phoneField = register("phone");
-
-  function handlePhoneInput(value: string) {
+  function handlePhoneInput(value: string, onChange: (phone: string) => void) {
     setPhoneInput(value);
     const trimmed = value.trim();
     const isInternational = trimmed.startsWith("+") || trimmed.startsWith("00");
@@ -430,14 +429,14 @@ export function RegisterForm() {
         setPhoneCountry(detectedCountry);
         setPhoneInput(internationalDigits.slice(detectedCountry.code.length));
       }
-      setPhoneValue(`+${internationalDigits}`, internationalDigits.length);
+      onChange(`+${internationalDigits}`);
       return;
     }
 
     const digits = trimmed.replace(/\D/g, "");
     const nationalDigits = phoneCountry.region === "CI" ? digits : digits.replace(/^0/, "");
     const international = nationalDigits ? `+${phoneCountry.code}${nationalDigits}` : "";
-    setPhoneValue(international, phoneCountry.code.length + nationalDigits.length);
+    onChange(international);
   }
 
   function setPhoneValue(value: string, digitCount: number) {
@@ -629,20 +628,30 @@ export function RegisterForm() {
               </ul>
             </div>
           </details>
-          <Input
-            id="phone"
-            type="tel"
-            autoComplete="tel-national"
-            inputMode="tel"
-            placeholder={phoneCountry.region === "CI" ? "07 00 00 00 00" : "Numéro de téléphone"}
-            value={phoneInput}
-            invalid={Boolean(errors.phone)}
-            {...fieldAriaProps("phone", {
-              error: errors.phone?.message,
-              description: "Utilisé pour préremplir tes achats de billets. Il reste privé.",
-            })}
-            {...phoneField}
-            onChange={(event) => handlePhoneInput(event.target.value)}
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field }) => (
+              <Input
+                id="phone"
+                ref={field.ref}
+                name={field.name}
+                type="tel"
+                autoComplete="tel-national"
+                inputMode="tel"
+                placeholder={
+                  phoneCountry.region === "CI" ? "07 00 00 00 00" : "Numéro de téléphone"
+                }
+                value={phoneInput}
+                invalid={Boolean(errors.phone)}
+                {...fieldAriaProps("phone", {
+                  error: errors.phone?.message,
+                  description: "Utilisé pour préremplir tes achats de billets. Il reste privé.",
+                })}
+                onBlur={field.onBlur}
+                onChange={(event) => handlePhoneInput(event.target.value, field.onChange)}
+              />
+            )}
           />
         </div>
       </Field>

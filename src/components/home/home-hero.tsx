@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  CalendarDays,
-  MapPin,
-  Search,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Search, Sparkles } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
@@ -98,8 +92,13 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
                 aria-label={`Découvrir ${featuredEvent.title}`}
                 aria-live="off"
               >
-                <span className="home-hero-featured-category">
-                  {getCategoryLabel(featuredEvent.category)}
+                <span className="home-hero-featured-topline">
+                  <span className="home-hero-featured-category">
+                    {getCategoryLabel(featuredEvent.category)}
+                  </span>
+                  <span className="home-hero-featured-action">
+                    Voir l&apos;événement <ArrowRight className="size-4" aria-hidden="true" />
+                  </span>
                 </span>
                 <span className="home-hero-featured-title">{featuredEvent.title}</span>
                 <span className="home-hero-featured-meta">
@@ -113,9 +112,6 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
                       {formatDate(featuredEvent.start_at)}
                     </time>
                   </span>
-                </span>
-                <span className="home-hero-featured-action">
-                  Voir l&apos;événement <ArrowRight className="size-4" aria-hidden="true" />
                 </span>
               </Link>
             ) : null}
