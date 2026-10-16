@@ -5,8 +5,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
   MapPin,
   Search,
   Sparkles,
@@ -29,14 +27,6 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
   const featuredEvent = featuredEvents[featuredIndex];
   const cover = featuredEvent?.cover_url ?? featuredEvent?.gallery?.[0] ?? null;
   const canRotate = featuredEvents.length > 1;
-
-  const goToPreviousEvent = () => {
-    setFeaturedIndex((current) => (current - 1 + featuredEvents.length) % featuredEvents.length);
-  };
-
-  const goToNextEvent = () => {
-    setFeaturedIndex((current) => (current + 1) % featuredEvents.length);
-  };
 
   useEffect(() => {
     if (!canRotate || isPaused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -83,27 +73,6 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
             </Link>
             {canRotate ? <HomeHeroMotionToggle /> : null}
           </div>
-
-          {canRotate ? (
-            <>
-              <button
-                type="button"
-                aria-label="Événement précédent"
-                onClick={goToPreviousEvent}
-                className="home-hero-slide-control home-hero-slide-control-previous"
-              >
-                <ChevronLeft className="size-5" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                aria-label="Événement suivant"
-                onClick={goToNextEvent}
-                className="home-hero-slide-control home-hero-slide-control-next"
-              >
-                <ChevronRight className="size-5" aria-hidden="true" />
-              </button>
-            </>
-          ) : null}
 
           <div className="home-hero-layout">
             <div className="home-hero-copy">
