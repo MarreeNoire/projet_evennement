@@ -581,24 +581,6 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   justify-content: space-between;
 }
 
-.home-hero-organizer-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  border: 1px solid color-mix(in srgb, white 28%, transparent);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--void-900) 82%, transparent);
-  padding: 0.6rem 0.8rem;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: background-color 180ms ease;
-}
-
-.home-hero-organizer-link:hover {
-  background: color-mix(in srgb, var(--void-800) 94%, transparent);
-}
-
 .home-hero-topline .home-hero-motion-toggle {
   border-color: color-mix(in srgb, white 35%, transparent);
   background: color-mix(in srgb, var(--void-900) 82%, transparent);
@@ -922,18 +904,10 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
     margin-bottom: -0.5rem;
   }
 
-  .home-hero-organizer-link {
-    max-width: 100%;
-    gap: 0.35rem;
-    padding: 0.5rem 0.55rem;
-    font-size: 0.6875rem;
-  }
-
   .home-hero-layout {
     grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
     grid-template-areas:
       "title title"
-      "organizer featured"
       "description featured"
       "actions actions";
     align-items: center;
@@ -942,11 +916,6 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
 
   .home-hero-copy {
     display: contents;
-  }
-
-  .home-hero-organizer-link {
-    grid-area: organizer;
-    justify-self: start;
   }
 
   .home-hero-title {

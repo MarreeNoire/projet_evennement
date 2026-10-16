@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, MapPin, Search, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Search } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
@@ -67,11 +67,6 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
 
           <div className="home-hero-layout">
             <div className="home-hero-copy">
-              <Link href="/devenir-organisateur" className="home-hero-organizer-link">
-                <Sparkles className="size-4 shrink-0" aria-hidden="true" />
-                <span>Organisateur ? Crée ta billetterie en ligne</span>
-                <ArrowRight className="size-3.5 shrink-0" aria-hidden="true" />
-              </Link>
               <h1 className="home-hero-title font-display">Trouve ton prochain moment à vivre.</h1>
               <p>
                 Explore les événements, réserve ta place et retrouve ta communauté dans les salons.
