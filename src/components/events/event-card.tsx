@@ -195,9 +195,19 @@ function EventPoster({ event }: { event: PublishedEventView }) {
 
 export function EventGrid({ events }: { events: PublishedEventView[] }) {
   return (
-    <div className="event-grid grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div
+      className="event-grid no-scrollbar focus-visible:outline-primary flex max-w-full min-w-0 snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-2 md:grid md:snap-none md:grid-cols-2 md:gap-x-6 md:gap-y-8 md:overflow-visible md:pb-0 md:focus-visible:outline-none lg:grid-cols-3"
+      role="region"
+      aria-label="Résultats des événements à faire défiler"
+      tabIndex={0}
+    >
       {events.map((event) => (
-        <EventCard key={event.id} event={event} />
+        <div
+          key={event.id}
+          className="event-card-reveal w-[78vw] min-w-[16rem] shrink-0 snap-start md:w-auto md:min-w-0"
+        >
+          <EventCard event={event} />
+        </div>
       ))}
     </div>
   );

@@ -15,33 +15,38 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t-2 border-fg bg-bg-subtle">
-      <div className="container-page py-10 md:py-12">
-        <div className="grid gap-9 sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(4,1fr)]">
-          <div className="flex flex-col gap-4">
-            <Logo />
-            <p className="max-w-xs text-sm leading-relaxed text-fg-muted">
+    <footer className="border-fg bg-bg-subtle mt-auto border-t-2">
+      <div className="container-page py-6 md:py-12">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-6 sm:gap-9 lg:grid-cols-[1.5fr_repeat(4,1fr)]">
+          <div className="col-span-2 flex flex-col gap-2 sm:col-span-1 sm:gap-4">
+            <div className="flex items-center justify-between gap-3">
+              <Logo />
+              <Link
+                href="/explorer"
+                className="text-primary inline-flex shrink-0 items-center gap-2 text-sm font-semibold hover:underline"
+              >
+                Parcourir les événements
+              </Link>
+            </div>
+            <p className="text-fg-muted max-w-xs text-sm leading-relaxed">
               Découvre un événement, participe, et rencontre sa communauté avant, pendant et après.
             </p>
-            <Link href="/explorer" className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary hover:underline">
-              Parcourir les événements
-            </Link>
           </div>
 
           {FOOTER_SECTIONS.map((section) => (
             <nav key={section.title} aria-labelledby={`footer-${section.title}`}>
               <h2
                 id={`footer-${section.title}`}
-                className="mb-3 text-xs font-bold tracking-[0.12em] text-fg uppercase"
+                className="text-fg mb-2 text-xs font-bold tracking-[0.12em] uppercase sm:mb-3"
               >
                 {section.title}
               </h2>
-              <ul className="flex flex-col gap-2">
+              <ul className="flex flex-col gap-1.5 sm:gap-2">
                 {section.links.map((link) => (
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="text-sm text-fg-muted underline-offset-4 transition-colors hover:text-primary hover:underline"
+                      className="text-fg-muted hover:text-primary text-sm underline-offset-4 transition-colors hover:underline"
                     >
                       {link.label}
                     </a>
@@ -52,16 +57,13 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-border-strong pt-5 text-xs text-fg-subtle sm:flex-row sm:items-center sm:justify-between">
+        <div className="border-border-strong text-fg-subtle mt-6 flex flex-col gap-1.5 border-t pt-4 text-xs sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-5">
           <p>
             © {year} {APP_NAME}. Tous droits réservés.
           </p>
-          <p>
-            Montants en {CURRENCY_LABEL} · Abidjan, Côte d&apos;Ivoire
-          </p>
+          <p>Montants en {CURRENCY_LABEL} · Abidjan, Côte d&apos;Ivoire</p>
         </div>
       </div>
-
     </footer>
   );
 }
