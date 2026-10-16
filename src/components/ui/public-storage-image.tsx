@@ -39,6 +39,7 @@ export function PublicStorageImage({
   width,
   height,
   fill = false,
+  quality = 75,
   preload = false,
 }: PublicStorageImageProps) {
   if (isPublicSupabaseImage(src)) {
@@ -51,8 +52,8 @@ export function PublicStorageImage({
         width={fill ? undefined : width}
         height={fill ? undefined : height}
         fill={fill}
+        quality={quality}
         preload={preload}
-        unoptimized
       />
     );
   }

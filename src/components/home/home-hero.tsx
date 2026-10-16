@@ -49,7 +49,7 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
               src={cover}
               alt=""
               fill
-              preload
+              preload={featuredIndex === 0}
               sizes="100vw"
               quality={76}
               className="home-hero-backdrop-image"

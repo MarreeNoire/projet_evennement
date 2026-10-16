@@ -54,6 +54,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
     <article className="group border-border-strong/70 bg-surface hover:border-primary flex h-full flex-col overflow-hidden rounded-xl border backdrop-blur-md transition-[transform,border-color,box-shadow] duration-300 ease-[var(--ease-out-soft)] hover:-translate-y-1 hover:shadow-lg">
       <Link
         href={`/evenements/${event.slug}`}
+        prefetch={false}
         aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
         className="focus-visible:outline-border-focus block focus-visible:outline-2 focus-visible:outline-offset-[-3px]"
       >
@@ -87,6 +88,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
           <h3 className="line-clamp-2 min-w-0 flex-1 text-base leading-snug font-bold sm:text-lg">
             <Link
               href={`/evenements/${event.slug}`}
+              prefetch={false}
               className="text-fg hover:text-primary focus-visible:outline-border-focus focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {event.title}
