@@ -64,11 +64,10 @@ export function EventHorizontalList({ events }: EventHorizontalListProps) {
         tabIndex={0}
         className="no-scrollbar focus-visible:outline-primary flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pt-1 pb-2 focus-visible:outline-2 focus-visible:outline-offset-4 motion-reduce:scroll-auto"
       >
-        {events.map((event, index) => (
+        {events.map((event) => (
           <div
             key={event.id}
             className="event-card-reveal w-[78vw] min-w-[16rem] shrink-0 snap-start sm:w-[20rem] md:w-[21rem]"
-            style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
           >
             <EventCard event={event} />
           </div>
@@ -83,7 +82,7 @@ export function EventHorizontalList({ events }: EventHorizontalListProps) {
             aria-label="Événements précédents"
             onClick={() => scroll(-1)}
             disabled={!canGoBack}
-            className="border-border bg-surface/95 text-fg hover:bg-primary focus-visible:outline-primary pointer-events-auto inline-flex size-10 items-center justify-center rounded-full border shadow-md transition-all hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-0"
+            className="border-border bg-surface/95 text-fg hover:bg-primary focus-visible:outline-primary pointer-events-auto inline-flex size-10 items-center justify-center rounded-md border shadow-sm transition-all hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-0"
           >
             <ChevronLeft className="size-5" aria-hidden="true" />
           </button>
@@ -92,7 +91,7 @@ export function EventHorizontalList({ events }: EventHorizontalListProps) {
             aria-label="Événements suivants"
             onClick={() => scroll(1)}
             disabled={!canGoForward}
-            className="border-border bg-surface/95 text-fg hover:bg-primary focus-visible:outline-primary pointer-events-auto inline-flex size-10 items-center justify-center rounded-full border shadow-md transition-all hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-0"
+            className="border-border bg-surface/95 text-fg hover:bg-primary focus-visible:outline-primary pointer-events-auto inline-flex size-10 items-center justify-center rounded-md border shadow-sm transition-all hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-0"
           >
             <ChevronRight className="size-5" aria-hidden="true" />
           </button>

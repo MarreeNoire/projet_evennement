@@ -165,7 +165,7 @@ export default async function SalonDetailPage({
               href={`/salons/${id}?tab=${item.slug}`}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
+                "inline-flex min-h-11 shrink-0 items-center rounded-md px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
                 isActive
                   ? "bg-primary-solid text-primary-solid-fg shadow-sm"
                   : "text-fg-muted hover:bg-bg-muted hover:text-fg",

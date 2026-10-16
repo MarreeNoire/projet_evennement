@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Syne, Plus_Jakarta_Sans } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { PwaRouteRestoration } from "@/components/providers/pwa-route-restoration";
@@ -9,17 +9,20 @@ import { env } from "@/lib/env";
 import "./globals.css";
 
 /* =============================================================================
-   Police — une seule famille sans-serif, chargée par next/font (auto-hébergée,
-   sans requête vers Google au runtime, donc sans décalage de rendu ni fuite
-   de données utilisateur).
-
-   * Inter : la sans-serif de référence des interfaces sociales, très lisible
-     aux petites tailles et neutre à souhait.
+   Polices — nuit électrique
+   * Plus Jakarta Sans : humaniste, lisible à toutes les tailles, corps de texte
+   * Syne : géométrique et forte personnalité, titres qui accrochent le regard
    ========================================================================== */
 
-const inter = Inter({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+const syne = Syne({
+  subsets: ["latin"],
+  variable: "--font-syne",
   display: "swap",
 });
 
@@ -30,12 +33,12 @@ export const metadata: Metadata = {
     template: `%s · ${APP_NAME}`,
   },
   description:
-    "Recherche des événements en Côte d’Ivoire, consulte les détails et réserve ta place en ligne.",
+    "Recherche des événements en Côte d'Ivoire, consulte les détails et réserve ta place en ligne.",
   applicationName: APP_NAME,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: APP_NAME,
   },
   icons: {
@@ -65,43 +68,31 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${APP_NAME} · Événements et billetterie`,
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  formatDetection: {
-    telephone: false,
-    address: false,
-    email: false,
-  },
+  robots: { index: true, follow: true },
+  formatDetection: { telephone: false, address: false, email: false },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  // Le zoom reste autorisé : le bloquer nuit à l'accessibilité.
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#e4ddd1" },
-    { media: "(prefers-color-scheme: dark)", color: "#201f1d" },
+    { media: "(prefers-color-scheme: light)", color: "#f5f3fa" },
+    { media: "(prefers-color-scheme: dark)", color: "#171420" },
   ],
 };
 
-// Les pages partagées lisent la session via cookies(). Le rendu doit donc
-// avoir lieu à la requête plutôt que pendant la génération statique.
 export const dynamic = "force-dynamic";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // suppressHydrationWarning : next-themes écrit la classe de thème sur <html>
-    // avant l'hydratation, ce qui est attendu et non une erreur.
     <html
       lang="fr"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={inter.variable}
+      className={`${jakarta.variable} ${syne.variable}`}
     >
-      <head></head>
+      <head />
       <body className="min-h-dvh antialiased">
         <a href="#contenu" className="skip-link">
           Aller au contenu principal

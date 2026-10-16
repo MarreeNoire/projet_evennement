@@ -33,7 +33,7 @@ export default async function HomePage() {
       <SiteHeader />
 
       <main id="contenu" className="flex flex-col">
-        <HomeHero featuredEvent={featured[0]} />
+        <HomeHero featuredEvents={featured} />
 
         {/* ── MODULE ÉVÉNEMENTS & SALONS EN DIRECT ────────────────────────── */}
         <section
@@ -42,7 +42,7 @@ export default async function HomePage() {
         >
           <div className="container-page">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-12">
-              {/* Colonne Principale : Événements en défilement horizontal */}
+              {/* Les événements suivants défilent horizontalement sous le hero. */}
               <div className="flex min-w-0 flex-col gap-6">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
@@ -53,7 +53,7 @@ export default async function HomePage() {
                       Événements à la une
                     </h2>
                     <p className="text-fg-muted mt-1 text-xs md:text-sm">
-                      Fais défiler les événements du moment et réserve tes places.
+                      Retrouve les prochains rendez-vous à découvrir et les billets à réserver.
                     </p>
                   </div>
                   <Link
@@ -74,7 +74,7 @@ export default async function HomePage() {
                   </Link>
                 </div>
 
-                {/* Événements sous forme de carrousel/défilement horizontal */}
+                {/* L’événement mis en avant apparaît dans le hero ; les autres sont en grille. */}
                 {featured.length === 0 ? (
                   <EmptyState
                     title="Aucun événement pour le moment"
@@ -83,8 +83,13 @@ export default async function HomePage() {
                       <ButtonLink href="/devenir-organisateur">Devenir organisateur</ButtonLink>
                     }
                   />
+                ) : featured.length > 1 ? (
+                  <EventHorizontalList events={featured.slice(1)} />
                 ) : (
-                  <EventHorizontalList events={featured} />
+                  <p className="border-border bg-surface text-fg-muted rounded-lg border p-5 text-sm">
+                    L&apos;événement à l&apos;affiche est présenté juste au-dessus. D&apos;autres
+                    rendez-vous apparaîtront ici dès leur publication.
+                  </p>
                 )}
               </div>
 

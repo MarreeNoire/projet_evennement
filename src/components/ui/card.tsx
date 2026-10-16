@@ -3,9 +3,8 @@ import { cn } from "@/lib/utils";
 /* =============================================================================
    Carte
    --------------------------------------------------------------------------
-   Brique de base des listes et des tableaux de bord. Filet fin sur papier, pas
-   d'ombre : la hiérarchie vient de la typographie et de l'espacement, pas de
-   l'empilement d'élévations.
+   Surface réutilisable des listes et tableaux de bord. Le verre fumé laisse
+   l'ambiance de la page respirer tout en gardant un contraste fort.
    ========================================================================== */
 
 export function Card({
@@ -15,10 +14,11 @@ export function Card({
 }: React.HTMLAttributes<HTMLDivElement> & { interactive?: boolean }) {
   return (
     <div
+      data-scroll-reveal
       className={cn(
-        "border-border bg-surface rounded-xl border transition-[transform,border-color,background-color,box-shadow] duration-300 ease-[var(--ease-out-soft)]",
+        "border-border bg-surface/80 rounded-xl border shadow-sm backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] duration-300 ease-[var(--ease-out-soft)]",
         interactive &&
-          "hover:-translate-y-1 hover:border-transparent hover:bg-surface-raised hover:shadow-md focus-within:border-border-focus",
+          "hover:border-primary/35 hover:bg-surface-raised focus-within:border-border-focus hover:-translate-y-0.5 hover:shadow-lg",
         className,
       )}
       {...props}
@@ -94,7 +94,12 @@ export function StatCard({
           </span>
         ) : null}
       </div>
-      <p className={cn("font-display mt-2 font-bold tracking-tight tabular-nums", compact ? "text-xl sm:text-2xl md:text-3xl" : "text-2xl md:text-3xl")}>
+      <p
+        className={cn(
+          "font-display mt-2 font-bold tracking-tight tabular-nums",
+          compact ? "text-xl sm:text-2xl md:text-3xl" : "text-2xl md:text-3xl",
+        )}
+      >
         {value}
       </p>
       {(hint || trend) && (

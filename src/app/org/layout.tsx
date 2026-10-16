@@ -27,15 +27,18 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
   const canAccessOrganizationSpace = Boolean(owned?.length || memberships?.length);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="bg-bg flex min-h-dvh flex-col">
       <SiteHeader />
       <div className="container-page min-w-0 flex-1 py-4 sm:py-6 lg:py-8">
         {!canAccessOrganizationSpace ? (
-          <div className="mx-auto max-w-xl py-12 space-y-6">
-            <div className="text-center space-y-2">
-              <h1 className="font-display text-3xl font-bold tracking-tight">Activation de l&apos;Espace Organisateur</h1>
-              <p className="text-sm text-fg-muted">
-                Pour créer des événements et gérer votre billetterie, veuillez choisir le nom de votre organisation.
+          <div className="mx-auto max-w-xl space-y-6 py-12">
+            <div className="space-y-2 text-center">
+              <h1 className="font-display text-3xl font-bold tracking-tight">
+                Activation de l&apos;Espace Organisateur
+              </h1>
+              <p className="text-fg-muted text-sm">
+                Pour créer des événements et gérer votre billetterie, veuillez choisir le nom de
+                votre organisation.
               </p>
             </div>
             <BecomeOrganizerForm user={{ displayName: profile.display_name }} />
@@ -44,23 +47,23 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
           <div className="grid min-w-0 gap-4 sm:gap-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
             {/* Navigation latérale Organisateur */}
             <aside className="min-w-0">
-              <div className="-mx-4 border-y-2 border-fg bg-surface px-4 py-2 lg:mx-0 lg:border-x-0 lg:border-b-0 lg:p-4">
+              <div className="border-border bg-surface/85 -mx-4 border-y px-4 py-3 backdrop-blur-md lg:mx-0 lg:rounded-xl lg:border lg:p-4 lg:shadow-sm">
                 <OrgMobileNavigation />
-                <div className="mb-2 hidden min-w-0 items-center justify-between gap-2 border-b border-border-strong pb-2 lg:mb-4 lg:flex lg:pb-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-fg-subtle">
+                <div className="border-border-strong mb-2 hidden min-w-0 items-center justify-between gap-2 border-b pb-2 lg:mb-4 lg:flex lg:pb-4">
+                  <p className="text-fg-subtle text-xs font-semibold tracking-wider uppercase">
                     Espace Organisateur
                   </p>
-                  <p className="hidden truncate font-display text-sm font-bold text-fg lg:block">
+                  <p className="font-display text-fg hidden truncate text-sm font-bold lg:block">
                     {profile.display_name}
                   </p>
                 </div>
 
                 <OrgDesktopNavigation />
 
-                <div className="mt-2 hidden border-t border-border pt-4 lg:mt-6 lg:block">
+                <div className="border-border mt-2 hidden border-t pt-4 lg:mt-6 lg:block">
                   <Link
                     href="/"
-                    className="flex items-center gap-2 text-xs font-medium text-fg-subtle hover:text-fg"
+                    className="text-fg-subtle hover:text-fg flex items-center gap-2 text-xs font-medium"
                   >
                     <ArrowLeft className="size-3.5" /> Retour au site public
                   </Link>

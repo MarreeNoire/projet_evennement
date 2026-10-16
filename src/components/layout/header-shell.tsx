@@ -55,10 +55,11 @@ export function HeaderShell({
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
         },
-        () => startTransition(() => {
-          updateUnreadCount(1);
-          router.refresh();
-        }),
+        () =>
+          startTransition(() => {
+            updateUnreadCount(1);
+            router.refresh();
+          }),
       )
       .on(
         "postgres_changes",
@@ -71,11 +72,12 @@ export function HeaderShell({
         (payload) => {
           const oldRow = payload.old as { is_read?: boolean };
           const newRow = payload.new as { is_read?: boolean };
-          const change = oldRow.is_read === false && newRow.is_read === true
-            ? -1
-            : oldRow.is_read === true && newRow.is_read === false
-              ? 1
-              : 0;
+          const change =
+            oldRow.is_read === false && newRow.is_read === true
+              ? -1
+              : oldRow.is_read === true && newRow.is_read === false
+                ? 1
+                : 0;
           if (change) {
             startTransition(() => {
               updateUnreadCount(change);
@@ -146,7 +148,7 @@ export function HeaderShell({
   }, []);
 
   return (
-    <header className="border-border-strong bg-surface sticky top-0 z-40 border-b">
+    <header className="glass border-border-strong sticky top-0 z-40 border-b">
       {navigating ? (
         <>
           <div aria-hidden="true" className="navigation-progress-track">
@@ -168,7 +170,7 @@ export function HeaderShell({
         </Link>
 
         <nav aria-label="Modules principaux" className="hidden lg:block">
-          <ul className="flex items-center gap-1 rounded-lg border border-border bg-bg-muted p-1">
+          <ul className="border-border bg-bg-muted flex items-center gap-1 rounded-lg border p-1">
             {primaryNavItems.map((item) => {
               const active =
                 isActive(pathname, item.href) ||
@@ -181,7 +183,7 @@ export function HeaderShell({
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus",
+                      "focus-visible:ring-border-focus flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none",
                       active
                         ? "bg-surface-raised text-primary shadow-sm"
                         : "text-fg-muted hover:bg-surface hover:text-fg",

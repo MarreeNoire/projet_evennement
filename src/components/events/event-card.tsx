@@ -8,6 +8,7 @@ import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { CURRENCY_LABEL, getCategoryLabel } from "@/lib/constants";
 import { formatDate, formatNumber } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
+import { EventQuickPreview } from "./event-quick-preview";
 
 /* =============================================================================
    Carte d'événement
@@ -50,12 +51,12 @@ export function EventCard({ event }: { event: PublishedEventView }) {
   const imageUrl = event.cover_url ?? gallery[0] ?? null;
 
   return (
-    <Link
-      href={`/evenements/${event.slug}`}
-      className="group block h-full focus-visible:outline-2 focus-visible:outline-offset-2"
-      aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
-    >
-      <article className="border-border-strong/70 bg-surface group-hover:border-primary group-focus-visible:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-[transform,border-color,box-shadow] duration-300 ease-[var(--ease-out-soft)] group-hover:-translate-y-1 group-hover:shadow-lg">
+    <article className="group border-border-strong/70 bg-surface hover:border-primary flex h-full flex-col overflow-hidden rounded-xl border backdrop-blur-md transition-[transform,border-color,box-shadow] duration-300 ease-[var(--ease-out-soft)] hover:-translate-y-1 hover:shadow-lg">
+      <Link
+        href={`/evenements/${event.slug}`}
+        aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
+        className="focus-visible:outline-border-focus block focus-visible:outline-2 focus-visible:outline-offset-[-3px]"
+      >
         <div className="border-border bg-bg-muted relative aspect-[16/8] overflow-hidden border-b">
           {imageUrl ? (
             <ViewTransition name={`event-cover-${event.id}`} share="morph" default="none">
@@ -79,93 +80,110 @@ export function EventCard({ event }: { event: PublishedEventView }) {
             </span>
           </div>
         </div>
+      </Link>
 
-        <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="text-fg group-hover:text-primary line-clamp-2 min-w-0 flex-1 text-base leading-snug font-bold transition-colors sm:text-lg">
-              {event.title}
-            </h3>
-            <time
-              dateTime={event.start_at}
-              className="border-border-strong flex shrink-0 flex-col rounded-md border px-2.5 py-1 text-right"
-              aria-label={`${day} ${month} ${year}`}
+      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="line-clamp-2 min-w-0 flex-1 text-base leading-snug font-bold sm:text-lg">
+            <Link
+              href={`/evenements/${event.slug}`}
+              className="text-fg hover:text-primary focus-visible:outline-border-focus focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              <span className="font-display text-primary text-xl leading-none font-bold tabular-nums">
-                {day}
-              </span>
-              <span className="text-2xs text-fg-muted mt-1 font-semibold tracking-wide uppercase">
-                {month}
-              </span>
-            </time>
-          </div>
-
-          {/* Gallery preview */}
-          {gallery.length > 0 && (
-            <div className="mb-2 flex gap-1">
-              {gallery.slice(0, 3).map((url, index) => (
-                <span
-                  key={`${event.id}-gallery-${index}`}
-                  className="border-border/50 bg-bg-muted size-10 shrink-0 overflow-hidden rounded-md border"
-                >
-                  <PublicStorageImage
-                    src={url}
-                    alt=""
-                    width={40}
-                    height={40}
-                    sizes="40px"
-                    quality={48}
-                    className="size-full object-cover"
-                  />
-                </span>
-              ))}
-            </div>
-          )}
-
-          <p className="text-fg-muted flex items-center gap-2 text-xs">
-            <MapPin className="text-primary size-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">
-              {event.venue_name ? `${event.venue_name}, ` : ""}
-              {event.city}
+              {event.title}
+            </Link>
+          </h3>
+          <time
+            dateTime={event.start_at}
+            className="border-border-strong flex shrink-0 flex-col rounded-md border px-2.5 py-1 text-right"
+            aria-label={`${day} ${month} ${year}`}
+          >
+            <span className="font-display text-primary text-xl leading-none font-bold tabular-nums">
+              {day}
             </span>
-          </p>
-
-          <div className="border-border mt-auto flex items-center justify-between gap-3 border-t pt-3">
-            <span className="text-fg text-sm font-bold tabular-nums">{priceLabel(event)}</span>
-            <span className="text-fg-subtle flex max-w-[140px] items-center gap-1 truncate text-xs">
-              {event.organizer_verified ? (
-                <BadgeCheck
-                  className="text-primary size-4 shrink-0"
-                  aria-label="Organisateur vérifié"
-                />
-              ) : null}
-              <span className="truncate">{event.organizer_name}</span>
+            <span className="text-2xs text-fg-muted mt-1 font-semibold tracking-wide uppercase">
+              {month}
             </span>
-          </div>
+          </time>
         </div>
-      </article>
-    </Link>
+
+        {/* Gallery preview */}
+        {gallery.length > 0 && (
+          <div className="mb-2 flex gap-1">
+            {gallery.slice(0, 3).map((url, index) => (
+              <span
+                key={`${event.id}-gallery-${index}`}
+                className="border-border/50 bg-bg-muted size-10 shrink-0 overflow-hidden rounded-md border"
+              >
+                <PublicStorageImage
+                  src={url}
+                  alt=""
+                  width={40}
+                  height={40}
+                  sizes="40px"
+                  quality={48}
+                  className="size-full object-cover"
+                />
+              </span>
+            ))}
+          </div>
+        )}
+
+        <p className="text-fg-muted flex items-center gap-2 text-xs">
+          <MapPin className="text-primary size-4 shrink-0" aria-hidden="true" />
+          <span className="truncate">
+            {event.venue_name ? `${event.venue_name}, ` : ""}
+            {event.city}
+          </span>
+        </p>
+
+        <div className="border-border mt-auto flex items-center justify-between gap-3 border-t pt-3">
+          <span className="text-fg text-sm font-bold tabular-nums">{priceLabel(event)}</span>
+          <span className="text-fg-subtle flex max-w-[140px] items-center gap-1 truncate text-xs">
+            {event.organizer_verified ? (
+              <BadgeCheck
+                className="text-primary size-4 shrink-0"
+                aria-label="Organisateur vérifié"
+              />
+            ) : null}
+            <span className="truncate">{event.organizer_name}</span>
+          </span>
+        </div>
+        <div className="flex justify-end pt-1">
+          <EventQuickPreview event={event} formattedPrice={priceLabel(event)} />
+        </div>
+      </div>
+    </article>
   );
 }
 
 function EventPoster({ event }: { event: PublishedEventView }) {
-  const palette = 1 + [...event.title].reduce((total, char) => total + char.charCodeAt(0), 0) % 5;
+  const palette = 1 + ([...event.title].reduce((total, char) => total + char.charCodeAt(0), 0) % 5);
   const style = {
     "--poster-bg": `var(--poster-${palette})`,
     "--poster-text": `var(--poster-${palette}-fg)`,
   } as CSSProperties;
 
   return (
-    <div style={style} className="relative flex size-full flex-col justify-between overflow-hidden bg-(--poster-bg) p-5 text-(--poster-text) sm:p-6">
-      <span aria-hidden="true" className="absolute -right-8 -top-10 size-40 rounded-full border-[18px] border-(--poster-text)" />
+    <div
+      style={style}
+      className="relative flex size-full flex-col justify-between overflow-hidden bg-(--poster-bg) p-5 text-(--poster-text) sm:p-6"
+    >
+      <span
+        aria-hidden="true"
+        className="absolute -top-10 -right-8 size-40 rounded-full border-[18px] border-(--poster-text)"
+      />
       <div className="relative flex items-center justify-between gap-3 text-xs font-semibold tracking-[0.16em] uppercase">
         <span>{getCategoryLabel(event.category)}</span>
         <span>{event.city}</span>
       </div>
       <div className="relative max-w-[85%]">
-        <span className="font-display block text-5xl leading-none font-semibold sm:text-6xl" aria-hidden="true">
+        <span
+          className="font-display block text-5xl leading-none font-semibold sm:text-6xl"
+          aria-hidden="true"
+        >
           {event.title.trim().charAt(0).toLocaleUpperCase("fr-FR")}
         </span>
-        <span className="mt-3 block line-clamp-2 text-lg leading-tight font-semibold sm:text-xl">
+        <span className="mt-3 line-clamp-2 block text-lg leading-tight font-semibold sm:text-xl">
           {event.title}
         </span>
       </div>

@@ -69,11 +69,13 @@ export function HomeHeroMotionToggle() {
     <button
       type="button"
       aria-label={
-        controls.paused ? "Reprendre l’animation du titre" : "Mettre en pause l’animation du titre"
+        controls.paused
+          ? "Reprendre les animations de l’accueil"
+          : "Mettre en pause les animations de l’accueil"
       }
       aria-pressed={controls.paused}
       onClick={controls.toggle}
-      className="home-hero-motion-toggle border-border-strong bg-surface text-fg-muted hover:text-primary focus-visible:outline-border-focus inline-flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="home-hero-motion-toggle border-border-strong bg-surface text-fg-muted hover:text-primary focus-visible:outline-border-focus inline-flex size-11 shrink-0 items-center justify-center rounded-md border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
     >
       {controls.paused ? (
         <svg viewBox="0 0 16 16" className="size-4" fill="currentColor" aria-hidden="true">

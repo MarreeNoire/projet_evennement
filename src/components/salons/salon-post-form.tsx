@@ -140,7 +140,7 @@ export function SalonPostForm({
                     ? "L'envoi de photos est désactivé pour cet événement"
                     : "Ajouter des photos"
                 }
-                className="text-fg-muted hover:bg-bg-muted hover:text-fg border-border inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="text-fg-muted hover:bg-bg-muted hover:text-fg border-border inline-flex min-h-10 items-center gap-2 rounded-sm border px-3 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ImageIcon className="size-4" aria-hidden="true" />
                 {photos.length ? `Photos ${photos.length}/4` : "Ajouter des photos"}
@@ -156,7 +156,7 @@ export function SalonPostForm({
                 type="submit"
                 disabled={pending || content.trim().length === 0}
                 aria-busy={pending}
-                className="bg-primary-solid hover:bg-primary-solid-hover text-primary-solid-fg inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold shadow-sm transition-colors disabled:cursor-progress disabled:opacity-60"
+                className="bg-primary-solid hover:bg-primary-solid-hover text-primary-solid-fg inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-5 text-sm font-semibold shadow-sm transition-colors disabled:cursor-progress disabled:opacity-60"
               >
                 {pending ? (
                   <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
@@ -185,7 +185,7 @@ export function SalonPostForm({
               <button
                 type="button"
                 onClick={() => setPhotos((current) => current.filter((_, i) => i !== index))}
-                className="border-border bg-surface/95 hover:bg-surface absolute top-2 right-2 min-h-10 rounded-full border px-3 text-xs font-semibold shadow-sm"
+                className="border-border bg-surface/95 hover:bg-surface absolute top-2 right-2 min-h-10 rounded-sm border px-3 text-xs font-semibold shadow-sm"
                 aria-label={`Retirer la photo ${index + 1}`}
               >
                 Retirer

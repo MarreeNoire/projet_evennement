@@ -338,7 +338,7 @@ export function SalonLiveChat({
               setNewCount(0);
               bottomRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
-            className="bg-primary-solid text-primary-solid-fg sticky top-1 z-10 mx-auto flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold shadow-lg"
+            className="bg-primary-solid text-primary-solid-fg sticky top-1 z-10 mx-auto flex items-center gap-2 rounded-sm px-4 py-2 text-xs font-semibold shadow-md"
           >
             {newCount} nouveau{newCount > 1 ? "x" : ""} message{newCount > 1 ? "s" : ""}
             <ArrowDown className="size-3.5" aria-hidden="true" />
@@ -445,7 +445,7 @@ export function SalonLiveChat({
                             aria-label={`${label}, ${count}${selected ? ", sélectionné" : ""}`}
                             aria-pressed={selected}
                             className={cn(
-                              "border-border bg-surface inline-flex h-7 items-center gap-1 rounded-full border px-2 text-xs transition-colors",
+                              "border-border bg-surface inline-flex h-7 items-center gap-1 rounded-sm border px-2 text-xs transition-colors",
                               selected && "border-primary bg-primary-subtle",
                             )}
                           >
@@ -470,7 +470,7 @@ export function SalonLiveChat({
                                 onClick={() => handleReaction(message.id, key)}
                                 aria-label={label}
                                 title={label}
-                                className="text-fg-subtle hover:bg-surface hover:text-fg flex size-8 items-center justify-center rounded-full text-sm transition-colors"
+                                className="text-fg-subtle hover:bg-surface hover:text-fg flex size-8 items-center justify-center rounded-sm text-sm transition-colors"
                               >
                                 {emoji}
                               </button>
@@ -481,7 +481,7 @@ export function SalonLiveChat({
                             onClick={() => startReply(message)}
                             aria-label="Répondre à ce message"
                             title="Répondre"
-                            className="text-fg-subtle hover:bg-surface hover:text-fg flex size-8 items-center justify-center rounded-full transition-colors"
+                            className="text-fg-subtle hover:bg-surface hover:text-fg flex size-8 items-center justify-center rounded-sm transition-colors"
                           >
                             <Reply className="size-3.5" aria-hidden="true" />
                           </button>
@@ -492,7 +492,7 @@ export function SalonLiveChat({
                                 onClick={() => startEdit(message)}
                                 aria-label="Modifier ce message"
                                 title="Modifier"
-                                className="text-fg-subtle hover:bg-surface hover:text-fg flex size-8 items-center justify-center rounded-full transition-colors"
+                                className="text-fg-subtle hover:bg-surface hover:text-fg flex size-8 items-center justify-center rounded-sm transition-colors"
                               >
                                 <Pencil className="size-3.5" aria-hidden="true" />
                               </button>
@@ -506,7 +506,7 @@ export function SalonLiveChat({
                                 disabled={pending}
                                 aria-label="Supprimer ce message"
                                 title="Supprimer"
-                                className="text-fg-subtle hover:bg-danger-subtle hover:text-danger flex size-8 items-center justify-center rounded-full transition-colors"
+                                className="text-fg-subtle hover:bg-danger-subtle hover:text-danger flex size-8 items-center justify-center rounded-sm transition-colors"
                               >
                                 <Trash2 className="size-3.5" aria-hidden="true" />
                               </button>
@@ -542,7 +542,7 @@ export function SalonLiveChat({
                 type="button"
                 onClick={cancelComposeMode}
                 aria-label="Annuler"
-                className="text-fg-muted hover:bg-surface flex size-8 shrink-0 items-center justify-center rounded-full"
+                className="text-fg-muted hover:bg-surface flex size-8 shrink-0 items-center justify-center rounded-sm"
               >
                 <X className="size-4" />
               </button>

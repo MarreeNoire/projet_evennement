@@ -1,16 +1,16 @@
-"use client";
+﻿"use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 import { Toaster } from "sonner";
 
 import { STORAGE_KEYS } from "@/lib/constants";
 import { PwaInstallProvider } from "@/components/providers/pwa-install-provider";
 
 /* =============================================================================
-   Gestion du thème (compatible React 19 / Next.js 16)
+   Gestion du thÃ¨me (compatible React 19 / Next.js 16)
    --------------------------------------------------------------------------
-   * Évite l'avertissement React 19 d'injection de <script> dans les Client Components.
-   * Gère le basculement clair / sombre / système avec persistance localStorage.
+   * Ã‰vite l'avertissement React 19 d'injection de <script> dans les Client Components.
+   * GÃ¨re le basculement clair / sombre / systÃ¨me avec persistance localStorage.
    ========================================================================== */
 
 export type Theme = "light" | "dark" | "system";
@@ -31,62 +31,58 @@ const ThemeContext = createContext<ThemeContextType>({
   themes: ["light", "dark", "system"],
 });
 
+const THEME_CHANGE_EVENT = "event:theme-change";
+let fallbackTheme: Theme = "dark";
+
+function getStoredTheme(): Theme {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.THEME) as Theme | null;
+    return saved && ["light", "dark", "system"].includes(saved) ? saved : "dark";
+  } catch {
+    return fallbackTheme;
+  }
+}
+
+function subscribeToTheme(onStoreChange: () => void) {
+  window.addEventListener(THEME_CHANGE_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(THEME_CHANGE_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
+}
+
+function subscribeToSystemTheme(onStoreChange: () => void) {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  media.addEventListener("change", onStoreChange);
+  return () => media.removeEventListener("change", onStoreChange);
+}
+
+function getSystemTheme(): "light" | "dark" {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 export const useTheme = () => useContext(ThemeContext);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
-  const [systemTheme, setSystemTheme] = useState<"light" | "dark">("light");
+  const theme = useSyncExternalStore<Theme>(subscribeToTheme, getStoredTheme, () => "dark");
+  const systemTheme = useSyncExternalStore<"light" | "dark">(subscribeToSystemTheme, getSystemTheme, () => "dark");
+  const resolvedTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.THEME) as Theme | null;
-      if (saved && ["light", "dark", "system"].includes(saved)) {
-        setThemeState(saved);
-      }
-    } catch {
-      // Ignorer
-    }
-  }, []);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const getSystemTheme = () => (media.matches ? "dark" : "light");
-
-    const applyTheme = (currentTheme: Theme) => {
-      const sys = getSystemTheme();
-      setSystemTheme(sys);
-
-      const target = currentTheme === "system" ? sys : currentTheme;
-      setResolvedTheme(target);
-
-      const root = document.documentElement;
-      if (target === "dark") {
-        root.classList.add("dark");
-      } else {
-        root.classList.remove("dark");
-      }
-    };
-
-    applyTheme(theme);
-
-    const handleChange = () => {
-      if (theme === "system") {
-        applyTheme("system");
-      }
-    };
-
-    media.addEventListener("change", handleChange);
-    return () => media.removeEventListener("change", handleChange);
-  }, [theme]);
+    const root = document.documentElement;
+    root.classList.toggle("dark", resolvedTheme === "dark");
+    root.classList.toggle("light", resolvedTheme === "light");
+  }, [resolvedTheme]);
 
   const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+    fallbackTheme = newTheme;
     try {
       localStorage.setItem(STORAGE_KEYS.THEME, newTheme);
     } catch {
       // Ignorer
     }
+    window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
   };
 
   return (

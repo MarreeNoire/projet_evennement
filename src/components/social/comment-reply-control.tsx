@@ -30,7 +30,7 @@ export function CommentReplyControl({
     return (
       <Link
         href={`/connexion?redirect=${encodeURIComponent(`/salons/${salonId}?tab=fil`)}`}
-        className="text-primary hover:bg-primary/10 inline-flex min-h-9 items-center gap-1.5 rounded-full px-2 text-xs font-semibold"
+        className="text-primary hover:bg-primary/10 inline-flex min-h-9 items-center gap-1.5 rounded-sm px-2 text-xs font-semibold"
       >
         <Reply className="size-3.5" aria-hidden="true" /> Se connecter pour répondre
       </Link>
@@ -66,7 +66,7 @@ export function CommentReplyControl({
             setOpen(true);
           }}
           aria-expanded={open}
-          className="text-fg-muted hover:bg-bg-muted hover:text-primary inline-flex min-h-9 items-center gap-1.5 rounded-full px-2 text-xs font-semibold transition-colors"
+          className="text-fg-muted hover:bg-bg-muted hover:text-primary inline-flex min-h-9 items-center gap-1.5 rounded-sm px-2 text-xs font-semibold transition-colors"
         >
           <Reply className="size-3.5" aria-hidden="true" /> Répondre
         </button>
@@ -100,7 +100,7 @@ export function CommentReplyControl({
                 setError(null);
               }}
               disabled={pending}
-              className="text-fg-muted hover:bg-bg-muted inline-flex min-h-9 items-center gap-1 rounded-full px-3 text-xs font-semibold"
+              className="text-fg-muted hover:bg-bg-muted inline-flex min-h-9 items-center gap-1 rounded-sm px-3 text-xs font-semibold"
             >
               <X className="size-3.5" aria-hidden="true" /> Annuler
             </button>
@@ -108,7 +108,7 @@ export function CommentReplyControl({
               type="submit"
               disabled={pending || !content.trim()}
               aria-busy={pending}
-              className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-9 items-center gap-1.5 rounded-full px-4 text-xs font-semibold disabled:opacity-50"
+              className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-9 items-center gap-1.5 rounded-sm px-4 text-xs font-semibold disabled:opacity-50"
             >
               {pending ? (
                 <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />

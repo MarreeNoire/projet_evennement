@@ -32,7 +32,7 @@ export default function MaintenancePage() {
         </p>
         <Link
           href="/connexion"
-          className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover mt-6 inline-flex min-h-11 items-center justify-center rounded-full px-5 text-sm font-semibold transition-colors"
+          className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover mt-6 inline-flex min-h-11 items-center justify-center rounded-sm px-5 text-sm font-semibold transition-colors"
         >
           Connexion administrateur
         </Link>

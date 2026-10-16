@@ -37,7 +37,7 @@ export function PostEditControl({ postId, content }: { postId: string; content: 
           setError(null);
           setEditing(true);
         }}
-        className="text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors"
+        className="text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex min-h-9 items-center gap-1.5 rounded-sm px-3 text-xs font-semibold transition-colors"
         aria-label="Modifier ma publication"
       >
         <Pencil className="size-3.5" aria-hidden="true" />
@@ -78,14 +78,14 @@ export function PostEditControl({ postId, content }: { postId: string; content: 
             type="button"
             onClick={() => setEditing(false)}
             disabled={pending}
-            className="text-fg-muted hover:bg-bg-muted inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 text-xs font-semibold"
+            className="text-fg-muted hover:bg-bg-muted inline-flex min-h-10 items-center gap-1.5 rounded-sm px-3 text-xs font-semibold"
           >
             <X className="size-3.5" aria-hidden="true" /> Annuler
           </button>
           <button
             type="submit"
             disabled={pending || !draft.trim() || draft.trim() === content}
-            className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-xs font-semibold disabled:opacity-50"
+            className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-10 items-center gap-1.5 rounded-sm px-4 text-xs font-semibold disabled:opacity-50"
           >
             {pending ? (
               <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
