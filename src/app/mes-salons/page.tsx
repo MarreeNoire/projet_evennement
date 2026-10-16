@@ -110,9 +110,12 @@ export default async function MesSalonsPage() {
                     </h2>
                     <p className="text-fg-muted mt-1 text-sm">{section.description}</p>
                   </header>
-                  <ul className="grid gap-5 sm:grid-cols-2">
+                  <ul className="-mx-4 flex snap-x snap-mandatory [scrollbar-width:none] gap-4 overflow-x-auto overscroll-x-contain px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
                     {section.entries.map(({ salon, event }) => (
-                      <li key={salon.id}>
+                      <li
+                        key={salon.id}
+                        className="w-[82vw] max-w-[23rem] shrink-0 snap-start sm:w-auto sm:max-w-none sm:shrink"
+                      >
                         <SalonStub salon={salon} event={event} now={now} />
                       </li>
                     ))}
@@ -127,9 +130,12 @@ export default async function MesSalonsPage() {
                     Autres salons
                   </h2>
                 </header>
-                <ul className="grid gap-5 sm:grid-cols-2">
+                <ul className="-mx-4 flex snap-x snap-mandatory [scrollbar-width:none] gap-4 overflow-x-auto overscroll-x-contain px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
                   {communityEntries.map(({ salon, event }) => (
-                    <li key={salon.id}>
+                    <li
+                      key={salon.id}
+                      className="w-[82vw] max-w-[23rem] shrink-0 snap-start sm:w-auto sm:max-w-none sm:shrink"
+                    >
                       <SalonStub salon={salon} event={event} now={now} />
                     </li>
                   ))}

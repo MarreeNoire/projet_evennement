@@ -28,6 +28,7 @@ function ExploreFiltersInner({
   const [city, setCity] = useState(current.get("ville") ?? "");
   const [sort, setSort] = useState(current.get("tri") ?? "date_asc");
   const [freeOnly, setFreeOnly] = useState(current.get("gratuit") === "1");
+  const activeFilterCount = [category, city, freeOnly, sort !== "date_asc"].filter(Boolean).length;
 
   function apply(event?: React.FormEvent) {
     event?.preventDefault();
@@ -55,7 +56,7 @@ function ExploreFiltersInner({
       onSubmit={apply}
       role="search"
       aria-label="Rechercher des événements"
-      className="border-border-strong bg-surface flex flex-col gap-4 border p-3 sm:p-5"
+      className="border-border-strong bg-surface flex flex-col gap-3 border p-3 sm:gap-4 sm:p-5"
     >
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <div className="sm:col-span-2 xl:col-span-1">
@@ -70,7 +71,7 @@ function ExploreFiltersInner({
             placeholder="Concert, conférence, Abidjan…"
           />
         </div>
-        <div>
+        <div className="hidden sm:block">
           <label
             htmlFor="explorer-city"
             className="text-fg-muted mb-1.5 block text-xs font-semibold"
@@ -86,7 +87,7 @@ function ExploreFiltersInner({
             ))}
           </Select>
         </div>
-        <div>
+        <div className="hidden sm:block">
           <label
             htmlFor="explorer-sort"
             className="text-fg-muted mb-1.5 block text-xs font-semibold"
@@ -103,56 +104,143 @@ function ExploreFiltersInner({
         </div>
       </div>
 
-      <fieldset className="border-border border-t pt-3">
-        <legend className="text-fg-muted mb-2 text-xs font-semibold">Type d’événement</legend>
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par catégorie">
-          <button
-            type="button"
-            aria-pressed={!category}
-            onClick={() => setCategory("")}
-            className={`focus-visible:ring-border-focus min-h-10 border px-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${category ? "border-border bg-bg text-fg-muted hover:bg-bg-muted" : "border-primary-solid bg-primary-solid text-primary-solid-fg"}`}
-          >
-            Toutes
-          </button>
-          {CATEGORIES.map((item) => (
-            <button
-              key={item.slug}
-              type="button"
-              aria-pressed={category === item.slug}
-              onClick={() => setCategory(item.slug)}
-              className={`focus-visible:ring-border-focus min-h-10 border px-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${category === item.slug ? "border-primary-solid bg-primary-solid text-primary-solid-fg" : "border-border bg-bg text-fg-muted hover:bg-bg-muted"}`}
-            >
-              {item.label}
-            </button>
-          ))}
+      <details className="border-border border-t pt-2 sm:hidden">
+        <summary className="text-fg-muted min-h-10 cursor-pointer py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">
+          Filtres supplémentaires
+          {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+        </summary>
+        <div className="grid gap-3 pt-2 pb-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                htmlFor="explorer-city-mobile"
+                className="text-fg-muted mb-1.5 block text-xs font-semibold"
+              >
+                Ville
+              </label>
+              <Select
+                id="explorer-city-mobile"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              >
+                <option value="">Toutes villes</option>
+                {cities.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label
+                htmlFor="explorer-sort-mobile"
+                className="text-fg-muted mb-1.5 block text-xs font-semibold"
+              >
+                Trier par
+              </label>
+              <Select
+                id="explorer-sort-mobile"
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+              >
+                {EVENT_SORTS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+          <CategoryChoices category={category} setCategory={setCategory} compact />
+          <FreeOnlyChoice freeOnly={freeOnly} setFreeOnly={setFreeOnly} />
         </div>
-      </fieldset>
+      </details>
+
+      <div className="hidden sm:block">
+        <CategoryChoices category={category} setCategory={setCategory} />
+      </div>
+
+      <div className="hidden sm:flex">
+        <FreeOnlyChoice freeOnly={freeOnly} setFreeOnly={setFreeOnly} />
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <label className="text-fg-muted flex cursor-pointer items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={freeOnly}
-            onChange={(e) => setFreeOnly(e.target.checked)}
-            className="size-4 accent-[var(--color-primary-solid)]"
-          />
-          Gratuits uniquement
-        </label>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-fg-subtle text-xs" role="status">
-            {total} événement{total > 1 ? "s" : ""}
-          </span>
-          {(query || category || city || freeOnly || sort !== "date_asc") && (
-            <Button type="button" variant="ghost" size="sm" onClick={reset}>
-              Réinitialiser
-            </Button>
-          )}
-          <Button type="submit" size="sm" loading={pending} loadingLabel="Recherche…">
-            Rechercher
+        <span className="text-fg-subtle text-xs" role="status">
+          {total} événement{total > 1 ? "s" : ""}
+        </span>
+        {(query || category || city || freeOnly || sort !== "date_asc") && (
+          <Button type="button" variant="ghost" size="sm" onClick={reset}>
+            Réinitialiser
           </Button>
-        </div>
+        )}
+        <Button
+          type="submit"
+          size="sm"
+          loading={pending}
+          loadingLabel="Recherche…"
+          className="ml-auto"
+        >
+          Rechercher
+        </Button>
       </div>
     </form>
+  );
+}
+
+function CategoryChoices({
+  category,
+  setCategory,
+  compact = false,
+}: {
+  category: string;
+  setCategory: (value: string) => void;
+  compact?: boolean;
+}) {
+  return (
+    <fieldset className="border-border border-t pt-3">
+      <legend className="text-fg-muted mb-2 text-xs font-semibold">Type d’événement</legend>
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par catégorie">
+        <button
+          type="button"
+          aria-pressed={!category}
+          onClick={() => setCategory("")}
+          className={`focus-visible:ring-border-focus ${compact ? "min-h-9 px-2.5 text-xs" : "min-h-10 px-3 text-sm"} border font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${category ? "border-border bg-bg text-fg-muted hover:bg-bg-muted" : "border-primary-solid bg-primary-solid text-primary-solid-fg"}`}
+        >
+          Toutes
+        </button>
+        {CATEGORIES.map((item) => (
+          <button
+            key={item.slug}
+            type="button"
+            aria-pressed={category === item.slug}
+            onClick={() => setCategory(item.slug)}
+            className={`focus-visible:ring-border-focus ${compact ? "min-h-9 px-2.5 text-xs" : "min-h-10 px-3 text-sm"} border font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${category === item.slug ? "border-primary-solid bg-primary-solid text-primary-solid-fg" : "border-border bg-bg text-fg-muted hover:bg-bg-muted"}`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function FreeOnlyChoice({
+  freeOnly,
+  setFreeOnly,
+}: {
+  freeOnly: boolean;
+  setFreeOnly: (value: boolean) => void;
+}) {
+  return (
+    <label className="text-fg-muted flex min-h-10 cursor-pointer items-center gap-2 text-sm">
+      <input
+        type="checkbox"
+        checked={freeOnly}
+        onChange={(e) => setFreeOnly(e.target.checked)}
+        className="size-4 accent-[var(--color-primary-solid)]"
+      />
+      Gratuits uniquement
+    </label>
   );
 }
 
