@@ -59,17 +59,15 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
         </div>
 
         <div className="container-page home-hero-content">
-          <div className="home-hero-topline">
-            <Link href="/devenir-organisateur" className="home-hero-organizer-link">
-              <Sparkles className="size-4" aria-hidden="true" />
-              Organisateur ? Crée ta billetterie en ligne
-              <ArrowRight className="size-3.5" aria-hidden="true" />
-            </Link>
-            {canRotate ? <HomeHeroMotionToggle /> : null}
-          </div>
+          <div className="home-hero-topline">{canRotate ? <HomeHeroMotionToggle /> : null}</div>
 
           <div className="home-hero-layout">
             <div className="home-hero-copy">
+              <Link href="/devenir-organisateur" className="home-hero-organizer-link">
+                <Sparkles className="size-4 shrink-0" aria-hidden="true" />
+                <span>Organisateur ? Crée ta billetterie en ligne</span>
+                <ArrowRight className="size-3.5 shrink-0" aria-hidden="true" />
+              </Link>
               <h1 className="home-hero-title font-display">Trouve ton prochain moment à vivre.</h1>
               <p>
                 Explore les événements, réserve ta place et retrouve ta communauté dans les salons.
