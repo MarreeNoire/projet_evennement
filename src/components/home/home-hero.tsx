@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, MapPin, Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 
 import { ButtonLink } from "@/components/ui/button";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
@@ -12,7 +12,6 @@ import {
 } from "@/components/home/home-hero-motion-scope";
 import { HomeHeroPalette } from "@/components/home/home-hero-palette";
 import { CATEGORIES, getCategoryLabel, ROUTES } from "@/lib/constants";
-import { formatDate } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
 
 export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEventView[] }) {
@@ -86,26 +85,9 @@ export function HomeHero({ featuredEvents = [] }: { featuredEvents?: PublishedEv
                 aria-label={`Découvrir ${featuredEvent.title}`}
                 aria-live="off"
               >
-                <span className="home-hero-featured-topline">
-                  <span className="home-hero-featured-category">
-                    {getCategoryLabel(featuredEvent.category)}
-                  </span>
-                  <span className="home-hero-featured-action">
-                    Voir l&apos;événement <ArrowRight className="size-4" aria-hidden="true" />
-                  </span>
-                </span>
                 <span className="home-hero-featured-title">{featuredEvent.title}</span>
-                <span className="home-hero-featured-meta">
-                  <span>
-                    <MapPin className="size-4 shrink-0" aria-hidden="true" />
-                    {featuredEvent.city}
-                  </span>
-                  <span>
-                    <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-                    <time dateTime={featuredEvent.start_at}>
-                      {formatDate(featuredEvent.start_at)}
-                    </time>
-                  </span>
+                <span className="home-hero-featured-action">
+                  Voir l&apos;événement <ArrowRight className="size-4" aria-hidden="true" />
                 </span>
               </Link>
             ) : null}
