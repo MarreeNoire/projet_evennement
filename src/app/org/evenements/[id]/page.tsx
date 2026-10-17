@@ -1,25 +1,16 @@
 import { ArrowLeft } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/states";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { OrgEventDetailEditor } from "@/components/events/org-event-detail-editor";
-import { OrgEventTicketTypesEditor } from "@/components/events/org-event-ticket-types-editor";
-import { formatNumber, formatPercent, formatPrice, toDateTimeLocalValue } from "@/lib/utils";
+import { OrgEventDetailEditor, type EventStatsRow } from "@/components/events/org-event-detail-editor";
+import { type EventTicketItem } from "@/components/events/org-event-ticket-types-editor";
+import { toDateTimeLocalValue } from "@/lib/utils";
 
 export const metadata = {
-  title: "Gérer l'Événement | Event",
-  description: "Détails et modifications de votre événement",
+  title: "Gérer l'Événement | Espace Organisateur",
+  description: "Détails, billetterie et modifications de votre événement",
 };
-
-/** Ligne de la vue `event_stats` utilisée par les cartes de statistiques. */
-interface EventStatsRow {
-  tickets_sold: number;
-  gross_revenue: number;
-  checked_in: number;
-  capacity: number | null;
-}
 
 export default async function OrgEvenementDetailPage({
   params,
@@ -30,15 +21,24 @@ export default async function OrgEvenementDetailPage({
 
   let eventData: any = null;
   let stats: EventStatsRow | null = null;
-  let eventTickets: Array<{ id: string; eventId: string; name: string; description: string | null; price: number; quantity: number; accessLevel: "standard" | "vip" | "vvip"; isActive: boolean }> = [];
+  let eventTickets: EventTicketItem[] = [];
 
   try {
     const supabase = await createSupabaseServerClient();
     const [{ data }, { data: statsRow }, { data: tickets }] = await Promise.all([
       supabase.from("events").select("*, cover_url, gallery").eq("id", id).maybeSingle(),
-      supabase.from("event_stats").select("tickets_sold, gross_revenue, checked_in, capacity").eq("event_id", id).maybeSingle(),
-      supabase.from("ticket_types").select("id, event_id, name, description, price, quantity, access_level, is_active").eq("event_id", id).order("position", { ascending: true }),
+      supabase
+        .from("event_stats")
+        .select("tickets_sold, gross_revenue, checked_in, capacity")
+        .eq("event_id", id)
+        .maybeSingle(),
+      supabase
+        .from("ticket_types")
+        .select("id, event_id, name, description, price, quantity, access_level, is_active")
+        .eq("event_id", id)
+        .order("position", { ascending: true }),
     ]);
+
     eventData = data;
     stats = (statsRow as EventStatsRow | null) ?? null;
     eventTickets = (tickets ?? []).map((ticket) => ({
@@ -52,29 +52,21 @@ export default async function OrgEvenementDetailPage({
       isActive: ticket.is_active,
     }));
   } catch {
-    // Ignorer : la page reste utilisable pour corriger l'événement.
+    // La page reste utilisable si les données sont partielles
   }
 
-  const ticketsSold = stats?.tickets_sold ?? 0;
-  const capacity = stats?.capacity ?? eventData?.capacity ?? null;
-  const grossRevenue = stats?.gross_revenue ?? 0;
-  const checkedIn = stats?.checked_in ?? 0;
-  const fillRate = capacity && capacity > 0 ? ticketsSold / capacity : null;
-  const checkinRate = ticketsSold > 0 ? checkedIn / ticketsSold : 0;
-
-  // Événement introuvable (identifiant inexistant, non autorisé, ou brouillon
-  // purement local `draft-…`) : on l'annonce au lieu d'afficher une fiche vide.
+  // Événement introuvable (identifiant inexistant ou non autorisé)
   if (!eventData) {
     return (
-      <div className="space-y-6 max-w-4xl">
+      <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center gap-3">
           <ButtonLink href="/org/evenements" variant="ghost" size="sm">
-            <ArrowLeft className="size-4" /> Retour à la liste
+            <ArrowLeft className="size-4 mr-1.5" /> Retour à mes événements
           </ButtonLink>
         </div>
         <EmptyState
           title="Événement introuvable"
-          description="Cet événement n'existe pas en base ou ne dépend pas d'une organisation que vous gérez. S'il n'a été enregistré que dans ce navigateur, recréez-le pour pouvoir le publier."
+          description="Cet événement n'existe pas en base ou ne dépend pas d'une organisation que vous administrez."
           action={<ButtonLink href="/org/evenements/nouveau">Créer un événement</ButtonLink>}
         />
       </div>
@@ -82,58 +74,22 @@ export default async function OrgEvenementDetailPage({
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center gap-3">
-        <ButtonLink href="/org/evenements" variant="ghost" size="sm">
-          <ArrowLeft className="size-4" /> Retour à la liste
-        </ButtonLink>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-4 text-center">
-          <p className="text-xs text-fg-muted font-medium">Billets Vendus</p>
-          <p className="text-2xl font-bold text-fg mt-1">{formatNumber(ticketsSold)}</p>
-          <p className="text-xs text-fg-subtle mt-0.5">
-            {capacity ? `sur ${formatNumber(capacity)} places` : "capacité non définie"}
-          </p>
-        </Card>
-        <Card className="p-4 text-center">
-          <p className="text-xs text-fg-muted font-medium">Revenus Générés</p>
-          <p className="text-2xl font-bold text-success mt-1">{formatPrice(grossRevenue)}</p>
-          <p className="text-xs text-fg-subtle mt-0.5">commandes payées</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <p className="text-xs text-fg-muted font-medium">Taux de Remplissage</p>
-          <p className="text-2xl font-bold text-primary mt-1">
-            {fillRate === null ? "Indisponible" : formatPercent(fillRate)}
-          </p>
-          <p className="text-xs text-fg-subtle mt-0.5">billets / capacité</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <p className="text-xs text-fg-muted font-medium">Taux de Check-in</p>
-          <p className="text-2xl font-bold text-fg mt-1">{formatPercent(checkinRate)}</p>
-          <p className="text-xs text-fg-subtle mt-0.5">
-            {formatNumber(checkedIn)} entrée{checkedIn > 1 ? "s" : ""} validée
-            {checkedIn > 1 ? "s" : ""}
-          </p>
-        </Card>
-      </div>
-
+    <div className="mx-auto max-w-5xl w-full">
       <OrgEventDetailEditor
         id={id}
         initialTitle={eventData.title}
+        initialDescription={eventData.description ?? ""}
+        initialCategory={eventData.category ?? "concerts"}
         initialVenue={eventData.venue_name ?? ""}
         initialCity={eventData.city ?? "Abidjan"}
         initialStatus={eventData.status}
         initialSlug={eventData.slug}
         initialStartAt={toDateTimeLocalValue(eventData.start_at)}
         initialEndAt={toDateTimeLocalValue(eventData.end_at)}
+        initialCapacity={eventData.capacity ?? null}
         initialCoverUrl={eventData.cover_url ?? null}
         initialGalleryUrls={eventData.gallery ?? []}
-      />
-
-      <OrgEventTicketTypesEditor
-        eventId={id}
+        stats={stats}
         initialTickets={eventTickets}
       />
     </div>

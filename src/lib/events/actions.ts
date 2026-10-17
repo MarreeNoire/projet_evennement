@@ -510,6 +510,8 @@ export async function setEventStatusAction(
 export interface UpdateEventDetailsInput {
   eventId: string;
   title: string;
+  description?: string | null;
+  category?: string;
   city?: string;
   venueName?: string;
   /** Nouvelle date/heure de début (valeur `datetime-local` ou ISO). */
@@ -660,6 +662,8 @@ export async function updateEventDetailsAction(
 
     if (startIso) payload.start_at = startIso;
     if (endIso) payload.end_at = endIso;
+    if (input.description !== undefined) payload.description = input.description?.trim() || null;
+    if (input.category !== undefined) payload.category = input.category.trim();
     if (input.coverUrl !== undefined) payload.cover_url = sanitizeCoverUrl(input.coverUrl);
     if (input.galleryUrls !== undefined) payload.gallery = sanitizeGalleryUrls(input.galleryUrls);
 
