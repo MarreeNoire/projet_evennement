@@ -21,7 +21,7 @@ export default async function OrgLayout({ children }: { children: React.ReactNod
       .select("id")
       .eq("user_id", profile.id)
       .eq("status", "active")
-      .in("role", ["owner", "manager", "checkin_agent"])
+      .in("role", ["owner", "manager", "checkin_agent", "moderator"])
       .limit(1),
   ]);
   const canAccessOrganizationSpace = Boolean(owned?.length || memberships?.length);
