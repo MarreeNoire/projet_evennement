@@ -363,6 +363,7 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
     color-scheme: dark;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem; /* compense l'en-tête sticky (72px) + marge */
     scrollbar-gutter: stable;
     accent-color: var(--primary);
   }

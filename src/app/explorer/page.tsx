@@ -110,7 +110,7 @@ export default async function ExplorePage({
               action={<ButtonLink href="/explorer">Voir tous les événements</ButtonLink>}
             />
           ) : (
-            <div className="flex flex-col gap-6">
+            <div id="resultats" className="flex flex-col gap-6 scroll-mt-24">
               <div className="flex items-center justify-between">
                 <p className="text-fg-muted text-sm">
                   {total} événement{total > 1 ? "s" : ""} à découvrir

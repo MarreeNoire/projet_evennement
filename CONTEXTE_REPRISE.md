@@ -76,3 +76,42 @@ Rien n’a été poussé après `43d09a8`. Le dernier contrôle avant la rédact
 
 Ne jamais publier le contenu de `.env.local`, `SUPABASE_SERVICE_ROLE_KEY` ou une signature QR dans un journal ou un message.
 
+---
+
+## Mise à jour de reprise — 15 octobre 2026
+
+Cette section est plus récente que l’état historique ci-dessus et le remplace pour les décisions de déploiement et les changements récents. Cette note est un résumé de reprise ; elle ne constitue pas une copie mot à mot de la conversation.
+
+### Décisions de déploiement actuelles
+
+- La personne a demandé que les tests et déploiements se fassent désormais sur **Vercel**. L’application de production est `https://projet-evennement.vercel.app`.
+- La branche de référence demandée est `main`. La personne ne veut pas que le travail soit isolé sur une branche `codex/*` qu’elle ne retrouverait pas sur son domaine.
+- Ne pas publier automatiquement à la fin d’une tâche. Pour les changements qui doivent être poussés, suivre l’autorisation explicite donnée dans le tour en cours.
+- Les anciennes notes Railway/Cloudflare et leur URL ne décrivent plus la cible active de déploiement.
+
+### Changements récents confirmés
+
+- `c1e9d8a` — `fix(pwa): always launch from the home page` : corrige le démarrage PWA qui pouvait réouvrir un ancien chemin et afficher une 404. Le manifeste utilise `/` comme `start_url`, l’ancienne URL de démarrage est redirigée vers l’accueil, la mémorisation du dernier chemin a été retirée et le cache du service worker a été incrémenté. Le correctif a été déployé sur Vercel ; le manifeste, l’URL historique et le service worker v2 ont été vérifiés en production. Si l’ancienne PWA est encore ouverte, la fermer complètement puis la relancer en ligne peut permettre au nouveau service worker de s’activer.
+- `0ce8dbc` — `fix(auth): render country flags as colored icons` et commits précédents : sélecteur de pays pour le téléphone à l’inscription, avec drapeaux visibles (dont le drapeau ivoirien orange-blanc-vert), indicatif séparé, recherche et détection initiale du pays ; le champ mot de passe permet aussi l’affichage/masquage.
+- `288856f` — `fix(salons): avoid comment RLS recursion` : corrige la récursion de politique RLS qui empêchait les réponses aux commentaires dans les salons. La migration associée a été traitée précédemment ; vérifier l’état réel de la base avant toute réapplication.
+- D’autres changements antérieurs de l’application incluent les réponses aux commentaires, les filtres de phase des salons, l’utilisation des coordonnées de profil pour préremplir l’achat du billet et le mode maintenance avec accès conservé pour les administrateurs.
+
+### Paiements et données sensibles
+
+- GeniusPay est le prestataire de paiement intégré ; l’URL de webhook configurée côté prestataire est `https://projet-evennement.vercel.app/api/webhooks/geniuspay`.
+- Les tests ont été effectués en sandbox. Ne pas basculer en production ni modifier `PAYMENT_PROVIDER` sans tenir compte du mode voulu par la personne.
+- Le paiement doit rester robuste aux webhooks répétés, délais réseau et retours ambigus afin d’éviter un double débit ou une double émission de billet. En cas de confirmation en attente, vérifier la réponse GeniusPay et les journaux/fonctions Vercel avant d’en conclure que le paiement a échoué.
+- Ne jamais enregistrer, afficher, committer ou transmettre les valeurs de `.env`, `.env.local`, des variables Vercel, ni les clés GeniusPay/Supabase. Les clés côté serveur restent privées. Les paramètres sont à gérer dans les variables d’environnement Vercel.
+- Pour Supabase, `NEXT_PUBLIC_SUPABASE_URL` correspond à l’URL du projet et `NEXT_PUBLIC_SUPABASE_ANON_KEY` est la clé publique/publishable. `SUPABASE_SERVICE_ROLE_KEY` est une clé privilégiée serveur uniquement ; ne jamais l’exposer au navigateur. Si les nouvelles clés Supabase sont utilisées, `SUPABASE_SECRET_KEY` est également privée et nécessite de vérifier la compatibilité de l’application avant de remplacer la variable existante.
+
+### Travail local à préserver au moment de cette mise à jour
+
+- `git status` indiquait un changement non publié dans `src/app/evenements/[slug]/page.tsx`, lié à la présentation des détails de l’événement. Il est indépendant de ce résumé et ne doit pas être supprimé, écrasé, inclus dans un commit ou poussé sans vérifier son contenu et l’intention de la personne.
+- Les secrets ne doivent pas être copiés dans cette note, même si la personne autorise leur configuration dans un service externe.
+
+### Préférences produit à conserver
+
+- L’application Event est une plateforme événementielle avec billetterie et espaces communautaires. Priorité à une expérience mobile soignée, y compris la PWA.
+- La personne souhaite réduire la friction d’achat : les informations déjà recueillies au compte, notamment le téléphone, doivent préremplir le parcours de paiement lorsqu’elles sont disponibles.
+- Expliquer les changements en français, avec des indications pratiques et sans prétendre qu’un déploiement ou une migration a eu lieu sans vérification.
+

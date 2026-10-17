@@ -1,11 +1,12 @@
 "use client";
 
-import { Bell, LoaderCircle, Menu, Search } from "lucide-react";
+import { Bell, LoaderCircle, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
 import { Logo } from "@/components/brand/logo";
+import { SearchBar } from "@/components/layout/search-bar";
 import { ButtonLink } from "@/components/ui/button";
 import { ROUTES } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -199,29 +200,7 @@ export function HeaderShell({
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <form
-            action={ROUTES.explore}
-            method="get"
-            role="search"
-            className="hidden items-center md:flex"
-          >
-            <label htmlFor="header-search" className="sr-only">
-              Rechercher un événement
-            </label>
-            <div className="relative">
-              <Search
-                className="text-fg-subtle pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2"
-                aria-hidden="true"
-              />
-              <input
-                id="header-search"
-                name="q"
-                type="search"
-                placeholder="Rechercher des événements, salons…"
-                className="border-border bg-bg placeholder:text-fg-subtle focus:border-border-focus focus:bg-surface h-10 w-48 rounded-sm border pr-4 pl-9 text-sm transition-[width] duration-200 focus:w-64 focus:outline-none"
-              />
-            </div>
-          </form>
+          <SearchBar className="hidden md:block" />
 
           <ThemeToggle className="hidden sm:inline-flex md:hidden lg:inline-flex" />
 
