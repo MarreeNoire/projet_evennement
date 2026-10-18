@@ -3,25 +3,25 @@
 
 /* =============================================================================
    EVENT — Nuit électrique
-   Direction : accents menthe/fuchsia diffus sur fond aubergine, surfaces vitrées,
+   Direction : accents corail/fuchsia diffus sur fond aubergine, surfaces vitrées,
    typographie blanche contrastée, animations fluides. Rien de générique.
    ========================================================================== */
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Nuances menthe (marque principale) */
-  --neon-50: #f1fcf3;
-  --neon-100: #e1fae5;
-  --neon-200: #e1fae5;
-  --neon-300: #d0f3d6;
-  --neon-400: #b7e9bf;
-  --neon-500: #8ed89c;
-  --neon-600: #68c27c;
-  --neon-700: #48a65f;
-  --neon-800: #328449;
-  --neon-900: #24683a;
-  --neon-950: #194b2c;
+  /* Nuances corail (marque principale) */
+  --neon-50: #fff5f0;
+  --neon-100: #ffe2d9;
+  --neon-200: #ffd0c2;
+  --neon-300: #ffb39d;
+  --neon-400: #ff9879;
+  --neon-500: #ff7a59;
+  --neon-600: #e66343;
+  --neon-700: #c94f2d;
+  --neon-800: #c2482e;
+  --neon-900: #b9422b;
+  --neon-950: #87301f;
 
   /* Fuchsia accent */
   --fuchsia-300: #f472e8;
@@ -78,17 +78,17 @@
 
   --border: rgba(208, 204, 220, 0.2);
   --border-strong: rgba(208, 204, 220, 0.36);
-  --border-focus: #d0f3d6;
+  --border-focus: #ffb39d;
 
   /* Marque néon */
-  --primary: #d0f3d6;
-  --primary-hover: #def7e2;
-  --primary-active: #eafbed;
-  --primary-solid: #8ed89c;
-  --primary-solid-hover: #a8e1b2;
-  --primary-solid-fg: #163b22;
-  --primary-subtle: rgba(225, 250, 229, 0.14);
-  --primary-subtle-fg: #d8f5de;
+  --primary: #ff9b82;
+  --primary-hover: #ffb09b;
+  --primary-active: #ffc4b4;
+  --primary-solid: #b9422b;
+  --primary-solid-hover: #a93a27;
+  --primary-solid-fg: #ffffff;
+  --primary-subtle: rgba(255, 122, 89, 0.16);
+  --primary-subtle-fg: #ffd0c2;
 
   /* Accent fuchsia */
   --accent: #efb0e6;
@@ -129,24 +129,24 @@
 
   /* Glassmorphism backdrop pour les cartes et panels flottants */
   --glass-bg: rgba(48, 44, 61, 0.82);
-  --glass-border: rgba(161, 226, 176, 0.22);
+  --glass-border: rgba(255, 155, 130, 0.22);
   --glass-blur: 18px;
-  --ambient-primary: rgba(66, 173, 98, 0.14);
+  --ambient-primary: rgba(255, 122, 89, 0.14);
   --ambient-fuchsia: rgba(185, 113, 170, 0.08);
 
   /* Lueurs néon (box-shadow) */
-  --glow-sm: 0 0 10px rgba(66, 173, 98, 0.2);
-  --glow-md: 0 0 20px rgba(66, 173, 98, 0.26), 0 0 8px rgba(185, 113, 170, 0.13);
+  --glow-sm: 0 0 10px rgba(255, 122, 89, 0.2);
+  --glow-md: 0 0 20px rgba(255, 122, 89, 0.26), 0 0 8px rgba(185, 113, 170, 0.13);
   --glow-lg:
-    0 0 36px rgba(66, 173, 98, 0.3), 0 0 16px rgba(185, 113, 170, 0.17),
-    0 0 72px rgba(66, 173, 98, 0.1);
+    0 0 36px rgba(255, 122, 89, 0.3), 0 0 16px rgba(185, 113, 170, 0.17),
+    0 0 72px rgba(255, 122, 89, 0.1);
 }
 
 /* ============ SÉMANTIQUES — THÈME CLAIR ============ */
 .light {
-  --bg: #f7fcf8;
-  --bg-subtle: #edf8ef;
-  --bg-muted: #e1fae5;
+  --bg: #fffaf8;
+  --bg-subtle: #fff2ee;
+  --bg-muted: #ffe2d9;
   --bg-inverted: #06040f;
   --surface: rgba(255, 255, 255, 0.86);
   --surface-raised: rgba(250, 248, 255, 0.96);
@@ -154,22 +154,22 @@
   --surface-overlay: rgba(255, 255, 255, 0.94);
 
   --fg: #120e22;
-  --fg-muted: #354b3a;
-  --fg-subtle: #526b57;
+  --fg-muted: #4f3d39;
+  --fg-subtle: #69534e;
   --fg-inverted: #f0ecff;
 
-  --border: rgba(69, 105, 77, 0.2);
-  --border-strong: rgba(69, 105, 77, 0.38);
-  --border-focus: #267744;
+  --border: rgba(111, 72, 61, 0.2);
+  --border-strong: rgba(111, 72, 61, 0.38);
+  --border-focus: #b9422b;
 
-  --primary: #24683a;
-  --primary-hover: #194b2c;
-  --primary-active: #123923;
-  --primary-solid: #8ed89c;
-  --primary-solid-hover: #a8e1b2;
-  --primary-solid-fg: #163b22;
-  --primary-subtle: #e1fae5;
-  --primary-subtle-fg: #1b4e31;
+  --primary: #b9422b;
+  --primary-hover: #a93a27;
+  --primary-active: #87301f;
+  --primary-solid: #b9422b;
+  --primary-solid-hover: #a93a27;
+  --primary-solid-fg: #ffffff;
+  --primary-subtle: #ffe2d9;
+  --primary-subtle-fg: #87301f;
 
   --accent: #985a8a;
   --accent-solid: #985a8a;
@@ -190,14 +190,14 @@
   --info-subtle: #dbeafe;
 
   --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(47, 145, 78, 0.2);
+  --glass-border: rgba(201, 79, 45, 0.2);
   --glass-blur: 12px;
-  --ambient-primary: rgba(47, 145, 78, 0.09);
+  --ambient-primary: rgba(255, 122, 89, 0.1);
   --ambient-fuchsia: rgba(233, 51, 216, 0.06);
 
-  --glow-sm: 0 0 10px rgba(47, 145, 78, 0.18);
-  --glow-md: 0 0 20px rgba(47, 145, 78, 0.22);
-  --glow-lg: 0 0 32px rgba(47, 145, 78, 0.28);
+  --glow-sm: 0 0 10px rgba(201, 79, 45, 0.18);
+  --glow-md: 0 0 20px rgba(201, 79, 45, 0.22);
+  --glow-lg: 0 0 32px rgba(201, 79, 45, 0.28);
 }
 
 /* ============================================================
@@ -305,12 +305,12 @@
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
 
-  /* Ombres avec teinte menthe */
+  /* Ombres avec teinte corail */
   --shadow-xs: 0 1px 3px rgba(17, 14, 28, 0.2);
   --shadow-sm: 0 3px 10px rgba(17, 14, 28, 0.24);
-  --shadow-md: 0 8px 24px rgba(17, 14, 28, 0.3), 0 0 0 1px rgba(161, 226, 176, 0.07);
-  --shadow-lg: 0 14px 32px rgba(17, 14, 28, 0.34), 0 0 0 1px rgba(161, 226, 176, 0.1);
-  --shadow-xl: 0 20px 48px rgba(17, 14, 28, 0.4), 0 0 0 1px rgba(161, 226, 176, 0.12);
+  --shadow-md: 0 8px 24px rgba(17, 14, 28, 0.3), 0 0 0 1px rgba(255, 155, 130, 0.07);
+  --shadow-lg: 0 14px 32px rgba(17, 14, 28, 0.34), 0 0 0 1px rgba(255, 155, 130, 0.1);
+  --shadow-xl: 0 20px 48px rgba(17, 14, 28, 0.4), 0 0 0 1px rgba(255, 155, 130, 0.12);
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
