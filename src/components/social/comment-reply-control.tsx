@@ -57,7 +57,7 @@ export function CommentReplyControl({
   }
 
   return (
-    <div className="mt-1">
+    <div className="mt-0.5">
       {!open ? (
         <button
           type="button"
@@ -66,12 +66,15 @@ export function CommentReplyControl({
             setOpen(true);
           }}
           aria-expanded={open}
-          className="text-fg-muted hover:bg-bg-muted hover:text-primary inline-flex min-h-9 items-center gap-1.5 rounded-sm px-2 text-xs font-semibold transition-colors"
+          className="text-fg-muted hover:bg-bg-muted hover:text-primary inline-flex min-h-8 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition-colors"
         >
           <Reply className="size-3.5" aria-hidden="true" /> Répondre
         </button>
       ) : (
-        <form onSubmit={submit} className="mt-2 grid gap-2">
+        <form
+          onSubmit={submit}
+          className="bg-bg-subtle border-border mt-1 grid gap-2 rounded-2xl border p-2.5"
+        >
           <label htmlFor={`reply-comment-${parentId}`} className="text-fg-muted text-xs">
             Répondre à <span className="font-semibold">{parentAuthor}</span>
           </label>
@@ -85,7 +88,7 @@ export function CommentReplyControl({
             disabled={pending}
             autoFocus
             placeholder="Écris ta réponse…"
-            className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus min-h-20 w-full resize-y rounded-lg border px-3 py-2 text-sm leading-relaxed focus:ring-1 focus:outline-none"
+            className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus min-h-16 w-full resize-y rounded-xl border px-3 py-2 text-sm leading-relaxed focus:ring-1 focus:outline-none"
           />
           {error ? (
             <p role="alert" className="text-danger text-xs">

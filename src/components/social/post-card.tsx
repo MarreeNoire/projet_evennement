@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeCheck, Megaphone } from "lucide-react";
+import { BadgeCheck, MessageCircle, Megaphone } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import type { CommentWithAuthor, PostWithAuthor } from "@/lib/salons/types";
@@ -32,34 +32,39 @@ function CommentThread({
   depth?: number;
 }) {
   const name = comment.author?.display_name ?? "Membre du salon";
+  const isOwnComment = Boolean(currentUserId && comment.author_id === currentUserId);
 
   return (
-    <li className="min-w-0">
-      <div className="flex items-start gap-2.5">
-        <Avatar src={comment.author?.avatar_url} name={name} size="xs" />
-        <div className="min-w-0 flex-1">
-          <div className="bg-surface border-border border px-3 py-2 text-xs">
-            <p className="flex items-center justify-between gap-2">
-              <span className="text-fg font-semibold">{name}</span>
-              <span className="text-2xs text-fg-subtle shrink-0">
-                {formatRelative(comment.created_at)}
-              </span>
-            </p>
-            <p className="text-fg-muted mt-1 leading-relaxed whitespace-pre-line">
-              {comment.content}
-            </p>
-          </div>
-          <CommentReplyControl
-            postId={postId}
-            parentId={comment.id}
-            salonId={salonId}
-            parentAuthor={name}
-            isAuthenticated={Boolean(currentUserId)}
-          />
+    <li className={`flex min-w-0 flex-col ${isOwnComment ? "items-end" : "items-start"}`}>
+      <div
+        className={`flex w-full items-end gap-2 ${isOwnComment ? "justify-end" : "justify-start"}`}
+      >
+        {!isOwnComment ? <Avatar src={comment.author?.avatar_url} name={name} size="xs" /> : null}
+        <div
+          className={`max-w-[88%] min-w-0 rounded-2xl px-3.5 py-2.5 sm:max-w-[82%] ${
+            isOwnComment
+              ? "bg-primary-subtle text-fg rounded-br-sm"
+              : "bg-surface-raised text-fg rounded-bl-sm"
+          }`}
+        >
+          <p className="text-fg text-xs font-semibold">{isOwnComment ? "Vous" : name}</p>
+          <p className="mt-1 text-sm leading-relaxed whitespace-pre-line">{comment.content}</p>
+          <p className="text-fg-subtle text-2xs mt-1 text-right">
+            {formatRelative(comment.created_at)}
+          </p>
         </div>
       </div>
+      <div className={`${isOwnComment ? "mr-1" : "ml-9"}`}>
+        <CommentReplyControl
+          postId={postId}
+          parentId={comment.id}
+          salonId={salonId}
+          parentAuthor={name}
+          isAuthenticated={Boolean(currentUserId)}
+        />
+      </div>
       {comment.replies.length > 0 ? (
-        <ul className="border-border mt-2 ml-5 flex flex-col gap-2 border-l pl-3 sm:ml-8 sm:pl-4">
+        <ul className="border-border/60 mt-2 ml-3 flex w-[calc(100%-0.75rem)] flex-col gap-3 border-l pl-3 sm:ml-5 sm:w-[calc(100%-1.25rem)] sm:pl-4">
           {comment.replies.map((reply) => (
             <CommentThread
               key={reply.id}
@@ -188,26 +193,38 @@ export function PostCard({
             </ul>
           ) : null}
 
+          {comments.length > 0 ? (
+            <section
+              aria-label="Discussion de la publication"
+              className="bg-bg-subtle border-border mt-4 rounded-2xl border p-3 sm:p-4"
+            >
+              <div className="text-fg-muted mb-3 flex items-center gap-2 text-xs font-semibold">
+                <MessageCircle className="text-primary size-4" aria-hidden="true" />
+                Discussion
+                {post.comment_count > 0 ? (
+                  <span className="text-fg-subtle font-normal">· {post.comment_count}</span>
+                ) : null}
+              </div>
+              <ul className="flex flex-col gap-3">
+                {comments.map((comment) => (
+                  <CommentThread
+                    key={comment.id}
+                    comment={comment}
+                    postId={post.id}
+                    salonId={post.salon_id}
+                    currentUserId={currentUserId}
+                  />
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
           <PostActions
             postId={post.id}
             reactionCount={post.reaction_count ?? 0}
             commentCount={post.comment_count ?? comments.length}
             hasReacted={post.has_reacted}
           />
-
-          {comments.length > 0 ? (
-            <ul className="bg-bg-subtle border-border mt-4 flex flex-col gap-2.5 border-y px-3 py-3">
-              {comments.map((comment) => (
-                <CommentThread
-                  key={comment.id}
-                  comment={comment}
-                  postId={post.id}
-                  salonId={post.salon_id}
-                  currentUserId={currentUserId}
-                />
-              ))}
-            </ul>
-          ) : null}
         </div>
       </div>
     </article>

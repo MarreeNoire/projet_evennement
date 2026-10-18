@@ -68,8 +68,8 @@ export function PostActions({
   }
 
   return (
-    <div className="mt-3 pt-2">
-      <div className="border-border/40 flex items-center border-t pt-2 text-sm">
+    <div className="border-border/50 mt-4 border-t pt-3">
+      <div className="flex items-center text-sm">
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -115,7 +115,10 @@ export function PostActions({
       </div>
 
       {replyOpen ? (
-        <form onSubmit={sendReply} className="mt-3 flex items-start gap-2">
+        <form
+          onSubmit={sendReply}
+          className="bg-bg-subtle border-border mt-3 flex items-end gap-2 rounded-2xl border p-2"
+        >
           <label htmlFor={`reply-${postId}`} className="sr-only">
             Ta réponse
           </label>
@@ -126,7 +129,7 @@ export function PostActions({
             rows={2}
             maxLength={2000}
             placeholder="Écrire un commentaire..."
-            className="border-border bg-surface-raised placeholder:text-fg-subtle focus:border-primary focus:ring-primary min-h-10 w-full resize-none rounded-xl border px-3.5 py-2 text-sm focus:ring-1 focus:outline-none"
+            className="border-border bg-surface placeholder:text-fg-subtle focus:border-primary focus:ring-primary min-h-11 w-full resize-none rounded-xl border px-3.5 py-2.5 text-sm focus:ring-1 focus:outline-none"
           />
           <button
             type="submit"
