@@ -10,22 +10,17 @@ import { Logo } from "@/components/brand/logo";
 import { Spinner } from "@/components/ui/skeleton";
 import { APP_NAME } from "@/lib/constants";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { getFeaturedEvents } from "@/lib/events/queries";
 
 export const metadata: Metadata = { title: "Connexion" };
 
 /* Page de connexion : redirige vers l'accueil si déjà authentifié. */
 
 export default async function LoginPage() {
-  const [user, events] = await Promise.all([
-    getCurrentUser(),
-    getFeaturedEvents(1).catch(() => []),
-  ]);
+  const user = await getCurrentUser();
   if (user) redirect("/");
-  const image = events[0]?.cover_url ?? events[0]?.gallery?.[0] ?? null;
 
   return (
-    <AuthScreen image={image}>
+    <AuthScreen>
       <section className="auth-card" aria-labelledby="connexion-title">
         <header className="auth-card-header">
           <Logo />

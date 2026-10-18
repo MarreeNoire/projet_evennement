@@ -6,21 +6,16 @@ import { RegisterForm } from "@/components/auth/register-form";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { BackButton } from "@/components/auth/back-button";
 import { Logo } from "@/components/brand/logo";
-import { getFeaturedEvents } from "@/lib/events/queries";
 import { getCurrentUser } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Inscription" };
 
 export default async function RegisterPage() {
-  const [user, events] = await Promise.all([
-    getCurrentUser(),
-    getFeaturedEvents(1).catch(() => []),
-  ]);
+  const user = await getCurrentUser();
   if (user) redirect("/");
-  const image = events[0]?.cover_url ?? events[0]?.gallery?.[0] ?? null;
 
   return (
-    <AuthScreen image={image}>
+    <AuthScreen>
       <section className="auth-card" aria-labelledby="inscription-title">
         <header className="auth-card-header">
           <Logo />

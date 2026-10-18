@@ -1,22 +1,19 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 
-import { PublicStorageImage } from "@/components/ui/public-storage-image";
-
-export function AuthScreen({ image, children }: { image: string | null; children: ReactNode }) {
+export function AuthScreen({ children }: { children: ReactNode }) {
   return (
     <main className="auth-screen">
       <div className="auth-screen-backdrop" aria-hidden="true">
-        {image ? (
-          <PublicStorageImage
-            src={image}
-            alt=""
-            fill
-            sizes="100vw"
-            quality={68}
-            preload
-            className="auth-screen-image"
-          />
-        ) : null}
+        <Image
+          src="/images/auth-background.png"
+          alt=""
+          fill
+          sizes="100vw"
+          quality={72}
+          preload
+          className="auth-screen-image"
+        />
         <div className="auth-screen-scrim" />
       </div>
       <div className="auth-screen-content">{children}</div>
