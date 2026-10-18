@@ -14,12 +14,43 @@ export function OrderSummary({
   pending,
   error,
   paymentProvider,
+  compact = false,
 }: {
   pricing: OrderPricing;
   pending: boolean;
   error: string | null;
   paymentProvider: PaymentProviderName;
+  compact?: boolean;
 }) {
+  if (compact) {
+    return (
+      <div className="flex flex-col gap-2">
+        {error ? (
+          <div role="alert" aria-live="assertive">
+            <Alert tone="danger" title="Le paiement n’a pas démarré">
+              {error}
+            </Alert>
+          </div>
+        ) : null}
+        <Button
+          type="submit"
+          loading={pending}
+          loadingLabel="Création de la commande…"
+          fullWidth
+          size="lg"
+          disabled={pending || pricing.lines.length === 0}
+        >
+          {pricing.total === 0 ? "Obtenir mes billets" : `Payer ${formatPrice(pricing.total)}`}
+        </Button>
+        <p className="text-fg-subtle text-center text-xs">
+          {paymentProvider === "mock"
+            ? "Simulation : aucun montant réel débité."
+            : "Paiement sécurisé chez le prestataire."}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <Card className="overflow-hidden rounded-xl">
       <CardHeader className="pb-4">

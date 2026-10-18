@@ -13,18 +13,20 @@ export function QuantityPicker({
   ticketType,
   quantity,
   disabled = false,
+  compact = false,
   onChange,
 }: {
   ticketType: TicketTypeRow;
   quantity: number;
   disabled?: boolean;
+  compact?: boolean;
   onChange: (value: number) => void;
 }) {
   const remaining = ticketType.quantity - ticketType.sold_count;
   const max = Math.min(ticketType.max_per_order, Math.max(remaining, 0));
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border p-4">
+    <div className={`flex items-center gap-3 rounded-xl border border-border ${compact ? "p-2.5" : "p-4"}`}>
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-2 font-medium">
           {ticketType.name}
@@ -33,9 +35,11 @@ export function QuantityPicker({
         <p className="text-sm font-semibold tabular-nums">
           {ticketType.price <= 0 ? "Gratuit" : formatPrice(ticketType.price)}
         </p>
-        <p className="text-xs text-fg-subtle">
-          {remaining <= 0 ? "Épuisé" : remaining <= 20 ? `Plus que ${remaining}` : `${remaining} disponibles`}
-        </p>
+        {!compact ? (
+          <p className="text-xs text-fg-subtle">
+            {remaining <= 0 ? "Épuisé" : remaining <= 20 ? `Plus que ${remaining}` : `${remaining} disponibles`}
+          </p>
+        ) : null}
       </div>
       <div className="flex items-center gap-2" role="group" aria-label={`Quantité pour ${ticketType.name}`}>
         <Button

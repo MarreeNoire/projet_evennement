@@ -36,12 +36,9 @@ export function CheckoutDialog({
     >
       <div className="checkout-dialog-shell">
         <header className="checkout-dialog-header">
-          <div>
-            <p className="eyebrow">Réservation sécurisée</p>
-            <h2 id="checkout-dialog-title" className="font-display text-xl font-bold sm:text-2xl">
-              Commander des billets
-            </h2>
-          </div>
+          <h2 id="checkout-dialog-title" className="font-display text-xl font-bold sm:text-2xl">
+            Finaliser la réservation
+          </h2>
           <button
             type="button"
             className="checkout-dialog-close"
