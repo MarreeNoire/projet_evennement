@@ -1298,6 +1298,102 @@
   }
 }
 
+.checkout-dialog {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: min(54rem, 100vw);
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-left: 1px solid var(--border-strong);
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: var(--shadow-xl);
+  animation: checkout-panel-enter 260ms var(--ease-out-soft) both;
+}
+
+.checkout-dialog::backdrop {
+  background: color-mix(in srgb, var(--void-950) 72%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.checkout-dialog-shell {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+}
+
+.checkout-dialog-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-overlay);
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) 1rem
+    max(1rem, env(safe-area-inset-left));
+}
+
+.checkout-dialog-header .eyebrow {
+  margin-bottom: 0.2rem;
+}
+
+.checkout-dialog-close {
+  display: inline-flex;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  color: var(--fg);
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+
+.checkout-dialog-close:hover {
+  border-color: var(--border-focus);
+  background: var(--bg-muted);
+}
+
+.checkout-dialog-close:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.checkout-dialog-body {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.25rem max(1rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+  scrollbar-gutter: stable;
+}
+
+@keyframes checkout-panel-enter {
+  from {
+    opacity: 0.7;
+    translate: 1.25rem 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 /* Menu mobile */
 @keyframes mobile-menu-arrive {
   from {
@@ -1625,6 +1721,7 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   [data-checkout-step],
   .app-mobile-nav-enter,
   .navigation-progress-indicator,
+  .checkout-dialog,
   .home-hero-backdrop-image,
   .home-hero-featured-event,
   .payment-success-ring,
