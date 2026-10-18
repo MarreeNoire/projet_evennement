@@ -11,6 +11,16 @@ import { createPost } from "@/lib/salons/actions";
 import { LIMITS, STORAGE_BUCKETS } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { EventPhase } from "@/lib/social/phase";
+import type { SalonPostCategory } from "@/types/database";
+
+const POST_CATEGORIES: { value: SalonPostCategory; label: string }[] = [
+  { value: "discussion", label: "Discussion" },
+  { value: "question", label: "Question" },
+  { value: "info_pratique", label: "Info pratique" },
+  { value: "rencontre", label: "Rencontre" },
+  { value: "covoiturage", label: "Covoiturage" },
+  { value: "photo", label: "Photo" },
+];
 
 /* =============================================================================
    Composeur du salon
@@ -32,6 +42,7 @@ export function SalonPostForm({
 }) {
   const router = useRouter();
   const [content, setContent] = useState("");
+  const [category, setCategory] = useState<SalonPostCategory>("discussion");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [photos, setPhotos] = useState<File[]>([]);
@@ -64,9 +75,10 @@ export function SalonPostForm({
             uploaded.push({ storage_path, size_bytes: photo.size });
           }
         }
-        const result = await createPost(salonId, content.trim(), uploaded);
+        const result = await createPost(salonId, content.trim(), uploaded, category);
         if (result.success) {
           setContent("");
+          setCategory("discussion");
           setPhotos([]);
           if (inputRef.current) inputRef.current.value = "";
           router.refresh();
@@ -113,6 +125,21 @@ export function SalonPostForm({
 
           <div className="border-border/60 mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
             <div className="flex flex-wrap items-center gap-2">
+              <label className="sr-only" htmlFor="salon-post-category">
+                Étiquette de la publication
+              </label>
+              <select
+                id="salon-post-category"
+                value={category}
+                onChange={(event) => setCategory(event.target.value as SalonPostCategory)}
+                className="border-border bg-surface text-fg min-h-10 rounded-sm border px-3 text-xs font-semibold"
+              >
+                {POST_CATEGORIES.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
               <input
                 ref={inputRef}
                 type="file"

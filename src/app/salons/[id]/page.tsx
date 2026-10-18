@@ -27,6 +27,7 @@ import type { PostWithAuthor } from "@/lib/salons/types";
 import { getEventPhase, phaseStatus, type EventPhase } from "@/lib/social/phase";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { cn, formatDateRange } from "@/lib/utils";
+import type { SalonPostCategory } from "@/types/database";
 
 export const metadata = {
   title: "Salon de l'événement",
@@ -53,18 +54,38 @@ const PHASE_TITLES: Record<EventPhase, string> = {
   live: "Sur place",
   apres: "Après l’événement",
 };
+const POST_CATEGORIES: { value: SalonPostCategory | "tous"; label: string }[] = [
+  { value: "tous", label: "Tout" },
+  { value: "discussion", label: "Discussion" },
+  { value: "question", label: "Questions" },
+  { value: "info_pratique", label: "Infos pratiques" },
+  { value: "rencontre", label: "Rencontres" },
+  { value: "covoiturage", label: "Covoiturage" },
+  { value: "photo", label: "Photos" },
+];
 
 export default async function SalonDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string; phase?: string }>;
+  searchParams: Promise<{ tab?: string; phase?: string; category?: string; unanswered?: string }>;
 }) {
   const { id } = await params;
-  const { tab, phase: requestedPhase } = await searchParams;
+  const {
+    tab,
+    phase: requestedPhase,
+    category: requestedCategory,
+    unanswered,
+  } = await searchParams;
   const activeTab: TabSlug = SALON_TABS.find((item) => item.slug === tab)?.slug ?? "fil";
   const phaseFilter = PHASE_FILTER_ORDER.find((item) => item === requestedPhase) ?? null;
+  const selectedCategory = POST_CATEGORIES.some(
+    (item) => item.value === requestedCategory && item.value !== "tous",
+  )
+    ? (requestedCategory as SalonPostCategory)
+    : "tous";
+  const unansweredOnly = unanswered === "1";
 
   const salon = await getSalonById(id);
   if (!salon) notFound();
@@ -192,6 +213,8 @@ export default async function SalonDetailPage({
               profile={profile}
               phase={phase}
               phaseFilter={phaseFilter}
+              selectedCategory={selectedCategory}
+              unansweredOnly={unansweredOnly}
               allowMedia={event?.allow_media_upload ?? true}
             />
           ) : null}
@@ -356,6 +379,8 @@ function Discussion({
   profile,
   phase,
   phaseFilter,
+  selectedCategory,
+  unansweredOnly,
   allowMedia,
 }: {
   salonId: string;
@@ -365,6 +390,8 @@ function Discussion({
   profile: Awaited<ReturnType<typeof getCurrentProfile>>;
   phase: EventPhase | null;
   phaseFilter: EventPhase | null;
+  selectedCategory: SalonPostCategory | "tous";
+  unansweredOnly: boolean;
   allowMedia: boolean;
 }) {
   const groups: Record<EventPhase, PostWithAuthor[]> = { avant: [], live: [], apres: [] };
@@ -374,10 +401,52 @@ function Discussion({
     }
   }
   const selectedPhase = phaseFilter ?? phase ?? "avant";
-  const selectedPosts = event ? groups[selectedPhase] : posts;
+  const phasePosts = event ? groups[selectedPhase] : posts;
+  const selectedPosts = phasePosts.filter((post) => {
+    if (selectedCategory !== "tous" && post.category !== selectedCategory) return false;
+    if (
+      unansweredOnly &&
+      (post.category !== "question" || (commentsByPost.get(post.id)?.length ?? 0) > 0)
+    )
+      return false;
+    return true;
+  });
+  const filtersHref = (category: SalonPostCategory | "tous", unansweredValue: boolean) => {
+    const query = new URLSearchParams({ tab: "fil" });
+    if (event) query.set("phase", selectedPhase);
+    if (category !== "tous") query.set("category", category);
+    if (unansweredValue) query.set("unanswered", "1");
+    return `/salons/${salonId}?${query.toString()}#salon-post-filters`;
+  };
 
   return (
     <div className="flex flex-col gap-8">
+      {event ? (
+        <aside
+          className="border-primary/20 bg-primary/5 rounded-2xl border p-4 sm:p-5"
+          aria-label="Informations pratiques épinglées"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-primary text-xs font-bold tracking-wide uppercase">
+                À retenir · {event.title}
+              </p>
+              <p className="text-fg mt-2 flex items-center gap-2 text-sm">
+                <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
+                {formatDateRange(event.start_at, event.end_at)}
+              </p>
+              <p className="text-fg-muted mt-1 flex items-center gap-2 text-sm">
+                <MapPin className="size-4 shrink-0" aria-hidden="true" />
+                {event.venue_name ? `${event.venue_name} · ` : ""}
+                {event.city}
+              </p>
+            </div>
+            <ButtonLink href={`/evenements/${event.slug}`} variant="secondary" size="sm">
+              Détails
+            </ButtonLink>
+          </div>
+        </aside>
+      ) : null}
       {profile ? (
         <SalonPostForm
           salonId={salonId}
@@ -393,6 +462,47 @@ function Discussion({
           <ButtonLink href={`${ROUTES.login}?redirect=/salons/${salonId}`}>Se connecter</ButtonLink>
         </div>
       )}
+
+      <nav
+        id="salon-post-filters"
+        aria-label="Filtrer les publications"
+        className="flex flex-col gap-3"
+      >
+        <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Étiquettes">
+          {POST_CATEGORIES.map((item) => {
+            const active = selectedCategory === item.value;
+            const keepUnanswered =
+              unansweredOnly && (item.value === "tous" || item.value === "question");
+            return (
+              <Link
+                key={item.value}
+                href={filtersHref(item.value, keepUnanswered)}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
+                  active
+                    ? "border-primary bg-primary text-white"
+                    : "border-border bg-surface text-fg-muted hover:text-fg",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+        <Link
+          href={filtersHref(unansweredOnly ? selectedCategory : "question", !unansweredOnly)}
+          aria-current={unansweredOnly ? "page" : undefined}
+          className={cn(
+            "w-fit rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
+            unansweredOnly
+              ? "border-primary bg-primary/10 text-primary"
+              : "border-border bg-surface text-fg-muted hover:text-fg",
+          )}
+        >
+          {unansweredOnly ? "✓ Questions sans réponse" : "Questions sans réponse"}
+        </Link>
+      </nav>
 
       {posts.length === 0 && !event ? (
         <EmptyState
@@ -458,23 +568,33 @@ function Discussion({
               ))
             ) : (
               <p className="text-fg-muted border-border bg-surface rounded-2xl border border-dashed px-4 py-6 text-sm">
-                {phase === selectedPhase
-                  ? "C’est la période actuelle. Sois le premier à publier ici."
-                  : "Aucune publication pour cette période pour le moment."}
+                {unansweredOnly
+                  ? "Aucune question sans réponse dans cette étape."
+                  : phase === selectedPhase
+                    ? "C’est la période actuelle. Sois le premier à publier ici."
+                    : "Aucune publication pour cette période pour le moment."}
               </p>
             )}
           </section>
         </div>
       ) : (
         <section aria-label="Publications" className="flex flex-col gap-3">
-          {selectedPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              comments={commentsByPost.get(post.id)}
-              currentUserId={profile?.id}
-            />
-          ))}
+          {selectedPosts.length ? (
+            selectedPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                comments={commentsByPost.get(post.id)}
+                currentUserId={profile?.id}
+              />
+            ))
+          ) : (
+            <p className="text-fg-muted border-border bg-surface rounded-2xl border border-dashed px-4 py-6 text-sm">
+              {unansweredOnly
+                ? "Aucune question sans réponse."
+                : "Aucune publication ne correspond à ce filtre."}
+            </p>
+          )}
         </section>
       )}
     </div>

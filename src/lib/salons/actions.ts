@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 /** Mutations pour le salon communautaire (poster, commenter, réagir, join/leave). */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { ReactionType } from "@/types/database";
+import type { ReactionType, SalonPostCategory } from "@/types/database";
 
 const NOT_SIGNED_IN = "Connecte-toi pour participer.";
 const SALON_CHAT_REACTIONS = ["heart", "laugh", "fire", "clap", "wow"] as const;
@@ -301,6 +301,7 @@ export async function createPost(
   salonId: string,
   content: string,
   media: { storage_path: string; size_bytes: number }[] = [],
+  category: SalonPostCategory = "discussion",
 ): Promise<{ success: boolean; postId?: string; error?: string }> {
   const supabase = await createSupabaseServerClient();
   const userId = await getUserId(supabase);
@@ -309,6 +310,16 @@ export async function createPost(
   if (media.length > 4 || media.some((item) => !item.storage_path.startsWith(`${salonId}/`))) {
     return { success: false, error: "Les photos sélectionnées ne sont pas valides." };
   }
+  const categories: SalonPostCategory[] = [
+    "discussion",
+    "question",
+    "info_pratique",
+    "rencontre",
+    "covoiturage",
+    "photo",
+  ];
+  if (!categories.includes(category))
+    return { success: false, error: "Cette étiquette n'est pas valide." };
 
   const { data: salon, error: salonError } = await supabase
     .from("salons")
@@ -325,6 +336,7 @@ export async function createPost(
       content: content.trim(),
       media: [],
       kind: "post" as const,
+      category,
     })
     .select("id")
     .single();
@@ -412,7 +424,6 @@ export async function createComment(
       .select("id")
       .eq("id", parentId)
       .eq("post_id", postId)
-      .is("parent_id", null)
       .eq("is_hidden", false)
       .maybeSingle();
     if (parentError || !parent) {

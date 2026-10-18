@@ -9,6 +9,15 @@ import { PostEditControl } from "./post-edit-control";
 import { PostActions } from "./post-actions";
 import { CommentReplyControl } from "./comment-reply-control";
 
+const CATEGORY_LABELS: Record<string, string> = {
+  discussion: "Discussion",
+  question: "Question",
+  info_pratique: "Info pratique",
+  rencontre: "Rencontre",
+  covoiturage: "Covoiturage",
+  photo: "Photo",
+};
+
 function CommentThread({
   comment,
   postId,
@@ -40,15 +49,13 @@ function CommentThread({
               {comment.content}
             </p>
           </div>
-          {depth === 0 ? (
-            <CommentReplyControl
-              postId={postId}
-              parentId={comment.id}
-              salonId={salonId}
-              parentAuthor={name}
-              isAuthenticated={Boolean(currentUserId)}
-            />
-          ) : null}
+          <CommentReplyControl
+            postId={postId}
+            parentId={comment.id}
+            salonId={salonId}
+            parentAuthor={name}
+            isAuthenticated={Boolean(currentUserId)}
+          />
         </div>
       </div>
       {comment.replies.length > 0 ? (
@@ -140,6 +147,10 @@ export function PostCard({
               </span>
             ) : null}
           </header>
+
+          <span className="bg-primary/10 text-primary text-2xs mt-2 inline-flex rounded-full px-2.5 py-1 font-semibold">
+            {CATEGORY_LABELS[post.category] ?? "Discussion"}
+          </span>
 
           {isAnnouncement ? (
             <div className="border-accent/30 bg-accent-subtle/70 mt-3 border-y px-3.5 py-3">

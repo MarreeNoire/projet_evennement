@@ -199,6 +199,7 @@ export type PostRow = {
   salon_id: string;
   author_id: string | null;
   kind: PostKind;
+  category: SalonPostCategory;
   content: string;
   media: Json;
   mentions: string[];
@@ -211,6 +212,9 @@ export type PostRow = {
   created_at: string;
   updated_at: string;
 };
+
+export type SalonPostCategory =
+  "discussion" | "question" | "info_pratique" | "rencontre" | "covoiturage" | "photo";
 
 export type SalonPollRow = {
   id: string;
