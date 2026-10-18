@@ -5,8 +5,9 @@ colors:
   void: "#211e2c"
   night-surface: "#302c3d"
   raised-surface: "#3a354a"
-  violet: "#7757c8"
-  violet-light: "#c2a9f2"
+  mint: "#e1fae5"
+  green: "#267744"
+  green-light: "#a1e2b0"
   fuchsia: "#985a8a"
   cyan: "#8bcad2"
   moonlight: "#f6f4fa"
@@ -60,7 +61,7 @@ spacing:
   xl: "32px"
 components:
   button-primary:
-    backgroundColor: "#7757c8"
+    backgroundColor: "#267744"
     textColor: "#ffffff"
     typography: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif; 600"
     rounded: "6px"
@@ -82,11 +83,11 @@ components:
 
 ## Overview
 
-Event relie la découverte d’événements, la billetterie et les salons où les participants échangent avant, pendant et après une rencontre. Sa nouvelle direction, « Nuit électrique », évoque l’énergie d’une sortie en soirée avec une fond aubergine adouci, des accents violet/fuchsia diffus, des surfaces vitrées et une typographie expressive.
+Event relie la découverte d’événements, la billetterie et les salons où les participants échangent avant, pendant et après une rencontre. Sa direction visuelle « Nuit électrique » associe un fond aubergine adouci à des accents vert menthe et fuchsia, des surfaces vitrées discrètes et une typographie expressive.
 
 ## Colors
 
-Le thème sombre est la présentation par défaut : fond aubergine, surfaces décalées en luminosité, texte clair et accents violet/fuchsia. Le cyan reste un accent ponctuel. Les couleurs de réussite, d’alerte, d’erreur et d’information sont distinctes et accompagnées d’un libellé. Le thème clair reste disponible avec des fonds doux, des accents sombres et un contraste lisible.
+Le thème sombre est la présentation par défaut : fond aubergine, surfaces décalées en luminosité, texte clair et accents vert menthe/fuchsia. Le vert menthe de référence est `#E1FAE5`; les boutons principaux utilisent un vert plus soutenu pour garder un contraste lisible. Le cyan reste un accent ponctuel. Les couleurs de réussite, d’alerte, d’erreur et d’information restent distinctes. Le thème clair utilise des surfaces légèrement teintées de vert.
 
 ## Typography
 
@@ -102,7 +103,7 @@ Les cartes et panneaux utilisent des surfaces légèrement translucides avec un 
 
 ## Components
 
-- **Action principale.** Accent violet lisible, bord rectangulaire, états de chargement, désactivé, focus et survol cohérents.
+- **Action principale.** Accent vert lisible, bord rectangulaire, états de chargement, désactivé, focus et survol cohérents.
 - **Événement.** Couverture fournie par l’organisateur, date, lieu, tarif réel et accès rapide aux détails.
 - **Publication de salon.** Colonne de lecture sur une surface discrète, réponses clairement hiérarchisées.
 - **Navigation.** Contrôles familiers, état actif visible, panneau mobile et barre de navigation PWA lisibles sur le fond nocturne.

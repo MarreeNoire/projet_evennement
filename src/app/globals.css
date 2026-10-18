@@ -3,25 +3,25 @@
 
 /* =============================================================================
    EVENT — Nuit électrique
-Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
+   Direction : accents menthe/fuchsia diffus sur fond aubergine, surfaces vitrées,
    typographie blanche contrastée, animations fluides. Rien de générique.
    ========================================================================== */
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Néons violets/fuchsia (marque principale) */
-  --neon-50: #f5f0ff;
-  --neon-100: #ede0ff;
-  --neon-200: #d8bcff;
-  --neon-300: #bb8cff;
-  --neon-400: #9d56ff;
-  --neon-500: #8330f8;
-  --neon-600: #6d1de3;
-  --neon-700: #5a15c2;
-  --neon-800: #49109e;
-  --neon-900: #330a75;
-  --neon-950: #1e044a;
+  /* Nuances menthe (marque principale) */
+  --neon-50: #f1fcf3;
+  --neon-100: #e1fae5;
+  --neon-200: #c6f1ce;
+  --neon-300: #a1e2b0;
+  --neon-400: #70cd8a;
+  --neon-500: #42ad62;
+  --neon-600: #2f914e;
+  --neon-700: #267744;
+  --neon-800: #205f39;
+  --neon-900: #1b4e31;
+  --neon-950: #123923;
 
   /* Fuchsia accent */
   --fuchsia-300: #f472e8;
@@ -78,17 +78,17 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
 
   --border: rgba(208, 204, 220, 0.2);
   --border-strong: rgba(208, 204, 220, 0.36);
-  --border-focus: #c2a9f2;
+  --border-focus: #a1e2b0;
 
   /* Marque néon */
-  --primary: #c2a9f2;
-  --primary-hover: #d9c7ff;
-  --primary-active: #eee7ff;
-  --primary-solid: #7757c8;
-  --primary-solid-hover: #6546b2;
+  --primary: #a1e2b0;
+  --primary-hover: #b9edc4;
+  --primary-active: #d2f5d9;
+  --primary-solid: #267744;
+  --primary-solid-hover: #205f39;
   --primary-solid-fg: #ffffff;
-  --primary-subtle: rgba(119, 87, 200, 0.2);
-  --primary-subtle-fg: #e3d7ff;
+  --primary-subtle: rgba(225, 250, 229, 0.14);
+  --primary-subtle-fg: #d8f5de;
 
   /* Accent fuchsia */
   --accent: #efb0e6;
@@ -129,24 +129,24 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
 
   /* Glassmorphism backdrop pour les cartes et panels flottants */
   --glass-bg: rgba(48, 44, 61, 0.82);
-  --glass-border: rgba(194, 169, 242, 0.22);
+  --glass-border: rgba(161, 226, 176, 0.22);
   --glass-blur: 18px;
-  --ambient-violet: rgba(119, 87, 200, 0.14);
+  --ambient-primary: rgba(66, 173, 98, 0.14);
   --ambient-fuchsia: rgba(185, 113, 170, 0.08);
 
   /* Lueurs néon (box-shadow) */
-  --glow-sm: 0 0 10px rgba(119, 87, 200, 0.2);
-  --glow-md: 0 0 20px rgba(119, 87, 200, 0.26), 0 0 8px rgba(185, 113, 170, 0.13);
+  --glow-sm: 0 0 10px rgba(66, 173, 98, 0.2);
+  --glow-md: 0 0 20px rgba(66, 173, 98, 0.26), 0 0 8px rgba(185, 113, 170, 0.13);
   --glow-lg:
-    0 0 36px rgba(119, 87, 200, 0.3), 0 0 16px rgba(185, 113, 170, 0.17),
-    0 0 72px rgba(119, 87, 200, 0.1);
+    0 0 36px rgba(66, 173, 98, 0.3), 0 0 16px rgba(185, 113, 170, 0.17),
+    0 0 72px rgba(66, 173, 98, 0.1);
 }
 
 /* ============ SÉMANTIQUES — THÈME CLAIR ============ */
 .light {
-  --bg: #f8f6ff;
-  --bg-subtle: #f0ecff;
-  --bg-muted: #e8e2ff;
+  --bg: #f7fcf8;
+  --bg-subtle: #edf8ef;
+  --bg-muted: #e1fae5;
   --bg-inverted: #06040f;
   --surface: rgba(255, 255, 255, 0.86);
   --surface-raised: rgba(250, 248, 255, 0.96);
@@ -154,22 +154,22 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   --surface-overlay: rgba(255, 255, 255, 0.94);
 
   --fg: #120e22;
-  --fg-muted: #3d3463;
-  --fg-subtle: #5b527e;
+  --fg-muted: #354b3a;
+  --fg-subtle: #526b57;
   --fg-inverted: #f0ecff;
 
-  --border: rgba(93, 82, 126, 0.2);
-  --border-strong: rgba(93, 82, 126, 0.38);
-  --border-focus: #8330f8;
+  --border: rgba(69, 105, 77, 0.2);
+  --border-strong: rgba(69, 105, 77, 0.38);
+  --border-focus: #267744;
 
-  --primary: #6841b3;
-  --primary-hover: #57369b;
-  --primary-active: #492e80;
-  --primary-solid: #6841b3;
-  --primary-solid-hover: #57369b;
+  --primary: #205f39;
+  --primary-hover: #194e31;
+  --primary-active: #123923;
+  --primary-solid: #267744;
+  --primary-solid-hover: #205f39;
   --primary-solid-fg: #ffffff;
-  --primary-subtle: #ede0ff;
-  --primary-subtle-fg: #49109e;
+  --primary-subtle: #e1fae5;
+  --primary-subtle-fg: #1b4e31;
 
   --accent: #985a8a;
   --accent-solid: #985a8a;
@@ -190,14 +190,14 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   --info-subtle: #dbeafe;
 
   --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(131, 48, 248, 0.2);
+  --glass-border: rgba(47, 145, 78, 0.2);
   --glass-blur: 12px;
-  --ambient-violet: rgba(131, 48, 248, 0.09);
+  --ambient-primary: rgba(47, 145, 78, 0.09);
   --ambient-fuchsia: rgba(233, 51, 216, 0.06);
 
-  --glow-sm: 0 0 10px rgba(131, 48, 248, 0.18);
-  --glow-md: 0 0 20px rgba(131, 48, 248, 0.22);
-  --glow-lg: 0 0 32px rgba(131, 48, 248, 0.28);
+  --glow-sm: 0 0 10px rgba(47, 145, 78, 0.18);
+  --glow-md: 0 0 20px rgba(47, 145, 78, 0.22);
+  --glow-lg: 0 0 32px rgba(47, 145, 78, 0.28);
 }
 
 /* ============================================================
@@ -305,12 +305,12 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
 
-  /* Ombres avec teinte violette */
+  /* Ombres avec teinte menthe */
   --shadow-xs: 0 1px 3px rgba(17, 14, 28, 0.2);
   --shadow-sm: 0 3px 10px rgba(17, 14, 28, 0.24);
-  --shadow-md: 0 8px 24px rgba(17, 14, 28, 0.3), 0 0 0 1px rgba(194, 169, 242, 0.07);
-  --shadow-lg: 0 14px 32px rgba(17, 14, 28, 0.34), 0 0 0 1px rgba(194, 169, 242, 0.1);
-  --shadow-xl: 0 20px 48px rgba(17, 14, 28, 0.4), 0 0 0 1px rgba(194, 169, 242, 0.12);
+  --shadow-md: 0 8px 24px rgba(17, 14, 28, 0.3), 0 0 0 1px rgba(161, 226, 176, 0.07);
+  --shadow-lg: 0 14px 32px rgba(17, 14, 28, 0.34), 0 0 0 1px rgba(161, 226, 176, 0.1);
+  --shadow-xl: 0 20px 48px rgba(17, 14, 28, 0.4), 0 0 0 1px rgba(161, 226, 176, 0.12);
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
@@ -385,7 +385,7 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
     line-height: 1.6;
     /* Fond animé de particules + gradient radial */
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, var(--ambient-violet) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% -20%, var(--ambient-primary) 0%, transparent 60%),
       radial-gradient(ellipse 40% 30% at 80% 120%, var(--ambient-fuchsia) 0%, transparent 55%);
     background-attachment: fixed;
   }
@@ -540,7 +540,7 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
   background:
     radial-gradient(
       ellipse at 74% 38%,
-      var(--hero-accent-glow, var(--ambient-violet)),
+      var(--hero-accent-glow, var(--ambient-primary)),
       transparent 50%
     ),
     linear-gradient(145deg, var(--void-800), var(--void-950));
@@ -1419,7 +1419,7 @@ Direction : accents violet/fuchsia diffus sur fond aubergine, surfaces vitrées,
 @utility section-gradient {
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--ambient-violet) 75%, transparent) 0%,
+    color-mix(in srgb, var(--ambient-primary) 75%, transparent) 0%,
     color-mix(in srgb, var(--ambient-fuchsia) 70%, transparent) 55%,
     transparent 100%
   );
