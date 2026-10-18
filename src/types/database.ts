@@ -81,6 +81,12 @@ export type ProfileContactRow = {
   updated_at: string;
 };
 
+export type ConnectionContactShareRow = {
+  connection_id: string;
+  owner_id: string;
+  created_at: string;
+};
+
 export type UserRoleRow = {
   id: string;
   user_id: string;
@@ -677,6 +683,7 @@ export type Database = {
     Tables: {
       profiles: TableDefinition<ProfileRow>;
       profile_contacts: TableDefinition<ProfileContactRow>;
+      connection_contact_shares: TableDefinition<ConnectionContactShareRow>;
       user_roles: TableDefinition<UserRoleRow>;
       organizations: TableDefinition<OrganizationRow>;
       organization_members: TableDefinition<OrganizationMemberRow>;

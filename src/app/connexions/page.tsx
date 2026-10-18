@@ -4,6 +4,7 @@ import { QrCode, WifiOff } from "lucide-react";
 
 import { ConnectionActions } from "@/components/social/connection-actions";
 import { ConnectionsRetryButton } from "@/components/social/connections-retry-button";
+import { ConnectionContactShareControl } from "@/components/social/connection-contact-share-control";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
@@ -45,8 +46,12 @@ export default async function ConnexionsPage() {
   const loadFailed = all === null;
   const entries = all ?? [];
   const network = entries.filter((entry) => entry.status === "accepted");
-  const received = entries.filter((entry) => entry.status === "pending" && entry.direction === "incoming");
-  const sent = entries.filter((entry) => entry.status === "pending" && entry.direction === "outgoing");
+  const received = entries.filter(
+    (entry) => entry.status === "pending" && entry.direction === "incoming",
+  );
+  const sent = entries.filter(
+    (entry) => entry.status === "pending" && entry.direction === "outgoing",
+  );
 
   return (
     <SocialShell active="reseau">
@@ -67,13 +72,13 @@ export default async function ConnexionsPage() {
         {loadFailed ? (
           <section
             role="alert"
-            className="flex flex-col gap-4 rounded-xl border border-border bg-surface-raised p-5 sm:flex-row sm:items-center sm:justify-between"
+            className="border-border bg-surface-raised flex flex-col gap-4 rounded-xl border p-5 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="flex items-start gap-3">
-              <WifiOff className="mt-0.5 size-5 shrink-0 text-fg-muted" aria-hidden="true" />
+              <WifiOff className="text-fg-muted mt-0.5 size-5 shrink-0" aria-hidden="true" />
               <div>
                 <h2 className="font-semibold">Ton réseau est momentanément indisponible</h2>
-                <p className="mt-1 text-sm text-fg-muted">
+                <p className="text-fg-muted mt-1 text-sm">
                   Les connexions n’ont pas pu être chargées. Réessaie dans un instant.
                 </p>
               </div>
@@ -82,70 +87,70 @@ export default async function ConnexionsPage() {
           </section>
         ) : (
           <>
-        {received.length > 0 ? (
-          <section aria-labelledby="recues" className="flex flex-col gap-4">
-            <div className="border-t border-border pt-4">
-              <p className="eyebrow">À traiter</p>
-              <h2 id="recues" className="mt-2 font-display text-2xl font-semibold">
-                Demandes reçues
-              </h2>
-            </div>
-            <ul className="flex flex-col">
-              {received.map((entry) => (
-                <li
-                  key={entry.id}
-                  className="flex flex-col gap-4 border-b border-border py-5 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <PersonLine entry={entry} />
-                  <ConnectionActions connectionId={entry.id} />
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+            {received.length > 0 ? (
+              <section aria-labelledby="recues" className="flex flex-col gap-4">
+                <div className="border-border border-t pt-4">
+                  <p className="eyebrow">À traiter</p>
+                  <h2 id="recues" className="font-display mt-2 text-2xl font-semibold">
+                    Demandes reçues
+                  </h2>
+                </div>
+                <ul className="flex flex-col">
+                  {received.map((entry) => (
+                    <li
+                      key={entry.id}
+                      className="border-border flex flex-col gap-4 border-b py-5 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <PersonLine entry={entry} />
+                      <ConnectionActions connectionId={entry.id} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
-        <section aria-labelledby="carnet" className="flex flex-col gap-5">
-          <div className="border-t border-border pt-4">
-            <p className="eyebrow">Carnet</p>
-            <h2 id="carnet" className="mt-2 font-display text-2xl font-semibold">
-              Cartes de visite{network.length > 0 ? ` (${network.length})` : ""}
-            </h2>
-          </div>
+            <section aria-labelledby="carnet" className="flex flex-col gap-5">
+              <div className="border-border border-t pt-4">
+                <p className="eyebrow">Carnet</p>
+                <h2 id="carnet" className="font-display mt-2 text-2xl font-semibold">
+                  Cartes de visite{network.length > 0 ? ` (${network.length})` : ""}
+                </h2>
+              </div>
 
-          {network.length === 0 ? (
-            <EmptyState
-              title="Ton carnet est vide"
-              description="Ta première carte de visite arrive à ton prochain événement : montre ton badge, scanne celui d'un autre participant."
-              action={<ButtonLink href={ROUTES.explore}>Trouver un événement</ButtonLink>}
-            />
-          ) : (
-            <ul className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
-              {network.map((entry) => (
-                <li key={entry.id}>
-                  <BusinessCard entry={entry} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+              {network.length === 0 ? (
+                <EmptyState
+                  title="Ton carnet est vide"
+                  description="Ta première carte de visite arrive à ton prochain événement : montre ton badge, scanne celui d'un autre participant."
+                  action={<ButtonLink href={ROUTES.explore}>Trouver un événement</ButtonLink>}
+                />
+              ) : (
+                <ul className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
+                  {network.map((entry) => (
+                    <li key={entry.id}>
+                      <BusinessCard entry={entry} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
 
-        {sent.length > 0 ? (
-          <section aria-labelledby="envoyees" className="flex flex-col gap-4">
-            <div className="border-t border-border pt-4">
-              <p className="eyebrow">En attente</p>
-              <h2 id="envoyees" className="mt-2 font-display text-2xl font-semibold">
-                Demandes envoyées
-              </h2>
-            </div>
-            <ul className="flex flex-col">
-              {sent.map((entry) => (
-                <li key={entry.id} className="border-b border-border py-4">
-                  <PersonLine entry={entry} />
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+            {sent.length > 0 ? (
+              <section aria-labelledby="envoyees" className="flex flex-col gap-4">
+                <div className="border-border border-t pt-4">
+                  <p className="eyebrow">En attente</p>
+                  <h2 id="envoyees" className="font-display mt-2 text-2xl font-semibold">
+                    Demandes envoyées
+                  </h2>
+                </div>
+                <ul className="flex flex-col">
+                  {sent.map((entry) => (
+                    <li key={entry.id} className="border-border border-b py-4">
+                      <PersonLine entry={entry} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </>
         )}
       </div>
@@ -162,18 +167,18 @@ function PersonLine({ entry }: { entry: ConnectionEntry }) {
         {entry.person ? (
           <Link
             href={`/profil/${entry.person.id}`}
-            className="font-semibold hover:text-primary hover:underline"
+            className="hover:text-primary font-semibold hover:underline"
           >
             {name}
           </Link>
         ) : (
           <span className="font-semibold">{name}</span>
         )}
-        <p className="truncate text-sm text-fg-muted">
+        <p className="text-fg-muted truncate text-sm">
           {meetingLabel(entry)} · {formatRelative(entry.createdAt)}
         </p>
         {entry.message ? (
-          <p className="mt-1 line-clamp-2 text-sm text-fg-muted italic">« {entry.message} »</p>
+          <p className="text-fg-muted mt-1 line-clamp-2 text-sm italic">« {entry.message} »</p>
         ) : null}
       </div>
     </div>
@@ -185,18 +190,18 @@ function BusinessCard({ entry }: { entry: ConnectionEntry }) {
   const name = entry.person?.display_name ?? "Participant";
 
   return (
-    <div className="flex h-full flex-col justify-between gap-6 rounded-lg border border-border border-t-4 border-t-fg bg-surface-raised p-5">
+    <div className="border-border border-t-fg bg-surface-raised flex h-full flex-col justify-between gap-6 rounded-lg border border-t-4 p-5">
       <div className="flex items-start gap-4">
         <Avatar src={entry.person?.avatar_url} name={name} size="lg" />
         <div className="min-w-0">
           {entry.person ? (
             <Link
               href={`/profil/${entry.person.id}`}
-              className="block truncate font-display text-xl leading-tight font-semibold hover:text-primary"
+              className="font-display hover:text-primary block truncate text-xl leading-tight font-semibold"
             >
               {name}
               {entry.person.is_verified ? (
-                <span className="ml-1.5 text-sm font-semibold text-success" title="Profil vérifié">
+                <span className="text-success ml-1.5 text-sm font-semibold" title="Profil vérifié">
                   ✓
                 </span>
               ) : null}
@@ -204,13 +209,30 @@ function BusinessCard({ entry }: { entry: ConnectionEntry }) {
           ) : (
             <span className="font-display text-xl font-semibold">{name}</span>
           )}
-          <p className="text-sm text-fg-muted">{entry.person?.city ?? "Côte d'Ivoire"}</p>
+          <p className="text-fg-muted text-sm">{entry.person?.city ?? "Côte d'Ivoire"}</p>
         </div>
       </div>
 
-      <p className="border-t border-dashed border-border-strong pt-3 text-xs text-fg-subtle">
+      <p className="border-border-strong text-fg-subtle border-t border-dashed pt-3 text-xs">
         {meetingLabel(entry)}
       </p>
+      <div className="border-border border-t pt-3">
+        {entry.sharedPhone ? (
+          <a
+            href={`tel:${entry.sharedPhone}`}
+            className="text-primary inline-flex min-h-10 items-center text-sm font-semibold hover:underline"
+          >
+            {entry.sharedPhone}
+          </a>
+        ) : (
+          <p className="text-fg-subtle py-2 text-sm">Numéro non partagé avec toi</p>
+        )}
+        <ConnectionContactShareControl
+          connectionId={entry.id}
+          initialSharing={entry.isSharingPhone}
+          canShare={entry.canSharePhone}
+        />
+      </div>
     </div>
   );
 }

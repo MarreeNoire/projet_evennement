@@ -3,8 +3,8 @@ import { Save } from "lucide-react";
 
 import { Stamp } from "@/components/social/stamp";
 import { ProfilePhoneForm } from "@/components/auth/profile-phone-form";
+import { ProfileAvatarForm } from "@/components/social/profile-avatar-form";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
-import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/states";
 import { dayMonth } from "@/lib/social/time";
 import { ROUTES } from "@/lib/constants";
@@ -43,7 +43,11 @@ export default async function MonProfilPage() {
 
         {/* Page d'identité */}
         <section className="border-border grid gap-6 border-y py-8 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
-          <Avatar src={profile.avatar_url} name={profile.display_name} size="xl" />
+          <ProfileAvatarForm
+            userId={profile.id}
+            displayName={profile.display_name}
+            initialAvatarUrl={profile.avatar_url}
+          />
           <div>
             <h2 className="font-display text-3xl font-semibold">{profile.display_name}</h2>
             {profile.username ? (

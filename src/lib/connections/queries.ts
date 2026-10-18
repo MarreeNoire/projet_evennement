@@ -21,11 +21,21 @@ export interface ConnectionEntry {
   eventTitle: string | null;
   createdAt: string;
   person: ConnectionPerson | null;
+  /** Numéro de l'autre personne, visible seulement après son partage individuel. */
+  sharedPhone: string | null;
+  /** Le membre courant partage-t-il son numéro avec cette connexion ? */
+  isSharingPhone: boolean;
+  canSharePhone: boolean;
 }
 
 function isNetworkFailure(error: { message?: string; cause?: unknown }): boolean {
-  const details = `${error.message ?? ""} ${error.cause instanceof Error ? error.cause.message : ""}`.toLowerCase();
-  return details.includes("fetch failed") || details.includes("failed to fetch") || details.includes("networkerror");
+  const details =
+    `${error.message ?? ""} ${error.cause instanceof Error ? error.cause.message : ""}`.toLowerCase();
+  return (
+    details.includes("fetch failed") ||
+    details.includes("failed to fetch") ||
+    details.includes("networkerror")
+  );
 }
 
 function waitForRetry(): Promise<void> {
@@ -45,13 +55,14 @@ export async function getMyConnections(userId?: string): Promise<ConnectionEntry
   }
   if (!currentUserId) return [];
 
-  const loadConnections = () => supabase
-    .from("connections")
-    .select("id, requester_id, addressee_id, status, message, origin, event_id, created_at")
-    .or(`requester_id.eq.${currentUserId},addressee_id.eq.${currentUserId}`)
-    .neq("status", "declined")
-    .order("created_at", { ascending: false })
-    .limit(200);
+  const loadConnections = () =>
+    supabase
+      .from("connections")
+      .select("id, requester_id, addressee_id, status, message, origin, event_id, created_at")
+      .or(`requester_id.eq.${currentUserId},addressee_id.eq.${currentUserId}`)
+      .neq("status", "declined")
+      .order("created_at", { ascending: false })
+      .limit(200);
 
   let { data, error } = await loadConnections();
   if (error && isNetworkFailure(error)) {
@@ -69,24 +80,49 @@ export async function getMyConnections(userId?: string): Promise<ConnectionEntry
 
   const rows = data ?? [];
   const otherIds = [
-    ...new Set(rows.map((row) => (row.requester_id === currentUserId ? row.addressee_id : row.requester_id))),
+    ...new Set(
+      rows.map((row) => (row.requester_id === currentUserId ? row.addressee_id : row.requester_id)),
+    ),
   ];
   const eventIds = rows.map((row) => row.event_id).filter((id): id is string => Boolean(id));
+  const acceptedRows = rows.filter((row) => row.status === "accepted");
+  const acceptedConnectionIds = acceptedRows.map((row) => row.id);
+  const acceptedOtherIds = acceptedRows.map((row) =>
+    row.requester_id === currentUserId ? row.addressee_id : row.requester_id,
+  );
 
-  const [profilesResult, events] = await Promise.all([
-    otherIds.length > 0
-      ? supabase
-          .from("profiles")
-          .select("id, display_name, avatar_url, city, is_verified")
-          .in("id", otherIds)
-      : Promise.resolve({ data: [] as ConnectionPerson[] }),
-    getEventsByIds(eventIds),
-  ]);
+  const [profilesResult, events, sharesResult, contactsResult, ownContactResult] =
+    await Promise.all([
+      otherIds.length > 0
+        ? supabase
+            .from("profiles")
+            .select("id, display_name, avatar_url, city, is_verified")
+            .in("id", otherIds)
+        : Promise.resolve({ data: [] as ConnectionPerson[] }),
+      getEventsByIds(eventIds),
+      acceptedConnectionIds.length > 0
+        ? supabase
+            .from("connection_contact_shares")
+            .select("connection_id, owner_id")
+            .in("connection_id", acceptedConnectionIds)
+        : Promise.resolve({ data: [] as { connection_id: string; owner_id: string }[] }),
+      acceptedOtherIds.length > 0
+        ? supabase.from("profile_contacts").select("user_id, phone").in("user_id", acceptedOtherIds)
+        : Promise.resolve({ data: [] as { user_id: string; phone: string }[] }),
+      supabase.from("profile_contacts").select("phone").eq("user_id", currentUserId).maybeSingle(),
+    ]);
 
   const people = new Map<string, ConnectionPerson>();
   for (const person of (profilesResult.data ?? []) as unknown as ConnectionPerson[]) {
     people.set(person.id, person);
   }
+  const shareKeys = new Set(
+    (sharesResult.data ?? []).map((share) => `${share.connection_id}:${share.owner_id}`),
+  );
+  const sharedPhones = new Map(
+    (contactsResult.data ?? []).map((contact) => [contact.user_id, contact.phone]),
+  );
+  const canSharePhone = Boolean(ownContactResult.data?.phone);
 
   return rows.map((row) => {
     const outgoing = row.requester_id === currentUserId;
@@ -101,6 +137,9 @@ export async function getMyConnections(userId?: string): Promise<ConnectionEntry
       eventTitle: row.event_id ? (events.get(row.event_id)?.title ?? null) : null,
       createdAt: row.created_at,
       person: people.get(otherId) ?? null,
+      sharedPhone: sharedPhones.get(otherId) ?? null,
+      isSharingPhone: shareKeys.has(`${row.id}:${currentUserId}`),
+      canSharePhone,
     };
   });
 }
