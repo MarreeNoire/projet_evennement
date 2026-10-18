@@ -13,15 +13,15 @@
   /* Nuances menthe (marque principale) */
   --neon-50: #f1fcf3;
   --neon-100: #e1fae5;
-  --neon-200: #c6f1ce;
-  --neon-300: #a1e2b0;
-  --neon-400: #70cd8a;
-  --neon-500: #42ad62;
-  --neon-600: #2f914e;
-  --neon-700: #267744;
-  --neon-800: #205f39;
-  --neon-900: #1b4e31;
-  --neon-950: #123923;
+  --neon-200: #d0f3d6;
+  --neon-300: #b7e9bf;
+  --neon-400: #a8e1b2;
+  --neon-500: #8ed89c;
+  --neon-600: #68c27c;
+  --neon-700: #48a65f;
+  --neon-800: #328449;
+  --neon-900: #24683a;
+  --neon-950: #194b2c;
 
   /* Fuchsia accent */
   --fuchsia-300: #f472e8;
@@ -81,12 +81,12 @@
   --border-focus: #a1e2b0;
 
   /* Marque néon */
-  --primary: #a1e2b0;
-  --primary-hover: #b9edc4;
-  --primary-active: #d2f5d9;
-  --primary-solid: #267744;
-  --primary-solid-hover: #205f39;
-  --primary-solid-fg: #ffffff;
+  --primary: #b7e9bf;
+  --primary-hover: #c4f0cb;
+  --primary-active: #d4f5da;
+  --primary-solid: #a8e1b2;
+  --primary-solid-hover: #b7e9bf;
+  --primary-solid-fg: #163b22;
   --primary-subtle: rgba(225, 250, 229, 0.14);
   --primary-subtle-fg: #d8f5de;
 
@@ -162,12 +162,12 @@
   --border-strong: rgba(69, 105, 77, 0.38);
   --border-focus: #267744;
 
-  --primary: #205f39;
-  --primary-hover: #194e31;
+  --primary: #24683a;
+  --primary-hover: #194b2c;
   --primary-active: #123923;
-  --primary-solid: #267744;
-  --primary-solid-hover: #205f39;
-  --primary-solid-fg: #ffffff;
+  --primary-solid: #a8e1b2;
+  --primary-solid-hover: #b7e9bf;
+  --primary-solid-fg: #163b22;
   --primary-subtle: #e1fae5;
   --primary-subtle-fg: #1b4e31;
 

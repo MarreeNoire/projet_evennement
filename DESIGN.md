@@ -6,8 +6,9 @@ colors:
   night-surface: "#302c3d"
   raised-surface: "#3a354a"
   mint: "#e1fae5"
-  green: "#267744"
-  green-light: "#a1e2b0"
+  green: "#a8e1b2"
+  green-light: "#e1fae5"
+  green-ink: "#163b22"
   fuchsia: "#985a8a"
   cyan: "#8bcad2"
   moonlight: "#f6f4fa"
@@ -62,7 +63,7 @@ spacing:
 components:
   button-primary:
     backgroundColor: "#267744"
-    textColor: "#ffffff"
+    textColor: "#163b22"
     typography: "Plus Jakarta Sans, ui-sans-serif, system-ui, sans-serif; 600"
     rounded: "6px"
     padding: "0 16px"
@@ -87,7 +88,7 @@ Event relie la découverte d’événements, la billetterie et les salons où le
 
 ## Colors
 
-Le thème sombre est la présentation par défaut : fond aubergine, surfaces décalées en luminosité, texte clair et accents vert menthe/fuchsia. Le vert menthe de référence est `#E1FAE5`; les boutons principaux utilisent un vert plus soutenu pour garder un contraste lisible. Le cyan reste un accent ponctuel. Les couleurs de réussite, d’alerte, d’erreur et d’information restent distinctes. Le thème clair utilise des surfaces légèrement teintées de vert.
+Le thème sombre est la présentation par défaut : fond aubergine, surfaces décalées en luminosité, texte clair et accents vert menthe/fuchsia. Le vert menthe de référence est `#E1FAE5`; les boutons utilisent une nuance pastel `#A8E1B2` avec un texte vert foncé pour garder un contraste lisible. Le cyan reste un accent ponctuel. Les couleurs de réussite, d’alerte, d’erreur et d’information restent distinctes. Le thème clair utilise des surfaces légèrement teintées de vert.
 
 ## Typography
 
