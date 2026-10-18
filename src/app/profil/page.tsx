@@ -4,6 +4,7 @@ import { Save } from "lucide-react";
 import { Stamp } from "@/components/social/stamp";
 import { ProfilePhoneForm } from "@/components/auth/profile-phone-form";
 import { ProfileAvatarForm } from "@/components/social/profile-avatar-form";
+import { updateMyProfile } from "@/lib/profile/actions";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { EmptyState } from "@/components/ui/states";
 import { dayMonth } from "@/lib/social/time";
@@ -19,7 +20,12 @@ export const metadata = { title: "Mon profil" };
    des événements vécus en dessous, le formulaire d'édition tout en bas.
    ========================================================================== */
 
-export default async function MonProfilPage() {
+export default async function MonProfilPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ profileSaved?: string; profileError?: string }>;
+}) {
+  const { profileSaved, profileError } = await searchParams;
   const profile = await getCurrentProfile();
   if (!profile) redirect(`${ROUTES.login}?redirect=${ROUTES.profile}`);
 
@@ -102,7 +108,18 @@ export default async function MonProfilPage() {
             </h2>
           </div>
 
-          <form className="grid max-w-xl gap-5">
+          {profileError ? (
+            <p role="alert" className="text-danger text-sm">
+              {profileError}
+            </p>
+          ) : null}
+          {profileSaved ? (
+            <p role="status" className="text-success text-sm">
+              Ton profil a été enregistré.
+            </p>
+          ) : null}
+
+          <form action={updateMyProfile} className="grid max-w-xl gap-5">
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="flex flex-col gap-1.5 text-sm">
                 <span className="font-semibold">Nom d&apos;affichage</span>
@@ -149,9 +166,7 @@ export default async function MonProfilPage() {
 
             <button
               type="submit"
-              disabled
-              title="L'enregistrement arrive bientôt"
-              className="bg-primary-solid text-primary-solid-fg inline-flex h-11 w-fit items-center gap-2 rounded-md px-5 text-sm font-semibold opacity-60"
+              className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex h-11 w-fit items-center gap-2 rounded-md px-5 text-sm font-semibold transition-colors"
             >
               <Save className="size-4" aria-hidden="true" />
               Enregistrer

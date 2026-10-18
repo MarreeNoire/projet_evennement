@@ -87,6 +87,16 @@ export type ConnectionContactShareRow = {
   created_at: string;
 };
 
+export type ConnectionContactRequestRow = {
+  id: string;
+  connection_id: string;
+  requester_id: string;
+  recipient_id: string;
+  status: ConnectionStatus;
+  created_at: string;
+  responded_at: string | null;
+};
+
 export type UserRoleRow = {
   id: string;
   user_id: string;
@@ -684,6 +694,7 @@ export type Database = {
       profiles: TableDefinition<ProfileRow>;
       profile_contacts: TableDefinition<ProfileContactRow>;
       connection_contact_shares: TableDefinition<ConnectionContactShareRow>;
+      connection_contact_requests: TableDefinition<ConnectionContactRequestRow>;
       user_roles: TableDefinition<UserRoleRow>;
       organizations: TableDefinition<OrganizationRow>;
       organization_members: TableDefinition<OrganizationMemberRow>;

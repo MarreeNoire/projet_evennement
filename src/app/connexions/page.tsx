@@ -5,6 +5,7 @@ import { QrCode, WifiOff } from "lucide-react";
 import { ConnectionActions } from "@/components/social/connection-actions";
 import { ConnectionsRetryButton } from "@/components/social/connections-retry-button";
 import { ConnectionContactShareControl } from "@/components/social/connection-contact-share-control";
+import { ConnectionContactRequestControl } from "@/components/social/connection-contact-request-control";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { Avatar } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
@@ -227,7 +228,14 @@ function BusinessCard({ entry }: { entry: ConnectionEntry }) {
         ) : (
           <p className="text-fg-subtle py-2 text-sm">Numéro non partagé avec toi</p>
         )}
+        <ConnectionContactRequestControl
+          connectionId={entry.id}
+          requestId={entry.phoneRequestId}
+          direction={entry.phoneRequestDirection}
+          hasSharedPhone={Boolean(entry.sharedPhone)}
+        />
         <ConnectionContactShareControl
+          key={`${entry.id}-${entry.isSharingPhone}`}
           connectionId={entry.id}
           initialSharing={entry.isSharingPhone}
           canShare={entry.canSharePhone}

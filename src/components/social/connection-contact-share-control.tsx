@@ -76,18 +76,18 @@ export function ConnectionContactShareControl({
         onClick={toggleSharing}
         disabled={pending}
         aria-pressed={sharing}
-        className="text-fg-muted hover:bg-bg-muted hover:text-primary inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-xs font-semibold transition-colors disabled:opacity-60"
+        className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 text-xs font-bold shadow-sm transition-colors disabled:opacity-60 ${
+          sharing
+            ? "border-border-strong bg-surface hover:bg-bg-muted text-fg-muted"
+            : "border-primary/40 bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover"
+        }`}
       >
         {sharing ? (
           <PhoneOff className="size-4" aria-hidden="true" />
         ) : (
           <Phone className="size-4" aria-hidden="true" />
         )}
-        {pending
-          ? "Mise à jour…"
-          : sharing
-            ? "Ne plus partager mon numéro"
-            : "Partager mon numéro avec cette personne"}
+        {pending ? "Mise à jour…" : sharing ? "Retirer le partage" : "Partager mon numéro"}
       </button>
       {error ? (
         <p role="alert" className="text-danger px-2 text-xs">

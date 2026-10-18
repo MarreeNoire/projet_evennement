@@ -26,6 +26,8 @@ export interface ConnectionEntry {
   /** Le membre courant partage-t-il son numéro avec cette connexion ? */
   isSharingPhone: boolean;
   canSharePhone: boolean;
+  phoneRequestId: string | null;
+  phoneRequestDirection: "incoming" | "outgoing" | null;
 }
 
 function isNetworkFailure(error: { message?: string; cause?: unknown }): boolean {
@@ -91,26 +93,41 @@ export async function getMyConnections(userId?: string): Promise<ConnectionEntry
     row.requester_id === currentUserId ? row.addressee_id : row.requester_id,
   );
 
-  const [profilesResult, events, sharesResult, contactsResult, ownContactResult] =
-    await Promise.all([
-      otherIds.length > 0
-        ? supabase
-            .from("profiles")
-            .select("id, display_name, avatar_url, city, is_verified")
-            .in("id", otherIds)
-        : Promise.resolve({ data: [] as ConnectionPerson[] }),
-      getEventsByIds(eventIds),
-      acceptedConnectionIds.length > 0
-        ? supabase
-            .from("connection_contact_shares")
-            .select("connection_id, owner_id")
-            .in("connection_id", acceptedConnectionIds)
-        : Promise.resolve({ data: [] as { connection_id: string; owner_id: string }[] }),
-      acceptedOtherIds.length > 0
-        ? supabase.from("profile_contacts").select("user_id, phone").in("user_id", acceptedOtherIds)
-        : Promise.resolve({ data: [] as { user_id: string; phone: string }[] }),
-      supabase.from("profile_contacts").select("phone").eq("user_id", currentUserId).maybeSingle(),
-    ]);
+  const [
+    profilesResult,
+    events,
+    sharesResult,
+    contactsResult,
+    ownContactResult,
+    contactRequestsResult,
+  ] = await Promise.all([
+    otherIds.length > 0
+      ? supabase
+          .from("profiles")
+          .select("id, display_name, avatar_url, city, is_verified")
+          .in("id", otherIds)
+      : Promise.resolve({ data: [] as ConnectionPerson[] }),
+    getEventsByIds(eventIds),
+    acceptedConnectionIds.length > 0
+      ? supabase
+          .from("connection_contact_shares")
+          .select("connection_id, owner_id")
+          .in("connection_id", acceptedConnectionIds)
+      : Promise.resolve({ data: [] as { connection_id: string; owner_id: string }[] }),
+    acceptedOtherIds.length > 0
+      ? supabase.from("profile_contacts").select("user_id, phone").in("user_id", acceptedOtherIds)
+      : Promise.resolve({ data: [] as { user_id: string; phone: string }[] }),
+    supabase.from("profile_contacts").select("phone").eq("user_id", currentUserId).maybeSingle(),
+    acceptedConnectionIds.length > 0
+      ? supabase
+          .from("connection_contact_requests")
+          .select("id, connection_id, requester_id")
+          .in("connection_id", acceptedConnectionIds)
+          .eq("status", "pending")
+      : Promise.resolve({
+          data: [] as { id: string; connection_id: string; requester_id: string }[],
+        }),
+  ]);
 
   const people = new Map<string, ConnectionPerson>();
   for (const person of (profilesResult.data ?? []) as unknown as ConnectionPerson[]) {
@@ -123,6 +140,9 @@ export async function getMyConnections(userId?: string): Promise<ConnectionEntry
     (contactsResult.data ?? []).map((contact) => [contact.user_id, contact.phone]),
   );
   const canSharePhone = Boolean(ownContactResult.data?.phone);
+  const contactRequests = new Map(
+    (contactRequestsResult.data ?? []).map((request) => [request.connection_id, request]),
+  );
 
   return rows.map((row) => {
     const outgoing = row.requester_id === currentUserId;
@@ -140,6 +160,12 @@ export async function getMyConnections(userId?: string): Promise<ConnectionEntry
       sharedPhone: sharedPhones.get(otherId) ?? null,
       isSharingPhone: shareKeys.has(`${row.id}:${currentUserId}`),
       canSharePhone,
+      phoneRequestId: contactRequests.get(row.id)?.id ?? null,
+      phoneRequestDirection: contactRequests.has(row.id)
+        ? contactRequests.get(row.id)?.requester_id === currentUserId
+          ? "outgoing"
+          : "incoming"
+        : null,
     };
   });
 }
