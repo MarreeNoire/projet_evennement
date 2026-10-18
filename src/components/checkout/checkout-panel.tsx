@@ -32,7 +32,9 @@ export async function CheckoutPanel({
   const ticketTypes = data.ticketTypes.filter((ticket) => ticket.is_active);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+    <div
+      className={`mx-auto flex w-full max-w-3xl flex-col gap-6 ${inDialog ? "checkout-panel-dialog" : ""}`}
+    >
       {!inDialog ? (
         <nav aria-label="Fil d'Ariane" className="text-fg-muted text-sm">
           <Link href={`/evenements/${slug}`} className="hover:text-fg hover:underline">
@@ -73,6 +75,7 @@ export async function CheckoutPanel({
             email: profile.email ?? "",
             phone: contact?.phone ?? "",
           }}
+          inDialog={inDialog}
         />
       )}
     </div>

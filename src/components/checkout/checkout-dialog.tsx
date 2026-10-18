@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 
 export function CheckoutDialog({
-  slug,
   children,
 }: {
-  slug: string;
   children: ReactNode;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -20,7 +18,7 @@ export function CheckoutDialog({
   }, []);
 
   function closeDialog() {
-    router.push(`/evenements/${slug}`);
+    router.back();
   }
 
   return (
@@ -31,6 +29,9 @@ export function CheckoutDialog({
       onCancel={(event) => {
         event.preventDefault();
         closeDialog();
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) closeDialog();
       }}
     >
       <div className="checkout-dialog-shell">

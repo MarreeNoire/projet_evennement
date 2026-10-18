@@ -32,12 +32,14 @@ export function CheckoutForm({
   preselectedId,
   paymentProvider,
   initialBuyer,
+  inDialog = false,
 }: {
   eventId: string;
   ticketTypes: TicketTypeRow[];
   preselectedId?: string;
   paymentProvider: PaymentProviderName;
   initialBuyer: { name: string; email: string; phone: string };
+  inDialog?: boolean;
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -184,7 +186,7 @@ export function CheckoutForm({
   const stepLabels = ["Billets", "Coordonnées", "Paiement", "Confirmation"];
 
   return (
-    <form onSubmit={step === 3 ? onSubmit : (event) => event.preventDefault()} noValidate className="mx-auto w-full max-w-3xl space-y-5 sm:space-y-6">
+    <form onSubmit={step === 3 ? onSubmit : (event) => event.preventDefault()} noValidate className={`mx-auto w-full max-w-3xl space-y-5 sm:space-y-6 ${inDialog ? "checkout-form-dialog" : ""}`}>
       <nav aria-label="Étapes de la commande" className="rounded-xl border border-border bg-surface p-4 sm:p-5">
         <div className="mb-3 flex items-center justify-between gap-3 text-sm">
           <span className="font-semibold">Étape {step + 1} sur {stepLabels.length}</span>

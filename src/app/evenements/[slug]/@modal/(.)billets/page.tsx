@@ -11,7 +11,7 @@ export default async function CheckoutModalPage({
   const [{ slug }, { type }] = await Promise.all([params, searchParams]);
 
   return (
-    <CheckoutDialog slug={slug}>
+    <CheckoutDialog>
       <CheckoutPanel slug={slug} type={typeof type === "string" ? type : undefined} inDialog />
     </CheckoutDialog>
   );
