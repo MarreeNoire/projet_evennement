@@ -1802,7 +1802,99 @@
   animation-play-state: paused;
 }
 
+/* Écrans d’authentification avec visuel d’événement en arrière-plan */
+.auth-screen {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vh, 3rem) 1rem;
+}
+
+.auth-screen-backdrop {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 18% 20%, var(--ambient-fuchsia), transparent 48%),
+    linear-gradient(135deg, var(--void-900), var(--void-950));
+  pointer-events: none;
+}
+
+.auth-screen-image {
+  object-fit: cover;
+  opacity: 0.82;
+  filter: saturate(0.78) brightness(0.68);
+  transform: scale(1.025);
+}
+
+.auth-screen-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--void-950) 66%, transparent),
+    color-mix(in srgb, var(--void-950) 48%, transparent) 48%,
+    color-mix(in srgb, var(--void-950) 76%, transparent)
+  );
+}
+
+.auth-screen-content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 30rem);
+  margin-block: auto;
+}
+
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-2xl);
+  background: color-mix(in srgb, var(--surface-overlay) 96%, transparent);
+  padding: clamp(1.25rem, 5vw, 2rem);
+  color: var(--fg);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(18px);
+}
+
+.auth-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.875rem;
+}
+
+.auth-card-heading {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+@media (max-width: 480px) {
+  .auth-screen {
+    align-items: flex-start;
+    padding: max(1rem, env(safe-area-inset-top)) 0.875rem max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .auth-card {
+    gap: 1.125rem;
+    border-radius: var(--radius-xl);
+  }
+}
+
 /* PWA compact */
+@media (max-width: 767px) {
+  .site-footer {
+    display: none;
+  }
+}
+
 body.pwa-standalone footer > .container-page {
   padding-block: 1.25rem;
 }

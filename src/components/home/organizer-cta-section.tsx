@@ -32,7 +32,7 @@ export function OrganizerCtaSection() {
   return (
     <section
       aria-labelledby="organizer-section-title"
-      className="border-border bg-bg-subtle border-b py-8 md:py-11"
+      className="border-border bg-bg-subtle hidden border-b py-8 md:block md:py-11"
     >
       <div className="container-page grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-12">
         <div className="home-scroll-reveal max-w-2xl">

@@ -14,7 +14,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 import type { HeaderUser } from "./header-types";
-import { getNavGroups } from "./nav-config";
+import { FOOTER_SECTIONS, getNavGroups } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
 
 /* =============================================================================
@@ -73,14 +73,14 @@ export function MobileNav({
       role="dialog"
       aria-modal="true"
       aria-label="Menu de navigation"
-      className="app-mobile-nav-enter fixed inset-0 z-50 flex flex-col bg-bg lg:hidden"
+      className="app-mobile-nav-enter bg-bg fixed inset-0 z-50 flex flex-col lg:hidden"
     >
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
+      <div className="border-border flex h-16 shrink-0 items-center justify-between border-b px-4">
         <Logo />
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex size-10 items-center justify-center rounded-sm border border-border text-fg-muted hover:bg-bg-muted"
+          className="border-border text-fg-muted hover:bg-bg-muted inline-flex size-10 items-center justify-center rounded-sm border"
         >
           <X className="size-5" aria-hidden="true" />
           <span className="sr-only">Fermer le menu</span>
@@ -92,7 +92,7 @@ export function MobileNav({
           <Link
             href={ROUTES.admin}
             aria-current={pathname.startsWith(ROUTES.admin) ? "page" : undefined}
-            className="mb-4 flex min-h-14 items-center gap-3 rounded-xl border border-danger/40 bg-danger-subtle px-4 font-semibold text-danger shadow-sm"
+            className="border-danger/40 bg-danger-subtle text-danger mb-4 flex min-h-14 items-center gap-3 rounded-xl border px-4 font-semibold shadow-sm"
           >
             <Shield className="size-5 shrink-0" aria-hidden="true" />
             <span className="flex-1">Espace administrateur</span>
@@ -108,7 +108,7 @@ export function MobileNav({
             name="q"
             type="search"
             placeholder="Rechercher un événement…"
-            className="h-12 w-full rounded-sm border border-border-strong bg-surface px-4 text-base placeholder:text-fg-subtle focus:border-border-focus focus:outline-none"
+            className="border-border-strong bg-surface placeholder:text-fg-subtle focus:border-border-focus h-12 w-full rounded-sm border px-4 text-base focus:outline-none"
           />
         </form>
 
@@ -119,7 +119,9 @@ export function MobileNav({
               aria-current={pathname === "/" ? "page" : undefined}
               className={cn(
                 "flex h-12 items-center px-4 text-base font-semibold",
-                pathname === "/" ? "bg-primary-subtle text-primary-subtle-fg" : "text-fg hover:bg-bg-muted",
+                pathname === "/"
+                  ? "bg-primary-subtle text-primary-subtle-fg"
+                  : "text-fg hover:bg-bg-muted",
               )}
             >
               Accueil
@@ -127,9 +129,7 @@ export function MobileNav({
           ) : null}
           {navGroups.map((group) => (
             <section key={group.label} aria-label={group.label}>
-              <h2
-                className="mb-1 px-3 py-1 text-xs font-semibold tracking-wide text-fg-subtle"
-              >
+              <h2 className="text-fg-subtle mb-1 px-3 py-1 text-xs font-semibold tracking-wide">
                 {group.label}
               </h2>
               <ul className="flex flex-col">
@@ -142,7 +142,9 @@ export function MobileNav({
                         aria-current={active ? "page" : undefined}
                         className={cn(
                           "flex min-h-11 items-center rounded-lg px-3 text-base font-medium",
-                          active ? "bg-primary-subtle text-primary-subtle-fg" : "text-fg hover:bg-bg-muted",
+                          active
+                            ? "bg-primary-subtle text-primary-subtle-fg"
+                            : "text-fg hover:bg-bg-muted",
                         )}
                       >
                         {item.label}
@@ -155,30 +157,57 @@ export function MobileNav({
           ))}
         </div>
 
+        <details className="border-border mt-4 border-t pt-3">
+          <summary className="text-fg flex min-h-11 cursor-pointer items-center px-3 text-sm font-semibold">
+            À propos, aide et informations légales
+          </summary>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-4 px-3 pt-1 pb-2">
+            {FOOTER_SECTIONS.map((section) => (
+              <section key={section.title} aria-label={section.title}>
+                <h2 className="text-fg-subtle mb-1 text-xs font-semibold tracking-wide uppercase">
+                  {section.title}
+                </h2>
+                <ul className="flex flex-col gap-1">
+                  {section.links.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className="text-fg-muted hover:text-primary inline-flex min-h-9 items-center text-xs underline-offset-4 hover:underline"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </details>
+
         {user ? (
-          <div className="mt-4 flex flex-col gap-1 border-t border-border pt-4">
+          <div className="border-border mt-4 flex flex-col gap-1 border-t pt-4">
             <Link
               href={`${ROUTES.orgDashboard}/evenements/nouveau`}
-              className="flex h-12 items-center gap-3 rounded-xl px-4 text-base font-medium text-fg hover:bg-bg-muted"
+              className="text-fg hover:bg-bg-muted flex h-12 items-center gap-3 rounded-xl px-4 text-base font-medium"
             >
               <Plus className="size-5" aria-hidden="true" />
               Créer un événement
             </Link>
             <Link
               href={ROUTES.notifications}
-              className="flex h-12 items-center gap-3 rounded-xl px-4 text-base font-medium text-fg hover:bg-bg-muted"
+              className="text-fg hover:bg-bg-muted flex h-12 items-center gap-3 rounded-xl px-4 text-base font-medium"
             >
               <Bell className="size-5" aria-hidden="true" />
               Notifications
               {unreadCount > 0 ? (
-                <span className="ml-auto rounded-sm bg-danger-solid px-2 py-0.5 text-2xs font-bold text-white">
+                <span className="bg-danger-solid text-2xs ml-auto rounded-sm px-2 py-0.5 font-bold text-white">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               ) : null}
             </Link>
             <Link
               href={ROUTES.settings}
-              className="flex h-12 items-center gap-3 rounded-xl px-4 text-base font-medium text-fg hover:bg-bg-muted"
+              className="text-fg hover:bg-bg-muted flex h-12 items-center gap-3 rounded-xl px-4 text-base font-medium"
             >
               <Settings className="size-5" aria-hidden="true" />
               Réglages
@@ -186,14 +215,14 @@ export function MobileNav({
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex h-12 items-center gap-3 rounded-xl px-4 text-left text-base font-medium text-fg hover:bg-bg-muted"
+              className="text-fg hover:bg-bg-muted flex h-12 items-center gap-3 rounded-xl px-4 text-left text-base font-medium"
             >
               <LogOut className="size-5" aria-hidden="true" />
               Se déconnecter
             </button>
           </div>
         ) : (
-          <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
+          <div className="border-border mt-4 flex flex-col gap-2 border-t pt-4">
             <ButtonLink href={ROUTES.login} variant="secondary" fullWidth>
               Connexion
             </ButtonLink>
@@ -204,11 +233,11 @@ export function MobileNav({
         )}
       </nav>
 
-      <div className="shrink-0 border-t border-border p-4">
+      <div className="border-border shrink-0 border-t p-4">
         <div className="flex flex-col gap-4">
           <PwaInstallButton />
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-medium text-fg">Apparence</span>
+            <span className="text-fg text-sm font-medium">Apparence</span>
             <ThemeToggle />
           </div>
         </div>
