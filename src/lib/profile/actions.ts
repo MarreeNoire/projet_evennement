@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -29,7 +28,9 @@ const profileSchema = z.object({
     .transform((value) => value || null),
 });
 
-export async function updateMyProfile(formData: FormData): Promise<void> {
+export type UpdateProfileResult = { success: true } | { success: false; message: string };
+
+export async function updateMyProfile(formData: FormData): Promise<UpdateProfileResult> {
   const parsed = profileSchema.safeParse({
     displayName: formData.get("display_name"),
     username: formData.get("username"),
@@ -37,16 +38,19 @@ export async function updateMyProfile(formData: FormData): Promise<void> {
     bio: formData.get("bio"),
   });
   if (!parsed.success) {
-    redirect(
-      `/profil?profileError=${encodeURIComponent(parsed.error.issues[0]?.message ?? "Vérifie les informations saisies.")}`,
-    );
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "Vérifie les informations saisies.",
+    };
   }
 
   const supabase = await createSupabaseServerClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
-  if (authError || !authData.user) redirect("/connexion?redirect=/profil");
+  if (authError || !authData.user) {
+    return { success: false, message: "Ta session a expiré. Reconnecte-toi puis réessaie." };
+  }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .update({
       display_name: parsed.data.displayName,
@@ -54,20 +58,19 @@ export async function updateMyProfile(formData: FormData): Promise<void> {
       city: parsed.data.city,
       bio: parsed.data.bio,
     })
-    .eq("id", authData.user.id);
+    .eq("id", authData.user.id)
+    .select("id")
+    .maybeSingle();
 
   if (error?.code === "23505") {
-    redirect(
-      "/profil?profileError=Ce%20nom%20d%E2%80%99utilisateur%20est%20d%C3%A9j%C3%A0%20utilis%C3%A9.",
-    );
+    return { success: false, message: "Ce nom d’utilisateur est déjà utilisé." };
   }
-  if (error)
-    redirect(
-      "/profil?profileError=Impossible%20d%E2%80%99enregistrer%20le%20profil.%20R%C3%A9essaie.",
-    );
+  if (error || !data) {
+    return { success: false, message: "Impossible d’enregistrer le profil. Réessaie." };
+  }
 
   revalidatePath("/profil");
   revalidatePath(`/profil/${authData.user.id}`);
   revalidatePath("/connexions");
-  redirect("/profil?profileSaved=1");
+  return { success: true };
 }

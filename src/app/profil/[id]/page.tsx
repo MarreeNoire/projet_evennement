@@ -5,7 +5,7 @@ import { RequestConnectionButton } from "@/components/social/request-connection-
 import { ButtonLink } from "@/components/ui/button";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { Avatar } from "@/components/ui/avatar";
+import { ProfileAvatarPreview } from "@/components/social/profile-avatar-preview";
 import { env, isSupabaseAdminConfigured } from "@/lib/env";
 import { verifyBadgeSignature } from "@/lib/social/badge-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -62,7 +62,7 @@ export default async function ProfilPublicPage({
       <SiteHeader />
       <main id="contenu" className="container-page flex flex-col gap-8 py-10">
         <section className="border-border grid gap-6 border-y py-8 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
-          <Avatar src={profile.avatar_url} name={profile.display_name} size="xl" />
+          <ProfileAvatarPreview src={profile.avatar_url} name={profile.display_name} />
 
           <div>
             <h1 className="font-display text-3xl font-semibold">{profile.display_name}</h1>

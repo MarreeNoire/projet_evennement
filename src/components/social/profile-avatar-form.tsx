@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, LoaderCircle } from "lucide-react";
 
-import { Avatar } from "@/components/ui/avatar";
+import { ProfileAvatarPreview } from "@/components/social/profile-avatar-preview";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -86,7 +86,7 @@ export function ProfileAvatarForm({
 
   return (
     <div className="flex flex-col items-center gap-3 sm:items-start">
-      <Avatar src={avatarUrl} name={displayName} size="xl" />
+      <ProfileAvatarPreview src={avatarUrl} name={displayName} />
       <input
         ref={inputRef}
         type="file"

@@ -1,31 +1,18 @@
 import { redirect } from "next/navigation";
-import { Save } from "lucide-react";
 
-import { Stamp } from "@/components/social/stamp";
 import { ProfilePhoneForm } from "@/components/auth/profile-phone-form";
 import { ProfileAvatarForm } from "@/components/social/profile-avatar-form";
-import { updateMyProfile } from "@/lib/profile/actions";
+import { ProfileDetailsForm } from "@/components/social/profile-details-form";
+import { Stamp } from "@/components/social/stamp";
 import { SocialPageHeader, SocialShell } from "@/components/social/social-shell";
 import { EmptyState } from "@/components/ui/states";
-import { dayMonth } from "@/lib/social/time";
 import { ROUTES } from "@/lib/constants";
+import { dayMonth } from "@/lib/social/time";
 import { createSupabaseServerClient, getCurrentProfile } from "@/lib/supabase/server";
 
 export const metadata = { title: "Mon profil" };
 
-/* =============================================================================
-   Mon profil — un passeport
-   --------------------------------------------------------------------------
-   L'identité en haut (comme la page d'identité d'un passeport), les tampons
-   des événements vécus en dessous, le formulaire d'édition tout en bas.
-   ========================================================================== */
-
-export default async function MonProfilPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ profileSaved?: string; profileError?: string }>;
-}) {
-  const { profileSaved, profileError } = await searchParams;
+export default async function MonProfilPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect(`${ROUTES.login}?redirect=${ROUTES.profile}`);
 
@@ -40,14 +27,11 @@ export default async function MonProfilPage({
     supabase.from("profile_contacts").select("phone").eq("user_id", profile.id).maybeSingle(),
   ]);
 
-  const stamps = pastTickets ?? [];
-
   return (
     <SocialShell active="profil">
       <div className="flex flex-col gap-12">
         <SocialPageHeader eyebrow="Mon profil" title="Carte" accent="d'identité." />
 
-        {/* Page d'identité */}
         <section className="border-border grid gap-6 border-y py-8 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
           <ProfileAvatarForm
             userId={profile.id}
@@ -71,7 +55,6 @@ export default async function MonProfilPage({
 
         <ProfilePhoneForm initialPhone={contact?.phone ?? ""} />
 
-        {/* Tampons */}
         <section aria-labelledby="tampons" className="flex flex-col gap-5">
           <div>
             <p className="eyebrow">Vécus</p>
@@ -80,23 +63,22 @@ export default async function MonProfilPage({
             </h2>
           </div>
 
-          {stamps.length === 0 ? (
-            <EmptyState
-              title="Aucun tampon encore"
-              description="Chaque événement terminé auquel tu as participé laisse un tampon ici."
-            />
-          ) : (
+          {pastTickets?.length ? (
             <ul className="flex flex-wrap gap-6">
-              {stamps.map((ticket, index) => (
+              {pastTickets.map((ticket, index) => (
                 <li key={`${ticket.event_title}-${index}`}>
                   <Stamp title={ticket.event_title} date={dayMonth(ticket.event_start_at).year} />
                 </li>
               ))}
             </ul>
+          ) : (
+            <EmptyState
+              title="Aucun tampon encore"
+              description="Chaque événement terminé auquel tu as participé laisse un tampon ici."
+            />
           )}
         </section>
 
-        {/* Édition */}
         <section
           aria-labelledby="editer"
           className="border-border flex flex-col gap-5 border-t pt-8"
@@ -107,71 +89,12 @@ export default async function MonProfilPage({
               Informations visibles par les autres
             </h2>
           </div>
-
-          {profileError ? (
-            <p role="alert" className="text-danger text-sm">
-              {profileError}
-            </p>
-          ) : null}
-          {profileSaved ? (
-            <p role="status" className="text-success text-sm">
-              Ton profil a été enregistré.
-            </p>
-          ) : null}
-
-          <form action={updateMyProfile} className="grid max-w-xl gap-5">
-            <div className="grid gap-5 sm:grid-cols-2">
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="font-semibold">Nom d&apos;affichage</span>
-                <input
-                  type="text"
-                  name="display_name"
-                  defaultValue={profile.display_name}
-                  className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus h-11 rounded-md border px-3 text-sm focus:ring-1 focus:outline-none"
-                />
-              </label>
-              <label className="flex flex-col gap-1.5 text-sm">
-                <span className="font-semibold">Nom d&apos;utilisateur</span>
-                <input
-                  type="text"
-                  name="username"
-                  defaultValue={profile.username ?? ""}
-                  placeholder="nom_utilisateur"
-                  className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus h-11 rounded-md border px-3 text-sm focus:ring-1 focus:outline-none"
-                />
-              </label>
-            </div>
-
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-semibold">Ville</span>
-              <input
-                type="text"
-                name="city"
-                defaultValue={profile.city ?? ""}
-                placeholder="Abidjan"
-                className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus h-11 rounded-md border px-3 text-sm focus:ring-1 focus:outline-none"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-semibold">Biographie</span>
-              <textarea
-                name="bio"
-                rows={3}
-                defaultValue={profile.bio ?? ""}
-                placeholder="Passionné d'événements et de rencontres à Abidjan…"
-                className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus resize-none rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex h-11 w-fit items-center gap-2 rounded-md px-5 text-sm font-semibold transition-colors"
-            >
-              <Save className="size-4" aria-hidden="true" />
-              Enregistrer
-            </button>
-          </form>
+          <ProfileDetailsForm
+            displayName={profile.display_name}
+            username={profile.username}
+            city={profile.city}
+            bio={profile.bio}
+          />
         </section>
       </div>
     </SocialShell>
