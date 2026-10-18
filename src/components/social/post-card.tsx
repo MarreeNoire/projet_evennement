@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeCheck, MessageCircle, Megaphone } from "lucide-react";
+import { BadgeCheck, CornerUpRight, MessageCircle, Megaphone } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import type { CommentWithAuthor, PostWithAuthor } from "@/lib/salons/types";
@@ -18,43 +18,53 @@ const CATEGORY_LABELS: Record<string, string> = {
   photo: "Photo",
 };
 
-function CommentThread({
+function flattenComments(comments: CommentWithAuthor[]) {
+  const messages: CommentWithAuthor[] = [];
+  const visit = (comment: CommentWithAuthor) => {
+    messages.push(comment);
+    comment.replies.forEach(visit);
+  };
+  comments.forEach(visit);
+  return messages.sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+function CommentMessage({
   comment,
+  parentAuthor,
   postId,
   salonId,
   currentUserId,
-  depth = 0,
 }: {
   comment: CommentWithAuthor;
+  parentAuthor: string | null;
   postId: string;
   salonId: string;
   currentUserId: string | null;
-  depth?: number;
 }) {
   const name = comment.author?.display_name ?? "Membre du salon";
   const isOwnComment = Boolean(currentUserId && comment.author_id === currentUserId);
 
   return (
-    <li className={`flex min-w-0 flex-col ${isOwnComment ? "items-end" : "items-start"}`}>
-      <div
-        className={`flex w-full items-end gap-2 ${isOwnComment ? "justify-end" : "justify-start"}`}
-      >
-        {!isOwnComment ? <Avatar src={comment.author?.avatar_url} name={name} size="xs" /> : null}
+    <li className="flex min-w-0 items-start gap-2.5">
+      <Avatar src={comment.author?.avatar_url} name={name} size="xs" />
+      <div className="min-w-0 flex-1">
         <div
-          className={`max-w-[88%] min-w-0 rounded-2xl px-3.5 py-2.5 sm:max-w-[82%] ${
-            isOwnComment
-              ? "bg-primary-subtle text-fg rounded-br-sm"
-              : "bg-surface-raised text-fg rounded-bl-sm"
+          className={`border-border/60 rounded-2xl border px-3.5 py-3 sm:px-4 ${
+            isOwnComment ? "bg-primary/10" : "bg-surface-raised"
           }`}
         >
           <p className="text-fg text-xs font-semibold">{isOwnComment ? "Vous" : name}</p>
+          {parentAuthor ? (
+            <p className="text-primary mt-1 flex items-center gap-1.5 text-xs font-medium">
+              <CornerUpRight className="size-3.5 shrink-0" aria-hidden="true" />
+              En réponse à {parentAuthor}
+            </p>
+          ) : null}
           <p className="mt-1 text-sm leading-relaxed whitespace-pre-line">{comment.content}</p>
-          <p className="text-fg-subtle text-2xs mt-1 text-right">
+          <p className="text-fg-subtle text-2xs mt-1.5 text-right">
             {formatRelative(comment.created_at)}
           </p>
         </div>
-      </div>
-      <div className={`${isOwnComment ? "mr-1" : "ml-9"}`}>
         <CommentReplyControl
           postId={postId}
           parentId={comment.id}
@@ -63,20 +73,6 @@ function CommentThread({
           isAuthenticated={Boolean(currentUserId)}
         />
       </div>
-      {comment.replies.length > 0 ? (
-        <ul className="border-border/60 mt-2 ml-3 flex w-[calc(100%-0.75rem)] flex-col gap-3 border-l pl-3 sm:ml-5 sm:w-[calc(100%-1.25rem)] sm:pl-4">
-          {comment.replies.map((reply) => (
-            <CommentThread
-              key={reply.id}
-              comment={reply}
-              postId={postId}
-              salonId={salonId}
-              currentUserId={currentUserId}
-              depth={depth + 1}
-            />
-          ))}
-        </ul>
-      ) : null}
     </li>
   );
 }
@@ -103,6 +99,8 @@ export function PostCard({
   const images = (Array.isArray(post.media) ? post.media : []).filter(
     (item) => item.kind === "image" && item.url,
   );
+  const discussionMessages = flattenComments(comments);
+  const commentsById = new Map(discussionMessages.map((comment) => [comment.id, comment]));
 
   return (
     <article className="post-card group border-border bg-surface hover:border-border-strong mb-4 rounded-2xl border px-4 py-5 shadow-sm transition-[transform,border-color,box-shadow] duration-300 ease-[var(--ease-out-soft)] hover:-translate-y-0.5 hover:shadow-md sm:px-6 sm:py-6">
@@ -201,15 +199,21 @@ export function PostCard({
               <div className="text-fg-muted mb-3 flex items-center gap-2 text-xs font-semibold">
                 <MessageCircle className="text-primary size-4" aria-hidden="true" />
                 Discussion
-                {post.comment_count > 0 ? (
-                  <span className="text-fg-subtle font-normal">· {post.comment_count}</span>
-                ) : null}
+                <span className="text-fg-subtle font-normal">
+                  · {discussionMessages.length} message{discussionMessages.length === 1 ? "" : "s"}
+                </span>
               </div>
               <ul className="flex flex-col gap-3">
-                {comments.map((comment) => (
-                  <CommentThread
+                {discussionMessages.map((comment) => (
+                  <CommentMessage
                     key={comment.id}
                     comment={comment}
+                    parentAuthor={
+                      comment.parent_id
+                        ? (commentsById.get(comment.parent_id)?.author?.display_name ??
+                          "un commentaire")
+                        : null
+                    }
                     postId={post.id}
                     salonId={post.salon_id}
                     currentUserId={currentUserId}
