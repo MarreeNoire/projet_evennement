@@ -1465,11 +1465,11 @@
 
 @media (max-width: 640px) {
   .checkout-dialog {
-    width: 100vw;
-    height: 100dvh;
-    max-height: 100dvh;
-    border: 0;
-    border-radius: 0;
+    width: min(calc(100vw - 1rem), 30rem);
+    height: min(40rem, calc(100dvh - 2rem));
+    max-height: calc(100dvh - 2rem);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-xl);
   }
 
   .checkout-dialog-header {
