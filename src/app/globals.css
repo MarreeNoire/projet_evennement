@@ -1979,16 +1979,16 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
 
 /* Direction créative: scène de fête tissée, affiches et navigation tactile. */
 .home-page {
-  --home-paper: #f2f1e7;
-  --home-paper-deep: #e2e5d8;
-  --home-ink: #183234;
-  --home-muted: #637474;
-  --home-rule: #c9d3ca;
-  --home-rust: #b34855;
-  --home-gold: #d6e44b;
-  --home-leaf: #285e53;
-  --home-coral: #ed7958;
-  --home-indigo: #123d3e;
+  --home-paper: #f5f4ec;
+  --home-paper-deep: #e9ebe1;
+  --home-ink: #273836;
+  --home-muted: #6f7d78;
+  --home-rule: #d8ddd3;
+  --home-rust: #a85d55;
+  --home-gold: #cdb66f;
+  --home-leaf: #667f72;
+  --home-coral: #ce806b;
+  --home-indigo: #506964;
 }
 .home-page > header {
   z-index: 45;
@@ -2394,7 +2394,7 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
 }
 .home-live-mark {
   background: var(--home-coral);
-  box-shadow: 0 0 0 4px rgb(237 121 88 / 0.18);
+  box-shadow: 0 0 0 4px rgb(206 128 107 / 0.18);
 }
 .home-hero-intro h1 em {
   color: var(--home-gold);
@@ -2414,20 +2414,20 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   color: var(--home-ink);
 }
 .home-poster-art-1 {
-  background: #b34855;
+  background: #a85d55;
 }
 .home-poster-art-2 {
-  background: #d6e44b;
-  color: #183234;
+  background: #cdb66f;
+  color: #273836;
 }
 .home-poster-art-3 {
-  background: #2b7180;
+  background: #688a8a;
 }
 .home-poster-art-4 {
-  background: #ed7958;
+  background: #ce806b;
 }
 .home-poster-art-5 {
-  background: #714666;
+  background: #847386;
 }
 .home-category {
   color: var(--home-ink);
@@ -3510,16 +3510,16 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
 
 /* Palette finale : ces tokens sont déclarés après les styles partagés. */
 .home-page {
-  --home-paper: #f2f1e7;
-  --home-paper-deep: #e2e5d8;
-  --home-ink: #183234;
-  --home-muted: #637474;
-  --home-rule: #c9d3ca;
-  --home-rust: #b34855;
-  --home-gold: #d6e44b;
-  --home-leaf: #285e53;
-  --home-coral: #ed7958;
-  --home-indigo: #123d3e;
+  --home-paper: #f5f4ec;
+  --home-paper-deep: #e9ebe1;
+  --home-ink: #273836;
+  --home-muted: #6f7d78;
+  --home-rule: #d8ddd3;
+  --home-rust: #a85d55;
+  --home-gold: #cdb66f;
+  --home-leaf: #667f72;
+  --home-coral: #ce806b;
+  --home-indigo: #506964;
   background: var(--home-paper);
   color: var(--home-ink);
 }
@@ -3543,20 +3543,20 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   color: var(--home-gold);
 }
 .home-poster-art-1 {
-  background: #b34855;
+  background: #a85d55;
 }
 .home-poster-art-2 {
-  background: #d6e44b;
-  color: #183234;
+  background: #cdb66f;
+  color: #273836;
 }
 .home-poster-art-3 {
-  background: #2b7180;
+  background: #688a8a;
 }
 .home-poster-art-4 {
-  background: #ed7958;
+  background: #ce806b;
 }
 .home-poster-art-5 {
-  background: #714666;
+  background: #847386;
 }
 .home-page > header nav a[aria-current="page"] {
   background: var(--home-gold);
@@ -3566,5 +3566,90 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   background: var(--home-gold);
 }
 .home-search-dock {
-  background: rgb(242 241 231 / 0.96);
+  background: rgb(245 244 236 / 0.96);
+}
+@media (max-width: 699px) {
+  .home-page > header {
+    background: var(--home-paper);
+    color: var(--home-ink);
+    border-color: var(--home-rule);
+  }
+  .home-page > header .text-fg-muted {
+    color: var(--home-muted);
+  }
+  .home-page > header nav ul {
+    border-color: var(--home-rule);
+    background: var(--home-paper-deep);
+  }
+  .home-page > header nav a[aria-current="page"] {
+    background: #dce3d8;
+    color: var(--home-ink);
+  }
+  .home-hero-stage {
+    background: #e9ede5;
+    color: var(--home-ink);
+  }
+  .home-hero-intro,
+  .home-poster-hero .home-poster-copy,
+  .home-poster-hero .home-poster-main h3 a {
+    color: var(--home-ink);
+  }
+  .home-hero-intro > div:first-child,
+  .home-hero-intro p,
+  .home-poster-hero .home-poster-meta,
+  .home-poster-hero .home-poster-main p,
+  .home-carousel-controls {
+    color: var(--home-muted);
+  }
+  .home-hero-intro h1 {
+    color: var(--home-ink);
+  }
+  .home-hero-intro h1 em,
+  .home-poster-hero .home-book {
+    color: var(--home-rust);
+  }
+  .home-poster-hero .home-poster-image {
+    border-color: var(--home-gold);
+    box-shadow: 0 14px 32px rgb(39 56 54 / 0.14);
+  }
+  .home-poster-index {
+    background: var(--home-gold);
+    color: var(--home-ink);
+  }
+  .home-carousel-controls button {
+    border-color: var(--home-rule);
+    color: var(--home-ink);
+    background: rgb(255 255 255 / 0.5);
+  }
+  .home-categories {
+    border-color: var(--home-rule);
+    background: #e7e2d1;
+  }
+  .home-categories-label,
+  .home-category {
+    color: var(--home-ink);
+  }
+  .home-category span {
+    color: var(--home-rust);
+  }
+  .home-poster-art-1 {
+    background: #a85d55;
+  }
+  .home-poster-art-2 {
+    background: #cdb66f;
+    color: #273836;
+  }
+  .home-poster-art-3 {
+    background: #688a8a;
+  }
+  .home-poster-art-4 {
+    background: #ce806b;
+  }
+  .home-poster-art-5 {
+    background: #847386;
+  }
+  .home-page nav[aria-label="Navigation mobile"] {
+    background: var(--home-paper);
+    border-color: var(--home-rule);
+  }
 }
