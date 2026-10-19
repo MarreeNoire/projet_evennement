@@ -1979,16 +1979,16 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
 
 /* Direction créative: scène de fête tissée, affiches et navigation tactile. */
 .home-page {
-  --home-paper: #f3e9d5;
-  --home-paper-deep: #e5d5b9;
-  --home-ink: #231b3f;
-  --home-muted: #655d6b;
-  --home-rule: #cbbda5;
-  --home-rust: #c24f32;
-  --home-gold: #efbd48;
-  --home-leaf: #367451;
-  --home-coral: #e16a53;
-  --home-indigo: #231b3f;
+  --home-paper: #f2f1e7;
+  --home-paper-deep: #e2e5d8;
+  --home-ink: #183234;
+  --home-muted: #637474;
+  --home-rule: #c9d3ca;
+  --home-rust: #b34855;
+  --home-gold: #d6e44b;
+  --home-leaf: #285e53;
+  --home-coral: #ed7958;
+  --home-indigo: #123d3e;
 }
 .home-page > header {
   z-index: 45;
@@ -1997,10 +1997,10 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   color: var(--home-paper);
 }
 .home-page > header .text-fg-muted {
-  color: rgb(243 233 213 / 0.76);
+  color: rgb(242 241 231 / 0.76);
 }
 .home-page > header nav ul {
-  border-color: rgb(243 233 213 / 0.18);
+  border-color: rgb(242 241 231 / 0.18);
   background: rgb(255 255 255 / 0.06);
 }
 .home-page > header nav a[aria-current="page"] {
@@ -2010,7 +2010,7 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
 .home-search-dock {
   top: 4.5rem;
   padding-block: 0.6rem;
-  background: rgb(243 233 213 / 0.95);
+  background: rgb(242 241 231 / 0.95);
   border-bottom: 1px solid var(--home-rule);
 }
 .home-search-control input {
@@ -2098,7 +2098,7 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   color: var(--home-paper);
 }
 .home-hero-intro > div:first-child {
-  color: #e5d5b9;
+  color: #c4d4c9;
 }
 .home-live-mark {
   box-shadow: 0 0 0 4px rgb(239 189 72 / 0.18);
@@ -2113,7 +2113,7 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   color: var(--home-gold);
 }
 .home-hero-intro p {
-  color: #e5d5b9;
+  color: #c4d4c9;
 }
 .home-hero-discover {
   min-height: 2.9rem;
@@ -2130,7 +2130,7 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
 }
 .home-hero-discover:hover {
   transform: translateY(-2px);
-  background: #ffcf5c;
+  background: #e4ef76;
 }
 .home-carousel {
   min-width: 0;
@@ -3300,7 +3300,7 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
 .home-poster-hero .home-poster-meta,
 .home-poster-hero .home-poster-main p,
 .home-carousel-controls {
-  color: #e5d5b9;
+  color: #c4d4c9;
 }
 .home-poster-hero .home-book {
   color: var(--home-gold);
@@ -3365,20 +3365,20 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   background-color: var(--home-leaf);
 }
 .home-poster-art-1 {
-  background: #bc523a;
+  background: #b34855;
 }
 .home-poster-art-2 {
-  background: #d09632;
-  color: #231b3f;
+  background: #d6e44b;
+  color: #183234;
 }
 .home-poster-art-3 {
-  background: #315c83;
+  background: #2b7180;
 }
 .home-poster-art-4 {
-  background: #b64b62;
+  background: #ed7958;
 }
 .home-poster-art-5 {
-  background: #78508a;
+  background: #714666;
 }
 .home-organizer-initial {
   background: var(--home-gold);
@@ -3506,4 +3506,65 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
     transform: none;
     transition: none;
   }
+}
+
+/* Palette finale : ces tokens sont déclarés après les styles partagés. */
+.home-page {
+  --home-paper: #f2f1e7;
+  --home-paper-deep: #e2e5d8;
+  --home-ink: #183234;
+  --home-muted: #637474;
+  --home-rule: #c9d3ca;
+  --home-rust: #b34855;
+  --home-gold: #d6e44b;
+  --home-leaf: #285e53;
+  --home-coral: #ed7958;
+  --home-indigo: #123d3e;
+  background: var(--home-paper);
+  color: var(--home-ink);
+}
+.home-page > header {
+  background: var(--home-indigo);
+  color: var(--home-paper);
+}
+.home-page > header .text-fg-muted,
+.home-hero-intro > div:first-child,
+.home-hero-intro p,
+.home-poster-hero .home-poster-meta,
+.home-poster-hero .home-poster-main p,
+.home-carousel-controls {
+  color: #c4d4c9;
+}
+.home-live-mark {
+  background: var(--home-coral);
+  box-shadow: 0 0 0 4px rgb(237 121 88 / 0.18);
+}
+.home-hero-intro h1 em {
+  color: var(--home-gold);
+}
+.home-poster-art-1 {
+  background: #b34855;
+}
+.home-poster-art-2 {
+  background: #d6e44b;
+  color: #183234;
+}
+.home-poster-art-3 {
+  background: #2b7180;
+}
+.home-poster-art-4 {
+  background: #ed7958;
+}
+.home-poster-art-5 {
+  background: #714666;
+}
+.home-page > header nav a[aria-current="page"] {
+  background: var(--home-gold);
+  color: var(--home-ink);
+}
+.home-categories {
+  background: var(--home-gold);
+}
+.home-search-dock {
+  background: rgb(242 241 231 / 0.96);
 }
