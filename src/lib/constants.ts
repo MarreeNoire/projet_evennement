@@ -197,6 +197,7 @@ export const REACTION_LABELS: Record<Reaction, string> = {
 export const CATEGORIES = [
   { slug: "concerts", label: "Concerts" },
   { slug: "conferences", label: "Conférences" },
+  { slug: "salons", label: "Salons" },
   { slug: "formations", label: "Formations" },
   { slug: "networking", label: "Networking" },
   { slug: "sport", label: "Sport" },

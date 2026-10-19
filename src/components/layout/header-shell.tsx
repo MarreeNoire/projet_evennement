@@ -200,7 +200,7 @@ export function HeaderShell({
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <SearchBar className="hidden md:block" />
+          {pathname === "/" ? null : <SearchBar className="hidden md:block" />}
 
           <ThemeToggle className="hidden sm:inline-flex md:hidden lg:inline-flex" />
 
