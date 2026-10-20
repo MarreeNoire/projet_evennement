@@ -52,7 +52,7 @@ export function BottomNav({ user }: { user: HeaderUser | null }) {
   return (
     <nav
       aria-label="Navigation mobile"
-      className="bg-bg border-border-strong fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_28px_rgba(10,8,18,0.22)] lg:hidden"
+      className="mobile-tabbar bg-bg border-border-strong fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_28px_rgba(10,8,18,0.22)] lg:hidden"
     >
       <ul className="grid h-14 grid-cols-5 items-stretch">
         {items.map((item) => {

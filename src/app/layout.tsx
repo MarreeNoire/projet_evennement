@@ -1,30 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Syne, Plus_Jakarta_Sans } from "next/font/google";
-
 import { AppProviders } from "@/components/providers/app-providers";
 import { PwaRouteRestoration } from "@/components/providers/pwa-route-restoration";
 import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
 import "./globals.css";
-
-/* =============================================================================
-   Polices — nuit électrique
-   * Plus Jakarta Sans : humaniste, lisible à toutes les tailles, corps de texte
-   * Syne : géométrique et forte personnalité, titres qui accrochent le regard
-   ========================================================================== */
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-  display: "swap",
-});
-
-const syne = Syne({
-  subsets: ["latin"],
-  variable: "--font-syne",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl),
@@ -77,8 +57,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f3fa" },
-    { media: "(prefers-color-scheme: dark)", color: "#171420" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f4ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#171e28" },
   ],
 };
 
@@ -90,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`${jakarta.variable} ${syne.variable}`}
+      className="light"
     >
       <head />
       <body className="min-h-dvh antialiased">

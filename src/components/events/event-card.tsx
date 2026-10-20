@@ -51,7 +51,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
   const imageUrl = event.cover_url ?? gallery[0] ?? null;
 
   return (
-    <article className="group border-border-strong/70 bg-surface hover:border-primary flex h-full flex-col overflow-hidden rounded-xl border backdrop-blur-md transition-[transform,border-color,box-shadow] duration-300 ease-[var(--ease-out-soft)] hover:-translate-y-1 hover:shadow-lg">
+    <article className="event-card group border-border-strong/70 bg-surface hover:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-[transform,border-color,box-shadow] duration-200 ease-[var(--ease-out-soft)] hover:-translate-y-1 hover:shadow-lg">
       <Link
         href={`/evenements/${event.slug}`}
         prefetch={false}

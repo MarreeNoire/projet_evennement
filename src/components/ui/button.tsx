@@ -16,12 +16,12 @@ export const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 whitespace-nowrap",
     "font-semibold",
-    "rounded-[3px] border border-transparent",
-    "transition-[background-color,border-color,color,box-shadow,transform] duration-250",
+    "rounded-lg border border-transparent",
+    "transition-[background-color,border-color,color,box-shadow,transform] duration-160",
     "ease-[var(--ease-out-soft)]",
     "select-none",
     // Feedback immédiat au clic
-    "active:translate-y-px active:scale-[0.975] motion-reduce:transform-none motion-reduce:transition-none",
+    "active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none",
     // Accessibilité : jamais de contenu masqué par l'état désactivé
     "disabled:pointer-events-none disabled:opacity-50",
     "aria-busy:cursor-progress",

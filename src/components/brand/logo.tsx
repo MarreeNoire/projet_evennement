@@ -1,12 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/* =============================================================================
-   Signature visuelle « Event »
-   --------------------------------------------------------------------------
-   Marque = deux arcs qui se rejoignent : la rencontre entre un événement et sa
-   communauté. Construite en SVG pour rester nette à toutes les tailles et
-   hériter de la couleur du texte.
-   ========================================================================== */
+/* Event's mark is a ticket shape with a center perforation. */
 
 export function LogoMark({ className }: { className?: string }) {
   return (
@@ -14,12 +8,12 @@ export function LogoMark({ className }: { className?: string }) {
       viewBox="0 0 32 32"
       role="img"
       aria-label="Event"
-      className={cn("size-8", className)}
-      fill="none"
+      className={cn("size-8 shrink-0 rounded-[10px] bg-primary-solid p-1.5 text-white shadow-sm", className)}
+      fill="currentColor"
     >
-      {/* Arc gauche : le participant */}
-      <path d="M6 27V5h9M26 27V5h-9" stroke="currentColor" strokeWidth="3" />
-      <path d="M12 21h8v8h-8z" fill="currentColor" />
+      <path d="M8 6.5h16a2.5 2.5 0 0 1 2.5 2.5v4.2a2.8 2.8 0 0 0 0 5.6V23a2.5 2.5 0 0 1-2.5 2.5H8A2.5 2.5 0 0 1 5.5 23v-4.2a2.8 2.8 0 0 0 0-5.6V9A2.5 2.5 0 0 1 8 6.5Z" fill="currentColor" />
+      <path d="M18.5 9.5v13" stroke="var(--primary-solid)" strokeWidth="1.5" strokeDasharray="1.8 2.1" strokeLinecap="round" />
+      <path d="m12.5 11.2 1.1 2.2 2.4.3-1.7 1.7.4 2.4-2.2-1.1-2.2 1.1.4-2.4L9 13.7l2.4-.3 1.1-2.2Z" fill="var(--primary-solid)" />
     </svg>
   );
 }
