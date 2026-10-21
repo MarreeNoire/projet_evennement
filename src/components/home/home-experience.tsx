@@ -15,8 +15,10 @@ export function HomeExperience({ events, weekCount }: HomeExperienceProps) {
     <div className="home-editorial relative min-h-screen">
       <ArchedHero events={events} weekCount={weekCount} />
 
-      {/* Événements publiés à venir */}
-      <TrendingEvents events={events} />
+      {/* Événements publiés à venir — le hero les présente déjà sur mobile */}
+      <div className="hidden lg:block">
+        <TrendingEvents events={events} />
+      </div>
 
       {/* Sorties de la semaine, si elles existent */}
       <ThisWeekEvents events={events} />

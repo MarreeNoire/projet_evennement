@@ -12,10 +12,10 @@ import styles from "./arched-hero.module.css";
 /* =============================================================================
    Hero « arche » — composition éditoriale, carrousel de sorties en éventail.
    --------------------------------------------------------------------------
-   Les cartes sont les vraies sorties publiées. Sur desktop, la géométrie est
-   calculée dans un espace de 1440 × 1010 puis mise à l’échelle. Sous 1024 px,
-   on ne rétrécit pas cette scène : le hero devient une composition verticale
-   avec un rail à défilement natif (scroll-snap), comme dans une application.
+   Les cartes sont les vraies sorties publiées. Le même carrousel est utilisé
+   partout : sur desktop dans un espace de 1440 × 1010, sur tablette dans un
+   espace de 900, sur téléphone dans un espace de 390. Seule la composition
+   autour change.
    ========================================================================== */
 
 const CARD_COUNT = 10;
@@ -23,8 +23,7 @@ const DESIGN_WIDTH = 1440;
 const DESIGN_HEIGHT = 1010;
 /** Haut de la bande du carrousel dans l’espace de desktop. */
 const BAND_TOP = 420;
-const IMAGE_SIZES = "19vw";
-const RAIL_IMAGE_SIZES = "(max-width: 600px) 76vw, (max-width: 1023px) 52vw, 19vw";
+const IMAGE_SIZES = "(max-width: 1023px) 46vw, 19vw";
 
 interface Geometry {
   width: number;
@@ -61,6 +60,66 @@ const DESKTOP: Geometry = {
   speed: 50,
   corner: 15,
 };
+
+/** Éventail mobile : trois cartes visibles, la centrale plein cadre. */
+const MOBILE: Geometry = {
+  width: 390,
+  height: 330,
+  cx: 195,
+  centerY: 175,
+  radius: 280,
+  pitch: 185,
+  span: 925,
+  baseW: 166,
+  growW: 34,
+  baseH: 254,
+  growH: 56,
+  cyDrop: 2,
+  push: 0.03,
+  speed: 38,
+  corner: 15,
+};
+const MOBILE_BAND = 340;
+
+/** Même éventail, resserré pour les écrans courts (iPhone SE, paysage). */
+const MOBILE_COMPACT: Geometry = {
+  width: 390,
+  height: 280,
+  cx: 195,
+  centerY: 148,
+  radius: 240,
+  pitch: 160,
+  span: 800,
+  baseW: 142,
+  growW: 30,
+  baseH: 214,
+  growH: 46,
+  cyDrop: 2,
+  push: 0.03,
+  speed: 34,
+  corner: 13,
+};
+const MOBILE_COMPACT_BAND = 290;
+
+/** Tablette : un éventail plus large, trois cartes de front. */
+const TABLET: Geometry = {
+  width: 900,
+  height: 520,
+  cx: 450,
+  centerY: 260,
+  radius: 820,
+  pitch: 286,
+  span: 1430,
+  baseW: 262,
+  growW: 38,
+  baseH: 400,
+  growH: 44,
+  cyDrop: 8,
+  push: 0.02,
+  speed: 46,
+  corner: 18,
+};
+const TABLET_BAND = 540;
 
 const unit = (dx: number, dy: number): [number, number] => {
   const length = Math.hypot(dx, dy) || 1;
@@ -122,23 +181,20 @@ function roundedQuad(
 function HeroCard({
   event,
   register,
-  variant = "arc",
   preload = false,
 }: {
   event: PublishedEventView;
   register?: (el: HTMLAnchorElement | null) => void;
-  variant?: "arc" | "rail";
   preload?: boolean;
 }) {
   const date = formatEventDate(event.start_at);
   const cover = event.cover_url || event.gallery?.[0];
-  const isRail = variant === "rail";
 
   return (
     <Link
       ref={register}
       href={`/evenements/${event.slug}`}
-      className={isRail ? styles.railCard : styles.card}
+      className={styles.card}
       draggable={false}
       aria-label={`${event.title} — ${date.fullBadge}, ${event.city}`}
     >
@@ -147,7 +203,7 @@ function HeroCard({
           src={cover}
           alt=""
           fill
-          sizes={isRail ? RAIL_IMAGE_SIZES : IMAGE_SIZES}
+          sizes={IMAGE_SIZES}
           quality={75}
           preload={preload}
           className={styles.cover}
@@ -160,18 +216,10 @@ function HeroCard({
 
       <span className={styles.cardScrim} aria-hidden="true" />
 
-      {isRail ? (
-        <span className={styles.dateChip}>
+      <span className={styles.cardInfo}>
+        <span className={styles.cardDate}>
           {date.weekday} {date.dayMonth}
         </span>
-      ) : null}
-
-      <span className={styles.cardInfo}>
-        {isRail ? null : (
-          <span className={styles.cardDate}>
-            {date.weekday} {date.dayMonth}
-          </span>
-        )}
         <span className={styles.cardTitle}>{event.title}</span>
         <span className={styles.cardMeta}>
           {event.city}
@@ -235,11 +283,14 @@ export function ArchedHero({
     if (cards.length === 0) return;
 
     const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const phoneQuery = window.matchMedia("(max-width: 599px)");
+    const compactQuery = window.matchMedia("(max-height: 739px)");
     const reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let reduce = reduceQuery.matches;
     let desktop = desktopQuery.matches;
 
-    const cfg = DESKTOP;
+    let cfg: Geometry = DESKTOP;
+    let bandTop = BAND_TOP;
     let scroll = 0;
     let velocity = 0;
     let dragging = false;
@@ -280,7 +331,7 @@ export function ArchedHero({
 
       el.style.width = `${w.toFixed(2)}px`;
       el.style.height = `${h.toFixed(2)}px`;
-      el.style.transform = `translate3d(${(x - w / 2).toFixed(2)}px, ${(cy - h / 2 - BAND_TOP).toFixed(
+      el.style.transform = `translate3d(${(x - w / 2).toFixed(2)}px, ${(cy - h / 2 - bandTop).toFixed(
         2,
       )}px, 0)`;
       el.style.clipPath = `path("${roundedQuad(w, h, ylt, ylb, yrt, yrb, cfg.corner)}")`;
@@ -292,10 +343,29 @@ export function ArchedHero({
 
     /* --------------------------------------------------------- mode / size */
 
-    const applyScale = () => {
-      if (!desktop) return;
-      const s = Math.min(section.clientWidth / DESIGN_WIDTH, section.clientHeight / DESIGN_HEIGHT);
-      stage.style.setProperty("--s", String(Math.max(0.25, s)));
+    const applyMode = () => {
+      const mobile = !desktop;
+      const phone = mobile && phoneQuery.matches;
+      const compact = phone && compactQuery.matches;
+      cfg = desktop ? DESKTOP : phone ? (compact ? MOBILE_COMPACT : MOBILE) : TABLET;
+      bandTop = desktop ? BAND_TOP : 0;
+
+      track.style.width = `${cfg.width}px`;
+      track.style.height = `${cfg.height}px`;
+
+      if (mobile) {
+        const k = carousel.clientWidth / cfg.width || 1;
+        const band = compact ? MOBILE_COMPACT_BAND : phone ? MOBILE_BAND : TABLET_BAND;
+        track.style.transform = `translateX(-50%) scale(${k})`;
+        carousel.style.height = `${(band * k).toFixed(2)}px`;
+        stage.style.removeProperty("--s");
+      } else {
+        track.style.transform = "translateX(-50%)";
+        carousel.style.height = "";
+        const s = Math.min(section.clientWidth / DESIGN_WIDTH, section.clientHeight / DESIGN_HEIGHT);
+        stage.style.setProperty("--s", String(Math.max(0.25, s)));
+      }
+
       layoutAll();
     };
 
@@ -505,32 +575,23 @@ export function ArchedHero({
     /* -------------------------------------------------------------- startup */
 
     stage.dataset.ready = "true";
-    applyScale();
-    if (desktop) {
-      frameId = window.requestAnimationFrame(frame);
-      entrance();
-    }
+    applyMode();
+    frameId = window.requestAnimationFrame(frame);
+    if (desktop) entrance();
 
     const onReduce = () => {
       reduce = reduceQuery.matches;
     };
 
     const onResize = () => {
-      window.requestAnimationFrame(applyScale);
+      window.requestAnimationFrame(applyMode);
     };
 
     const onBreakpoint = () => {
       const next = desktopQuery.matches;
       if (next === desktop) return;
       desktop = next;
-
-      if (desktop) {
-        applyScale();
-        if (!frameId) frameId = window.requestAnimationFrame(frame);
-      } else {
-        window.cancelAnimationFrame(frameId);
-        frameId = 0;
-      }
+      applyMode();
     };
 
     carousel.addEventListener("pointerdown", onPointerDown);
@@ -598,14 +659,6 @@ export function ArchedHero({
         <p className={styles.sublineShort}>
           Concerts, expos, ateliers… les sorties à ne pas manquer près de chez vous.
         </p>
-
-        {cards.length > 0 ? (
-          <div className={styles.rail} role="group" aria-label="Carrousel des prochaines sorties">
-            {cards.map((event, index) => (
-              <HeroCard key={`rail-${index}`} event={event} variant="rail" />
-            ))}
-          </div>
-        ) : null}
 
         {cards.length > 0 ? (
           <>
