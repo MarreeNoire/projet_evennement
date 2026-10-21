@@ -2,15 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, LoaderCircle, Send } from "lucide-react";
+import { ImageIcon, LoaderCircle, Send, X } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
-import { Alert } from "@/components/ui/states";
-import { PhaseTag } from "@/components/social/phase-tag";
 import { createPost } from "@/lib/salons/actions";
 import { LIMITS, STORAGE_BUCKETS } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { EventPhase } from "@/lib/social/phase";
+import { PHASE_LABELS, type EventPhase } from "@/lib/social/phase";
 import type { SalonPostCategory } from "@/types/database";
 
 const POST_CATEGORIES: { value: SalonPostCategory; label: string }[] = [
@@ -25,8 +23,9 @@ const POST_CATEGORIES: { value: SalonPostCategory; label: string }[] = [
 /* =============================================================================
    Composeur du salon
    --------------------------------------------------------------------------
-   Rappelle dans quelle phase (avant / sur place / après) la publication sera
-   rangée, pour que l'auteur sache où elle apparaîtra dans le fil.
+   Une seule ligne qui grandit avec le texte, comme un chat. La catégorie et
+   les photos restent accessibles en un clic ; la phase d'arrivée est rappelée
+   en texte discret pour savoir où la publication sera rangée.
    ========================================================================== */
 
 export function SalonPostForm({
@@ -47,9 +46,17 @@ export function SalonPostForm({
   const [pending, startTransition] = useTransition();
   const [photos, setPhotos] = useState<File[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
   const previews = useMemo(() => photos.map((photo) => URL.createObjectURL(photo)), [photos]);
 
   useEffect(() => () => previews.forEach((url) => URL.revokeObjectURL(url)), [previews]);
+
+  useEffect(() => {
+    const element = textRef.current;
+    if (!element) return;
+    element.style.height = "0px";
+    element.style.height = `${Math.min(element.scrollHeight, 200)}px`;
+  }, [content]);
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -82,6 +89,7 @@ export function SalonPostForm({
           setPhotos([]);
           if (inputRef.current) inputRef.current.value = "";
           router.refresh();
+          requestAnimationFrame(() => textRef.current?.focus());
         } else {
           setError(result.error || "Impossible de publier ton message.");
         }
@@ -97,34 +105,33 @@ export function SalonPostForm({
     <form
       onSubmit={handleSubmit}
       aria-busy={pending}
-      className="border-border bg-surface mb-6 rounded-2xl border p-4 shadow-sm sm:p-5"
+      className="border-border bg-surface mb-6 rounded-xl border p-3 sm:p-4"
     >
-      {error ? (
-        <div className="mb-4">
-          <Alert tone="danger" title="Publication impossible">
-            {error}
-          </Alert>
-        </div>
-      ) : null}
-
-      <div className="flex gap-3 sm:gap-4">
-        <Avatar src={author.avatarUrl} name={author.name} size="md" />
+      <div className="flex gap-3">
+        <Avatar src={author.avatarUrl} name={author.name} size="sm" className="mt-1" />
         <div className="min-w-0 flex-1">
           <label htmlFor="salon-post" className="sr-only">
             Ta publication
           </label>
           <textarea
+            ref={textRef}
             id="salon-post"
             value={content}
             onChange={(event) => setContent(event.target.value)}
+            onKeyDown={(event) => {
+              if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
             maxLength={LIMITS.MAX_POST_LENGTH}
-            rows={4}
-            placeholder="Partage une question, une idée ou un moment de l’événement…"
-            className="placeholder:text-fg-subtle min-h-28 w-full resize-y bg-transparent text-base leading-relaxed focus:outline-none"
+            rows={1}
+            placeholder="Quoi de neuf dans le salon ?"
+            className="placeholder:text-fg-subtle min-h-9 w-full resize-none bg-transparent py-1.5 text-base leading-relaxed focus:outline-none"
           />
 
-          <div className="border-border/60 mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="mt-1.5 flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
               <label className="sr-only" htmlFor="salon-post-category">
                 Étiquette de la publication
               </label>
@@ -132,7 +139,7 @@ export function SalonPostForm({
                 id="salon-post-category"
                 value={category}
                 onChange={(event) => setCategory(event.target.value as SalonPostCategory)}
-                className="border-border bg-surface text-fg min-h-10 rounded-sm border px-3 text-xs font-semibold"
+                className="border-border text-fg-muted focus:border-border-strong h-8 max-w-28 rounded-full border bg-transparent px-2.5 text-xs font-semibold outline-none"
               >
                 {POST_CATEGORIES.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -162,46 +169,58 @@ export function SalonPostForm({
                 type="button"
                 disabled={!allowMedia || pending || photos.length >= 4}
                 onClick={() => inputRef.current?.click()}
+                aria-label={
+                  !allowMedia
+                    ? "L'envoi de photos est désactivé pour cet événement"
+                    : "Ajouter des photos"
+                }
                 title={
                   !allowMedia
                     ? "L'envoi de photos est désactivé pour cet événement"
                     : "Ajouter des photos"
                 }
-                className="text-fg-muted hover:bg-bg-muted hover:text-fg border-border inline-flex min-h-10 items-center gap-2 rounded-sm border px-3 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="text-fg-subtle hover:bg-bg-muted hover:text-fg flex size-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ImageIcon className="size-4" aria-hidden="true" />
-                {photos.length ? `Photos ${photos.length}/4` : "Ajouter des photos"}
               </button>
-              {phase ? <PhaseTag phase={phase} /> : null}
+              {phase ? (
+                <span className="text-fg-subtle hidden text-[11px] sm:inline">
+                  · {PHASE_LABELS[phase]}
+                </span>
+              ) : null}
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
-              <span className="text-fg-subtle text-xs tabular-nums" aria-live="polite">
-                {content.length}/{LIMITS.MAX_POST_LENGTH}
-              </span>
+            <div className="flex shrink-0 items-center gap-2">
+              {content.length > LIMITS.MAX_POST_LENGTH * 0.85 ? (
+                <span className="text-fg-subtle text-2xs tabular-nums" aria-live="polite">
+                  {content.length}/{LIMITS.MAX_POST_LENGTH}
+                </span>
+              ) : null}
               <button
                 type="submit"
                 disabled={pending || content.trim().length === 0}
                 aria-busy={pending}
-                className="bg-primary-solid hover:bg-primary-solid-hover text-primary-solid-fg inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-5 text-sm font-semibold shadow-sm transition-colors disabled:cursor-progress disabled:opacity-60"
+                aria-label={pending ? "Publication en cours" : "Publier"}
+                title={pending ? "Publication…" : "Publier (Ctrl + Entrée)"}
+                className="bg-primary-solid hover:bg-primary-solid-hover text-primary-solid-fg flex size-9 items-center justify-center rounded-full transition-[background-color,transform] duration-150 active:scale-95 disabled:cursor-progress disabled:opacity-40 motion-reduce:transform-none"
               >
                 {pending ? (
                   <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
                 ) : (
-                  <Send className="size-3.5" aria-hidden="true" />
+                  <Send className="size-4" aria-hidden="true" />
                 )}
-                {pending ? "Publication…" : "Publier"}
               </button>
             </div>
           </div>
         </div>
       </div>
+
       {photos.length > 0 ? (
-        <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <ul className="mt-3 ml-11 grid grid-cols-4 gap-2">
           {photos.map((photo, index) => (
             <li
               key={`${photo.name}-${index}`}
-              className="border-border bg-bg-muted relative aspect-square overflow-hidden border"
+              className="border-border bg-bg-muted relative aspect-square overflow-hidden rounded-md border"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -212,14 +231,20 @@ export function SalonPostForm({
               <button
                 type="button"
                 onClick={() => setPhotos((current) => current.filter((_, i) => i !== index))}
-                className="border-border bg-surface/95 hover:bg-surface absolute top-2 right-2 min-h-10 rounded-sm border px-3 text-xs font-semibold shadow-sm"
+                className="border-border bg-surface/95 hover:bg-surface absolute top-1 right-1 flex size-6 items-center justify-center rounded-full border"
                 aria-label={`Retirer la photo ${index + 1}`}
               >
-                Retirer
+                <X className="size-3" aria-hidden="true" />
               </button>
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {error ? (
+        <p role="alert" className="text-danger mt-2 text-xs font-medium">
+          {error}
+        </p>
       ) : null}
     </form>
   );

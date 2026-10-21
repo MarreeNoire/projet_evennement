@@ -378,6 +378,22 @@ export default async function SalonDetailPage({
 
 /* ------------------------------ Discussion ------------------------------ */
 
+const POST_GROUP_WINDOW_MS = 5 * 60 * 1000;
+
+/** Regroupe les publications consécutives d'une même personne (même étiquette). */
+function shouldGroup(previous: PostWithAuthor | undefined, post: PostWithAuthor): boolean {
+  if (!previous) return false;
+  if (previous.author_id !== post.author_id) return false;
+  if (previous.kind === "announcement" || post.kind === "announcement") return false;
+  if (previous.category !== post.category) return false;
+
+  return (
+    Math.abs(
+      new Date(post.created_at).getTime() - new Date(previous.created_at).getTime(),
+    ) <= POST_GROUP_WINDOW_MS
+  );
+}
+
 function Discussion({
   salonId,
   posts,
@@ -565,12 +581,13 @@ function Discussion({
               ) : null}
             </div>
             {selectedPosts.length > 0 ? (
-              selectedPosts.map((post) => (
+              selectedPosts.map((post, index) => (
                 <PostCard
                   key={post.id}
                   post={post}
                   comments={commentsByPost.get(post.id)}
                   currentUserId={profile?.id}
+                  grouped={shouldGroup(selectedPosts[index - 1], post)}
                 />
               ))
             ) : (
@@ -585,14 +602,15 @@ function Discussion({
           </section>
         </div>
       ) : (
-        <section aria-label="Publications" className="flex flex-col gap-3">
+        <section aria-label="Publications" className="flex flex-col">
           {selectedPosts.length ? (
-            selectedPosts.map((post) => (
+            selectedPosts.map((post, index) => (
               <PostCard
                 key={post.id}
                 post={post}
                 comments={commentsByPost.get(post.id)}
                 currentUserId={profile?.id}
+                grouped={shouldGroup(selectedPosts[index - 1], post)}
               />
             ))
           ) : (

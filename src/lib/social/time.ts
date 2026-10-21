@@ -1,6 +1,15 @@
 /* Temps relatif en français : « à l'instant », « il y a 2 heures », « 12 sept. ». */
 
 const relative = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+const clock = new Intl.DateTimeFormat("fr-FR", {
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Africa/Abidjan",
+});
+
+export function formatClock(value: string | Date): string {
+  return clock.format(typeof value === "string" ? new Date(value) : value);
+}
 
 export function formatRelative(value: string | Date, now: Date = new Date()): string {
   const date = typeof value === "string" ? new Date(value) : value;

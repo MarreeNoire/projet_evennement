@@ -68,56 +68,52 @@ export function PostActions({
   }
 
   return (
-    <div className="border-border/50 mt-4 border-t pt-3">
-      <div className="flex items-center text-sm">
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={toggleLike}
-            disabled={pending}
-            aria-pressed={reacted}
-            aria-busy={pending}
-            className={cn(
-              "group inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-[background-color,color,transform] duration-150 active:scale-95 disabled:cursor-progress disabled:opacity-70 motion-reduce:transform-none motion-reduce:transition-none",
-              reacted
-                ? "bg-danger-subtle text-danger"
-                : "text-fg-muted hover:bg-bg-muted hover:text-fg",
-            )}
-          >
-            {pending ? (
-              <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <Heart
-                className={cn(
-                  "size-4 transition-transform duration-200 motion-reduce:transition-none",
-                  reacted && !pending && "animate-like-confirm",
-                  reacted && "scale-110 fill-current",
-                )}
-                aria-hidden="true"
-              />
-            )}
-            <span>{pending ? "En cours…" : count > 0 ? count : "J'aime"}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setReplyOpen((open) => !open)}
-            aria-expanded={replyOpen}
-            className="group text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-[background-color,color,transform] duration-150 active:scale-95 motion-reduce:transform-none motion-reduce:transition-none"
-          >
-            <MessageCircle
-              className="size-4 transition-transform duration-200 group-hover:scale-110"
+    <div className="mt-2">
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={toggleLike}
+          disabled={pending}
+          aria-pressed={reacted}
+          aria-busy={pending}
+          className={cn(
+            "group inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition-[color,background-color,transform] duration-150 hover:bg-bg-muted active:scale-95 disabled:cursor-progress disabled:opacity-70 motion-reduce:transform-none motion-reduce:transition-none",
+            reacted ? "text-danger" : "text-fg-subtle hover:text-fg",
+          )}
+        >
+          {pending ? (
+            <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Heart
+              className={cn(
+                "size-4 transition-transform duration-200 motion-reduce:transition-none",
+                reacted && !pending && "animate-like-confirm",
+                reacted && "scale-110 fill-current",
+              )}
               aria-hidden="true"
             />
-            <span>{commentCount > 0 ? commentCount : "Commenter"}</span>
-          </button>
-        </div>
+          )}
+          <span>{pending ? "En cours…" : count > 0 ? count : "J'aime"}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setReplyOpen((open) => !open)}
+          aria-expanded={replyOpen}
+          className="group text-fg-subtle hover:bg-bg-muted hover:text-fg inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition-[color,background-color,transform] duration-150 active:scale-95 motion-reduce:transform-none motion-reduce:transition-none"
+        >
+          <MessageCircle
+            className="size-4 transition-transform duration-200 group-hover:scale-110"
+            aria-hidden="true"
+          />
+          <span>{commentCount > 0 ? commentCount : "Commenter"}</span>
+        </button>
       </div>
 
       {replyOpen ? (
         <form
           onSubmit={sendReply}
-          className="bg-bg-subtle border-border mt-3 flex items-end gap-2 rounded-2xl border p-2"
+          className="border-border bg-bg-subtle mt-2 flex items-end gap-2 rounded-lg border p-2"
         >
           <label htmlFor={`reply-${postId}`} className="sr-only">
             Ta réponse

@@ -62,29 +62,25 @@ export function CommentThreadList({
 
         return (
           <li key={comment.id} className="flex min-w-0 items-start gap-2.5">
-            <Avatar src={comment.author?.avatar_url} name={name} size="xs" />
+            <Avatar src={comment.author?.avatar_url} name={name} size="xs" className="mt-0.5" />
             <div className="min-w-0 flex-1">
-              <div
-                className={`border-border/60 rounded-2xl border px-3.5 py-3 sm:px-4 ${
-                  isOwnComment ? "bg-primary/10" : "bg-surface-raised"
-                }`}
-              >
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                 <p className="text-fg text-xs font-semibold">{isOwnComment ? "Vous" : name}</p>
-                {comment.parent_id ? (
-                  <p className="text-primary mt-1 flex items-center gap-1.5 text-xs font-medium">
-                    <CornerUpRight className="size-3.5 shrink-0" aria-hidden="true" />
-                    En réponse à{" "}
-                    {commentsById.get(comment.parent_id)?.author?.display_name ?? "un commentaire"}
-                  </p>
-                ) : null}
-                <p className="mt-1 text-sm leading-relaxed whitespace-pre-line">
-                  {comment.content}
-                </p>
-                <p className="text-fg-subtle text-2xs mt-1.5 text-right">
+                <time className="text-fg-subtle text-[10px]" dateTime={comment.created_at}>
                   {formatRelative(comment.created_at)}
-                </p>
+                </time>
               </div>
-              <div className="flex flex-wrap items-center gap-x-1">
+              {comment.parent_id ? (
+                <p className="text-fg-subtle mt-0.5 flex items-center gap-1 text-[11px]">
+                  <CornerUpRight className="size-3 shrink-0" aria-hidden="true" />
+                  Réponse à{" "}
+                  {commentsById.get(comment.parent_id)?.author?.display_name ?? "un commentaire"}
+                </p>
+              ) : null}
+              <p className="text-fg mt-1 text-sm leading-relaxed whitespace-pre-line">
+                {comment.content}
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-1">
                 <CommentReplyControl
                   postId={postId}
                   parentId={comment.id}
@@ -104,7 +100,7 @@ export function CommentThreadList({
                         return next;
                       })
                     }
-                    className="text-fg-muted hover:bg-bg-muted hover:text-primary inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs font-semibold transition-colors"
+                    className="text-fg-subtle hover:text-fg inline-flex min-h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium transition-colors"
                   >
                     {isCollapsed ? (
                       <ChevronDown className="size-3.5" aria-hidden="true" />

@@ -66,15 +66,12 @@ export function CommentReplyControl({
             setOpen(true);
           }}
           aria-expanded={open}
-          className="text-fg-muted hover:bg-bg-muted hover:text-primary inline-flex min-h-8 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition-colors"
+          className="text-fg-subtle hover:bg-bg-muted hover:text-fg inline-flex min-h-8 items-center gap-1.5 rounded-md px-2 text-[11px] font-semibold transition-colors"
         >
           <Reply className="size-3.5" aria-hidden="true" /> Répondre
         </button>
       ) : (
-        <form
-          onSubmit={submit}
-          className="bg-bg-subtle border-border mt-1 grid gap-2 rounded-2xl border p-2.5"
-        >
+        <form onSubmit={submit} className="border-border mt-1 grid gap-2 border-l-2 pl-2.5">
           <label htmlFor={`reply-comment-${parentId}`} className="text-fg-muted text-xs">
             Répondre à <span className="font-semibold">{parentAuthor}</span>
           </label>
@@ -88,7 +85,7 @@ export function CommentReplyControl({
             disabled={pending}
             autoFocus
             placeholder="Écris ta réponse…"
-            className="border-border-strong bg-surface focus:border-border-focus focus:ring-border-focus min-h-16 w-full resize-y rounded-xl border px-3 py-2 text-sm leading-relaxed focus:ring-1 focus:outline-none"
+            className="border-border bg-surface focus:border-border-focus focus:ring-border-focus min-h-16 w-full resize-y rounded-lg border px-3 py-2 text-sm leading-relaxed focus:ring-1 focus:outline-none"
           />
           {error ? (
             <p role="alert" className="text-danger text-xs">
@@ -103,7 +100,7 @@ export function CommentReplyControl({
                 setError(null);
               }}
               disabled={pending}
-              className="text-fg-muted hover:bg-bg-muted inline-flex min-h-9 items-center gap-1 rounded-sm px-3 text-xs font-semibold"
+              className="text-fg-muted hover:bg-bg-muted inline-flex min-h-8 items-center gap-1 rounded-md px-3 text-xs font-semibold"
             >
               <X className="size-3.5" aria-hidden="true" /> Annuler
             </button>
@@ -111,7 +108,7 @@ export function CommentReplyControl({
               type="submit"
               disabled={pending || !content.trim()}
               aria-busy={pending}
-              className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-9 items-center gap-1.5 rounded-sm px-4 text-xs font-semibold disabled:opacity-50"
+              className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-8 items-center gap-1.5 rounded-md px-3.5 text-xs font-semibold disabled:opacity-50"
             >
               {pending ? (
                 <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
