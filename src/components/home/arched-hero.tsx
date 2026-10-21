@@ -12,9 +12,10 @@ import styles from "./arched-hero.module.css";
 /* =============================================================================
    Hero « arche » — composition éditoriale, carrousel de sorties en éventail.
    --------------------------------------------------------------------------
-   Les cartes sont les vraies sorties publiées. La geometry est calculée dans un
-   espace de 1440 × 1010 puis mise à l’échelle pour tenir sur un écran ; sur
-   mobile, l’espace passe à 640 × 410 et le bloc reprend le flux du document.
+   Les cartes sont les vraies sorties publiées. Sur desktop, la géométrie est
+   calculée dans un espace de 1440 × 1010 puis mise à l’échelle. Sous 1024 px,
+   on ne rétrécit pas cette scène : le hero devient une composition verticale
+   avec un rail à défilement natif (scroll-snap), comme dans une application.
    ========================================================================== */
 
 const CARD_COUNT = 10;
@@ -22,10 +23,8 @@ const DESIGN_WIDTH = 1440;
 const DESIGN_HEIGHT = 1010;
 /** Haut de la bande du carrousel dans l’espace de desktop. */
 const BAND_TOP = 420;
-/** Hauteur de la bande mobile : un peu plus que le repère 410 pour que les
- *  infos des cartes d’extrémité ne soient pas rognées par le bas. */
-const MOBILE_BAND = 450;
-const IMAGE_SIZES = "(max-width: 820px) 44vw, 19vw";
+const IMAGE_SIZES = "19vw";
+const RAIL_IMAGE_SIZES = "(max-width: 600px) 76vw, (max-width: 1023px) 52vw, 19vw";
 
 interface Geometry {
   width: number;
@@ -61,24 +60,6 @@ const DESKTOP: Geometry = {
   push: 0.083,
   speed: 50,
   corner: 15,
-};
-
-const MOBILE: Geometry = {
-  width: 640,
-  height: 410,
-  cx: 320,
-  centerY: 205,
-  radius: 313,
-  pitch: 150,
-  span: 750,
-  baseW: 148,
-  growW: 30,
-  baseH: 266,
-  growH: 88,
-  cyDrop: 8,
-  push: 0.1,
-  speed: 46,
-  corner: 14,
 };
 
 const unit = (dx: number, dy: number): [number, number] => {
@@ -140,21 +121,24 @@ function roundedQuad(
 
 function HeroCard({
   event,
-  index,
   register,
+  variant = "arc",
+  preload = false,
 }: {
   event: PublishedEventView;
-  index: number;
-  register: (el: HTMLAnchorElement | null) => void;
+  register?: (el: HTMLAnchorElement | null) => void;
+  variant?: "arc" | "rail";
+  preload?: boolean;
 }) {
   const date = formatEventDate(event.start_at);
   const cover = event.cover_url || event.gallery?.[0];
+  const isRail = variant === "rail";
 
   return (
     <Link
       ref={register}
       href={`/evenements/${event.slug}`}
-      className={styles.card}
+      className={isRail ? styles.railCard : styles.card}
       draggable={false}
       aria-label={`${event.title} — ${date.fullBadge}, ${event.city}`}
     >
@@ -163,9 +147,9 @@ function HeroCard({
           src={cover}
           alt=""
           fill
-          sizes={IMAGE_SIZES}
+          sizes={isRail ? RAIL_IMAGE_SIZES : IMAGE_SIZES}
           quality={75}
-          preload={index === 4}
+          preload={preload}
           className={styles.cover}
         />
       ) : (
@@ -176,10 +160,18 @@ function HeroCard({
 
       <span className={styles.cardScrim} aria-hidden="true" />
 
-      <span className={styles.cardInfo}>
-        <span className={styles.cardDate}>
+      {isRail ? (
+        <span className={styles.dateChip}>
           {date.weekday} {date.dayMonth}
         </span>
+      ) : null}
+
+      <span className={styles.cardInfo}>
+        {isRail ? null : (
+          <span className={styles.cardDate}>
+            {date.weekday} {date.dayMonth}
+          </span>
+        )}
         <span className={styles.cardTitle}>{event.title}</span>
         <span className={styles.cardMeta}>
           {event.city}
@@ -242,12 +234,12 @@ export function ArchedHero({
     const cards = cardRefs.current.filter((card): card is HTMLAnchorElement => card !== null);
     if (cards.length === 0) return;
 
-    const mediaQuery = window.matchMedia("(max-width: 820px)");
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
     const reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let reduce = reduceQuery.matches;
+    let desktop = desktopQuery.matches;
 
-    let cfg = DESKTOP;
-    let bandTop = BAND_TOP;
+    const cfg = DESKTOP;
     let scroll = 0;
     let velocity = 0;
     let dragging = false;
@@ -288,7 +280,7 @@ export function ArchedHero({
 
       el.style.width = `${w.toFixed(2)}px`;
       el.style.height = `${h.toFixed(2)}px`;
-      el.style.transform = `translate3d(${(x - w / 2).toFixed(2)}px, ${(cy - h / 2 - bandTop).toFixed(
+      el.style.transform = `translate3d(${(x - w / 2).toFixed(2)}px, ${(cy - h / 2 - BAND_TOP).toFixed(
         2,
       )}px, 0)`;
       el.style.clipPath = `path("${roundedQuad(w, h, ylt, ylb, yrt, yrb, cfg.corner)}")`;
@@ -300,27 +292,10 @@ export function ArchedHero({
 
     /* --------------------------------------------------------- mode / size */
 
-    const applyMode = () => {
-      const mobile = mediaQuery.matches;
-      cfg = mobile ? MOBILE : DESKTOP;
-      bandTop = mobile ? 0 : BAND_TOP;
-      stage.dataset.mode = mobile ? "mobile" : "desktop";
-
-      track.style.width = `${cfg.width}px`;
-      track.style.height = `${cfg.height}px`;
-
-      if (mobile) {
-        const k = carousel.clientWidth / cfg.width || 1;
-        track.style.transform = `translateX(-50%) scale(${k})`;
-        carousel.style.height = `${(MOBILE_BAND * k).toFixed(2)}px`;
-        stage.style.removeProperty("--s");
-      } else {
-        carousel.style.height = "";
-        track.style.transform = "translateX(-50%)";
-        const s = Math.min(section.clientWidth / DESIGN_WIDTH, section.clientHeight / DESIGN_HEIGHT);
-        stage.style.setProperty("--s", String(Math.max(0.25, s)));
-      }
-
+    const applyScale = () => {
+      if (!desktop) return;
+      const s = Math.min(section.clientWidth / DESIGN_WIDTH, section.clientHeight / DESIGN_HEIGHT);
+      stage.style.setProperty("--s", String(Math.max(0.25, s)));
       layoutAll();
     };
 
@@ -529,17 +504,33 @@ export function ArchedHero({
 
     /* -------------------------------------------------------------- startup */
 
-    applyMode();
     stage.dataset.ready = "true";
-    frameId = window.requestAnimationFrame(frame);
-    entrance();
+    applyScale();
+    if (desktop) {
+      frameId = window.requestAnimationFrame(frame);
+      entrance();
+    }
 
     const onReduce = () => {
       reduce = reduceQuery.matches;
     };
 
     const onResize = () => {
-      window.requestAnimationFrame(applyMode);
+      window.requestAnimationFrame(applyScale);
+    };
+
+    const onBreakpoint = () => {
+      const next = desktopQuery.matches;
+      if (next === desktop) return;
+      desktop = next;
+
+      if (desktop) {
+        applyScale();
+        if (!frameId) frameId = window.requestAnimationFrame(frame);
+      } else {
+        window.cancelAnimationFrame(frameId);
+        frameId = 0;
+      }
     };
 
     carousel.addEventListener("pointerdown", onPointerDown);
@@ -551,7 +542,7 @@ export function ArchedHero({
     window.addEventListener("pointerup", finishDrag);
     window.addEventListener("pointercancel", onPointerCancel);
     window.addEventListener("resize", onResize);
-    mediaQuery.addEventListener("change", applyMode);
+    desktopQuery.addEventListener("change", onBreakpoint);
     reduceQuery.addEventListener("change", onReduce);
 
     return () => {
@@ -566,7 +557,7 @@ export function ArchedHero({
       window.removeEventListener("pointerup", finishDrag);
       window.removeEventListener("pointercancel", onPointerCancel);
       window.removeEventListener("resize", onResize);
-      mediaQuery.removeEventListener("change", applyMode);
+      desktopQuery.removeEventListener("change", onBreakpoint);
       reduceQuery.removeEventListener("change", onReduce);
       delete stage.dataset.ready;
     };
@@ -603,6 +594,18 @@ export function ArchedHero({
           Concerts, expos, ateliers, sport… Découvrez les sorties publiées près de chez vous, réservez
           votre place et rejoignez la communauté de chaque événement.
         </p>
+
+        <p className={styles.sublineShort}>
+          Concerts, expos, ateliers… les sorties à ne pas manquer près de chez vous.
+        </p>
+
+        {cards.length > 0 ? (
+          <div className={styles.rail} role="group" aria-label="Carrousel des prochaines sorties">
+            {cards.map((event, index) => (
+              <HeroCard key={`rail-${index}`} event={event} variant="rail" />
+            ))}
+          </div>
+        ) : null}
 
         {cards.length > 0 ? (
           <>
@@ -649,7 +652,7 @@ export function ArchedHero({
                   <HeroCard
                     key={index}
                     event={event}
-                    index={index}
+                    preload={index === 4}
                     register={(el) => {
                       cardRefs.current[index] = el;
                     }}
