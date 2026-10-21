@@ -10,9 +10,6 @@
   --hero-accent: #b83f22;
   --hero-muted: color-mix(in srgb, #171e28 66%, transparent);
   --hero-line: color-mix(in srgb, #171e28 16%, transparent);
-  --hero-badge-bg: #fffdfa;
-  --hero-badge-border: color-mix(in srgb, #b83f22 20%, transparent);
-  --hero-badge-fg: #7a2d19;
   --hero-cta-bg: #b83f22;
   --hero-cta-hover: #9c341c;
   --hero-cta-fg: #fffaf4;
@@ -43,38 +40,6 @@
   height: 1010px;
   transform: translate(-50%, -50%) scale(var(--s));
   transform-origin: center center;
-}
-
-/* ------------------------------------------------------------------ badge */
-
-.badge {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 45px;
-  width: fit-content;
-  margin-inline: auto;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  height: 37px;
-  padding: 0 18px 0 15px;
-  border: 1px solid var(--hero-badge-border);
-  border-radius: 999px;
-  background: var(--hero-badge-bg);
-  color: var(--hero-badge-fg);
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: -0.006em;
-  white-space: nowrap;
-}
-
-.badgeDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--hero-accent);
-  flex: none;
 }
 
 /* --------------------------------------------------------------- headline */
@@ -490,15 +455,6 @@
     padding: 20px var(--gutter) 18px;
   }
 
-  .badge {
-    position: static;
-    margin: 0;
-    height: 32px;
-    padding: 0 13px;
-    gap: 7px;
-    font-size: 12.5px;
-  }
-
   .headline {
     position: static;
     margin: 15px 0 0;
@@ -682,11 +638,6 @@
     padding-bottom: 14px;
   }
 
-  .badge {
-    height: 28px;
-    font-size: 12px;
-  }
-
   .headline {
     margin-top: 10px;
     font-size: clamp(1.45rem, 5.6vw, 2rem);
@@ -711,10 +662,6 @@
 
 /* Entrée mobile : courte, décalée, désactivée si mouvement réduit. */
 @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
-  .badge {
-    animation: mobile-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
   .headline {
     animation: mobile-rise 620ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both;
   }

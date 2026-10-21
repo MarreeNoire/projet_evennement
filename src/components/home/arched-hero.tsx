@@ -232,13 +232,7 @@ function HeroCard({
   );
 }
 
-export function ArchedHero({
-  events,
-  weekCount,
-}: {
-  events: PublishedEventView[];
-  weekCount: number;
-}) {
+export function ArchedHero({ events }: { events: PublishedEventView[] }) {
   const cards = useMemo(() => {
     if (events.length === 0) return [];
 
@@ -255,7 +249,6 @@ export function ArchedHero({
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const badgeRef = useRef<HTMLParagraphElement | null>(null);
   const lineRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const sublineRef = useRef<HTMLParagraphElement | null>(null);
   const ctaRef = useRef<HTMLDivElement | null>(null);
@@ -264,13 +257,6 @@ export function ArchedHero({
   const noteCtaRef = useRef<HTMLDivElement | null>(null);
   const doodlesRef = useRef<SVGSVGElement | null>(null);
   const pausedRef = useRef(false);
-
-  const badgeLabel =
-    weekCount > 0
-      ? `${weekCount} sortie${weekCount > 1 ? "s" : ""} cette semaine`
-      : events.length > 0
-        ? "Les prochaines sorties"
-        : "L’agenda des sorties en Côte d’Ivoire";
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -495,14 +481,6 @@ export function ArchedHero({
       const easeOut = "cubic-bezier(.22,1,.36,1)";
       const spring = "cubic-bezier(.34,1.56,.64,1)";
 
-      badgeRef.current?.animate(
-        [
-          { opacity: 0, transform: "scale(.9)" },
-          { opacity: 1, transform: "scale(1)" },
-        ],
-        { duration: 520, delay: 90, easing: spring, fill: "both" },
-      );
-
       lineRefs.current.forEach((line, index) => {
         line?.animate(
           [
@@ -627,11 +605,6 @@ export function ArchedHero({
   return (
     <section ref={sectionRef} className={styles.section} aria-labelledby="arched-hero-title">
       <div ref={stageRef} className={styles.stage}>
-        <p ref={badgeRef} className={styles.badge}>
-          <span className={styles.badgeDot} aria-hidden="true" />
-          {badgeLabel}
-        </p>
-
         <h1 id="arched-hero-title" className={styles.headline}>
           <span
             ref={(el) => {
@@ -639,7 +612,7 @@ export function ArchedHero({
             }}
             className={styles.line}
           >
-            Les sorties qui animent
+            Rejoindre Event,
           </span>
           <span
             ref={(el) => {
@@ -647,7 +620,7 @@ export function ArchedHero({
             }}
             className={`${styles.line} ${styles.lineAccent}`}
           >
-            Abidjan &amp; la Côte d’Ivoire
+            c’est rejoindre une communauté
           </span>
         </h1>
 
@@ -686,7 +659,7 @@ export function ArchedHero({
               ref={carouselRef}
               className={styles.carousel}
               role="group"
-              aria-label="Carrousel des prochaines sorties"
+              aria-label="Carrousel des sorties"
               onPointerEnter={(event) => {
                 if (event.pointerType === "mouse") pausedRef.current = true;
               }}

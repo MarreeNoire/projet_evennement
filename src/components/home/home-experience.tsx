@@ -7,13 +7,12 @@ import type { PublishedEventView } from "@/types/database";
 
 interface HomeExperienceProps {
   events: PublishedEventView[];
-  weekCount: number;
 }
 
-export function HomeExperience({ events, weekCount }: HomeExperienceProps) {
+export function HomeExperience({ events }: HomeExperienceProps) {
   return (
     <div className="home-editorial relative min-h-screen">
-      <ArchedHero events={events} weekCount={weekCount} />
+      <ArchedHero events={events} />
 
       {/* Événements publiés à venir — le hero les présente déjà sur mobile */}
       <div className="hidden lg:block">
