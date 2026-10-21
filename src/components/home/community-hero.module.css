@@ -1,8 +1,35 @@
+/*
+ * Le hero inverse la surface de la page : encre sur papier en clair,
+ * papier sur encre en sombre. Il se distingue du body sans sortir
+ * des rÃ´les de couleur dÃ©finis dans DESIGN.md.
+ */
 .section {
+  --hero-fg: var(--fg-inverted);
+  --hero-muted: color-mix(in srgb, var(--fg-inverted) 70%, transparent);
+  --hero-border: color-mix(in srgb, var(--fg-inverted) 22%, transparent);
+  --hero-accent: #b83f22;
+
   position: relative;
   overflow: hidden;
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--bg-inverted);
+  color: var(--hero-fg);
+  padding-block: clamp(3rem, 6vw, 5rem) clamp(2rem, 4vw, 3.5rem);
+}
+
+/* La classe .light est posÃ©e sur <html> par le ThemeProvider. */
+:global(html.light) .section {
+  --hero-accent: #ff9870;
+}
+
+.section::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hero-border), transparent);
+  opacity: 0.6;
 }
 
 .inner {
@@ -10,10 +37,20 @@
   grid-template-columns: minmax(18rem, 0.78fr) minmax(31rem, 1.22fr);
   align-items: center;
   gap: clamp(1.5rem, 4vw, 4.5rem);
-  width: min(90rem, calc(100% - 2 * clamp(1.25rem, 5vw, 5rem)));
+  width: min(76rem, calc(100% - 2rem));
   min-height: min(48rem, calc(100svh - 4.5rem));
   margin-inline: auto;
   padding-block: clamp(2rem, 5vw, 4.5rem);
+}
+
+/* Aligne les bords du hero sur le conteneur des sections du body
+   (max-w-7xl + px-4 / sm:px-6 / lg:px-8). */
+@media (min-width: 640px) {
+  .inner { width: min(76rem, calc(100% - 3rem)); }
+}
+
+@media (min-width: 1024px) {
+  .inner { width: min(76rem, calc(100% - 4rem)); }
 }
 
 .copy {
@@ -23,20 +60,20 @@
 }
 
 .copy h1 {
-  max-width: 12ch;
+  max-width: 14ch;
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: clamp(3.35rem, 5.9vw, 5.6rem);
-  font-weight: 820;
-  line-height: 0.94;
-  letter-spacing: -0.07em;
+  font-family: var(--font-display, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif);
+  font-size: clamp(3.1rem, 5.4vw, 5rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.06em;
   text-wrap: balance;
 }
 
 .copy h1 em {
-  color: var(--primary);
+  color: var(--hero-accent);
   font-style: normal;
-  font-weight: 850;
+  font-weight: 800;
 }
 
 .actions {
@@ -73,13 +110,13 @@
 .primary:hover { background: var(--primary-solid-hover); }
 
 .secondary {
-  border: 1px solid var(--border-strong);
-  color: var(--fg);
+  border: 1px solid var(--hero-border);
+  color: var(--hero-fg);
 }
 
 .secondary:hover {
-  border-color: var(--primary);
-  background: var(--primary-subtle);
+  border-color: var(--hero-fg);
+  background: color-mix(in srgb, var(--hero-fg) 10%, transparent);
 }
 
 .primary:active,
@@ -87,7 +124,7 @@
 
 .note {
   margin: 1.6rem 0 0;
-  color: var(--fg-subtle);
+  color: var(--hero-muted);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -96,7 +133,6 @@
   .inner {
     grid-template-columns: minmax(16rem, 0.82fr) minmax(27rem, 1.18fr);
     gap: 1.5rem;
-    width: min(82rem, calc(100% - 2.5rem));
   }
   .copy h1 { font-size: clamp(3rem, 5.7vw, 4.4rem); }
 }
@@ -104,7 +140,6 @@
 @media (max-width: 760px) {
   .inner {
     grid-template-columns: minmax(0, 1fr);
-    width: min(44rem, calc(100% - 2rem));
     gap: 0.5rem;
     padding-block: 2.5rem 1.75rem;
   }
@@ -114,7 +149,7 @@
 }
 
 @media (max-width: 520px) {
-  .inner { width: calc(100% - 1.5rem); padding-block: 1.75rem 1.25rem; }
+  .inner { padding-block: 1.75rem 1.25rem; }
   .copy h1 { max-width: 12ch; font-size: clamp(2.8rem, 12vw, 3.8rem); }
   .actions { width: 100%; }
   .primary,
@@ -123,5 +158,198 @@
 
 @media (prefers-reduced-motion: reduce) {
   .primary,
-  .secondary { transition: none; }
+  .secondary,
+  .featuredCard,
+  .featuredImage { transition: none; }
+
+  .primary:hover,
+  .secondary:hover,
+  .featuredCard:hover { transform: none; }
+
+  .featuredCard:hover .featuredImage { transform: none; }
+
+  .mediaLayerIn,
+  .contentIn { animation: none; }
+}
+
+.featured {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.featuredCard {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 44rem;
+  aspect-ratio: 4 / 3;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  text-decoration: none;
+  isolation: isolate;
+  transform: translateZ(0);
+  transition: transform 180ms var(--ease-out-soft), box-shadow 180ms var(--ease-out-soft);
+  background-image: linear-gradient(135deg, var(--surface) 0%, var(--surface-raised) 100%);
+}
+
+.featuredCard:active {
+  transform: scale(0.985);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .featuredCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.18);
+  }
+
+  .featuredCard:hover .featuredImage {
+    transform: scale(1.02);
+  }
+}
+
+.featuredMedia {
+  position: absolute;
+  inset: 0;
+}
+
+/* Deux couches empilÃ©es : l'ancienne sous la nouvelle, qui apparaÃ®t en fondu. */
+.mediaLayer {
+  position: absolute;
+  inset: 0;
+}
+
+.mediaLayerIn {
+  animation: hero-media-in 520ms var(--ease-out-soft) both;
+}
+
+@keyframes hero-media-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.featuredImage {
+  object-fit: cover;
+  transition: transform 500ms var(--ease-out-soft);
+}
+
+.featuredScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0) 18%,
+    rgb(0 0 0 / 0.35) 55%,
+    rgb(0 0 0 / 0.82) 100%
+  );
+}
+
+.featuredContent {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+  color: #fff;
+  z-index: 1;
+  text-shadow: 0 1px 14px rgb(0 0 0 / 0.45);
+}
+
+.contentIn {
+  animation: hero-content-in 460ms var(--ease-out-soft) both;
+}
+
+@keyframes hero-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.featuredMeta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  opacity: 0.9;
+}
+
+.featuredMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.featuredContent h2 {
+  margin: 0;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(1.5rem, 2.2vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.featuredFooter {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.featuredPrice {
+  font-weight: 700;
+  color: var(--primary-solid-fg, #fff);
+  background: var(--primary-solid, #B83F22);
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.5rem;
+}
+
+.featuredVenue {
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Affiche de secours : toujours sombre, car le texte de la carte est blanc. */
+.featuredFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 120% at 80% 0%, rgb(184 63 34 / 0.35), transparent 60%),
+    linear-gradient(150deg, #202a35, #121820);
+  color: rgb(247 244 238 / 0.6);
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.featuredFallback span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.featuredEmpty {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 1px dashed var(--border);
+  border-radius: 1.25rem;
+  display: grid;
+  place-items: center;
+  color: var(--fg-subtle);
+  background: var(--surface);
 }

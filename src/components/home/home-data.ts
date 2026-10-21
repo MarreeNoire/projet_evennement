@@ -54,6 +54,24 @@ export function formatEventPrice(event: Pick<PublishedEventView, "min_price" | "
   return `Dès ${formatNumber(event.min_price)} ${currency}`;
 }
 
+/** Nombre de sorties qui démarrent cette semaine (semaine du lundi au dimanche). */
+export function countEventsThisWeek(
+  events: Pick<PublishedEventView, "start_at">[],
+  now: Date = new Date(),
+): number {
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+
+  return events.filter((event) => {
+    const startAt = new Date(event.start_at);
+    return startAt >= start && startAt < end;
+  }).length;
+}
+
 export function formatEventDate(dateString: string): {
   weekday: string;
   dayMonth: string;

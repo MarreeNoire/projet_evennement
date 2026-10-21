@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Calendar, MapPin, Ticket } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Calendar } from "lucide-react";
 
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { formatEventDate, formatEventPrice } from "./home-data";
@@ -65,7 +65,7 @@ export function TrendingEvents({ events = [] }: TrendingEventsProps) {
                 onClick={() => scrollRail(-1)}
                 disabled={!canScrollBack}
                 aria-label="Sorties précédentes"
-                className="border-border-strong text-fg hover:bg-primary-subtle disabled:text-fg-subtle grid size-10 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-45"
+                className="border-border text-fg-muted hover:border-border-strong hover:text-fg disabled:text-fg-subtle grid size-9 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-45"
               >
                 <ArrowLeft aria-hidden="true" className="size-4" />
               </button>
@@ -74,14 +74,14 @@ export function TrendingEvents({ events = [] }: TrendingEventsProps) {
                 onClick={() => scrollRail(1)}
                 disabled={!canScrollForward}
                 aria-label="Sorties suivantes"
-                className="border-border-strong text-fg hover:bg-primary-subtle disabled:text-fg-subtle grid size-10 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-45"
+                className="border-border text-fg-muted hover:border-border-strong hover:text-fg disabled:text-fg-subtle grid size-9 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-45"
               >
                 <ArrowRight aria-hidden="true" className="size-4" />
               </button>
             </div>
             <Link
               href="/explorer?sort=date_asc"
-              className="text-fg-muted hover:text-primary group inline-flex min-h-10 items-center gap-1 text-sm font-semibold transition-colors"
+              className="text-fg-muted hover:text-fg group inline-flex min-h-10 items-center gap-1 text-sm font-semibold transition-colors"
             >
               <span>Voir tout</span>
               <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -105,76 +105,58 @@ export function TrendingEvents({ events = [] }: TrendingEventsProps) {
             return (
               <article
                 key={event.id}
-                className={`${styles.event} event-card border-border bg-surface-raised group flex flex-col overflow-hidden rounded-2xl border shadow-sm transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-lg`}
+                className={`${styles.event} group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors duration-200 hover:border-border-strong`}
               >
                 <Link
                   href={`/evenements/${event.slug}`}
-                  className="relative aspect-[3/4] w-full overflow-hidden bg-surface-sunken"
+                  aria-label={`Voir ${event.title}`}
+                  className="relative block aspect-[4/3] w-full overflow-hidden bg-bg-subtle"
                 >
                   {image ? (
                     <PublicStorageImage
                       src={image}
-                      alt={event.title}
+                      alt=""
                       fill
-                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                      quality={80}
-                      className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(min-width: 1280px) 22vw, (min-width: 900px) 30vw, (min-width: 600px) 46vw, 80vw"
+                      quality={72}
+                      className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   ) : (
-                    <div className="flex size-full flex-col justify-end bg-stone-900 p-5 text-white">
-                      <span className="text-accent text-xs font-semibold">
-                        {event.category}
-                      </span>
-                      <h3 className="mt-1 font-display text-lg font-bold">
-                        {event.title}
-                      </h3>
+                    <div className="text-fg-subtle flex size-full items-end p-4 text-[11px] font-semibold tracking-[0.14em] uppercase">
+                      {event.category}
                     </div>
                   )}
-
-                  <div className="absolute top-3 right-3 z-10">
-                    <span className="rounded-full bg-black/60 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-white border border-white/10 uppercase tracking-wider">
-                      {dateInfo.weekday} {dateInfo.dayMonth}
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-3 left-3 z-10">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold text-neutral-900 dark:text-white shadow-sm">
-                      <MapPin className="text-accent size-3" />
-                      <span>{event.city}</span>
-                    </span>
-                  </div>
                 </Link>
 
-                <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
-                  <div>
-                    <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400 mb-1.5">
-                      <Calendar className="text-primary size-3.5" />
-                      <span>{dateInfo.time}</span>
-                      <span>·</span>
-                      <span className="truncate">{event.venue_name || event.city}</span>
-                    </div>
+                <div className="flex flex-1 flex-col gap-1.5 p-4">
+                  <p className="text-fg-subtle flex items-center gap-1.5 text-xs">
+                    <Calendar aria-hidden="true" className="size-3.5 shrink-0" />
+                    <span className="truncate">
+                      {dateInfo.weekday} {dateInfo.dayMonth} · {dateInfo.time}
+                    </span>
+                  </p>
 
-                    <h3 className="text-fg font-display line-clamp-2 text-base font-bold transition-colors group-hover:text-primary">
-                      <Link href={`/evenements/${event.slug}`}>{event.title}</Link>
-                    </h3>
-                  </div>
+                  <h3 className="text-fg font-display line-clamp-2 text-[0.9375rem] leading-snug font-semibold">
+                    <Link
+                      href={`/evenements/${event.slug}`}
+                      className="decoration-border-strong underline-offset-4 hover:underline"
+                    >
+                      {event.title}
+                    </Link>
+                  </h3>
 
-                    <div className="border-border mt-4 flex items-center justify-between border-t pt-3">
-                    <div>
-                      <span className="text-fg-subtle block text-xs font-medium">
-                        Tarif
-                      </span>
-                      <span className="text-fg text-sm font-extrabold">
-                        {priceLabel}
-                      </span>
-                    </div>
+                  <p className="text-fg-muted truncate text-xs">
+                    {event.venue_name || event.city}
+                  </p>
 
+                  <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+                    <span className="text-fg text-sm font-semibold">{priceLabel}</span>
                     <Link
                       href={`/evenements/${event.slug}/billets`}
-                      className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-bold transition-colors"
+                      className="text-fg-muted hover:text-fg inline-flex shrink-0 items-center gap-1 text-xs font-semibold transition-colors"
                     >
-                      <Ticket className="size-3.5" />
-                      <span>Réserver</span>
+                      Réserver
+                      <ArrowUpRight aria-hidden="true" className="size-3.5" />
                     </Link>
                   </div>
                 </div>
