@@ -1,6 +1,6 @@
 "use client";
 
-import { CommunityHero } from "./community-hero";
+import { ArchedHero } from "./arched-hero";
 import { TrendingEvents } from "./trending-events";
 import { ThisWeekEvents } from "./this-week-events";
 import type { PublishedEventView } from "@/types/database";
@@ -13,7 +13,7 @@ interface HomeExperienceProps {
 export function HomeExperience({ events, weekCount }: HomeExperienceProps) {
   return (
     <div className="home-editorial relative min-h-screen">
-      <CommunityHero events={events} weekCount={weekCount} />
+      <ArchedHero events={events} weekCount={weekCount} />
 
       {/* Événements publiés à venir */}
       <TrendingEvents events={events} />
