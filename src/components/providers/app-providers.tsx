@@ -4,9 +4,6 @@ import { createContext, useContext, useEffect, useSyncExternalStore } from "reac
 import { Toaster } from "sonner";
 
 import { STORAGE_KEYS } from "@/lib/constants";
-import { PwaInstallProvider } from "@/components/providers/pwa-install-provider";
-import { PwaUpdateToast } from "@/components/providers/pwa-update-toast";
-import { PwaInstallBanner } from "@/components/layout/pwa-install-banner";
 
 /* =============================================================================
    Gestion du thÃ¨me (compatible React 19 / Next.js 16)
@@ -105,23 +102,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <PwaInstallProvider>
-        {children}
-        <PwaUpdateToast />
-        <PwaInstallBanner />
-        <Toaster
-          position="top-center"
-          closeButton
-          richColors
-          toastOptions={{
-            classNames: {
-              toast: "rounded-xl border border-border shadow-lg",
-              title: "text-sm font-semibold",
-              description: "text-sm text-fg-muted",
-            },
-          }}
-        />
-      </PwaInstallProvider>
+      {children}
+      <Toaster
+        position="top-center"
+        closeButton
+        richColors
+        toastOptions={{
+          classNames: {
+            toast: "rounded-xl border border-border shadow-lg",
+            title: "text-sm font-semibold",
+            description: "text-sm text-fg-muted",
+          },
+        }}
+      />
     </ThemeProvider>
   );
 }

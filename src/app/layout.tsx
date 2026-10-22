@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AppProviders } from "@/components/providers/app-providers";
-import { PwaRouteRestoration } from "@/components/providers/pwa-route-restoration";
+import { ServiceWorkerCleanup } from "@/components/providers/service-worker-cleanup";
 import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
@@ -15,12 +15,6 @@ export const metadata: Metadata = {
   description:
     "Recherche des événements en Côte d'Ivoire, consulte les détails et réserve ta place en ligne.",
   applicationName: APP_NAME,
-  manifest: "/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: APP_NAME,
-  },
   icons: {
     icon: [
       { url: "/app-icon-192.png", sizes: "192x192", type: "image/png" },
@@ -83,7 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppProviders>
           <div id="contenu">{children}</div>
         </AppProviders>
-        <PwaRouteRestoration />
+        <ServiceWorkerCleanup />
       </body>
     </html>
   );

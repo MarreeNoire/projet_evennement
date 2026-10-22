@@ -1,20 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const START_PARAM = "pwa_start";
-
-/*
- * PWA launch URLs carry a marker so previous installs also return to the home
- * page instead of following a stale route saved by an older app version.
- */
-function redirectPwaLaunch(request: NextRequest) {
-  if (request.nextUrl.searchParams.get(START_PARAM) !== "1") return null;
-
-  const response = NextResponse.redirect(new URL("/", request.url), 307);
-  response.cookies.set("event_pwa_last_route", "", { path: "/", maxAge: 0 });
-  return response;
-}
-
 /* =============================================================================
    Proxy de session Supabase (convention Next.js 16 : `src/proxy.ts`)
    --------------------------------------------------------------------------
@@ -25,9 +11,6 @@ function redirectPwaLaunch(request: NextRequest) {
    ========================================================================== */
 
 export default async function proxy(request: NextRequest) {
-  const launchRedirect = redirectPwaLaunch(request);
-  if (launchRedirect) return launchRedirect;
-
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

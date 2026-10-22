@@ -1875,18 +1875,6 @@
   }
 }
 
-body.pwa-standalone footer > .container-page {
-  padding-block: 1.25rem;
-}
-body.pwa-standalone .explorer-page > div:first-child h1 {
-  font-size: 2rem;
-}
-/* Standalone + viewport-fit cover : la barre supérieure passe sous la barre
-   système — on la protège avec la zone sûre (même logique que la tabbar). */
-body.pwa-standalone .site-header {
-  padding-block-start: env(safe-area-inset-top);
-}
-
 /* Réduction de mouvement */
 @media (prefers-reduced-motion: reduce) {
   body::before,
