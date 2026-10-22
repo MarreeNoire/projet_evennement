@@ -2,32 +2,33 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, MapPin, Users } from "lucide-react";
 
-import { SalonPostForm } from "@/components/salons/salon-post-form";
 import { SalonPolls } from "@/components/salons/salon-polls";
+import { SalonFeed } from "@/components/salons/salon-feed";
+import { SalonMuteButton } from "@/components/salons/salon-mute-button";
+import { SalonPostCard } from "@/components/salons/salon-post-card";
 import { PhaseTag } from "@/components/social/phase-tag";
-import { PostCard } from "@/components/social/post-card";
 import { SocialShell } from "@/components/social/social-shell";
 import { Avatar, AvatarGroup } from "@/components/ui/avatar";
 import { ButtonLink } from "@/components/ui/button";
 import { ImageCarousel } from "@/components/ui/image-carousel";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { EmptyState } from "@/components/ui/states";
-import { ROUTES, SALON_PRIVACY_LABELS, SALON_TABS } from "@/lib/constants";
+import { SALON_PRIVACY_LABELS, SALON_TABS } from "@/lib/constants";
 import {
   getCommentsByPost,
   getEventsByIds,
   getSalonById,
-  getSalonMembers,
+  getSalonContext,
   getSalonMedia,
+  getSalonMembers,
   getSalonPolls,
   getSalonPosts,
   type SalonEventInfo,
 } from "@/lib/salons/queries";
-import type { PostWithAuthor } from "@/lib/salons/types";
-import { getEventPhase, phaseStatus, type EventPhase } from "@/lib/social/phase";
+import { getEventPhase, phaseStatus } from "@/lib/social/phase";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { cn, formatDateRange } from "@/lib/utils";
-import type { SalonPostCategory } from "@/types/database";
+import type { MentionOption, ViewerInfo } from "@/components/salons/salon-shared";
 
 export const metadata = {
   title: "Salon de l'événement",
@@ -35,65 +36,36 @@ export const metadata = {
 };
 
 /* =============================================================================
-   Salon d'un événement — « le fil de l'événement »
+   Salon d'un événement — refonte « fil + commentaires »
    --------------------------------------------------------------------------
-   Le salon est une affiche (couleur de l'événement) surmontant un fil rangé
-   par phases : Avant l'événement, Sur place, Après. Chaque publication est
-   classée selon le moment où elle a été écrite par rapport à l'événement.
+   Affiche événementielle + onglets. L'onglet « Publications » est le fil
+   refondu : composeur, réactions, commentaires en overlay, temps réel,
+   hors-ligne. Les autres onglets ( sondages, participants, photos… ) gardent
+   leur logique. Le contexte spectateur (rôle, notifications, dernière
+   lecture) est précalculé côté serveur et transmis aux composants clients.
    ========================================================================== */
 
 type TabSlug = (typeof SALON_TABS)[number]["slug"];
-const PHASE_FILTER_ORDER: EventPhase[] = ["avant", "live", "apres"];
-const PHASE_SHORT_TITLES: Record<EventPhase, string> = {
-  avant: "Avant",
-  live: "Sur place",
-  apres: "Après",
-};
-const PHASE_TITLES: Record<EventPhase, string> = {
-  avant: "Avant l’événement",
-  live: "Sur place",
-  apres: "Après l’événement",
-};
-const POST_CATEGORIES: { value: SalonPostCategory | "tous"; label: string }[] = [
-  { value: "tous", label: "Tout" },
-  { value: "discussion", label: "Discussion" },
-  { value: "question", label: "Questions" },
-  { value: "info_pratique", label: "Infos pratiques" },
-  { value: "rencontre", label: "Rencontres" },
-  { value: "covoiturage", label: "Covoiturage" },
-  { value: "photo", label: "Photos" },
-];
 
 export default async function SalonDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string; phase?: string; category?: string; unanswered?: string }>;
+  searchParams: Promise<{ tab?: string; post?: string }>;
 }) {
   const { id } = await params;
-  const {
-    tab,
-    phase: requestedPhase,
-    category: requestedCategory,
-    unanswered,
-  } = await searchParams;
+  const { tab } = await searchParams;
   const activeTab: TabSlug = SALON_TABS.find((item) => item.slug === tab)?.slug ?? "fil";
-  const phaseFilter = PHASE_FILTER_ORDER.find((item) => item === requestedPhase) ?? null;
-  const selectedCategory = POST_CATEGORIES.some(
-    (item) => item.value === requestedCategory && item.value !== "tous",
-  )
-    ? (requestedCategory as SalonPostCategory)
-    : "tous";
-  const unansweredOnly = unanswered === "1";
 
   const salon = await getSalonById(id);
   if (!salon) notFound();
 
-  const [posts, members, profile, events, photos] = await Promise.all([
+  const [posts, members, profile, context, events, photos] = await Promise.all([
     getSalonPosts(id),
     getSalonMembers(id, 40),
     getCurrentProfile(),
+    getSalonContext(id),
     salon.event_id
       ? getEventsByIds([salon.event_id])
       : Promise.resolve(new Map<string, SalonEventInfo>()),
@@ -103,9 +75,29 @@ export default async function SalonDetailPage({
 
   const event = salon.event_id ? (events.get(salon.event_id) ?? null) : null;
   const commentsByPost = await getCommentsByPost(posts.map((post) => post.id));
+  const commentsRecord = Object.fromEntries(commentsByPost);
   const now = new Date();
+  const nowMs = now.getTime();
   const phase = event ? getEventPhase(event.start_at, event.end_at, now) : null;
   const memberCount = Math.max(salon.member_count ?? 0, members.length);
+
+  const viewer: ViewerInfo = profile
+    ? {
+        id: profile.id,
+        name: profile.display_name ?? "Membre",
+        avatarUrl: profile.avatar_url,
+        isVerified: profile.is_verified ?? false,
+        role: context.role,
+      }
+    : { id: null, name: "Invité", avatarUrl: null, isVerified: false, role: null };
+
+  const mentionMembers: MentionOption[] = members
+    .filter((member) => member.user_id !== viewer.id)
+    .map((member) => ({
+      id: member.user_id,
+      name: member.profile?.display_name ?? "Participant",
+      avatarUrl: member.profile?.avatar_url ?? null,
+    }));
 
   return (
     <SocialShell active="salons">
@@ -169,59 +161,68 @@ export default async function SalonDetailPage({
               <Users className="size-4" aria-hidden="true" />
               {memberCount} participant{memberCount > 1 ? "s" : ""}
             </li>
+            <li className="flex items-center gap-2">
+              {salon.post_count ?? posts.length} publication
+              {(salon.post_count ?? posts.length) > 1 ? "s" : ""}
+            </li>
           </ul>
         </div>
       </header>
 
-      {/* Onglets */}
-      <nav
-        aria-label="Sections du salon"
-        className="no-scrollbar border-border mt-6 flex gap-2 overflow-x-auto border-b pb-2"
-      >
-        {SALON_TABS.map((item) => {
-          const isActive = item.slug === activeTab;
-          return (
-            <Link
-              key={item.slug}
-              href={`/salons/${id}?tab=${item.slug}`}
-              aria-current={isActive ? "page" : undefined}
-              className={cn(
-                "inline-flex min-h-11 shrink-0 items-center rounded-md px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
-                isActive
-                  ? "bg-primary-solid text-primary-solid-fg shadow-sm"
-                  : "text-fg-muted hover:bg-bg-muted hover:text-fg",
-              )}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Onglets + notifications */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <nav
+          aria-label="Sections du salon"
+          className="no-scrollbar flex max-w-full gap-2 overflow-x-auto pb-2"
+        >
+          {SALON_TABS.map((item) => {
+            const isActive = item.slug === activeTab;
+            return (
+              <Link
+                key={item.slug}
+                href={`/salons/${id}?tab=${item.slug}`}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
+                  isActive
+                    ? "bg-primary-solid text-primary-solid-fg shadow-sm"
+                    : "text-fg-muted hover:bg-bg-muted hover:text-fg",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+        {context.userId ? (
+          <SalonMuteButton salonId={id} muted={context.isMuted} />
+        ) : null}
+      </div>
 
       <div
         className={cn(
-          "mt-8 grid gap-10",
+          "mt-6 grid gap-10",
           activeTab === "fil" ? "grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_18rem]",
         )}
       >
         <div className="min-w-0">
-          {activeTab === "sondages" ? (
-            <SalonPolls salonId={id} polls={polls} profile={profile} />
-          ) : null}
-
           {activeTab === "fil" ? (
-            <Discussion
+            <SalonFeed
               salonId={id}
               posts={posts}
-              commentsByPost={commentsByPost}
-              event={event}
-              profile={profile}
-              phase={phase}
-              phaseFilter={phaseFilter}
-              selectedCategory={selectedCategory}
-              unansweredOnly={unansweredOnly}
+              commentsByPost={commentsRecord}
+              viewer={viewer}
+              organizerIds={context.organizerIds}
+              members={mentionMembers}
               allowMedia={event?.allow_media_upload ?? true}
+              canAnnounce={viewer.role === "owner" || viewer.role === "moderator"}
+              nowMs={nowMs}
+              lastReadAt={context.lastReadAt}
             />
+          ) : null}
+
+          {activeTab === "sondages" ? (
+            <SalonPolls salonId={id} polls={polls} profile={profile} />
           ) : null}
 
           {activeTab === "accueil" ? (
@@ -232,18 +233,22 @@ export default async function SalonDetailPage({
                   Annonces de l&apos;organisateur
                 </h2>
                 {posts.filter((post) => post.kind === "announcement").length === 0 ? (
-                  <p className="text-fg-muted text-sm">
-                    Aucune annonce pour le moment. Elles apparaîtront ici et dans le fil du salon.
-                  </p>
+                  <EmptyState
+                    title="Aucune annonce pour le moment"
+                    description="Elles apparaîtront ici et en tête du fil des publications."
+                  />
                 ) : (
                   posts
                     .filter((post) => post.kind === "announcement")
                     .map((post) => (
-                      <PostCard
+                      <SalonPostCard
                         key={post.id}
                         post={post}
-                        comments={commentsByPost.get(post.id)}
-                        currentUserId={profile?.id}
+                        comments={commentsRecord[post.id] ?? []}
+                        viewer={viewer}
+                        organizerIds={context.organizerIds}
+                        members={mentionMembers}
+                        nowMs={nowMs}
                       />
                     ))
                 )}
@@ -373,256 +378,6 @@ export default async function SalonDetailPage({
         ) : null}
       </div>
     </SocialShell>
-  );
-}
-
-/* ------------------------------ Discussion ------------------------------ */
-
-const POST_GROUP_WINDOW_MS = 5 * 60 * 1000;
-
-/** Regroupe les publications consécutives d'une même personne (même étiquette). */
-function shouldGroup(previous: PostWithAuthor | undefined, post: PostWithAuthor): boolean {
-  if (!previous) return false;
-  if (previous.author_id !== post.author_id) return false;
-  if (previous.kind === "announcement" || post.kind === "announcement") return false;
-  if (previous.category !== post.category) return false;
-
-  return (
-    Math.abs(
-      new Date(post.created_at).getTime() - new Date(previous.created_at).getTime(),
-    ) <= POST_GROUP_WINDOW_MS
-  );
-}
-
-function Discussion({
-  salonId,
-  posts,
-  commentsByPost,
-  event,
-  profile,
-  phase,
-  phaseFilter,
-  selectedCategory,
-  unansweredOnly,
-  allowMedia,
-}: {
-  salonId: string;
-  posts: PostWithAuthor[];
-  commentsByPost: Awaited<ReturnType<typeof getCommentsByPost>>;
-  event: SalonEventInfo | null;
-  profile: Awaited<ReturnType<typeof getCurrentProfile>>;
-  phase: EventPhase | null;
-  phaseFilter: EventPhase | null;
-  selectedCategory: SalonPostCategory | "tous";
-  unansweredOnly: boolean;
-  allowMedia: boolean;
-}) {
-  const groups: Record<EventPhase, PostWithAuthor[]> = { avant: [], live: [], apres: [] };
-  if (event) {
-    for (const post of posts) {
-      groups[getEventPhase(event.start_at, event.end_at, new Date(post.created_at))].push(post);
-    }
-  }
-  const selectedPhase = phaseFilter ?? phase ?? "avant";
-  const phasePosts = event ? groups[selectedPhase] : posts;
-  const selectedPosts = phasePosts.filter((post) => {
-    if (selectedCategory !== "tous" && post.category !== selectedCategory) return false;
-    if (
-      unansweredOnly &&
-      (post.category !== "question" || (commentsByPost.get(post.id)?.length ?? 0) > 0)
-    )
-      return false;
-    return true;
-  });
-  const filtersHref = (category: SalonPostCategory | "tous", unansweredValue: boolean) => {
-    const query = new URLSearchParams({ tab: "fil" });
-    if (event) query.set("phase", selectedPhase);
-    if (category !== "tous") query.set("category", category);
-    if (unansweredValue) query.set("unanswered", "1");
-    return `/salons/${salonId}?${query.toString()}#salon-post-filters`;
-  };
-
-  return (
-    <div className="flex flex-col gap-8">
-      {event ? (
-        <aside
-          className="border-primary/20 bg-primary/5 rounded-2xl border p-4 sm:p-5"
-          aria-label="Informations pratiques épinglées"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="text-primary text-xs font-bold tracking-wide uppercase">
-                À retenir · {event.title}
-              </p>
-              <p className="text-fg mt-2 flex items-center gap-2 text-sm">
-                <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-                {formatDateRange(event.start_at, event.end_at)}
-              </p>
-              <p className="text-fg-muted mt-1 flex items-center gap-2 text-sm">
-                <MapPin className="size-4 shrink-0" aria-hidden="true" />
-                {event.venue_name ? `${event.venue_name} · ` : ""}
-                {event.city}
-              </p>
-            </div>
-            <ButtonLink href={`/evenements/${event.slug}`} variant="secondary" size="sm">
-              Détails
-            </ButtonLink>
-          </div>
-        </aside>
-      ) : null}
-      {profile ? (
-        <SalonPostForm
-          salonId={salonId}
-          author={{ name: profile.display_name, avatarUrl: profile.avatar_url }}
-          phase={phase ?? undefined}
-          allowMedia={allowMedia}
-        />
-      ) : (
-        <div className="border-border flex flex-col gap-3 border-y py-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-fg-muted text-sm">
-            Connecte-toi pour publier et répondre dans le salon.
-          </p>
-          <ButtonLink href={`${ROUTES.login}?redirect=/salons/${salonId}`}>Se connecter</ButtonLink>
-        </div>
-      )}
-
-      <nav
-        id="salon-post-filters"
-        aria-label="Filtrer les publications"
-        className="flex flex-col gap-3"
-      >
-        <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Étiquettes">
-          {POST_CATEGORIES.map((item) => {
-            const active = selectedCategory === item.value;
-            const keepUnanswered =
-              unansweredOnly && (item.value === "tous" || item.value === "question");
-            return (
-              <Link
-                key={item.value}
-                href={filtersHref(item.value, keepUnanswered)}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
-                  active
-                    ? "border-primary bg-primary text-white"
-                    : "border-border bg-surface text-fg-muted hover:text-fg",
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
-        <Link
-          href={filtersHref(unansweredOnly ? selectedCategory : "question", !unansweredOnly)}
-          aria-current={unansweredOnly ? "page" : undefined}
-          className={cn(
-            "w-fit rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
-            unansweredOnly
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-border bg-surface text-fg-muted hover:text-fg",
-          )}
-        >
-          {unansweredOnly ? "✓ Questions sans réponse" : "Questions sans réponse"}
-        </Link>
-      </nav>
-
-      {posts.length === 0 && !event ? (
-        <EmptyState
-          title="Le fil est encore vide"
-          description="Sois la première personne à écrire dans ce salon."
-        />
-      ) : event ? (
-        <div className="flex flex-col gap-5">
-          <nav
-            id="salon-phase-filter"
-            aria-label="Filtrer les publications selon la période de l’événement"
-            className="border-border bg-bg-subtle rounded-2xl border p-1.5"
-          >
-            <div className="grid grid-cols-3 gap-1">
-              {PHASE_FILTER_ORDER.map((key) => {
-                const isActive = selectedPhase === key;
-                const count = groups[key].length;
-                return (
-                  <Link
-                    key={key}
-                    href={`/salons/${salonId}?tab=fil&phase=${key}#salon-phase-filter`}
-                    aria-current={isActive ? "page" : undefined}
-                    className={cn(
-                      "flex min-h-12 flex-col items-center justify-center rounded-xl px-2 py-1.5 text-center transition-colors",
-                      isActive
-                        ? "bg-surface text-primary shadow-sm"
-                        : "text-fg-muted hover:bg-surface/70 hover:text-fg",
-                    )}
-                  >
-                    <span className="text-xs font-semibold sm:text-sm">
-                      {PHASE_SHORT_TITLES[key]}
-                    </span>
-                    <span className="text-2xs text-fg-subtle">
-                      {count} publication{count === 1 ? "" : "s"}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          </nav>
-
-          <section
-            id={`salon-phase-${selectedPhase}`}
-            aria-labelledby="salon-phase-title"
-            className="scroll-mt-24"
-          >
-            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-              <h2 id="salon-phase-title" className="font-display text-xl font-semibold sm:text-2xl">
-                {PHASE_TITLES[selectedPhase]}
-              </h2>
-              {phase === selectedPhase ? (
-                <span className="text-primary text-xs font-semibold">Période actuelle</span>
-              ) : null}
-            </div>
-            {selectedPosts.length > 0 ? (
-              selectedPosts.map((post, index) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  comments={commentsByPost.get(post.id)}
-                  currentUserId={profile?.id}
-                  grouped={shouldGroup(selectedPosts[index - 1], post)}
-                />
-              ))
-            ) : (
-              <p className="text-fg-muted border-border bg-surface rounded-2xl border border-dashed px-4 py-6 text-sm">
-                {unansweredOnly
-                  ? "Aucune question sans réponse dans cette étape."
-                  : phase === selectedPhase
-                    ? "C’est la période actuelle. Sois le premier à publier ici."
-                    : "Aucune publication pour cette période pour le moment."}
-              </p>
-            )}
-          </section>
-        </div>
-      ) : (
-        <section aria-label="Publications" className="flex flex-col">
-          {selectedPosts.length ? (
-            selectedPosts.map((post, index) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                comments={commentsByPost.get(post.id)}
-                currentUserId={profile?.id}
-                grouped={shouldGroup(selectedPosts[index - 1], post)}
-              />
-            ))
-          ) : (
-            <p className="text-fg-muted border-border bg-surface rounded-2xl border border-dashed px-4 py-6 text-sm">
-              {unansweredOnly
-                ? "Aucune question sans réponse."
-                : "Aucune publication ne correspond à ce filtre."}
-            </p>
-          )}
-        </section>
-      )}
-    </div>
   );
 }
 

@@ -39,6 +39,7 @@
   ],
   "exclude": [
     "node_modules",
+    "agent",
     "e2e",
     "promo-video",
     "playwright.config.ts"

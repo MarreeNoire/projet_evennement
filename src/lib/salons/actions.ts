@@ -5,9 +5,19 @@ import { revalidatePath } from "next/cache";
 /** Mutations pour le salon communautaire (poster, commenter, réagir, join/leave). */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { ReactionType, SalonPostCategory } from "@/types/database";
+import type {
+  OrgRole,
+  PostKind,
+  ReactionType,
+  ReportReason,
+  ReportTarget,
+  SalonPostCategory,
+} from "@/types/database";
 
 const NOT_SIGNED_IN = "Connecte-toi pour participer.";
+const MAX_COMMENTS = 2000;
+/** Rôles considérés comme « organisateur » dans un salon (usage interne). */
+const ORGANIZER_ROLES: OrgRole[] = ["owner", "moderator"];
 const SALON_CHAT_REACTIONS = ["heart", "laugh", "fire", "clap", "wow"] as const;
 type SalonChatReaction = (typeof SALON_CHAT_REACTIONS)[number];
 
@@ -19,6 +29,22 @@ async function getUserId(
     data: { user },
   } = await supabase.auth.getUser();
   return user?.id ?? null;
+}
+
+/** Rôle de l'utilisateur courant dans un salon (owner, moderator, manager…). */
+async function getSalonRole(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  salonId: string,
+  userId: string,
+): Promise<OrgRole | null> {
+  const { data } = await supabase
+    .from("salon_members")
+    .select("role")
+    .eq("salon_id", salonId)
+    .eq("user_id", userId)
+    .is("left_at", null)
+    .maybeSingle();
+  return (data?.role as OrgRole | null) ?? null;
 }
 
 /** Envoie un message dans le chat instantané du salon. */
@@ -302,6 +328,7 @@ export async function createPost(
   content: string,
   media: { storage_path: string; size_bytes: number }[] = [],
   category: SalonPostCategory = "discussion",
+  options: { kind?: PostKind } = {},
 ): Promise<{ success: boolean; postId?: string; error?: string }> {
   const supabase = await createSupabaseServerClient();
   const userId = await getUserId(supabase);
@@ -319,7 +346,17 @@ export async function createPost(
     "photo",
   ];
   if (!categories.includes(category))
-    return { success: false, error: "Cette étiquette n'est pas valide." };
+    return { success: false, error: "Cette étiquette n’est pas valide." };
+
+  const kind: PostKind = options.kind === "announcement" ? "announcement" : "post";
+  if (kind === "announcement") {
+    const userIdForRole = await getUserId(supabase);
+    if (!userIdForRole) return { success: false, error: NOT_SIGNED_IN };
+    const role = await getSalonRole(supabase, salonId, userIdForRole);
+    if (!role || !ORGANIZER_ROLES.includes(role)) {
+      return { success: false, error: "Seuls les organisateurs peuvent publier une annonce." };
+    }
+  }
 
   const { data: salon, error: salonError } = await supabase
     .from("salons")
@@ -335,7 +372,7 @@ export async function createPost(
       author_id: userId,
       content: content.trim(),
       media: [],
-      kind: "post" as const,
+      kind,
       category,
     })
     .select("id")
@@ -408,9 +445,10 @@ export async function createComment(
   postId: string,
   content: string,
   parentId?: string,
+  mentions: string[] = [],
 ): Promise<{ success: boolean; commentId?: string; error?: string }> {
   const normalized = content.trim();
-  if (!normalized || normalized.length > 2000) {
+  if (!normalized || normalized.length > MAX_COMMENTS) {
     return { success: false, error: "Le commentaire doit contenir entre 1 et 2 000 caractères." };
   }
 
@@ -438,6 +476,7 @@ export async function createComment(
       author_id: userId,
       content: normalized,
       parent_id: parentId ?? null,
+      mentions,
     })
     .select("id")
     .single();
@@ -720,5 +759,271 @@ export async function closeSalonPoll(
   }
 
   revalidatePath(`/salons/${poll.salon_id}`);
+  return { success: true };
+}
+
+/* -----------------------------------------------------------------------------
+   Refonte des salons — actions additives (aucune action existante modifiée)
+   Les politiques RLS font foi ; les vérifications de rôle ici limitent les
+   allers-retours, jamais la sécurité.
+   -------------------------------------------------------------------------- */
+
+/** Modifie un commentaire appartenant à l'utilisateur courant. */
+export async function updateComment(
+  commentId: string,
+  content: string,
+): Promise<{ success: boolean; error?: string }> {
+  const normalized = content.trim();
+  if (!normalized || normalized.length > MAX_COMMENTS) {
+    return { success: false, error: "Le commentaire doit contenir entre 1 et 2 000 caractères." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data, error } = await supabase
+    .from("comments")
+    .update({ content: normalized, updated_at: new Date().toISOString() })
+    .eq("id", commentId)
+    .eq("author_id", userId)
+    .select("post_id")
+    .maybeSingle();
+
+  if (error) return { success: false, error: "La modification n’a pas pu être enregistrée." };
+  if (!data) return { success: false, error: "Ce commentaire ne peut plus être modifié." };
+
+  if (data.post_id) {
+    const { data: post } = await supabase
+      .from("posts")
+      .select("salon_id")
+      .eq("id", data.post_id)
+      .maybeSingle();
+    if (post) revalidatePath(`/salons/${post.salon_id}`);
+  }
+  return { success: true };
+}
+
+/** Supprime un commentaire appartenant à l'utilisateur courant. */
+export async function deleteComment(
+  commentId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { error } = await supabase
+    .from("comments")
+    .delete()
+    .eq("id", commentId)
+    .eq("author_id", userId);
+
+  if (error) return { success: false, error: "Ce commentaire ne peut pas être supprimé." };
+  return { success: true };
+}
+
+/** Masque (ou réaffiche) un commentaire — organisateurs du salon. */
+export async function setCommentHidden(
+  salonId: string,
+  commentId: string,
+  hidden: boolean,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const role = await getSalonRole(supabase, salonId, userId);
+  if (!role || !ORGANIZER_ROLES.includes(role)) {
+    return { success: false, error: "Seuls les organisateurs peuvent modérer les commentaires." };
+  }
+
+  const { error } = await supabase
+    .from("comments")
+    .update({ is_hidden: hidden, hidden_by: hidden ? userId : null })
+    .eq("id", commentId);
+
+  if (error) return { success: false, error: "Cette modération n’a pas pu être appliquée." };
+
+  revalidatePath(`/salons/${salonId}`);
+  return { success: true };
+}
+
+/** Masque (ou réaffiche) une publication — organisateurs du salon. */
+export async function setPostHidden(
+  postId: string,
+  hidden: boolean,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: post } = await supabase
+    .from("posts")
+    .select("salon_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (!post) return { success: false, error: "Cette publication est introuvable." };
+
+  const role = await getSalonRole(supabase, post.salon_id, userId);
+  if (!role || !ORGANIZER_ROLES.includes(role)) {
+    return { success: false, error: "Seuls les organisateurs peuvent masquer une publication." };
+  }
+
+  const { error } = await supabase
+    .from("posts")
+    .update({ is_hidden: hidden, hidden_by: hidden ? userId : null })
+    .eq("id", postId);
+
+  if (error) return { success: false, error: "Cette modération n’a pas pu être appliquée." };
+
+  revalidatePath(`/salons/${post.salon_id}`);
+  return { success: true };
+}
+
+/** Épingle (ou désépingle) une publication — organisateurs du salon. */
+export async function setPostPinned(
+  postId: string,
+  pinned: boolean,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: post } = await supabase
+    .from("posts")
+    .select("salon_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (!post) return { success: false, error: "Cette publication est introuvable." };
+
+  const role = await getSalonRole(supabase, post.salon_id, userId);
+  if (!role || !ORGANIZER_ROLES.includes(role)) {
+    return { success: false, error: "Seuls les organisateurs peuvent épingler une publication." };
+  }
+
+  const { error } = await supabase
+    .from("posts")
+    .update({ is_pinned: pinned })
+    .eq("id", postId);
+
+  if (error) return { success: false, error: "L’épinglage n’a pas pu être appliqué." };
+
+  revalidatePath(`/salons/${post.salon_id}`);
+  return { success: true };
+}
+
+/** Supprime une publication (son auteur, ou un organisateur si la RLS l’autorise). */
+export async function deleteSalonPost(
+  postId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { data: deleted } = await supabase
+    .from("posts")
+    .delete()
+    .eq("id", postId)
+    .eq("author_id", userId)
+    .select("salon_id")
+    .maybeSingle();
+
+  if (deleted) {
+    revalidatePath(`/salons/${deleted.salon_id}`);
+    return { success: true };
+  }
+
+  /* L'auteur ne peut pas supprimer : tente la voie organisateur (policy RLS). */
+  const { data: post } = await supabase
+    .from("posts")
+    .select("salon_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (!post) return { success: false, error: "Cette publication est introuvable." };
+
+  const role = await getSalonRole(supabase, post.salon_id, userId);
+  if (role && ORGANIZER_ROLES.includes(role)) {
+    const { error: orgDeleteError } = await supabase.from("posts").delete().eq("id", postId);
+    if (!orgDeleteError) {
+      revalidatePath(`/salons/${post.salon_id}`);
+      return { success: true };
+    }
+  }
+
+  return { success: false, error: "Cette publication ne peut pas être supprimée." };
+}
+
+/**
+ * Marque le salon comme lu pour le membre courant UNIQUEMENT.
+ * (Correctif : `markSalonRead` historique met à jour last_read_at de tous les
+ * membres ; cette version est restreinte à la ligne du membre connecté.)
+ */
+export async function markSalonReadForMember(
+  salonId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { error } = await supabase
+    .from("salon_members")
+    .update({ last_read_at: new Date().toISOString() })
+    .eq("salon_id", salonId)
+    .eq("user_id", userId)
+    .is("left_at", null);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+/** Active ou désactive les notifications du salon pour le membre courant. */
+export async function setSalonMuted(
+  salonId: string,
+  muted: boolean,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { error } = await supabase
+    .from("salon_members")
+    .update({ is_muted: muted })
+    .eq("salon_id", salonId)
+    .eq("user_id", userId)
+    .is("left_at", null);
+
+  if (error) return { success: false, error: "Les notifications n’ont pas pu être modifiées." };
+  return { success: true };
+}
+
+/** Signale une publication, un commentaire ou un utilisateur du salon. */
+export async function reportSalonTarget(
+  target: {
+    type: ReportTarget;
+    id: string;
+    salonId: string;
+  },
+  reason: ReportReason,
+  details?: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!/^[0-9a-f-]{36}$/i.test(target.id) || !/^[0-9a-f-]{36}$/i.test(target.salonId)) {
+    return { success: false, error: "Signalement invalide." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const userId = await getUserId(supabase);
+  if (!userId) return { success: false, error: NOT_SIGNED_IN };
+
+  const { error } = await supabase.from("reports").insert({
+    reporter_id: userId,
+    target_type: target.type,
+    target_id: target.id,
+    salon_id: target.salonId,
+    reason,
+    details: details?.trim() || null,
+    status: "open" as const,
+  });
+
+  if (error) return { success: false, error: "Le signalement n’a pas pu être envoyé. Réessaie." };
   return { success: true };
 }

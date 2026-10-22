@@ -1,7 +1,7 @@
 /** Requetes de lecture pour le salon communautaire. */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { ReactionType, ProfileRow } from "@/types/database";
+import type { OrgRole, ReactionType, ProfileRow } from "@/types/database";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import type {
   PostWithAuthor,
@@ -696,7 +696,7 @@ export async function getCommentsByPost(
   const { data, error } = await supabase
     .from("comments")
     .select(
-      `id, post_id, parent_id, content, created_at,
+      `id, post_id, parent_id, content, created_at, updated_at, reaction_count, is_hidden,
        author:profiles!comments_author_id_fkey ( id, display_name, avatar_url, is_verified )`,
     )
     .in("post_id", postIds)
@@ -729,4 +729,70 @@ export async function getCommentsByPost(
     if (parent) parent.replies.push(comment);
   }
   return grouped;
+}
+
+/* -----------------------------------------------------------------------------
+   Refonte des salons — contexte « qui regarde »
+   -------------------------------------------------------------------------- */
+
+export interface SalonContext {
+  /** Identifiant du profil connecté (null si visiteur). */
+  userId: string | null;
+  /** Rôle du membre courant DANS ce salon. */
+  role: OrgRole | null;
+  isMember: boolean;
+  isMuted: boolean;
+  /** Dernier marquage « lu » du membre courant (séparateur de non-lus). */
+  lastReadAt: string | null;
+  /** Ids des organisateurs du salon (owner | moderator) → badge, mise en avant. */
+  organizerIds: string[];
+}
+
+/**
+ * Contexte du salon pour l'utilisateur courant : rôle, adhésion, notifications
+ * et liste des organisateurs. Ne lève jamais d'erreur : en cas de souci, on
+ * dégrade proprement (visiteur).
+ */
+export async function getSalonContext(salonId: string): Promise<SalonContext> {
+  const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const [membershipResult, organizersResult] = await Promise.all([
+    user
+      ? supabase
+          .from("salon_members")
+          .select("role, is_muted, last_read_at")
+          .eq("salon_id", salonId)
+          .eq("user_id", user.id)
+          .is("left_at", null)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("salon_members")
+      .select("user_id, role")
+      .eq("salon_id", salonId)
+      .in("role", ["owner", "moderator"])
+      .is("left_at", null),
+  ]);
+
+  if (organizersResult.error) {
+    console.error("[getSalonContext]", organizersResult.error.message);
+  }
+
+  const organizers = organizersResult.data ?? [];
+  const membership = membershipResult.data as
+    | { role: OrgRole; is_muted: boolean; last_read_at: string }
+    | null;
+
+  return {
+    userId: user?.id ?? null,
+    role: membership?.role ?? null,
+    isMember: Boolean(membership),
+    isMuted: membership?.is_muted ?? false,
+    lastReadAt: membership?.last_read_at ?? null,
+    organizerIds: organizers.map((row) => row.user_id),
+  };
 }
