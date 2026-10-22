@@ -9,23 +9,62 @@ import { COLORS } from "../theme";
    main. Tout est déterministe pour que le rendu soit stable image par image.
    ========================================================================== */
 
-const GRAIN_SVG =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E";
+/* Tuile de grain 128×128 générée une fois en canvas : un bitmap se réplique
+   pour presque rien, là où le filtre SVG feTurbulence que nous utilisions
+   avant faisait exploser le temps de rendu logiciel en pleine résolution. */
+const GRAIN_TILE = (() => {
+  if (typeof document === "undefined") {
+    return null;
+  }
 
-export const Grain = ({ opacity = 0.05 }: { opacity?: number }) => (
-  <AbsoluteFill
-    style={{
-      // Texture inline (data: URI) : aucun chargement réseau, donc aucune
-      // capture incomplète possible — le seul cas que cette règle vise.
-      // eslint-disable-next-line @remotion/no-background-image
-      backgroundImage: `url("${GRAIN_SVG}")`,
-      backgroundRepeat: "repeat",
-      opacity,
-      mixBlendMode: "multiply",
-      pointerEvents: "none",
-    }}
-  />
-);
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return null;
+  }
+
+  const image = context.createImageData(size, size);
+  let seed = 20261021;
+
+  for (let index = 0; index < image.data.length; index += 4) {
+    // Générateur congruentiel : même grain à chaque rendu, image par image.
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    const value = (seed >>> 16) & 0xff;
+    image.data[index] = value;
+    image.data[index + 1] = value;
+    image.data[index + 2] = value;
+    image.data[index + 3] = 255;
+  }
+
+  context.putImageData(image, 0, 0);
+  return canvas.toDataURL("image/png");
+})();
+
+export const Grain = ({ opacity = 0.05 }: { opacity?: number }) => {
+  if (GRAIN_TILE === null) {
+    return null;
+  }
+
+  return (
+    <AbsoluteFill
+      style={{
+        // Texture inline (data: URI) : aucun chargement réseau, donc aucune
+        // capture incomplète possible — le seul cas que cette règle vise.
+        // eslint-disable-next-line @remotion/no-background-image
+        backgroundImage: `url("${GRAIN_TILE}")`,
+        backgroundRepeat: "repeat",
+        backgroundSize: `${128}px ${128}px`,
+        opacity,
+        mixBlendMode: "multiply",
+        pointerEvents: "none",
+      }}
+    />
+  );
+};
 
 export const Vignette = ({ color = "rgba(58, 20, 12, 0.4)" }: { color?: string }) => (
   <AbsoluteFill

@@ -59,6 +59,11 @@ Remplacer `EventPubVerticale` par `EventPubCarre` ou `EventPubPaysage` pour les
 autres formats. Les mêmes commandes existent en scripts npm :
 `npm run render`, `npm run render:carre`, `npm run render:paysage`.
 
+> **Mémoire.** Un rendu ouvre un Chrome complet : sur une machine chargée,
+> l'initialisation peut expirer avant la première image. Arrêter le serveur de
+> développement Next.js (et les autres applications gourmandes) avant de lancer
+> la commande — le rendu dure ensuite une poignée de minutes par format.
+
 ## Bande son
 
 La vidéo est volontairement muette : les réseaux sociaux la lisent sans son, et
