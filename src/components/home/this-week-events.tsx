@@ -9,17 +9,23 @@ import type { PublishedEventView } from "@/types/database";
 
 interface ThisWeekEventsProps {
   events?: PublishedEventView[];
+  /** Horodatage de référence fourni par le serveur (rendu pur). */
+  nowMs: number;
 }
 
-export function ThisWeekEvents({ events = [] }: ThisWeekEventsProps) {
-  const now = Date.now();
-  const next7Days = now + 7 * 24 * 3600 * 1000;
+/**
+ * Semaine en cours (heure locale du visiteur, avec une demi-journée de
+ * tolérance sur la borne passée). Partagé avec HomeExperience pour décaler
+ * proprement le repli « Prochaines sorties » sur mobile.
+ */
+export function isThisWeekEvent(startAt: string, now: number): boolean {
+  const time = new Date(startAt).getTime();
+  return time >= now - 12 * 3600 * 1000 && time <= now + 7 * 24 * 3600 * 1000;
+}
 
+export function ThisWeekEvents({ events = [], nowMs }: ThisWeekEventsProps) {
   // Filtrer STRICTEMENT les événements réels des 7 prochains jours
-  const thisWeekList = events.filter((e) => {
-    const time = new Date(e.start_at).getTime();
-    return time >= now - 12 * 3600 * 1000 && time <= next7Days;
-  });
+  const thisWeekList = events.filter((e) => isThisWeekEvent(e.start_at, nowMs));
 
   // S'il n'y a aucun événement cette semaine, on masque la section proprement
   if (thisWeekList.length === 0) return null;

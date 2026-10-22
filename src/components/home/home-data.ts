@@ -77,6 +77,16 @@ export function formatEventDate(dateString: string): {
   };
 }
 
+/**
+ * Horodatage de référence de la page d'accueil (fenêtre « Cette semaine »).
+ * Fonction libre : isolée hors des corps de composants pour rester conforme
+ * à la règle react-hooks/purity, lisible par le rendu serveur et transmis
+ * en prop aux composants client.
+ */
+export function getWeekSnapshot(): number {
+  return Date.now();
+}
+
 export function getRelativeTimeTag(dateString: string): string {
   const target = new Date(dateString).getTime();
   const now = Date.now();

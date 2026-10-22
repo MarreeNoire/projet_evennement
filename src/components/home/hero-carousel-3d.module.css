@@ -25,6 +25,15 @@
   height: clamp(340px, min(58vw, 54dvh), 640px);
   perspective: var(--perspective, 1400px);
   perspective-origin: 50% 44%;
+  /* L'anneau déborde physiquement de la scène (cartes voisines) : on le borne
+     en X pour qu'il n'alimente jamais le scrollable du document — sinon la
+     page entière devient panable latéralement sur téléphone (chrome mobile
+     décalé, en-tête sticky qui glisse). `clip` — et non `hidden` — car il est
+     exclu des groupings qui aplatissent le `preserve-3d` (CSS Transforms),
+     et une seule axe bornée garde `overflow-y: visible` (les cartes débordent
+     légèrement en haut/bas). Sans support (iOS < 16), la page peut paner
+     latéralement mais reste fonctionnelle. */
+  overflow-x: clip;
   touch-action: pan-y;
   cursor: grab;
   user-select: none;
@@ -203,6 +212,10 @@
 }
 
 .price {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: 800;
   font-size: 0.9rem;
   color: #fffdfa;
@@ -213,12 +226,14 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  flex-shrink: 0;
   padding: 0.55rem 0.9rem;
   border-radius: 999px;
   background: var(--primary-solid);
   color: var(--primary-solid-fg, #fffdfa);
   font-size: 0.78rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 .ticketAction svg {
   width: 0.95rem;

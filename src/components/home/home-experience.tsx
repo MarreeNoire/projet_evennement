@@ -2,25 +2,35 @@
 
 import { HeroCarousel3D } from "./hero-carousel-3d";
 import { TrendingEvents } from "./trending-events";
-import { ThisWeekEvents } from "./this-week-events";
+import { isThisWeekEvent, ThisWeekEvents } from "./this-week-events";
 import type { PublishedEventView } from "@/types/database";
 
 interface HomeExperienceProps {
   events: PublishedEventView[];
+  /* Horodatage fourni par le serveur (voir page.tsx) — le composant reste
+     pur pendant le rendu (règle react-hooks/purity) et l'hydratation
+     reprend exactement la même fenêtre de 7 jours. */
+  weekNow: number;
 }
 
-export function HomeExperience({ events }: HomeExperienceProps) {
+export function HomeExperience({ events, weekNow }: HomeExperienceProps) {
+  /* Données réelles uniquement. Aucun contenu factice : si aucune sortie
+     cette semaine, la liste des prochaines publications prend le relais sur
+     mobile plutôt que de laisser un écran vide sous le carrousel. */
+  const hasThisWeek = events.some((event) => isThisWeekEvent(event.start_at, weekNow));
+
   return (
     <div className="home-editorial relative min-h-screen">
       <HeroCarousel3D events={events} />
 
-      {/* Événements publiés à venir — le héros les présente sur mobile */}
-      <div className="hidden md:block">
+      {/* Événements publiés à venir — le héros les présente sur mobile, sauf
+          si aucune sortie cette semaine (le repli évite le blanc sous l'anneau). */}
+      <div className={hasThisWeek ? "hidden md:block" : undefined}>
         <TrendingEvents events={events} />
       </div>
 
       {/* Sorties de la semaine, si elles existent */}
-      <ThisWeekEvents events={events} />
+      <ThisWeekEvents events={events} nowMs={weekNow} />
     </div>
   );
 }
