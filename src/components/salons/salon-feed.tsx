@@ -105,19 +105,21 @@ export function SalonFeed({
     return () => window.cancelAnimationFrame(raf);
   }, [loaded, online]);
 
-  /* Réception des publications rafraîchies par le serveur : fusion propre. */
+  /* Réception des publications rafraîchies par le serveur : on ne réagit
+     qu'à un vrai changement des posts SERVEUR (clé d'ids), jamais quand la
+     liste locale a grandi par pagination — sinon les pages suivantes seraient
+     écrasées à chaque rafraîchissement. */
+  const serverKeyRef = useRef(posts.map((post) => post.id).join(","));
   useEffect(() => {
-    const incoming = [...posts].sort(feedOrder);
-    if (
-      incoming.length !== loaded.length ||
-      incoming.some((post, index) => loaded[index]?.id !== post.id)
-    ) {
-      window.requestAnimationFrame(() => {
-        setLoaded([...posts].sort(feedOrder));
-        setPendingNew(0);
-      });
-    }
-  }, [posts, loaded]);
+    const key = posts.map((post) => post.id).join(",");
+    if (key === serverKeyRef.current) return;
+    serverKeyRef.current = key;
+    window.requestAnimationFrame(() => {
+      setLoaded([...posts].sort(feedOrder));
+      setExhausted(posts.length < PAGE_SIZE);
+      setPendingNew(0);
+    });
+  }, [posts]);
 
   /* --------------------------- Réseau + hors-ligne --------------------------- */
 
