@@ -69,6 +69,7 @@ export function SalonFeed({
   canAnnounce,
   nowMs,
   lastReadAt,
+  focusPostId = null,
 }: {
   salonId: string;
   posts: PostWithAuthor[];
@@ -80,6 +81,8 @@ export function SalonFeed({
   canAnnounce: boolean;
   nowMs: number;
   lastReadAt: string | null;
+  /** Publication ciblée par un lien partagé `?post=…`. */
+  focusPostId?: string | null;
 }) {
   const router = useRouter();
   const [loaded, setLoaded] = useState<PostWithAuthor[]>(() => [...posts].sort(feedOrder));
@@ -120,6 +123,25 @@ export function SalonFeed({
       setPendingNew(0);
     });
   }, [posts]);
+
+  /* --------------------------- Lien profond ?post= --------------------------- */
+
+  useEffect(() => {
+    if (!focusPostId) return;
+    let timer: number | undefined;
+    const raf = window.requestAnimationFrame(() => {
+      const target = document.getElementById(`post-${focusPostId}`);
+      if (!target) return;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+      setFocusedId(focusPostId);
+      timer = window.setTimeout(() => setFocusedId(null), 2600);
+    });
+    return () => {
+      window.cancelAnimationFrame(raf);
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [focusPostId]);
 
   /* --------------------------- Réseau + hors-ligne --------------------------- */
 
@@ -278,7 +300,7 @@ export function SalonFeed({
       {(!online || outboxCount > 0) && viewer.id ? (
         <p
           role="status"
-          className="bg-warning-subtle text-accent-subtle-fg flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold"
+          className="bg-warning-subtle text-warning flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold"
         >
           <WifiOff className="size-3.5" aria-hidden="true" />
           {!online
@@ -297,9 +319,9 @@ export function SalonFeed({
               onClick={() => setFilter(item.key)}
               aria-pressed={filter === item.key}
               className={cn(
-                "press shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors duration-150",
+                "press min-h-10 shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors duration-150",
                 filter === item.key
-                  ? "border-primary bg-primary text-white"
+                  ? "border-primary-solid bg-primary-solid text-primary-solid-fg"
                   : "border-border bg-surface text-fg-muted hover:text-fg",
               )}
             >
@@ -319,7 +341,7 @@ export function SalonFeed({
               onClick={() => setCategoryFilter(categoryFilter === key ? null : key)}
               aria-pressed={categoryFilter === key}
               className={cn(
-                "press shrink-0 rounded-full border px-3 py-1.5 text-2xs font-semibold transition-colors duration-150",
+                "press min-h-9 shrink-0 rounded-full border px-3 py-1.5 text-2xs font-semibold transition-colors duration-150",
                 categoryFilter === key
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border bg-surface text-fg-muted hover:text-fg",
@@ -353,62 +375,60 @@ export function SalonFeed({
         role="feed"
         aria-busy={loadingMore}
         aria-label="Publications du salon"
-        className="flex gap-5"
+        className="flex min-w-0 flex-col gap-4"
       >
-        <div className="flex min-w-0 flex-col gap-4">
-          {filtered.length === 0 && !loadingMore ? (
-            <FeedEmpty
-              filter={filter}
-              onReset={() => {
-                setFilter("all");
-                setCategoryFilter(null);
-              }}
-            />
-          ) : null}
+        {filtered.length === 0 && !loadingMore ? (
+          <FeedEmpty
+            filter={filter}
+            onReset={() => {
+              setFilter("all");
+              setCategoryFilter(null);
+            }}
+          />
+        ) : null}
 
-          {filtered.map((post, index) => (
-            <div key={post.id}>
-              {index === firstUnreadIndex ? (
-                <div
-                  role="separator"
-                  aria-label="Publications non lues"
-                  className="mb-4 flex items-center gap-3 first:mb-0"
-                >
-                  <span className="bg-accent-subtle-fg/30 h-px flex-1" aria-hidden="true" />
-                  <span className="text-accent-subtle-fg bg-accent-subtle text-2xs rounded-full px-2.5 py-1 font-bold tracking-[0.08em] whitespace-nowrap uppercase">
-                    Non lu depuis ta dernière visite
-                  </span>
-                  <span className="bg-accent-subtle-fg/30 h-px flex-1" aria-hidden="true" />
-                </div>
-              ) : null}
-              <div className={cn(focusedId === post.id && "rounded-2xl ring-2 ring-border-focus")}>
-                <SalonPostCard
-                  post={post}
-                  comments={commentsByPost[post.id] ?? []}
-                  viewer={viewer}
-                  organizerIds={organizerIds}
-                  members={members}
-                  nowMs={nowMs}
-                  isNew={firstUnreadIndex !== null && index >= firstUnreadIndex}
-                />
+        {filtered.map((post, index) => (
+          <div key={post.id} className="scroll-mt-24">
+            {index === firstUnreadIndex ? (
+              <div
+                role="separator"
+                aria-label="Publications non lues"
+                className="mb-4 flex items-center gap-3 first:mb-0"
+              >
+                <span className="bg-accent-subtle-fg/30 h-px flex-1" aria-hidden="true" />
+                <span className="text-accent-subtle-fg bg-accent-subtle text-2xs rounded-full px-2.5 py-1 font-bold tracking-[0.08em] whitespace-nowrap uppercase">
+                  Non lu depuis ta dernière visite
+                </span>
+                <span className="bg-accent-subtle-fg/30 h-px flex-1" aria-hidden="true" />
               </div>
+            ) : null}
+            <div className={cn(focusedId === post.id && "rounded-2xl ring-2 ring-border-focus")}>
+              <SalonPostCard
+                post={post}
+                comments={commentsByPost[post.id] ?? []}
+                viewer={viewer}
+                organizerIds={organizerIds}
+                members={members}
+                nowMs={nowMs}
+                isNew={firstUnreadIndex !== null && index >= firstUnreadIndex}
+              />
             </div>
-          ))}
+          </div>
+        ))}
 
-          {loadingMore ? <FeedSkeleton /> : null}
+        {loadingMore ? <FeedSkeleton /> : null}
 
-          {!exhausted && !loadingMore ? (
-            <button
-              ref={sentinelRef}
-              type="button"
-              onClick={() => void loadMore()}
-              className="text-primary bg-surface border-border mx-auto inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold shadow-sm"
-            >
-              <LoaderCircle className="size-4" aria-hidden="true" />
-              Charger plus de publications
-            </button>
-          ) : null}
-        </div>
+        {!exhausted && !loadingMore ? (
+          <button
+            ref={sentinelRef}
+            type="button"
+            onClick={() => void loadMore()}
+            className="text-primary bg-surface border-border mx-auto inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold shadow-sm"
+          >
+            <LoaderCircle className="size-4" aria-hidden="true" />
+            Charger plus de publications
+          </button>
+        ) : null}
       </div>
 
       {/* Rejoueur des commentaires hors-ligne */}
@@ -433,12 +453,14 @@ function matchFilter(
       case "media":
         return post.media.length > 0;
       case "unanswered":
-        return post.category === "question";
+        return post.category === "question" && post.comment_count === 0;
       default:
         return true;
     }
   };
-}function FeedEmpty({
+}
+
+function FeedEmpty({
   filter,
   onReset,
 }: {

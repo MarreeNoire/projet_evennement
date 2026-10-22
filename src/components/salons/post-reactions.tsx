@@ -136,7 +136,7 @@ export function PostReactions({
           <span
             aria-hidden="true"
             className={cn(
-              "text-lg leading-none transition-transform duration-280 ease-[var(--ease-out-soft)]",
+              "text-lg leading-none transition-transform duration-200 ease-[var(--ease-out-soft)]",
               popping && "scale-128 -rotate-6",
               mine && "scale-110",
             )}

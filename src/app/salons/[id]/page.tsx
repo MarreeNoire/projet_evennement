@@ -55,8 +55,11 @@ export default async function SalonDetailPage({
   searchParams: Promise<{ tab?: string; post?: string }>;
 }) {
   const { id } = await params;
-  const { tab } = await searchParams;
-  const activeTab: TabSlug = SALON_TABS.find((item) => item.slug === tab)?.slug ?? "fil";
+  const { tab, post } = await searchParams;
+  /* Un lien partagé `?post=…` ramène toujours dans le fil. */
+  const activeTab: TabSlug = post
+    ? "fil"
+    : (SALON_TABS.find((item) => item.slug === tab)?.slug ?? "fil");
 
   const salon = await getSalonById(id);
   if (!salon) notFound();
@@ -199,26 +202,24 @@ export default async function SalonDetailPage({
         ) : null}
       </div>
 
-      <div
-        className={cn(
-          "mt-6 grid gap-10",
-          activeTab === "fil" ? "grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_18rem]",
-        )}
-      >
+      <div className="mt-6 grid gap-10 xl:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0">
           {activeTab === "fil" ? (
-            <SalonFeed
-              salonId={id}
-              posts={posts}
-              commentsByPost={commentsRecord}
-              viewer={viewer}
-              organizerIds={context.organizerIds}
-              members={mentionMembers}
-              allowMedia={event?.allow_media_upload ?? true}
-              canAnnounce={viewer.role === "owner" || viewer.role === "moderator"}
-              nowMs={nowMs}
-              lastReadAt={context.lastReadAt}
-            />
+            <div className="mx-auto w-full max-w-[46rem] xl:mx-0">
+              <SalonFeed
+                salonId={id}
+                posts={posts}
+                commentsByPost={commentsRecord}
+                viewer={viewer}
+                organizerIds={context.organizerIds}
+                members={mentionMembers}
+                allowMedia={event?.allow_media_upload ?? true}
+                canAnnounce={viewer.role === "owner" || viewer.role === "moderator"}
+                nowMs={nowMs}
+                lastReadAt={context.lastReadAt}
+                focusPostId={post ?? null}
+              />
+            </div>
           ) : null}
 
           {activeTab === "sondages" ? (
@@ -349,33 +350,31 @@ export default async function SalonDetailPage({
           ) : null}
         </div>
 
-        {/* Colonne latérale (grands écrans) */}
-        {activeTab !== "fil" ? (
-          <aside className="hidden flex-col gap-8 xl:flex" aria-label="Autour du salon">
-            {event ? <EventPanel event={event} compact /> : null}
-            {members.length > 0 ? (
-              <section className="border-border border-t pt-4">
-                <p className="eyebrow">Participants</p>
-                <div className="mt-3">
-                  <AvatarGroup
-                    max={6}
-                    people={members.map((member) => ({
-                      id: member.user_id,
-                      name: member.profile?.display_name ?? "Participant",
-                      avatarUrl: member.profile?.avatar_url,
-                    }))}
-                  />
-                </div>
-                <Link
-                  href={`/salons/${id}?tab=participants`}
-                  className="text-primary mt-3 inline-block text-sm font-semibold underline underline-offset-4 hover:decoration-2"
-                >
-                  Voir tout le monde
-                </Link>
-              </section>
-            ) : null}
-          </aside>
-        ) : null}
+        {/* Colonne latérale (grands écrans) : contexte du salon, y compris dans le fil. */}
+        <aside className="hidden flex-col gap-8 xl:flex" aria-label="Autour du salon">
+          {event ? <EventPanel event={event} compact /> : null}
+          {members.length > 0 ? (
+            <section className="border-border border-t pt-4">
+              <p className="eyebrow">Participants</p>
+              <div className="mt-3">
+                <AvatarGroup
+                  max={6}
+                  people={members.map((member) => ({
+                    id: member.user_id,
+                    name: member.profile?.display_name ?? "Participant",
+                    avatarUrl: member.profile?.avatar_url,
+                  }))}
+                />
+              </div>
+              <Link
+                href={`/salons/${id}?tab=participants`}
+                className="text-primary mt-3 inline-block text-sm font-semibold underline underline-offset-4 hover:decoration-2"
+              >
+                Voir tout le monde
+              </Link>
+            </section>
+          ) : null}
+        </aside>
       </div>
     </SocialShell>
   );

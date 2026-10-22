@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
    Mobile  (< md)  : feuille quasi plein écran, poignée de glissement, fermeture
                      par swipe vers le bas, saisie collée au-dessus du clavier
                      (visualViewport + safe areas).
-   Desktop (≥ md)  : tiroir latéral droit de 27 rem.
+   Desktop (≥ md)  : boîte de dialogue centrée (42 rem), comme le reste du web.
    Temps réel      : canal Supabase par publication (INSERT/UPDATE → refresh
                      doux) + présence « x personnes écrivent… » ; dégrade
                      silencieusement si la diffusion temps réel n'est pas
@@ -112,9 +112,15 @@ export function CommentsOverlay({
     const viewport = window.visualViewport;
     if (!viewport) return;
     const sync = () => {
+      /* Le clavier visuel ne concerne que le tactile ; sur desktop, on garde
+         la boîte centrée intacte. */
+      if (!window.matchMedia("(max-width: 767px)").matches) {
+        setKbInset(0);
+        return;
+      }
       const inset = Math.max(
         0,
-        Math.min(window.innerHeight - viewport.height - viewport.offsetTop, 320),
+        Math.min(window.innerHeight - viewport.height, 320),
       );
       setKbInset(inset);
     };
@@ -305,10 +311,11 @@ export function CommentsOverlay({
                         */
 
   const startDrag = (event: React.PointerEvent) => {
+    if (event.pointerType !== "touch") return;
     dragStartRef.current = event.clientY;
   };
   const moveDrag = (event: React.PointerEvent) => {
-    if (dragStartRef.current === null) return;
+    if (event.pointerType !== "touch" || dragStartRef.current === null) return;
     setDragY(Math.max(0, event.clientY - dragStartRef.current));
   };
   const endDrag = () => {
@@ -374,7 +381,7 @@ export function CommentsOverlay({
         type="button"
         aria-label="Fermer"
         tabIndex={-1}
-        className="animate-in fade-in absolute inset-0 cursor-default bg-black/45 duration-300"
+        className="animate-in fade-in motion-reduce:animate-none absolute inset-0 cursor-default bg-black/45 duration-200"
         onClick={onClose}
       />
 
@@ -383,18 +390,18 @@ export function CommentsOverlay({
         aria-modal="true"
         aria-label={`Commentaires · ${totalCount}`}
         className={cn(
-          "bg-surface animate-in fade-in slide-in-from-bottom-6 absolute flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 duration-300",
-          "max-md:inset-x-0 max-md:bottom-0 max-md:top-8 max-md:rounded-t-2xl",
-          "md:right-4 md:top-4 md:bottom-4 md:w-[27rem] md:rounded-2xl",
-          !isDragging && "transition-transform duration-260 ease-[var(--ease-out-soft)]",
+          "bg-surface animate-in fade-in motion-reduce:animate-none absolute flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 duration-200",
+          /* Mobile : feuille quasi plein écran, sous la zone sûre de l'encoche. */
+          "max-md:inset-x-0 max-md:bottom-0 max-md:top-[calc(env(safe-area-inset-top)+0.5rem)] max-md:rounded-t-2xl",
+          /* Desktop : vraie boîte de dialogue centrée, pas un tiroir de téléphone. */
+          "md:left-1/2 md:top-1/2 md:h-[min(80dvh,46rem)] md:w-[42rem] md:max-w-[calc(100vw-4rem)] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl",
+          !isDragging && "transition-transform duration-200 ease-[var(--ease-out-soft)]",
         )}
         style={{
-          transform:
-            dragY !== null
-              ? `translateY(${dragY}px)`
-              : kbInset > 0
-                ? `translateY(-${kbInset}px)`
-                : undefined,
+          transform: dragY !== null ? `translateY(${dragY}px)` : undefined,
+          /* Clavier visuel : on remonte le bas du panneau, on ne translate pas
+             tout l'écran (sinon l'en-tête sort de la fenêtre). */
+          bottom: kbInset > 0 ? kbInset : undefined,
         }}
       >
         {/* En-tête + poignée de glissement */}
@@ -417,7 +424,7 @@ export function CommentsOverlay({
                 type="button"
                 onClick={onClose}
                 aria-label="Fermer les commentaires"
-                className="text-fg-muted press hover:bg-bg-muted inline-flex size-9 items-center justify-center rounded-full"
+                className="text-fg-muted press hover:bg-bg-muted inline-flex size-11 items-center justify-center rounded-full"
               >
                 <X className="size-4.5" aria-hidden="true" />
               </button>

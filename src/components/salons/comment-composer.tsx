@@ -178,7 +178,7 @@ export function CommentComposer({
                 void submit();
               }
             }}
-            className="text-fg placeholder:text-fg-subtle max-h-40 w-full resize-none bg-transparent px-3.5 py-2.5 text-[15px] leading-relaxed outline-none"
+            className="text-fg placeholder:text-fg-subtle max-h-40 w-full resize-none bg-transparent px-3.5 py-2.5 text-base leading-relaxed outline-none md:text-[15px]"
           />
 
           <div className="flex items-center justify-between px-2 pb-1.5">
@@ -188,7 +188,7 @@ export function CommentComposer({
                 onClick={() => setEmojiOpen((value) => !value)}
                 aria-label="Ajouter un emoji"
                 aria-expanded={emojiOpen}
-                className="text-fg-muted hover:text-fg press inline-flex size-9 items-center justify-center rounded-full"
+                className="text-fg-muted hover:text-fg press inline-flex size-11 items-center justify-center rounded-full"
               >
                 <Smile className="size-5" aria-hidden="true" />
               </button>
@@ -199,7 +199,7 @@ export function CommentComposer({
               disabled={!text.trim() || sending}
               aria-label="Envoyer le commentaire"
               className={cn(
-                "press inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold transition-all duration-200",
+                "press inline-flex size-11 items-center justify-center rounded-full text-sm font-semibold transition-all duration-200",
                 text.trim()
                   ? "bg-primary-solid text-primary-solid-fg hover:opacity-90"
                   : "text-fg-subtle opacity-0",

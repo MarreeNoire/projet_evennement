@@ -110,14 +110,14 @@ export function BottomSheet({ open, onClose, title, closeLabel, children }: Bott
         className={cn(
           "bg-surface border-border pointer-events-auto absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto overscroll-contain",
           "rounded-t-2xl border-t shadow-[0_-24px_60px_rgba(10,8,18,0.4)] outline-none",
-          "md:static md:mx-auto md:mb-0 md:w-full md:max-w-lg md:translate-y-0 md:place-self-center md:rounded-2xl md:border md:pb-0",
-          "md:top-1/2 md:-translate-y-1/2",
+          "md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:w-[min(32rem,calc(100vw-4rem))] md:max-h-[85dvh] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:border",
           "transition-transform duration-200 ease-[var(--ease-out-soft)] motion-reduce:transition-none",
-          "md:transition-opacity",
         )}
         style={{
           paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",
-          touchAction: "none",
+          /* Le panneau doit rester défilable au doigt (formulaires longs) ;
+             seule la poignée capte le geste de fermeture. */
+          touchAction: "pan-y",
         }}
       >
         <div

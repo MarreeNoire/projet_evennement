@@ -84,43 +84,71 @@ export function PostComposer({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  /* Composeur inline sur le web, feuille tactile sur téléphone. */
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const sync = () => setIsDesktop(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   return (
     <>
-      {/* Desktop : invitation à publier */}
-      <section
-        aria-label="Créer une publication"
-        className="bg-surface border-border hidden rounded-2xl border p-3.5 sm:flex sm:items-center sm:gap-3"
-      >
-        <Avatar src={viewer.avatarUrl} name={viewer.name} size="md" />
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="border-border bg-surface-sunken text-fg-subtle hover:bg-bg-subtle min-h-11 flex-1 rounded-full border px-4 py-2.5 text-left text-sm transition-colors hover:text-fg-muted"
+      {/* Desktop : invitation à publier, puis éditeur inline (pas de modale). */}
+      {open && isDesktop ? (
+        <section
+          aria-label="Nouvelle publication"
+          className="bg-surface border-border overflow-hidden rounded-2xl border shadow-xs"
         >
-          Quoi de neuf{viewer.name ? `, ${viewer.name.split(" ")[0]}` : ""} ?
-        </button>
-        {allowMedia ? (
-          <span
-            className="text-primary border-primary/25 inline-flex size-11 items-center justify-center rounded-full border font-semibold"
-            aria-hidden="true"
+          <PostEditor
+            salonId={salonId}
+            viewer={viewer}
+            allowMedia={allowMedia}
+            canAnnounce={canAnnounce}
+            onDone={() => {
+              setOpen(false);
+              router.refresh();
+            }}
+          />
+        </section>
+      ) : (
+        <section
+          aria-label="Créer une publication"
+          className="bg-surface border-border hidden rounded-2xl border p-3.5 shadow-xs md:flex md:items-center md:gap-3"
+        >
+          <Avatar src={viewer.avatarUrl} name={viewer.name} size="md" />
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="border-border bg-surface-sunken text-fg-subtle hover:bg-bg-subtle min-h-11 flex-1 rounded-full border px-4 py-2.5 text-left text-sm transition-colors hover:text-fg-muted"
           >
-            <ImageIcon className="size-4.5" />
-          </span>
-        ) : null}
-      </section>
+            Quoi de neuf{viewer.name ? `, ${viewer.name.split(" ")[0]}` : ""} ?
+          </button>
+          {allowMedia ? (
+            <span
+              className="text-primary border-primary/25 inline-flex size-11 items-center justify-center rounded-full border font-semibold"
+              aria-hidden="true"
+            >
+              <ImageIcon className="size-4.5" />
+            </span>
+          ) : null}
+        </section>
+      )}
 
-      {/* Mobile : bouton flottant (au-dessus de la barre d'onglets globale) */}
+      {/* Mobile : bouton flottant, calé sur la barre d'onglets + zone sûre. */}
       <button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Créer une publication"
-        className="bg-primary-solid text-primary-solid-fg press fixed right-4 bottom-24 z-40 inline-flex size-14 items-center justify-center rounded-full shadow-xl transition-transform duration-200 active:scale-90 md:hidden"
+        className="bg-primary-solid text-primary-solid-fg press fixed right-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-40 inline-flex size-14 items-center justify-center rounded-full shadow-xl transition-transform duration-200 active:scale-90 md:hidden"
       >
         <Plus className="size-6" aria-hidden="true" />
       </button>
 
-      {open ? (
+      {open && !isDesktop ? (
         <BottomSheet
           open={open}
           onClose={() => setOpen(false)}
@@ -411,7 +439,7 @@ export function PostEditor({
             dir="auto"
             aria-label="Texte de la publication"
             placeholder="Écris ton message… (info, question, annonce…)"
-            className="border-border bg-surface-sunken focus:border-border-focus text-fg placeholder:text-fg-subtle w-full resize-y rounded-xl border px-3.5 py-3 text-[15px] leading-relaxed outline-none"
+            className="border-border bg-surface-sunken focus:border-border-focus text-fg placeholder:text-fg-subtle w-full resize-y rounded-xl border px-3.5 py-3 text-base leading-relaxed outline-none md:text-[15px]"
           />
           <div className="text-fg-subtle text-right text-2xs tabular-nums">
             {content.length}/{LIMITS.MAX_POST_LENGTH}
@@ -557,7 +585,7 @@ export function PostEditor({
               onChange={(event) => setPollQuestion(event.target.value.slice(0, 280))}
               placeholder="Ta question…"
               aria-label="Question du sondage"
-              className="text-fg placeholder:text-fg-subtle bg-surface w-full rounded-lg border border-border px-3 py-2 text-sm outline-none"
+              className="text-fg placeholder:text-fg-subtle bg-surface w-full rounded-lg border border-border px-3 py-2 text-base outline-none md:text-sm"
             />
             {pollOptions.map((option, index) => (
               <div key={index} className="flex items-center gap-1.5">
@@ -575,7 +603,7 @@ export function PostEditor({
                   maxLength={120}
                   placeholder={`Choix ${index + 1}`}
                   aria-label={`Choix ${index + 1}`}
-                  className="text-fg placeholder:text-fg-subtle bg-surface min-h-9 w-full rounded-lg border border-border px-3 text-sm outline-none"
+                  className="text-fg placeholder:text-fg-subtle bg-surface min-h-10 w-full rounded-lg border border-border px-3 text-base outline-none md:text-sm"
                 />
                 {pollOptions.length > 2 ? (
                   <button

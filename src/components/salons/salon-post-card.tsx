@@ -144,7 +144,7 @@ function SalonPostCardImpl({
       data-post-id={post.id}
       aria-label={`Publication de ${post.author?.display_name ?? "un membre"}`}
       className={cn(
-        "bg-surface border-border group relative rounded-2xl border shadow-xs transition-shadow duration-200",
+        "bg-surface border-border group relative scroll-mt-24 rounded-2xl border shadow-xs transition-shadow duration-200",
         post.kind === "announcement" && "border-accent-subtle-fg/25 ring-accent-subtle-fg/10 ring-1",
       )}
     >
@@ -214,7 +214,7 @@ function SalonPostCardImpl({
         {!editing && post.content ? (
           <LinkifiedContent
             text={post.content}
-            className="text-fg text-[15px] leading-relaxed first-letter:uppercase"
+            className="text-fg text-[15px] leading-relaxed whitespace-pre-line"
           />
         ) : null}
 
@@ -303,7 +303,7 @@ function SalonPostCardImpl({
               type="button"
               onClick={() => setOverlayOpen(true)}
               aria-label={`Commenter — ${commentCount} commentaire${commentCount > 1 ? "s" : ""}`}
-              className="text-fg-muted press inline-flex min-h-9 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold transition-colors hover:bg-bg-muted hover:text-fg"
+              className="text-fg-muted press inline-flex min-h-10 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold transition-colors hover:bg-bg-muted hover:text-fg"
             >
               <MessageSquare className="size-4.5" aria-hidden="true" />
               {commentCount > 0 ? <span className="tabular-nums">{commentCount}</span> : null}
@@ -312,7 +312,7 @@ function SalonPostCardImpl({
               type="button"
               onClick={() => void share()}
               aria-label="Partager cette publication"
-              className="text-fg-muted press inline-flex min-h-9 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold transition-colors hover:bg-bg-muted hover:text-fg"
+              className="text-fg-muted press inline-flex min-h-10 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold transition-colors hover:bg-bg-muted hover:text-fg"
             >
               <Send className="size-4.5" aria-hidden="true" />
               <span className="hidden sm:inline">Partager</span>
@@ -323,7 +323,7 @@ function SalonPostCardImpl({
               aria-pressed={saved}
               aria-label={saved ? "Retirer de mes enregistrements" : "Enregistrer cette publication"}
               className={cn(
-                "press inline-flex min-h-9 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold transition-colors",
+                "press inline-flex min-h-10 items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold transition-colors",
                 saved ? "text-primary" : "text-fg-muted hover:bg-bg-muted hover:text-fg",
               )}
             >
@@ -372,7 +372,7 @@ function SalonPostCardImpl({
         onIndexChange={setLightboxIndex}
       />
 
-      {/* Overlay des commentaires (mobile : plein écran, desktop : tiroir) */}
+      {/* Overlay des commentaires (mobile : feuille tactile, desktop : dialogue centré) */}
       <CommentsOverlay
         open={overlayOpen}
         onClose={() => setOverlayOpen(false)}
@@ -426,7 +426,7 @@ function PostEditInline({
         rows={4}
         required
         disabled={pending}
-        className="border-border-strong bg-surface focus:border-border-focus text-fg min-h-24 w-full resize-y rounded-lg border px-3 py-2.5 text-[15px] leading-relaxed outline-none"
+        className="border-border-strong bg-surface focus:border-border-focus text-fg min-h-24 w-full resize-y rounded-lg border px-3 py-2.5 text-base leading-relaxed outline-none md:text-[15px]"
       />
       {error ? (
         <p role="alert" className="text-danger text-xs">

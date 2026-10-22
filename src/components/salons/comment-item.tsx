@@ -165,7 +165,7 @@ export function CommentItem({
                 onChange={(event) => setDraft(event.target.value)}
                 rows={2}
                 aria-label="Modifier le commentaire"
-                className="border-border bg-surface text-fg focus:border-border-focus w-full resize-none rounded-xl border px-3 py-2 text-[15px] leading-relaxed outline-none"
+                className="border-border bg-surface text-fg focus:border-border-focus w-full resize-none rounded-xl border px-3 py-2 text-base leading-relaxed outline-none md:text-[15px]"
               />
               <div className="flex justify-end gap-2">
                 <button
