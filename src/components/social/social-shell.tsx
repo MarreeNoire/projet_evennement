@@ -1,17 +1,15 @@
-import Link from "next/link";
-import { Bell, Compass, MessageSquare, QrCode, Ticket, User, Users } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { SiteHeader } from "@/components/layout/site-header";
-import { ROUTES } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 
 /* =============================================================================
-   Espace membre — rail de navigation (ordinateur)
+   Espace membre — coque de page
    --------------------------------------------------------------------------
-   Sur mobile, la navigation principale vient du `BottomNav` global (rendu par
-   `SiteHeader`) : on ne la duplique pas ici. Sur ordinateur, un rail vertical
-   à gauche complète l'en-tête avec les sections propres à l'espace membre.
+   La navigation (mobile : barre d'onglets, tablette : rail, ordinateur :
+   barre latérale) est rendue une seule fois par `SiteHeader`. Cette coque
+   apporte le conteneur, l'en-tête éditorial et l'accessibilité de page ;
+   l'ancien rail vertical, redondant avec la barre latérale globale, a été
+   retiré. Les sections members vivent dans `app-nav.tsx`.
    ========================================================================== */
 
 export type SocialSection =
@@ -23,31 +21,12 @@ export type SocialSection =
   | "badge"
   | "profil";
 
-const SECTION_GROUPS: { label: string; items: { key: SocialSection; href: string; label: string; icon: typeof Compass }[] }[] = [
-  {
-    label: "Événements",
-    items: [
-      { key: "explorer", href: ROUTES.explore, label: "Explorer", icon: Compass },
-      { key: "billets", href: ROUTES.myTickets, label: "Billets", icon: Ticket },
-      { key: "salons", href: ROUTES.mySalons, label: "Salons", icon: MessageSquare },
-    ],
-  },
-  {
-    label: "Mon espace",
-    items: [
-      { key: "reseau", href: ROUTES.connections, label: "Réseau", icon: Users },
-      { key: "notifications", href: ROUTES.notifications, label: "Alertes", icon: Bell },
-      { key: "badge", href: ROUTES.myBadge, label: "Mon badge", icon: QrCode },
-      { key: "profil", href: ROUTES.profile, label: "Profil", icon: User },
-    ],
-  },
-];
-
 export function SocialShell({
-  active,
   children,
 }: {
-  active: SocialSection;
+  /** Section active conservée dans l'API (la barre latérale globale
+      marque elle-même la page active). */
+  active?: SocialSection;
   children: ReactNode;
 }) {
   return (
@@ -56,46 +35,8 @@ export function SocialShell({
 
       <main
         id="contenu"
-        className="container-page grid flex-1 gap-10 py-8 pb-24 lg:grid-cols-[12rem_minmax(0,1fr)] lg:pb-14"
+        className="container-page flex flex-1 flex-col gap-10 py-8 pb-24 lg:pb-14"
       >
-        {/* Rail (ordinateur uniquement) */}
-        <nav aria-label="Espace membre" className="hidden lg:block">
-          <div className="sticky top-24">
-            <p className="eyebrow mb-4">Mon espace</p>
-            <div className="flex flex-col gap-6">
-              {SECTION_GROUPS.map((group) => (
-                <section key={group.label} aria-label={group.label}>
-                  <h2 className="mb-2 px-3 text-xs font-semibold tracking-wide text-fg-subtle">
-                    {group.label}
-                  </h2>
-                  <ul className="flex flex-col gap-1">
-                    {group.items.map(({ key, href, label, icon: Icon }) => {
-                      const isActive = key === active;
-                      return (
-                        <li key={key}>
-                          <Link
-                            href={href}
-                            aria-current={isActive ? "page" : undefined}
-                            className={cn(
-                              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors duration-150",
-                              isActive
-                                ? "bg-primary-subtle font-semibold text-primary-subtle-fg"
-                                : "font-medium text-fg-muted hover:bg-bg-muted hover:text-fg",
-                            )}
-                          >
-                            <Icon className="size-4" aria-hidden="true" />
-                            {label}
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          </div>
-        </nav>
-
         <div className="min-w-0">{children}</div>
       </main>
     </div>

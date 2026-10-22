@@ -1,4 +1,5 @@
 import { BottomNav } from "./bottom-nav";
+import { AppSideRail } from "./app-nav";
 import { HeaderShell } from "./header-shell";
 import type { HeaderUser } from "./header-types";
 
@@ -51,7 +52,7 @@ export async function SiteHeader() {
     <>
       {demo ? (
         <div className="border-b border-info/25 bg-info-subtle px-4 py-2 text-center text-xs font-medium text-info">
-          Mode installation : Supabase n'est pas encore configuré. Ajoute les clés dans
+          Mode installation : Supabase n&apos;est pas encore configuré. Ajoute les clés dans
           {" "}
           <code className="rounded bg-surface px-1 py-0.5 font-mono">.env.local</code> pour activer
           les comptes ({env.appName}).
@@ -59,6 +60,7 @@ export async function SiteHeader() {
       ) : null}
       <HeaderShell user={user} unreadCount={unreadCount} />
       <BottomNav user={user} />
+      <AppSideRail user={user} unreadCount={unreadCount} />
     </>
   );
 }

@@ -1717,24 +1717,9 @@
   animation: checkout-step-arrive 420ms var(--ease-out-soft) both;
 }
 
-/* Menu mobile */
-.app-mobile-nav-enter {
-  animation: mobile-menu-arrive 300ms var(--ease-out-soft) both;
-}
+/* Menu mobile (panneau des tableaux de bord) */
 .dashboard-menu-panel {
   animation: mobile-menu-arrive 280ms var(--ease-out-soft) both;
-}
-.app-mobile-nav-enter nav section {
-  animation: card-rise 500ms var(--ease-out-soft) both;
-}
-.app-mobile-nav-enter nav section:nth-of-type(2) {
-  animation-delay: 50ms;
-}
-.app-mobile-nav-enter nav section:nth-of-type(3) {
-  animation-delay: 100ms;
-}
-.app-mobile-nav-enter nav section:nth-of-type(4) {
-  animation-delay: 150ms;
 }
 
 /* Transitions de route */
@@ -1911,7 +1896,6 @@ body.pwa-standalone .explorer-page > div:first-child h1 {
   .animate-like-confirm,
   .event-card-reveal,
   [data-checkout-step],
-  .app-mobile-nav-enter,
   .navigation-progress-indicator,
   .checkout-dialog,
   .home-hero-backdrop-image,
@@ -2067,3 +2051,60 @@ button:active,
   }
 }
 
+
+/* ============================================================================
+   Coque applicative adaptative (refonte 2026-10)
+   --------------------------------------------------------------------------
+   Rail tablette → barre latérale desktop : un seul composant (AppSideRail),
+   décalage global du contenu appliqué sur <body> via :has() — les pages
+   restent inchangées. État réduit piloté par la classe `side-rail-collapsed`
+   sur <html>, persistée dans localStorage.
+   ========================================================================== */
+
+:root {
+  --rail-w: 4.75rem; /* 76 px */
+  --side-w: 17rem;   /* 272 px */
+}
+
+/* Retour d'appui natif : compression légère, sans cible fragile. */
+.press {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  scale: 1;
+  transition: scale 110ms var(--ease-out-soft);
+}
+.press:active {
+  scale: 0.96;
+}
+@media (prefers-reduced-motion: reduce) {
+  .press,
+  .press:active {
+    scale: 1;
+    transition: none;
+  }
+}
+
+/* Décalage horizontal du contenu quand la barre latérale est affichée. */
+@media (min-width: 768px) {
+  body:has(#app-side-rail) {
+    --side-offset: var(--rail-w);
+  }
+}
+@media (min-width: 1024px) {
+  html.side-rail-collapsed {
+    --side-w: var(--rail-w);
+  }
+  body:has(#app-side-rail) {
+    --side-offset: var(--side-w);
+  }
+}
+body:has(#app-side-rail) {
+  padding-inline-start: var(--side-offset, 0);
+  transition: padding-inline-start 200ms var(--ease-out-soft);
+}
+@media (prefers-reduced-motion: reduce) {
+  body:has(#app-side-rail) {
+    transition: none;
+  }
+}

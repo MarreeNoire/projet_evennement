@@ -1,339 +1,381 @@
+/* =============================================================================
+   Carrousel héros 3D — anneau CSS
+   --------------------------------------------------------------------------
+   Toutes les dimensions dérivent de variables posées par le composant selon
+   la boîte mesurée (ResizeObserver) : --card-w, --card-h, --radius,
+   --perspective, --slice-deg. Aucune taille de carte en pixels fixes.
+   Seuls transform / opacity / visibility sont animés.
+   ========================================================================== */
+
 .carousel {
-  min-width: 0;
-  outline: none;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .stage {
   position: relative;
-  height: clamp(31rem, 44vw, 39rem);
-  overflow: hidden;
-  perspective: 1400px;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  /* La hauteur suit la boîte réelle (dvh-safe) : pas de débordement en
+     paysage mobile, recalcul à l'orientation via le ResizeObserver. */
+  height: clamp(340px, min(58vw, 54dvh), 640px);
+  perspective: var(--perspective, 1400px);
   perspective-origin: 50% 44%;
-  isolation: isolate;
   touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.stage::before {
-  position: absolute;
-  inset: 6% 3% 7%;
-  z-index: -1;
-  border-radius: 50%;
-  background: var(--surface-raised);
-  content: "";
-  filter: blur(0.5px);
-  transform: rotate(-7deg) scaleY(0.64);
+.ring {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
 }
 
 .card {
   position: absolute;
-  top: 47%;
   left: 50%;
-  display: block;
-  width: clamp(14rem, 25vw, 20rem);
-  height: clamp(21rem, 35vw, 29rem);
-  overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 0.17);
-  border-radius: 1.3rem;
-  background: var(--surface);
-  color: #fff;
-  box-shadow: 0 2.5rem 4.5rem rgb(0 0 0 / 0.34);
-  transform: translate3d(calc(-50% + var(--x)), -50%, var(--z)) rotateY(var(--rot)) scale(var(--scale));
-  transform-style: preserve-3d;
-  transform-origin: 50% 55%;
-  transition: transform 620ms cubic-bezier(0.23, 1, 0.32, 1), opacity 420ms ease, filter 420ms ease, box-shadow 420ms ease;
-  opacity: var(--opacity);
-  filter: brightness(var(--brightness));
-  z-index: var(--layer);
-  will-change: transform;
+  top: 50%;
+  width: var(--card-w, 300px);
+  height: var(--card-h, 400px);
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: opacity 240ms ease-out;
+  border-radius: 26px;
 }
 
-.cardActive {
-  box-shadow: 0 2.8rem 5rem rgb(0 0 0 / 0.42);
+/* will-change ciblé : uniquement pendant le geste (classe posée par le JS). */
+.dragging,
+.dragging .card {
+  will-change: transform, opacity;
+}
+.dragging {
+  cursor: grabbing;
 }
 
-.cardSide:hover { filter: brightness(0.8); }
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
 
-.cover,
-.coverImage { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cardLink {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  border-radius: 26px;
+  overflow: hidden;
+  outline-offset: 3px;
+}
 
-.cover { overflow: hidden; background: var(--surface-raised); }
+.cardLink:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
 
-.coverImage { object-fit: cover; transition: transform 700ms cubic-bezier(0.23, 1, 0.32, 1); }
+.cover {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 26px;
+  overflow: hidden;
+  background: var(--surface-sunken);
+}
 
-.cardActive:hover .coverImage { transform: scale(1.035); }
+.coverImage {
+  object-fit: cover;
+}
 
 .scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgb(9 12 18 / 0.12) 0%, transparent 28%, rgb(9 12 18 / 0.12) 43%, rgb(9 12 18 / 0.88) 100%);
+  z-index: 1;
+  background:
+    linear-gradient(to top, rgba(10, 8, 18, 0.78) 0%, rgba(10, 8, 18, 0.05) 48%, rgba(10, 8, 18, 0.34) 100%);
+}
+
+.posterFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  text-align: center;
+  background: linear-gradient(160deg, var(--primary-sunken, #f6dfd4), var(--bg-muted));
+  color: var(--fg);
+}
+.posterFallback span {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.posterFallback strong {
+  font-size: 1.25rem;
+  line-height: 1.15;
+}
+.posterFallback i {
+  width: 3rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--gold-400, #edc85f);
+  justify-self: center;
 }
 
 .cardTop {
   position: absolute;
-  top: 0.9rem;
-  right: 0.9rem;
+  top: 0.85rem;
   left: 0.9rem;
+  right: 0.9rem;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(255, 253, 250, 0.92);
 }
-
-.cardTop span,
 .cardTop time {
-  display: inline-flex;
-  min-height: 2rem;
-  align-items: center;
-  border: 1px solid rgb(255 255 255 / 0.2);
+  padding: 0.25rem 0.55rem;
   border-radius: 999px;
-  padding: 0.35rem 0.65rem;
-  background: rgb(17 20 25 / 0.52);
-  backdrop-filter: blur(14px);
-  font-size: 0.75rem;
-  font-weight: 650;
+  background: rgba(10, 8, 18, 0.45);
+  font-variant-numeric: tabular-nums;
 }
-
-.cardTop time { border-color: transparent; background: var(--primary-solid); }
 
 .cardContent {
   position: absolute;
-  right: 1.2rem;
-  bottom: 1.15rem;
-  left: 1.2rem;
+  inset-inline: 1rem;
+  bottom: 0.95rem;
+  z-index: 2;
   display: grid;
-  gap: 0.65rem;
+  gap: 0.5rem;
 }
 
 .cardType {
-  margin: 0;
-  color: #ffb18f;
-  font-size: 0.75rem;
-  font-weight: 750;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-300, #f6df9b);
 }
 
 .cardContent h2 {
-  display: -webkit-box;
-  overflow: hidden;
-  margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.45rem, 2.25vw, 1.9rem);
-  font-weight: 750;
-  line-height: 1.02;
-  letter-spacing: -0.04em;
+  font-size: clamp(1.35rem, 4.2vw, 2.1rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: #fffdfa;
   text-wrap: balance;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .meta {
-  display: grid;
-  gap: 0.4rem;
-  color: rgb(255 255 255 / 0.78);
-  font-size: 0.8125rem;
-}
-
-.meta span {
   display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.45rem;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-size: 0.78rem;
+  color: rgba(255, 253, 250, 0.82);
 }
-
-.meta svg { width: 1rem; height: 1rem; flex: 0 0 auto; color: #ffb18f; }
-.meta span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.meta svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
 
 .cardBottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.6rem;
-  border-top: 1px solid rgb(255 255 255 / 0.2);
-  margin-top: 0.15rem;
-  padding-top: 0.8rem;
-}
-
-.price { font-size: 0.875rem; font-weight: 750; }
-
-.ticketAction {
-  display: inline-flex;
-  min-height: 2.6rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  border-radius: 0.7rem;
-  padding: 0 0.8rem;
-  background: var(--primary-solid);
-  color: white;
-  font-size: 0.8125rem;
-  font-weight: 750;
-  white-space: nowrap;
-}
-
-.ticketAction svg { width: 1rem; height: 1rem; }
-
-.posterFallback {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  overflow: hidden;
-  padding: 1.5rem;
-  background: var(--poster-1);
-  color: var(--poster-1-fg);
-}
-
-.posterFallback::before,
-.posterFallback::after {
-  position: absolute;
-  top: 9%;
-  right: -13%;
-  width: 78%;
-  aspect-ratio: 1;
-  border: 1px solid rgb(255 255 255 / 0.35);
-  border-radius: 50%;
-  content: "";
-}
-
-.posterFallback::after { top: 21%; right: 0; width: 56%; }
-.posterFallback span { position: relative; z-index: 1; font-size: 0.8125rem; font-weight: 700; }
-.posterFallback strong { position: relative; z-index: 1; margin-top: 0.5rem; font-family: var(--font-display); font-size: 2rem; line-height: 1; }
-.posterFallback i { position: absolute; top: 19%; left: -16%; width: 92%; aspect-ratio: 1; border: 1px solid rgb(255 255 255 / 0.2); border-radius: 50%; }
-
-.controls {
-  position: absolute;
-  z-index: 40;
-  right: 1.2rem;
-  bottom: 1rem;
-  display: flex;
-  align-items: center;
   gap: 0.75rem;
-  border: 1px solid rgb(255 255 255 / 0.16);
-  border-radius: 999px;
-  padding: 0.4rem;
-  background: rgb(23 30 40 / 0.82);
-  backdrop-filter: blur(18px);
+  margin-top: 0.15rem;
 }
 
-.controls button {
-  display: grid;
-  width: 2.65rem;
-  height: 2.65rem;
-  place-items: center;
-  border: 1px solid rgb(255 255 255 / 0.12);
-  border-radius: 50%;
-  background: transparent;
-  color: white;
-  cursor: pointer;
-  transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
-}
-
-.controls button:hover { background: var(--primary-solid); }
-.controls button:active { transform: scale(0.94); }
-.controls button svg { width: 1.125rem; height: 1.125rem; }
-
-.controls > span {
-  display: flex;
-  min-width: 3.2rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  color: rgb(255 255 255 / 0.65);
-  font-size: 0.75rem;
+.price {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #fffdfa;
   font-variant-numeric: tabular-nums;
 }
 
-.controls > span b { color: white; }
-.controls > span i { width: 0.9rem; height: 1px; background: rgb(255 255 255 / 0.38); }
+.ticketAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: var(--primary-solid);
+  color: var(--primary-solid-fg, #fffdfa);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.ticketAction svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.cardTitleSide {
+  position: absolute;
+  inset-inline: 1rem;
+  bottom: 0.9rem;
+  z-index: 2;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #fffdfa;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --------------------------- contrôles ------------------------------------- */
+
+.controls {
+  position: relative;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: -0.5rem;
+}
+
+.controlButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  color: var(--fg);
+  transition: background-color 150ms ease-out, transform 150ms ease-out;
+}
+.controlButton:hover {
+  background: var(--surface-raised);
+}
+.controlButton:active {
+  transform: scale(0.94);
+}
+.controlButton svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .controlButton {
+    transition: none;
+  }
+  .controlButton:active {
+    transform: none;
+  }
+}
+
+.counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  color: var(--fg-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.counter b {
+  color: var(--fg);
+}
+.counter i {
+  width: 2.25rem;
+  height: 1px;
+  background: var(--border-strong);
+}
 
 .caption {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.1rem 0.25rem 0;
-  color: var(--fg-subtle);
-  font-size: 0.8125rem;
+  gap: 1rem;
+  padding-inline: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
 }
-
-.emptyStage {
-  display: grid;
-  min-height: 30rem;
-  place-items: center;
-  align-content: center;
-  color: var(--fg-subtle);
-  text-align: center;
-}
-
-.emptyArtwork {
-  position: relative;
-  display: flex;
-  width: min(19rem, 75vw);
-  aspect-ratio: 0.72;
-  flex-direction: column;
-  justify-content: space-between;
+.caption span:first-child {
+  min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--border-strong);
-  border-radius: 1.3rem;
-  padding: 1.4rem;
-  background: var(--surface);
-  color: var(--fg);
-  text-align: left;
-  box-shadow: 0 2.5rem 5rem rgb(0 0 0 / 0.25);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.emptyArtwork span { font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.14em; }
-.emptyArtwork b { z-index: 1; font-family: var(--font-display); font-size: 2.4rem; line-height: 0.95; }
-.emptyArtwork i,
-.emptyArtwork::before,
-.emptyArtwork::after { position: absolute; border: 1px solid rgb(255 255 255 / 0.18); border-radius: 50%; content: ""; }
-.emptyArtwork i { top: 15%; right: -21%; width: 90%; aspect-ratio: 1; background: var(--accent-solid); }
-.emptyArtwork::before { top: 30%; right: -10%; width: 70%; aspect-ratio: 1; }
-.emptyArtwork::after { top: 38%; right: 6%; width: 43%; aspect-ratio: 1; }
-.emptyStage > p { margin: 1rem 0 0; font-size: 0.875rem; }
+/* ------------------------------ état vide ----------------------------------- */
 
-.carousel:focus-visible .stage { outline: 2px solid var(--border-focus); outline-offset: 4px; }
-.card:focus-visible,
-.controls button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
-
-@media (max-width: 920px) {
-  .stage { height: clamp(30rem, 54vw, 36rem); }
-  .card { width: clamp(13rem, 28vw, 18rem); height: clamp(20rem, 42vw, 26rem); }
-  .cardContent { right: 0.95rem; bottom: 0.95rem; left: 0.95rem; }
-  .cardContent h2 { font-size: clamp(1.25rem, 2.5vw, 1.65rem); }
+.empty {
+  display: grid;
+  gap: 1rem;
+  place-items: center;
+  padding: 2.5rem 1rem;
+}
+.emptyArt {
+  position: relative;
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.75rem 2rem;
+  border-radius: 26px;
+  background: linear-gradient(150deg, var(--primary-solid) 0%, var(--void-800, #2c3743) 130%);
+  color: #fffdfa;
+}
+.emptyArt span {
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+}
+.emptyArt b {
+  font-size: 1.35rem;
+  line-height: 1.15;
+  font-weight: 700;
+}
+.emptyArt i {
+  width: 3.5rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--gold-400, #edc85f);
+}
+.empty p {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
 }
 
-@media (max-width: 760px) {
-  .stage { height: clamp(26rem, 82vw, 34rem); margin-inline: -2vw; }
-  .card { width: clamp(12.5rem, 45vw, 19rem); height: clamp(19rem, 68vw, 27rem); }
-  .cardContent { gap: 0.55rem; }
-  .cardTop span,
-  .cardTop time { min-height: 1.9rem; font-size: 0.75rem; }
-  .controls { right: 50%; bottom: 0.8rem; transform: translateX(50%); }
-  .caption { padding-inline: 0.5rem; }
+/* --------------------- repli 2D : scroll-snap ------------------------------- */
+
+.plainTrack {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 4%;
+  padding-inline: 4%;
+  padding-bottom: 0.5rem;
+  list-style: none;
+  scrollbar-width: thin;
 }
 
-@media (max-width: 520px) {
-  .stage { height: 25rem; margin-inline: -1rem; }
-  .card { width: 15.5rem; height: 21rem; }
-  .cardContent h2 { font-size: 1.45rem; }
-  .cardTop { top: 0.7rem; right: 0.7rem; left: 0.7rem; }
-  .cardContent { right: 0.85rem; bottom: 0.85rem; left: 0.85rem; }
-  .cardBottom { padding-top: 0.65rem; }
-  .ticketAction { min-height: 2.4rem; padding-inline: 0.65rem; }
+.plainCard {
+  flex: 0 0 min(78%, 320px);
+  aspect-ratio: 3 / 4.1;
+  scroll-snap-align: center;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .card,
-  .coverImage,
-  .controls button { transition: none; }
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .cardTop span,
-  .cardTop time,
-  .controls { backdrop-filter: none; }
-  .cardTop span,
-  .controls { background: #171e28; }
+.plainCard > a,
+.plainCard .cover {
+  height: 100%;
 }

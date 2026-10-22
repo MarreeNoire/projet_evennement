@@ -153,6 +153,7 @@ export function SearchBar({ className }: { className?: string }) {
         <input
           ref={inputRef}
           id={`${id}-input`}
+          data-search-input=""
           type="search"
           autoComplete="off"
           spellCheck={false}

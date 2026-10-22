@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { ProfilePhoneForm } from "@/components/auth/profile-phone-form";
 import { ProfileAvatarForm } from "@/components/social/profile-avatar-form";
@@ -95,6 +96,12 @@ export default async function MonProfilPage() {
             city={profile.city}
             bio={profile.bio}
           />
+          <Link
+            href="/reglages"
+            className="text-fg-muted hover:text-fg press text-sm font-semibold underline decoration-dotted underline-offset-4"
+          >
+            Réglages du compte, préférences et déconnexion →
+          </Link>
         </section>
       </div>
     </SocialShell>

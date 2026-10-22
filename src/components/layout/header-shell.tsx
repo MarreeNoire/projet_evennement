@@ -1,27 +1,38 @@
 "use client";
 
-import { Bell, LoaderCircle, Menu } from "lucide-react";
+import { ArrowLeft, Bell, LoaderCircle, PanelLeft, Search, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
 import { Logo } from "@/components/brand/logo";
-import { SearchBar } from "@/components/layout/search-bar";
+import { Avatar } from "@/components/ui/avatar";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ButtonLink } from "@/components/ui/button";
+import { SearchBar } from "@/components/layout/search-bar";
 import { ROUTES } from "@/lib/constants";
+import { haptic } from "@/lib/ui/haptics";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 import type { HeaderUser } from "./header-types";
-import { MobileNav } from "./mobile-nav";
-import { getPrimaryNavItems } from "./nav-config";
+import { getMobileHeaderTitle, useSideCollapsed } from "./app-nav";
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 
-function isActive(pathname: string, href: string): boolean {
-  if (href === ROUTES.home) return pathname === "/";
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
+/* =============================================================================
+   Barre supérieure adaptative
+   --------------------------------------------------------------------------
+   - Mobile (<768)  : 64 px, app native — bouton retour contextuel sur les
+     pages de détail, icônes recherche/notification/avatar, aucun menu
+     hamburger (la navigation vit dans la barre d'onglets du bas).
+   - Tablette (768+) : recherche inline, rail latéral à icônes.
+   - Desktop (≥1024) : recherche inline, barre latérale réductible, menu
+     profil. Raccourci « / » pour la recherche, Échap pour fermer.
+
+   Conservés à l'identique : indicateur de progression de navigation, badge
+   temps réel des notifications (Supabase realtime), menu utilisateur.
+   ========================================================================== */
 
 export function HeaderShell({
   user,
@@ -32,7 +43,8 @@ export function HeaderShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [sideCollapsed, setSideCollapsed] = useSideCollapsed();
   const [navigatingFromPath, setNavigatingFromPath] = useState<string | null>(null);
   const navigating = navigatingFromPath === pathname;
   const [currentUnreadCount, updateUnreadCount] = useOptimistic(
@@ -40,8 +52,9 @@ export function HeaderShell({
     (count, change: number) => Math.max(0, count + change),
   );
   const [, startTransition] = useTransition();
-  const primaryNavItems = getPrimaryNavItems(user);
+  const mobileTitle = getMobileHeaderTitle(pathname);
 
+  /* Temps réel : badge de notifications (logique inchangée). */
   useEffect(() => {
     if (!user?.id) return;
 
@@ -94,6 +107,7 @@ export function HeaderShell({
     };
   }, [pathname, router, updateUnreadCount, user?.id]);
 
+  /* Indicateur de progression de navigation (logique inchangée). */
   useEffect(() => {
     let resetTimer: ReturnType<typeof setTimeout> | undefined;
     const startNavigationFeedback = () => {
@@ -148,8 +162,47 @@ export function HeaderShell({
     };
   }, []);
 
+  /* Raccourci « / » de recherche (le pli persistant est géré par le store). */
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "/") return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      const input = document.querySelector<HTMLInputElement>("[data-search-input]");
+      if (input) {
+        input.focus();
+      } else {
+        setSearchOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const toggleSide = () => {
+    haptic("light");
+    setSideCollapsed(!sideCollapsed);
+  };
+
+  const goBack = () => {
+    haptic("light");
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    if (mobileTitle) router.push(mobileTitle.backTo);
+  };
+
   return (
-    <header className="site-header bg-bg border-border-strong sticky top-0 z-40 border-b shadow-md">
+    <header className="site-header bg-bg/92 border-border-strong sticky top-0 z-40 border-b shadow-md backdrop-blur-md md:bg-bg md:supports-[backdrop-filter]:bg-bg/80">
       {navigating ? (
         <>
           <div aria-hidden="true" className="navigation-progress-track">
@@ -165,108 +218,131 @@ export function HeaderShell({
           </div>
         </>
       ) : null}
-      <div className="container-page flex h-[4.5rem] items-center gap-4">
-        <Link href={ROUTES.home} className="shrink-0" aria-label="Accueil">
+
+      <div className="container-page flex h-16 items-center gap-1.5 md:h-14 md:gap-2">
+        {/* Retour natif, uniquement sur les pages de détail (mobile). */}
+        {mobileTitle ? (
+          <>
+            <button
+              type="button"
+              onClick={goBack}
+              aria-label="Retour"
+              onPointerDown={() => haptic("light")}
+              className="press text-fg inline-flex size-11 shrink-0 items-center justify-center rounded-xl md:hidden"
+            >
+              <ArrowLeft className="size-5" aria-hidden="true" />
+            </button>
+            <span className="font-display min-w-0 flex-none truncate text-base font-bold tracking-tight md:hidden">
+              {mobileTitle.label}
+            </span>
+          </>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={toggleSide}
+          aria-label={sideCollapsed ? "Étendre la barre latérale" : "Réduire la barre latérale"}
+          aria-pressed={sideCollapsed}
+          className="press text-fg-muted hover:bg-bg-muted hover:text-fg hidden size-11 shrink-0 items-center justify-center rounded-xl lg:inline-flex"
+        >
+          <PanelLeft className="size-5" aria-hidden="true" />
+        </button>
+
+        {/* Identité — le rail/sidebar porte déjà la marque dès 768 px ;
+            en mode « détail » sur mobile, le titre la remplace. */}
+        <Link
+          href={ROUTES.home}
+          aria-label="Accueil — Event"
+          className={cn(
+            "press shrink-0 rounded-xl",
+            "md:ml-0 md:hidden",
+            mobileTitle && "hidden",
+          )}
+        >
           <Logo />
         </Link>
 
-        <nav aria-label="Modules principaux" className="hidden lg:block">
-          <ul className="border-border bg-bg-muted flex items-center gap-1 rounded-lg border p-1">
-            {primaryNavItems.map((item) => {
-              const active =
-                isActive(pathname, item.href) ||
-                (item.href === ROUTES.explore && pathname.startsWith("/evenements/"));
-              const Icon = item.icon;
+        <div className="min-w-0 flex-1" />
+        <SearchBar className="hidden w-full max-w-88 md:block" />
 
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "focus-visible:ring-border-focus flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none",
-                      active
-                        ? "bg-surface-raised text-primary shadow-sm"
-                        : "text-fg-muted hover:bg-surface hover:text-fg",
-                    )}
-                  >
-                    {Icon ? <Icon className="size-4" aria-hidden="true" /> : null}
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        <div className="ml-auto flex items-center gap-1 md:gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              haptic("light");
+              setSearchOpen(true);
+            }}
+            aria-label="Rechercher un événement"
+            className="press text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex size-11 shrink-0 items-center justify-center rounded-xl md:hidden"
+          >
+            <Search className="size-5" aria-hidden="true" />
+          </button>
 
-        <div className="ml-auto flex items-center gap-2">
-          {pathname === "/" ? null : <SearchBar className="hidden md:block" />}
-
-          <ThemeToggle className="hidden sm:inline-flex md:hidden lg:inline-flex" />
+          <ThemeToggle className="hidden md:inline-flex" />
 
           {user ? (
             <>
               <Link
                 href={ROUTES.notifications}
-                className="text-fg-muted hover:border-border hover:bg-bg-muted hover:text-fg relative inline-flex size-10 items-center justify-center rounded-sm border border-transparent"
                 aria-label={
                   currentUnreadCount > 0
                     ? `Notifications, ${currentUnreadCount} non lue${currentUnreadCount > 1 ? "s" : ""}`
                     : "Notifications"
                 }
+                className="press text-fg-muted hover:bg-bg-muted hover:text-fg relative inline-flex size-11 shrink-0 items-center justify-center rounded-xl"
               >
                 <Bell className="size-5" aria-hidden="true" />
                 {currentUnreadCount > 0 ? (
                   <span
                     aria-hidden="true"
-                    className="bg-danger-solid text-2xs ring-bg absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-sm px-1 font-bold text-white ring-2"
+                    className="bg-danger-solid ring-bg absolute top-1.5 right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white ring-2"
                   >
-                    {currentUnreadCount > 99 ? "99+" : currentUnreadCount}
+                    {currentUnreadCount > 9 ? "9+" : currentUnreadCount}
                   </span>
                 ) : null}
               </Link>
 
-              <div className="hidden md:block">
+              <div className="hidden lg:block">
                 <UserMenu user={user} />
               </div>
+              <Link href={ROUTES.profile} aria-label="Mon profil" className="press shrink-0 lg:hidden">
+                <Avatar src={user.avatarUrl} name={user.displayName} size="md" />
+              </Link>
             </>
           ) : (
-            <div className="flex items-center gap-2">
-              <ButtonLink
+            <>
+              <div className="hidden items-center gap-2 md:flex">
+                <ButtonLink href={ROUTES.login} variant="ghost">
+                  Connexion
+                </ButtonLink>
+                <ButtonLink href={ROUTES.register}>Créer un compte</ButtonLink>
+              </div>
+              <Link
                 href={ROUTES.login}
-                variant="ghost"
-                size="sm"
-                className="hidden sm:inline-flex"
+                aria-label="Connexion"
+                className="press text-fg-muted hover:bg-bg-muted hover:text-fg inline-flex size-11 shrink-0 items-center justify-center rounded-xl md:hidden"
               >
-                Connexion
-              </ButtonLink>
-              <ButtonLink href={ROUTES.register} size="sm" className="hidden sm:inline-flex">
-                Créer un compte
-              </ButtonLink>
-            </div>
+                <UserIcon className="size-5" aria-hidden="true" />
+              </Link>
+            </>
           )}
-
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            className="text-fg-muted hover:border-border hover:bg-bg-muted inline-flex size-10 items-center justify-center rounded-sm border border-transparent lg:hidden"
-            aria-expanded={mobileOpen}
-            aria-controls="menu-mobile"
-          >
-            <Menu className="size-5" aria-hidden="true" />
-            <span className="sr-only">Ouvrir le menu</span>
-          </button>
         </div>
       </div>
 
-      <div id="menu-mobile">
-        <MobileNav
-          open={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          user={user}
-          unreadCount={currentUnreadCount}
-        />
-      </div>
+      {/* Recherche en feuille basse, façon app native (mobile). */}
+      <BottomSheet
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        title="Rechercher"
+        closeLabel="Fermer la recherche"
+      >
+        <SearchBar className="w-full" />
+        <p className="text-fg-subtle mt-3 text-xs">
+          Astuce : sur ordinateur, appuie sur {""}
+          <kbd className="bg-bg-muted rounded px-1.5 py-0.5 font-mono text-xs">/</kbd> depuis
+          n&apos;importe quelle page.
+        </p>
+      </BottomSheet>
     </header>
   );
 }

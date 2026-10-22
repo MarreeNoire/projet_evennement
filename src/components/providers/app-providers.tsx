@@ -5,6 +5,8 @@ import { Toaster } from "sonner";
 
 import { STORAGE_KEYS } from "@/lib/constants";
 import { PwaInstallProvider } from "@/components/providers/pwa-install-provider";
+import { PwaUpdateToast } from "@/components/providers/pwa-update-toast";
+import { PwaInstallBanner } from "@/components/layout/pwa-install-banner";
 
 /* =============================================================================
    Gestion du thÃ¨me (compatible React 19 / Next.js 16)
@@ -105,6 +107,8 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <ThemeProvider>
       <PwaInstallProvider>
         {children}
+        <PwaUpdateToast />
+        <PwaInstallBanner />
         <Toaster
           position="top-center"
           closeButton

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Home, Compass, MessageSquare, Ticket, User } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants";
+import { haptic } from "@/lib/ui/haptics";
 import { cn } from "@/lib/utils";
 import type { HeaderUser } from "./header-types";
 
@@ -52,7 +53,7 @@ export function BottomNav({ user }: { user: HeaderUser | null }) {
   return (
     <nav
       aria-label="Navigation mobile"
-      className="mobile-tabbar bg-bg border-border-strong fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_28px_rgba(10,8,18,0.22)] lg:hidden"
+      className="mobile-tabbar bg-bg border-border-strong fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_28px_rgba(10,8,18,0.22)] md:hidden"
     >
       <ul className="grid h-14 grid-cols-5 items-stretch">
         {items.map((item) => {
@@ -62,8 +63,9 @@ export function BottomNav({ user }: { user: HeaderUser | null }) {
               <Link
                 href={item.href}
                 aria-current={item.active ? "page" : undefined}
+                onPointerDown={() => haptic("light")}
                 className={cn(
-                  "-mt-px flex h-14 flex-col items-center justify-center gap-1 border-t-2 transition-colors duration-200",
+                  "-mt-px flex h-14 flex-col items-center justify-center gap-1 border-t-2 transition-colors duration-200 active:scale-95",
                   item.active
                     ? "border-primary text-primary font-semibold"
                     : "text-fg-muted hover:text-fg border-transparent",

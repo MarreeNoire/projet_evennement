@@ -1,6 +1,6 @@
 "use client";
 
-import { ArchedHero } from "./arched-hero";
+import { HeroCarousel3D } from "./hero-carousel-3d";
 import { TrendingEvents } from "./trending-events";
 import { ThisWeekEvents } from "./this-week-events";
 import type { PublishedEventView } from "@/types/database";
@@ -12,10 +12,10 @@ interface HomeExperienceProps {
 export function HomeExperience({ events }: HomeExperienceProps) {
   return (
     <div className="home-editorial relative min-h-screen">
-      <ArchedHero events={events} />
+      <HeroCarousel3D events={events} />
 
-      {/* Événements publiés à venir — le hero les présente déjà sur mobile */}
-      <div className="hidden lg:block">
+      {/* Événements publiés à venir — le héros les présente sur mobile */}
+      <div className="hidden md:block">
         <TrendingEvents events={events} />
       </div>
 

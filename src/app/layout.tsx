@@ -56,6 +56,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  // « App native » : le contenu va sous l'encoche et la barre home
+  // (env(safe-area-inset-*) exploitées par la tabbar et les sheets).
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f7f4ee" },
     { media: "(prefers-color-scheme: dark)", color: "#171e28" },

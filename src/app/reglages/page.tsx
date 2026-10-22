@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { UserSettingsForm } from "@/components/auth/user-settings-form";
+import { LogoutButton } from "@/components/layout/logout-button";
 import { getMyNotificationPreferences } from "@/lib/notifications/queries";
 
 export const metadata = {
@@ -31,6 +32,13 @@ export default async function ReglagesPage() {
           initialVisibility={profile.visibility ?? "public"}
           initialNotificationPreferences={notificationPreferences}
         />
+
+        <div className="border-border-strong border-t pt-6">
+          <p className="text-fg-muted mb-3 text-sm">
+            Quitter ton compte en toute simplicité — tes billets restent réservés.
+          </p>
+          <LogoutButton />
+        </div>
       </main>
       <SiteFooter />
     </div>
