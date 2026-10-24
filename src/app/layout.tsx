@@ -3,6 +3,7 @@ import { Anton, Bricolage_Grotesque } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { ServiceWorkerRegistration } from "@/components/providers/service-worker-registration";
+import { PWAInstallPrompt, PWAInstallBanner } from "@/components/pwa/pwa-install-prompt";
 import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
@@ -96,6 +97,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div id="contenu">{children}</div>
         </AppProviders>
         <ServiceWorkerRegistration />
+        <PWAInstallPrompt />
+        <PWAInstallBanner />
       </body>
     </html>
   );

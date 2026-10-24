@@ -2362,3 +2362,34 @@ body:has(#app-side-rail) {
     transition: none;
   }
 }
+
+/* ============================================================================
+   PWA Install Prompt Animations
+   ========================================================================== */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 300ms var(--ease-out-soft) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Safe area padding for mobile */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
