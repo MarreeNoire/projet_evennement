@@ -82,7 +82,7 @@ export function EventHorizontalList({ events }: EventHorizontalListProps) {
             aria-label="Événements précédents"
             onClick={() => scroll(-1)}
             disabled={!canGoBack}
-            className="border-border bg-surface/95 text-fg hover:bg-primary focus-visible:outline-primary pointer-events-auto inline-flex size-10 items-center justify-center rounded-md border shadow-sm transition-all hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-0"
+            className="border-border bg-surface/95 text-fg hover:bg-primary focus-visible:outline-primary pointer-events-auto inline-flex size-10 items-center justify-center rounded-md border shadow-sm transition-all hover:text-(--primary-solid-fg) focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-0"
           >
             <ChevronLeft className="size-5" aria-hidden="true" />
           </button>
@@ -91,7 +91,7 @@ export function EventHorizontalList({ events }: EventHorizontalListProps) {
             aria-label="Événements suivants"
             onClick={() => scroll(1)}
             disabled={!canGoForward}
-            className="border-border bg-surface/95 text-fg hover:bg-primary focus-visible:outline-primary pointer-events-auto inline-flex size-10 items-center justify-center rounded-md border shadow-sm transition-all hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-0"
+            className="border-border bg-surface/95 text-fg hover:bg-primary focus-visible:outline-primary pointer-events-auto inline-flex size-10 items-center justify-center rounded-md border shadow-sm transition-all hover:text-(--primary-solid-fg) focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-0"
           >
             <ChevronRight className="size-5" aria-hidden="true" />
           </button>

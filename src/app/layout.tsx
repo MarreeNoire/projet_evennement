@@ -1,10 +1,27 @@
 import type { Metadata, Viewport } from "next";
+import { Anton, Bricolage_Grotesque } from "next/font/google";
+
 import { AppProviders } from "@/components/providers/app-providers";
 import { ServiceWorkerCleanup } from "@/components/providers/service-worker-cleanup";
 import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
 import "./globals.css";
+
+/* Polices de la maquette `accueil/`, auto-hébergées : aucun appel réseau au
+   chargement et aucun décalage de mise en page. */
+const anton = Anton({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-anton",
+});
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-bricolage",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl),
@@ -54,8 +71,8 @@ export const viewport: Viewport = {
   // (env(safe-area-inset-*) exploitées par la tabbar et les sheets).
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f4ee" },
-    { media: "(prefers-color-scheme: dark)", color: "#171e28" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f2ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0c" },
   ],
 };
 
@@ -67,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className="light"
+      className={`light ${anton.variable} ${bricolage.variable}`}
     >
       <head />
       <body className="min-h-dvh antialiased">

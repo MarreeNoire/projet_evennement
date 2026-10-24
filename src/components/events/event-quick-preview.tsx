@@ -6,15 +6,18 @@ import { ArrowUpRight, CalendarDays, MapPin, X } from "lucide-react";
 
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { getCategoryLabel } from "@/lib/constants";
-import { formatDateRange } from "@/lib/utils";
+import { cn, formatDateRange } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
 
 export function EventQuickPreview({
   event,
   formattedPrice,
+  buttonClassName,
 }: {
   event: PublishedEventView;
   formattedPrice: string;
+  /** Permet à la carte de fournir le style de son action secondaire. */
+  buttonClassName?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
@@ -36,7 +39,10 @@ export function EventQuickPreview({
         aria-haspopup="dialog"
         aria-controls={previewId}
         onClick={() => setOpen(true)}
-        className="border-border text-fg hover:border-primary hover:bg-bg-muted focus-visible:ring-border-focus inline-flex min-h-10 items-center gap-2 border px-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        className={cn(
+          "border-border text-fg hover:border-primary hover:bg-bg-muted focus-visible:ring-border-focus inline-flex min-h-10 items-center gap-2 border px-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none",
+          buttonClassName,
+        )}
       >
         Aperçu rapide
         <ArrowUpRight className="size-4" aria-hidden="true" />

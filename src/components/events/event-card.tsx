@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import type { CSSProperties } from "react";
-import { BadgeCheck, MapPin } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, MapPin } from "lucide-react";
 
 import { AccessLevelBadge } from "@/components/ui/badge";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
@@ -14,11 +14,15 @@ import { EventQuickPreview } from "./event-quick-preview";
    Carte d'événement
    --------------------------------------------------------------------------
    Une seule source de vérité visuelle, réutilisée sur l'accueil, l'explorer et
-   les salons. Le prix, la date et le lieu sont toujours en texte (jamais la
-   couleur seule). Sans image de couverture, on génère une « affiche » :
-   aplat de couleur, motif géométrique et initiale en serif. La couleur est
-   choisie de façon déterministe à partir du titre : deux rechargements
-   donnent le même résultat, et la grille reste variée.
+   les salons. La structure reprend le billet de la maquette `accueil/` : bloc de
+   date en menthe, filet perforé, prix composté, action principale franche.
+   La surface est un panneau de verre (voir `.event-card` dans globals.css).
+
+   Le prix, la date et le lieu restent toujours en texte, jamais portés par la
+   couleur seule. Sans image de couverture, on génère une « affiche » : aplat de
+   couleur, motif géométrique et initiale en display. La couleur est choisie de
+   façon déterministe à partir du titre, si bien que deux rechargements donnent
+   le même résultat et que la grille reste variée.
    ========================================================================== */
 
 export function priceLabel(event: Pick<PublishedEventView, "min_price" | "max_price">): string {
@@ -49,22 +53,23 @@ export function EventCard({ event }: { event: PublishedEventView }) {
   const { day, month, year } = dateParts(event.start_at);
   const gallery = Array.isArray(event.gallery) ? event.gallery : [];
   const imageUrl = event.cover_url ?? gallery[0] ?? null;
+  const eventHref = `/evenements/${event.slug}`;
 
   return (
-    <article className="event-card group border-border-strong/70 bg-surface hover:border-primary flex h-full flex-col overflow-hidden rounded-xl border transition-[transform,border-color,box-shadow] duration-200 ease-[var(--ease-out-soft)] hover:-translate-y-1 hover:shadow-lg">
+    <article className="event-card">
       <Link
-        href={`/evenements/${event.slug}`}
+        href={eventHref}
         prefetch={false}
         aria-label={`${event.title}, ${formatDate(event.start_at)} à ${event.city}`}
         className="focus-visible:outline-border-focus block focus-visible:outline-2 focus-visible:outline-offset-[-3px]"
       >
-        <div className="border-border bg-bg-muted relative aspect-[16/8] overflow-hidden border-b">
+        <div className="event-card-media aspect-[16/10]">
           {imageUrl ? (
             <ViewTransition name={`event-cover-${event.id}`} share="morph" default="none">
               <PublicStorageImage
                 src={imageUrl}
                 alt=""
-                className="size-full object-cover transition-transform duration-700 ease-[var(--ease-out-soft)] group-hover:scale-[1.045] motion-reduce:transform-none"
+                className="event-card-cover size-full object-cover"
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 fill
                 quality={68}
@@ -74,84 +79,92 @@ export function EventCard({ event }: { event: PublishedEventView }) {
             <EventPoster event={event} />
           )}
 
-          {/* Badges en superposition */}
-          <div className="absolute top-3 left-3 flex gap-1.5">
-            <span className="border-border bg-surface text-2xs text-fg rounded-md border px-2 py-1 font-semibold tracking-wide uppercase">
-              {getCategoryLabel(event.category)}
-            </span>
-          </div>
+          {/* Voile bas : garantit la lisibilité de la pastille de date. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[rgba(11,11,12,0.62)] to-transparent"
+          />
+
+          <span className="absolute top-3 left-3 inline-flex items-center rounded-md border border-[rgba(244,242,236,0.28)] bg-[rgba(11,11,12,0.58)] px-2 py-1 text-[0.62rem] font-bold tracking-[0.12em] text-[var(--paper)] uppercase backdrop-blur-md">
+            {getCategoryLabel(event.category)}
+          </span>
+
+          <time
+            dateTime={event.start_at}
+            className="event-card-date absolute right-3 bottom-3"
+            aria-label={`${day} ${month} ${year}`}
+          >
+            <span className="event-card-date-day">{day}</span>
+            <span className="event-card-date-month">{month}</span>
+          </time>
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="line-clamp-2 min-w-0 flex-1 text-base leading-snug font-bold sm:text-lg">
-            <Link
-              href={`/evenements/${event.slug}`}
-              prefetch={false}
-              className="text-fg hover:text-primary focus-visible:outline-border-focus focus-visible:outline-2 focus-visible:outline-offset-2"
-            >
-              {event.title}
-            </Link>
-          </h3>
-          <time
-            dateTime={event.start_at}
-            className="border-border-strong flex shrink-0 flex-col rounded-md border px-2.5 py-1 text-right"
-            aria-label={`${day} ${month} ${year}`}
+      <div className="event-card-tear" aria-hidden="true" />
+
+      <div className="flex flex-1 flex-col gap-2.5 p-4">
+        <h3 className="event-card-title line-clamp-2">
+          <Link
+            href={eventHref}
+            prefetch={false}
+            className="focus-visible:outline-border-focus transition-colors hover:text-(--mint-deep) focus-visible:outline-2 focus-visible:outline-offset-2"
           >
-            <span className="font-display text-primary text-xl leading-none font-bold tabular-nums">
-              {day}
-            </span>
-            <span className="text-2xs text-fg-muted mt-1 font-semibold tracking-wide uppercase">
-              {month}
-            </span>
-          </time>
-        </div>
+            {event.title}
+          </Link>
+        </h3>
 
-        {/* Gallery preview */}
-        {gallery.length > 0 && (
-          <div className="mb-2 flex gap-1">
-            {gallery.slice(0, 3).map((url, index) => (
-              <span
-                key={`${event.id}-gallery-${index}`}
-                className="border-border/50 bg-bg-muted size-10 shrink-0 overflow-hidden rounded-md border"
-              >
-                <PublicStorageImage
-                  src={url}
-                  alt=""
-                  width={40}
-                  height={40}
-                  sizes="40px"
-                  quality={48}
-                  className="size-full object-cover"
-                />
-              </span>
-            ))}
-          </div>
-        )}
-
-        <p className="text-fg-muted flex items-center gap-2 text-xs">
-          <MapPin className="text-primary size-4 shrink-0" aria-hidden="true" />
+        <p className="text-fg-muted flex items-center gap-1.5 text-xs">
+          <MapPin className="text-(--mint-deep) size-3.5 shrink-0" aria-hidden="true" />
           <span className="truncate">
             {event.venue_name ? `${event.venue_name}, ` : ""}
             {event.city}
           </span>
         </p>
 
-        <div className="border-border mt-auto flex items-center justify-between gap-3 border-t pt-3">
-          <span className="text-fg text-sm font-bold tabular-nums">{priceLabel(event)}</span>
-          <span className="text-fg-subtle flex max-w-[140px] items-center gap-1 truncate text-xs">
+        {gallery.length > 0 ? (
+          <div className="flex gap-1">
+            {gallery.slice(0, 3).map((url, index) => (
+              <span
+                key={`${event.id}-gallery-${index}`}
+                className="border-border/60 bg-bg-muted size-9 shrink-0 overflow-hidden rounded-md border"
+              >
+                <PublicStorageImage
+                  src={url}
+                  alt=""
+                  width={36}
+                  height={36}
+                  sizes="36px"
+                  quality={48}
+                  className="size-full object-cover"
+                />
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="border-border mt-auto flex items-end justify-between gap-3 border-t pt-2.5">
+          <span className="event-card-price">{priceLabel(event)}</span>
+          <span className="text-fg-subtle flex max-w-[9rem] items-center gap-1 truncate text-[0.7rem]">
             {event.organizer_verified ? (
               <BadgeCheck
-                className="text-primary size-4 shrink-0"
+                className="text-(--mint-deep) size-3.5 shrink-0"
                 aria-label="Organisateur vérifié"
               />
             ) : null}
             <span className="truncate">{event.organizer_name}</span>
           </span>
         </div>
-        <div className="flex justify-end pt-1">
-          <EventQuickPreview event={event} formattedPrice={priceLabel(event)} />
+
+        <div className="flex items-center gap-2">
+          <EventQuickPreview
+            event={event}
+            formattedPrice={priceLabel(event)}
+            buttonClassName="event-card-preview"
+          />
+          <Link href={`${eventHref}/billets`} className="event-card-cta ms-auto">
+            Billet
+            <ArrowUpRight aria-hidden="true" className="size-3.5" />
+          </Link>
         </div>
       </div>
     </article>
@@ -168,24 +181,24 @@ function EventPoster({ event }: { event: PublishedEventView }) {
   return (
     <div
       style={style}
-      className="relative flex size-full flex-col justify-between overflow-hidden bg-(--poster-bg) p-5 text-(--poster-text) sm:p-6"
+      className="event-card-cover relative flex size-full flex-col justify-between overflow-hidden bg-(--poster-bg) p-5 text-(--poster-text) sm:p-6"
     >
       <span
         aria-hidden="true"
-        className="absolute -top-10 -right-8 size-40 rounded-full border-[18px] border-(--poster-text)"
+        className="absolute -top-10 -right-8 size-40 rounded-full border-[18px] border-(--poster-text) opacity-25"
       />
-      <div className="relative flex items-center justify-between gap-3 text-xs font-semibold tracking-[0.16em] uppercase">
+      <div className="relative flex items-center justify-between gap-3 text-[0.62rem] font-bold tracking-[0.16em] uppercase">
         <span>{getCategoryLabel(event.category)}</span>
         <span>{event.city}</span>
       </div>
       <div className="relative max-w-[85%]">
         <span
-          className="font-display block text-5xl leading-none font-semibold sm:text-6xl"
+          className="font-display block text-5xl leading-none font-normal sm:text-6xl"
           aria-hidden="true"
         >
           {event.title.trim().charAt(0).toLocaleUpperCase("fr-FR")}
         </span>
-        <span className="mt-3 line-clamp-2 block text-lg leading-tight font-semibold sm:text-xl">
+        <span className="mt-3 line-clamp-2 block text-sm leading-tight font-semibold">
           {event.title}
         </span>
       </div>

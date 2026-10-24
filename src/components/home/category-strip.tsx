@@ -38,7 +38,7 @@ export function CategoryStrip({ events = [] }: CategoryStripProps) {
               <Link
                 key={cat.slug}
                 href={`/explorer?categorie=${cat.slug}#resultats`}
-                className="group relative flex h-40 sm:h-48 flex-col justify-between overflow-hidden rounded-2xl border border-black/5 bg-primary-solid p-4 text-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-white/10"
+                className="group bg-primary-solid text-primary-solid-fg relative flex h-40 flex-col justify-between overflow-hidden rounded-2xl border border-black/5 p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:h-48 dark:border-white/10"
               >
                 {/* Image d'un vrai événement publié dans cette catégorie */}
                 {realCover ? (

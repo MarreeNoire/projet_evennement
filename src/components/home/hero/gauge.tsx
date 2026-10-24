@@ -1,66 +1,63 @@
+import type { CSSProperties } from "react";
+
 type GaugeProps = {
   value: number;
-  color?: string;
-  showLabels?: boolean;
+  /** Libellé lu par les lecteurs d'écran, plus parlant qu'un pourcentage seul. */
+  label: string;
   min?: string;
   max?: string;
 };
 
-const TICK_COUNT = 40;
-const CENTER = 100;
-const RADIUS = 80;
-const TICK_INNER_RADIUS = RADIUS - 10;
+/* Demi-cercle : `pathLength={100}` permet d'exprimer le remplissage en
+   pourcentage sans calculer la longueur réelle de la courbe. */
+const ARC = "M 10 62 A 50 50 0 0 1 110 62";
 
-export function Gauge({
-  value,
-  color = "#ef4d23",
-  showLabels = false,
-  min = "",
-  max = "",
-}: GaugeProps) {
-  const clampedValue = Math.min(100, Math.max(0, value));
-  const activeTicks = Math.round((clampedValue / 100) * TICK_COUNT);
+export function Gauge({ value, label, min = "", max = "" }: GaugeProps) {
+  const clamped = Math.min(100, Math.max(0, Math.round(value)));
+  const style = {
+    "--arc-length": 100,
+    "--arc-offset": 100 - clamped,
+  } as CSSProperties;
 
   return (
-    <div className="mx-auto w-full max-w-[260px]">
+    <div className="w-full">
       <svg
-        viewBox="0 0 200 120"
+        viewBox="0 0 120 74"
         role="img"
-        aria-label={`${clampedValue}%`}
-        className="mx-auto block h-auto w-full"
+        aria-label={`${label} : ${clamped} %`}
+        className="mx-auto block h-auto w-full max-w-[11rem]"
       >
-        {Array.from({ length: TICK_COUNT }, (_, index) => {
-          const angle = Math.PI + (index / (TICK_COUNT - 1)) * Math.PI;
-          const cos = Math.cos(angle);
-          const sin = Math.sin(angle);
-
-          return (
-            <line
-              key={index}
-              x1={CENTER + cos * TICK_INNER_RADIUS}
-              y1={CENTER + sin * TICK_INNER_RADIUS}
-              x2={CENTER + cos * RADIUS}
-              y2={CENTER + sin * RADIUS}
-              stroke={index < activeTicks ? color : "#d4d4d8"}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          );
-        })}
+        <path
+          d={ARC}
+          fill="none"
+          stroke="rgba(244,242,236,0.18)"
+          strokeWidth="7"
+          strokeLinecap="round"
+        />
+        <path
+          d={ARC}
+          fill="none"
+          stroke="var(--mint)"
+          strokeWidth="7"
+          strokeLinecap="round"
+          pathLength={100}
+          className="home-gauge-arc"
+          style={style}
+        />
         <text
-          x="100"
-          y="105"
+          x="60"
+          y="56"
           textAnchor="middle"
-          fill="#171717"
-          fontSize="22"
-          fontWeight="600"
+          fill="var(--paper)"
+          fontFamily="var(--font-display)"
+          fontSize="21"
         >
-          {clampedValue}%
+          {clamped}%
         </text>
       </svg>
 
-      {showLabels ? (
-        <div className="mt-1 flex items-center justify-between text-[11px] text-neutral-500">
+      {min || max ? (
+        <div className="flex items-center justify-between text-[0.65rem] text-[rgba(244,242,236,0.6)]">
           <span>{min}</span>
           <span>{max}</span>
         </div>

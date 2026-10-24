@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
+import { EventGrid } from "@/components/events/event-card";
 import { buildHeroSnapshot, getHeroWeekRange } from "@/components/home/hero/data";
 import { EventHeroDashboard } from "@/components/home/hero/dashboard-preview";
 import { HeroBackground } from "@/components/home/hero/hero-background";
@@ -14,7 +15,6 @@ import {
   type ExploreResult,
 } from "@/lib/events/queries";
 
-import "@/styles/fonts.css";
 import "@/styles/home-hero.css";
 
 const EMPTY_RESULT: ExploreResult = {
@@ -24,6 +24,13 @@ const EMPTY_RESULT: ExploreResult = {
   pageSize: 48,
   totalPages: 1,
 };
+
+const TICKER_ITEMS = [
+  "Billets QR",
+  "Salons d'événement",
+  "Paiement en ligne",
+  "Côte d'Ivoire",
+];
 
 /** Une reprise pour absorber un incident réseau transitoire au premier rendu. */
 async function loadWithRetry<T>(load: () => Promise<T>, fallback: T): Promise<T> {
@@ -36,6 +43,19 @@ async function loadWithRetry<T>(load: () => Promise<T>, fallback: T): Promise<T>
       return fallback;
     }
   }
+}
+
+/** Le bandeau est dupliqué pour que la boucle du défilement soit invisible. */
+function TickerGroup() {
+  return (
+    <div className="home-ticker-group">
+      {TICKER_ITEMS.map((item) => (
+        <span key={item} className="home-ticker-item">
+          {item}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 export default async function HomePage() {
@@ -71,70 +91,80 @@ export default async function HomePage() {
     cities,
   });
 
+  const lineup = visibleEvents.slice(0, 6);
+
   return (
-    <main className="event-hero-page min-h-screen w-full bg-[#ededed] p-3 sm:p-4">
-      <section
-        aria-labelledby="event-hero-title"
-        className="relative h-[calc(100vh-24px)] w-full overflow-hidden rounded-2xl bg-[#d9d9d9] sm:h-[calc(100vh-32px)] sm:rounded-3xl"
-      >
-        <HeroBackground />
-        <div aria-hidden="true" className="absolute inset-0 bg-white/10" />
+    <main className="home-page">
+      <div className="home-frame">
+        <section aria-labelledby="event-hero-title" className="home-stage">
+          <HeroBackground />
+          <div aria-hidden="true" className="home-stage-veil" />
 
-        <div className="relative z-10">
-          <EventHeroNavbar />
+          <div className="home-stage-inner">
+            <EventHeroNavbar />
 
-          <div className="flex flex-col items-center px-4 pt-8 pb-4 text-center sm:pt-10 sm:pb-4">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-[13px] font-medium text-neutral-800 shadow-sm">
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#ef4d23]" />
-              {APP_NAME} · Côte d&apos;Ivoire
+            <div className="home-ticker" aria-hidden="true">
+              <div className="home-ticker-track">
+                <TickerGroup />
+                <TickerGroup />
+              </div>
             </div>
 
-            <h1
-              id="event-hero-title"
-              className="event-hero-heading mt-5 max-w-4xl text-neutral-900 sm:mt-6"
-              style={{
-                fontSize: "clamp(36px, 8vw, 72px)",
-                lineHeight: 1.05,
-                fontWeight: 500,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Les{" "}
-              <span
-                style={{
-                  fontFamily: "'Instrument Serif', serif",
-                  fontStyle: "italic",
-                  fontWeight: 400,
-                }}
-              >
-                événements
-              </span>
-              <br />
-              de demain
-            </h1>
+            <div className="home-hero-copy">
+              <p className="home-eyebrow">Événements · {APP_NAME}</p>
 
-            <p
-              className="mt-4 px-2 text-neutral-700 sm:mt-6"
-              style={{ fontSize: "clamp(13px, 3.5vw, 16px)" }}
-            >
-              Découvre les sorties qui comptent en Côte d&apos;Ivoire, réserve ta place et rencontre
-              ta communauté.
-            </p>
+              <h1 id="event-hero-title" className="home-hero-title">
+                Les <span className="home-hero-title-outline">événements</span>
+                <br />
+                de demain
+              </h1>
 
-            <Link
-              href="/explorer"
-              className="mt-6 inline-flex items-center gap-3 rounded-full bg-[#0b0f1a] py-2 pr-2 pl-6 text-[14px] font-medium text-white hover:bg-black sm:mt-8 sm:py-2.5 sm:pl-7"
-            >
-              Explorer les événements
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 sm:h-7 sm:w-7">
-                <ChevronRight aria-hidden="true" className="h-4 w-4" />
-              </span>
-            </Link>
+              <p className="home-hero-lead">
+                Découvre les sorties qui comptent en Côte d&apos;Ivoire, réserve ta place et
+                rencontre ta communauté.
+              </p>
+
+              <div className="home-hero-actions">
+                <Link href="/explorer" className="home-btn home-btn-primary">
+                  Explorer les événements
+                  <ArrowUpRight aria-hidden="true" className="size-4" />
+                </Link>
+                <Link href="/devenir-organisateur" className="home-btn home-btn-ghost">
+                  Devenir organisateur
+                </Link>
+              </div>
+            </div>
+
+            <EventHeroDashboard snapshot={snapshot} />
           </div>
+        </section>
 
-          <EventHeroDashboard snapshot={snapshot} />
-        </div>
-      </section>
+        <section aria-labelledby="home-lineup-title" className="home-lineup">
+          <header className="home-lineup-head">
+            <div>
+              <p className="home-eyebrow home-eyebrow-ink">À l&apos;affiche</p>
+              <h2 id="home-lineup-title" className="home-lineup-title">
+                Les prochaines sorties
+              </h2>
+            </div>
+            <Link href="/explorer" className="home-link-arrow">
+              Tout voir
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
+          </header>
+
+          {lineup.length > 0 ? (
+            <EventGrid events={lineup} />
+          ) : (
+            <div className="glass-surface home-empty">
+              <strong>Aucune sortie publiée pour le moment.</strong>
+              <span>
+                Les prochains événements apparaîtront ici dès leur publication par un organisateur.
+              </span>
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   );
 }

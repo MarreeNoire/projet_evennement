@@ -54,7 +54,7 @@ export function BecomeOrganizerCTA() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/devenir-organisateur"
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary-solid px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-primary-solid-hover"
+                className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover inline-flex min-h-11 items-center gap-2 rounded-lg px-5 py-3 text-sm font-bold transition-colors"
               >
                 <span>Publier un événement</span>
                 <ArrowRight className="size-3.5" />
