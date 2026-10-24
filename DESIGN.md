@@ -32,7 +32,7 @@ spacing:
 components:
   hero:
     style: "scène encre avec vidéo voilée, halo de menthe, bandeau défilant et panneaux de verre"
-    structure: "navigation de verre · bandeau · titre Anton · actions · trois panneaux de données réelles"
+    structure: "navigation de verre · bandeau · titre Anton · actions · composition centrée"
   event-card:
     style: "billet de verre : affiche, pastille de date en menthe, filet perforé, prix composté"
   navigation:
@@ -57,11 +57,11 @@ L'écart assumé avec la maquette est le verre. Les aplats opaques deviennent de
 
 - `backdrop-filter` est toujours doublé d'un repli opaque pour les navigateurs qui ne le prennent pas en charge.
 - `prefers-reduced-transparency: reduce` remplace le verre par une surface pleine et coupe le flou.
-- Le texte ne doit jamais reposer sur une zone de verre sans voile derrière : sur la scène d'accueil, un dégradé d'encre garantit le contraste, mesuré entre 11:1 et 14:1 sur les panneaux.
+- Le texte ne doit jamais reposer sur une zone de verre sans voile derrière : sur la scène d'accueil, un dégradé d'encre garantit le contraste du titre et des actions.
 
 ### Parcours
 
-1. L'accueil pose la promesse, le bandeau, puis les trois chiffres utiles et la prochaine sortie sous forme de billet.
+1. L'accueil pose la promesse et le bandeau, puis laisse la place aux sorties réelles dans les cartes-billets.
 2. La sélection « À l'affiche » reprend les vrais événements dans les cartes-billets.
 3. L'exploration garde les mêmes cartes, les mêmes filtres et les mêmes états.
 4. Les salons, billets et écrans organisateur héritent des mêmes jetons de couleur et de la même typographie.
@@ -71,7 +71,6 @@ L'écart assumé avec la maquette est le verre. Les aplats opaques deviennent de
 
 - Entrée du hero : montée de 14 px sur 620 ms, décalée de 40 à 420 ms selon l'ordre de lecture.
 - Bandeau : défilement linéaire continu, mis en pause au survol.
-- Jauge : trait qui se dessine en 1,5 s après l'arrivée du panneau.
 - Survol des cartes : élévation de 6 px, reflet qui balaie l'affiche, contour qui prend la menthe. Retour à l'état initial dès que le pointeur sort.
 - Cibles tactiles autour de 44 px, appui immédiat, transitions de 160 à 380 ms.
 - `prefers-reduced-motion: reduce` neutralise toutes les animations et conserve les états finaux lisibles.

@@ -411,204 +411,6 @@
   background: rgba(244, 242, 236, 0.14);
 }
 
-/* --------------------------------- Tableau de bord --------------------------------- */
-
-.home-dash {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0.7rem;
-  padding-top: clamp(0.5rem, 2vw, 1.25rem);
-}
-
-.home-panel {
-  position: relative;
-  display: flex;
-  height: 100%;
-  flex-direction: column;
-  gap: 0.55rem;
-  overflow: hidden;
-  border: 1px solid rgba(244, 242, 236, 0.18);
-  border-radius: 1.1rem;
-  background: rgba(244, 242, 236, 0.09);
-  padding: 0.95rem;
-  color: var(--paper);
-  -webkit-backdrop-filter: blur(22px) saturate(1.5);
-  backdrop-filter: blur(22px) saturate(1.5);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 20px 50px -34px rgba(0, 0, 0, 0.9);
-  transition:
-    transform 380ms var(--ease-spring),
-    border-color 220ms ease,
-    background-color 220ms ease;
-}
-
-.home-panel:hover {
-  transform: translateY(-4px);
-  border-color: rgba(224, 249, 228, 0.45);
-  background: rgba(244, 242, 236, 0.13);
-}
-
-.home-panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.72rem;
-}
-
-.home-panel-label {
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--mint);
-}
-
-.home-panel-meta {
-  color: rgba(244, 242, 236, 0.62);
-}
-
-.home-stat {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.45rem;
-}
-
-.home-stat-value {
-  font-family: var(--font-display);
-  font-size: 2.3rem;
-  line-height: 0.95;
-  font-variant-numeric: tabular-nums;
-  color: var(--paper);
-}
-
-.home-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  border: 1px solid rgba(224, 249, 228, 0.3);
-  border-radius: 999px;
-  background: rgba(224, 249, 228, 0.12);
-  padding: 0.15rem 0.5rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--mint);
-  white-space: nowrap;
-}
-
-.home-panel-note {
-  font-size: 0.7rem;
-  color: rgba(244, 242, 236, 0.6);
-}
-
-.home-panel-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin-top: auto;
-}
-
-.home-panel-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  border-top: 1px solid rgba(244, 242, 236, 0.12);
-  padding-top: 0.35rem;
-  font-size: 0.75rem;
-}
-
-.home-panel-row dt {
-  flex: none;
-  color: rgba(244, 242, 236, 0.58);
-}
-
-.home-panel-row dd {
-  min-width: 0;
-  overflow: hidden;
-  text-align: right;
-  font-weight: 600;
-  color: var(--paper);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.home-panel-foot {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-top: auto;
-  padding-top: 0.5rem;
-}
-
-.home-panel-link {
-  display: inline-flex;
-  min-height: 2.15rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  border: 1px solid rgba(244, 242, 236, 0.22);
-  border-radius: 0.5rem;
-  padding-inline: 0.65rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--paper);
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-}
-
-.home-panel-link:hover {
-  border-color: var(--mint);
-  color: var(--mint);
-}
-
-.home-panel-link-primary {
-  border-color: transparent;
-  background: var(--mint);
-  color: var(--ink);
-}
-
-.home-panel-link-primary:hover {
-  background: var(--mint-bright);
-  color: var(--ink);
-}
-
-/* Le prochain événement prend la forme d'un billet. */
-.home-ticket {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin-top: 0.15rem;
-  border: 1px solid rgba(244, 242, 236, 0.18);
-  border-radius: 0.75rem;
-  background: rgba(11, 11, 12, 0.42);
-  padding: 0.7rem 0.8rem;
-}
-
-.home-ticket-tear {
-  height: 0;
-  margin-block: 0.15rem;
-  border-top: 1px dashed rgba(244, 242, 236, 0.3);
-}
-
-.home-ticket-title {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  line-height: 1.03;
-  text-transform: uppercase;
-  color: var(--paper);
-}
-
-.home-empty-note {
-  font-size: 0.8rem;
-  line-height: 1.5;
-  color: rgba(244, 242, 236, 0.7);
-}
-
 /* ----------------------------------- Sélection ----------------------------------- */
 
 .home-lineup {
@@ -681,14 +483,6 @@
 .home-hero-copy > :nth-child(3) { animation-delay: 190ms; }
 .home-hero-copy > :nth-child(4) { animation-delay: 260ms; }
 
-.home-dash > * {
-  animation: home-rise 640ms var(--ease-spring) both;
-}
-
-.home-dash > :nth-child(1) { animation-delay: 260ms; }
-.home-dash > :nth-child(2) { animation-delay: 340ms; }
-.home-dash > :nth-child(3) { animation-delay: 420ms; }
-
 @keyframes home-rise {
   from {
     opacity: 0;
@@ -731,47 +525,25 @@
   }
 }
 
-/* Trait de la jauge : progression lente à l'arrivée. */
-.home-gauge-arc {
-  stroke-dasharray: var(--arc-length);
-  stroke-dashoffset: var(--arc-length);
-  animation: home-gauge-draw 1.5s var(--ease-spring) 320ms forwards;
-}
-
-@keyframes home-gauge-draw {
-  to {
-    stroke-dashoffset: var(--arc-offset);
-  }
-}
-
 /* --------------------------------- Responsive --------------------------------- */
 
-@media (min-width: 640px) {
-  .home-dash {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+/* Sans les panneaux de données, la scène garde une hauteur d'affiche et le
+   texte se centre dans l'espace laissé par la navigation et le bandeau. */
+@media (min-width: 768px) {
+  .home-stage-inner {
+    min-height: clamp(30rem, 74svh, 44rem);
   }
 
-  .home-dash > :nth-child(2) {
-    grid-column: span 2;
+  .home-hero-copy {
+    flex: 1;
+    justify-content: center;
+    padding-block: clamp(1.25rem, 4vw, 3rem);
   }
 }
 
 @media (min-width: 1024px) {
   .home-stage-inner {
     gap: clamp(1.25rem, 2vw, 1.85rem);
-  }
-
-  .home-hero-copy {
-    padding-top: clamp(1.5rem, 4vw, 3.5rem);
-  }
-
-  .home-dash {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: stretch;
-  }
-
-  .home-dash > :nth-child(2) {
-    grid-column: span 1;
   }
 }
 
@@ -808,24 +580,6 @@
     font-size: 0.72rem;
   }
 
-  .home-stat-value {
-    font-size: 1.9rem;
-  }
-
-  /* Sur mobile, la prochaine sortie passe devant les statistiques : c'est
-     l'information la plus actionnable du hero. */
-  .home-dash > :nth-child(2) {
-    order: -1;
-  }
-
-  .home-dash {
-    gap: 0.55rem;
-  }
-
-  .home-panel {
-    padding: 0.8rem;
-  }
-
   .home-lineup {
     padding-inline: 0.35rem;
   }
@@ -835,27 +589,18 @@
   .home-stage::before,
   .home-ticker-track,
   .home-hero-copy > *,
-  .home-dash > *,
-  .home-nav-sheet,
-  .home-gauge-arc {
+  .home-nav-sheet {
     animation: none !important;
   }
 
-  .home-panel,
-  .home-panel:hover,
   .home-btn-primary:hover,
   .home-nav-mark {
     transform: none;
     transition: none;
   }
-
-  .home-gauge-arc {
-    stroke-dashoffset: var(--arc-offset);
-  }
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .home-panel,
   .home-nav {
     background: rgba(11, 11, 12, 0.9);
     -webkit-backdrop-filter: none;

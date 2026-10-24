@@ -2,18 +2,10 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { EventGrid } from "@/components/events/event-card";
-import { buildHeroSnapshot, getHeroWeekRange } from "@/components/home/hero/data";
-import { EventHeroDashboard } from "@/components/home/hero/dashboard-preview";
 import { HeroBackground } from "@/components/home/hero/hero-background";
 import { EventHeroNavbar } from "@/components/home/hero/navbar";
-import { getWeekSnapshot } from "@/components/home/home-data";
 import { APP_NAME } from "@/lib/constants";
-import {
-  getEventCities,
-  getPublicOrganizers,
-  searchPublishedEvents,
-  type ExploreResult,
-} from "@/lib/events/queries";
+import { searchPublishedEvents, type ExploreResult } from "@/lib/events/queries";
 
 import "@/styles/home-hero.css";
 
@@ -25,12 +17,7 @@ const EMPTY_RESULT: ExploreResult = {
   totalPages: 1,
 };
 
-const TICKER_ITEMS = [
-  "Billets QR",
-  "Salons d'événement",
-  "Paiement en ligne",
-  "Côte d'Ivoire",
-];
+const TICKER_ITEMS = ["Billets QR", "Salons d'événement", "Paiement en ligne", "Côte d'Ivoire"];
 
 /** Une reprise pour absorber un incident réseau transitoire au premier rendu. */
 async function loadWithRetry<T>(load: () => Promise<T>, fallback: T): Promise<T> {
@@ -59,37 +46,16 @@ function TickerGroup() {
 }
 
 export default async function HomePage() {
-  const weekNow = getWeekSnapshot();
-  const weekRange = getHeroWeekRange(weekNow);
-
-  const [upcoming, thisWeek, organizers, cities] = await Promise.all([
-    loadWithRetry(() => searchPublishedEvents({ sort: "date_asc", pageSize: 48 }), EMPTY_RESULT),
-    loadWithRetry(
-      () =>
-        searchPublishedEvents({
-          startDate: weekRange.startDate,
-          endDate: weekRange.endDate,
-          pageSize: 1,
-        }),
-      EMPTY_RESULT,
-    ),
-    loadWithRetry(() => getPublicOrganizers(), []),
-    loadWithRetry(() => getEventCities(), []),
-  ]);
+  const upcoming = await loadWithRetry(
+    () => searchPublishedEvents({ sort: "date_asc", pageSize: 48 }),
+    EMPTY_RESULT,
+  );
 
   /* Même règle de visibilité que l'ancienne page d'accueil : les sorties de
      Bassam ne sont pas mises en avant dans le hero. */
   const visibleEvents = upcoming.events.filter(
     (event) => !event.city.toLocaleLowerCase("fr").includes("bassam"),
   );
-
-  const snapshot = buildHeroSnapshot({
-    events: visibleEvents,
-    totalEvents: upcoming.total,
-    thisWeekEvents: thisWeek.total,
-    organizers,
-    cities,
-  });
 
   const lineup = visibleEvents.slice(0, 6);
 
@@ -134,8 +100,6 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-
-            <EventHeroDashboard snapshot={snapshot} />
           </div>
         </section>
 
