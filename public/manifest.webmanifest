@@ -1,0 +1,46 @@
+{
+  "name": "Event · Événements et billetterie",
+  "short_name": "Event",
+  "description": "Recherche des événements en Côte d'Ivoire, consulte les détails et réserve ta place en ligne.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f2ec",
+  "theme_color": "#f4f2ec",
+  "scope": "/",
+  "lang": "fr-CI",
+  "icons": [
+    {
+      "src": "/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["events", "social", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Explorer les sorties",
+      "short_name": "Explorer",
+      "description": "Voir les événements à venir",
+      "url": "/explorer",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mes billets",
+      "short_name": "Billets",
+      "description": "Accéder à mes billets",
+      "url": "/mes-billets",
+      "icons": [{ "src": "/app-icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "screenshots": []
+}
