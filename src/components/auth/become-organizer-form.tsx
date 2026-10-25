@@ -2,13 +2,23 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Building, Sparkles, ArrowRight } from "lucide-react";
+import { Building, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/states";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export function BecomeOrganizerForm({ user }: { user?: { displayName?: string } | null }) {
+import content from "@/components/editorial/editorial.module.css";
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
+
+export function BecomeOrganizerForm({
+  user,
+  variant = "default",
+}: {
+  user?: { displayName?: string } | null;
+  /** `editorial` : rendu du parcours public (shell `.editorial`). */
+  variant?: "default" | "editorial";
+}) {
   const router = useRouter();
   const [orgName, setOrgName] = useState(user?.displayName ? `Organisation ${user.displayName}` : "");
   const [error, setError] = useState<string | null>(null);
@@ -82,40 +92,83 @@ export function BecomeOrganizerForm({ user }: { user?: { displayName?: string } 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-xl border border-primary/30 bg-surface p-6 shadow-sm">
+    <form
+      onSubmit={handleSubmit}
+      className={variant === "editorial" ? content.organizerPanel : "flex flex-col gap-4 rounded-xl border border-primary/30 bg-surface p-6 shadow-sm"}
+    >
       {error ? (
         <Alert tone="danger" title="Activation impossible">
           {error}
         </Alert>
       ) : null}
 
-      <div className="flex items-center gap-2 text-primary font-bold text-lg">
-        <Building className="size-5" />
-        <span>Activer mon Espace Organisateur</span>
-      </div>
+      {variant === "editorial" ? (
+        <>
+          <div className={content.organizerFormHead}>
+            <Building className={`${shell.icon} ${content.organizerFormIcon}`} aria-hidden="true" />
+            <span>Activer mon espace organisateur</span>
+          </div>
 
-      <p className="text-xs text-fg-muted">
-        Choisissez le nom de votre structure ou marque événementielle pour lancer votre billetterie.
-      </p>
+          <p>
+            Choisissez le nom de votre structure ou marque événementielle pour lancer votre
+            billetterie.
+          </p>
 
-      <div className="space-y-1.5">
-        <label htmlFor="orgName" className="text-xs font-semibold text-fg">
-          Nom de votre organisation *
-        </label>
-        <input
-          id="orgName"
-          type="text"
-          required
-          value={orgName}
-          onChange={(e) => setOrgName(e.target.value)}
-          placeholder="ex: Abidjan Events, Club Tech CI…"
-          className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm focus:border-border-focus focus:outline-none"
-        />
-      </div>
+          <label className={shell.field} htmlFor="orgName">
+            <span className={shell["field-label"]}>Nom de votre organisation *</span>
+            <input
+              id="orgName"
+              type="text"
+              required
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              placeholder="ex: Abidjan Events, Club Tech CI…"
+              className={shell.input}
+            />
+          </label>
 
-      <Button type="submit" loading={pending} loadingLabel="Activation en cours…" fullWidth size="lg">
-        Activer gratuitement <ArrowRight className="ml-1 size-4" />
-      </Button>
+          <button
+            type="submit"
+            className={`${shell.btn} ${shell["btn-primary"]} ${content.organizerPanelBtn}`}
+            disabled={pending}
+            aria-busy={pending || undefined}
+          >
+            {pending ? "Activation en cours…" : "Activer gratuitement"}
+            <ArrowRight className={shell.icon} aria-hidden="true" />
+          </button>
+        </>
+      ) : (
+        <>
+          <div className="text-primary flex items-center gap-2 text-lg font-bold">
+            <Building className="size-5" />
+            <span>Activer mon Espace Organisateur</span>
+          </div>
+
+          <p className="text-fg-muted text-xs">
+            Choisissez le nom de votre structure ou marque événementielle pour lancer votre
+            billetterie.
+          </p>
+
+          <div className="space-y-1.5">
+            <label htmlFor="orgName" className="text-fg text-xs font-semibold">
+              Nom de votre organisation *
+            </label>
+            <input
+              id="orgName"
+              type="text"
+              required
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              placeholder="ex: Abidjan Events, Club Tech CI…"
+              className="border-border focus:border-border-focus w-full rounded-md border bg-transparent px-3 py-2 text-sm focus:outline-none"
+            />
+          </div>
+
+          <Button type="submit" loading={pending} loadingLabel="Activation en cours…" fullWidth size="lg">
+            Activer gratuitement <ArrowRight className="ml-1 size-4" />
+          </Button>
+        </>
+      )}
     </form>
   );
 }

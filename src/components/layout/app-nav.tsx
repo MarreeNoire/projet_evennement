@@ -145,8 +145,8 @@ export function AppSideRail({ user, unreadCount }: { user: HeaderUser | null; un
           className="press flex h-11 w-full items-center justify-center"
         >
           <LogoMark className="size-7 shrink-0" />
-          <span className="font-display ml-2 hidden truncate text-lg font-bold tracking-tight text-fg lg:inline lg:data-[collapsed=true]:hidden">
-            Event
+          <span className="font-display text-fg ml-2 hidden truncate text-lg font-bold tracking-[-0.045em] lg:inline lg:data-[collapsed=true]:hidden">
+            event
           </span>
         </Link>
       </div>

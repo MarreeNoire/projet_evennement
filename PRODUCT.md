@@ -33,7 +33,7 @@ Le produit est conçu pour la Côte d’Ivoire et l’Afrique francophone. Les p
 
 ## Brand Commitments
 
-Le nom du produit est Event. La direction visuelle est « Nuit électrique » : fond aubergine, lueurs violettes et fuchsia diffuses, surfaces vitrées discrètes, typographie blanche contrastée et animations soignées. Garder le contenu fonctionnel lisible et les contrôles familiers. Ne pas utiliser de bouton en forme de pilule, de photo générée par IA, d’emoji comme icône, de slogan vague, de faux avis, de fausses métriques ou de compteur client inventé. Ne pas ajouter de texte promotionnel ou de preuve qui ne soit pas fourni ou vérifiable dans le produit.
+Le nom du produit est Event. La direction visuelle associe papier chaud, encre bleu nuit, vermillon et cobalt, avec une typographie éditoriale et des interactions directes. Garder le contenu fonctionnel lisible et les contrôles familiers. Ne pas utiliser de photo générée par IA, d’emoji comme icône, de slogan vague, de faux avis, de fausses métriques ou de compteur client inventé. Ne pas ajouter de texte promotionnel ou de preuve qui ne soit pas fourni ou vérifiable dans le produit.
 
 ## Evidence on Hand
 

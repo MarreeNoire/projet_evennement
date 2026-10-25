@@ -2,13 +2,24 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, useTransition } from "react";
+import { LoaderCircle, Search, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input, Select } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/skeleton";
 import { CATEGORIES, EVENT_SORTS } from "@/lib/constants";
 
-/* Barre de recherche + filtres de l'explorer : met à jour l'URL (?q=&categorie=…). */
+import content from "@/components/editorial/editorial.module.css";
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
+
+/* =============================================================================
+   Filtres de l'explorer (version éditoriale)
+   --------------------------------------------------------------------------
+   Même logique d'URL que la version applicative : ?q=&categorie=&ville=&tri=
+   &gratuit=1. Le rendu suit le langage public (filets, libellés capitales,
+   puces carrées) et reste pilotable au clavier.
+   ========================================================================== */
+
+function cx(...names: Array<string | false | null | undefined>) {
+  return names.filter(Boolean).join(" ");
+}
 
 function ExploreFiltersInner({
   cities,
@@ -28,6 +39,7 @@ function ExploreFiltersInner({
   const [city, setCity] = useState(current.get("ville") ?? "");
   const [sort, setSort] = useState(current.get("tri") ?? "date_asc");
   const [freeOnly, setFreeOnly] = useState(current.get("gratuit") === "1");
+
   const activeFilterCount = [category, city, freeOnly, sort !== "date_asc"].filter(Boolean).length;
 
   function apply(event?: React.FormEvent) {
@@ -51,137 +63,145 @@ function ExploreFiltersInner({
     startTransition(() => onNavigate("/explorer"));
   }
 
+  const hasFilters = Boolean(query || category || city || freeOnly || sort !== "date_asc");
+
   return (
     <form
       onSubmit={apply}
       role="search"
       aria-label="Rechercher des événements"
-      className="border-border-strong bg-surface flex flex-col gap-3 border p-3 sm:gap-4 sm:p-5"
+      className={content.filters}
     >
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <div className="sm:col-span-2 xl:col-span-1">
-          <label htmlFor="explorer-q" className="text-fg-muted mb-1.5 block text-xs font-semibold">
-            Mot-clé
-          </label>
-          <Input
-            id="explorer-q"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Concert, conférence, Abidjan…"
-          />
-        </div>
-        <div className="hidden sm:block">
-          <label
-            htmlFor="explorer-city"
-            className="text-fg-muted mb-1.5 block text-xs font-semibold"
+      <div className={content.filterRow}>
+        <label className={shell.field} htmlFor="explorer-q">
+          <span className={shell["field-label"]}>Mot-clé</span>
+          <span className={content.inputWrap}>
+            <Search className={content.inputIcon} aria-hidden="true" />
+            <input
+              id="explorer-q"
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Concert, conférence, Abidjan…"
+              className={`${shell.input} ${content.inputSearch}`}
+              style={{ paddingLeft: 34 }}
+            />
+          </span>
+        </label>
+
+        <label className={cx(shell.field, content.filterDesktopOnly)} htmlFor="explorer-city">
+          <span className={shell["field-label"]}>Ville</span>
+          <select
+            id="explorer-city"
+            value={city}
+            onChange={(event) => setCity(event.target.value)}
+            className={shell.select}
           >
-            Ville
-          </label>
-          <Select id="explorer-city" value={city} onChange={(e) => setCity(e.target.value)}>
             <option value="">Toutes villes</option>
-            {cities.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            {cities.map((value) => (
+              <option key={value} value={value}>
+                {value}
               </option>
             ))}
-          </Select>
-        </div>
-        <div className="hidden sm:block">
-          <label
-            htmlFor="explorer-sort"
-            className="text-fg-muted mb-1.5 block text-xs font-semibold"
+          </select>
+        </label>
+
+        <label className={cx(shell.field, content.filterDesktopOnly)} htmlFor="explorer-sort">
+          <span className={shell["field-label"]}>Trier par</span>
+          <select
+            id="explorer-sort"
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+            className={shell.select}
           >
-            Trier par
-          </label>
-          <Select id="explorer-sort" value={sort} onChange={(e) => setSort(e.target.value)}>
-            {EVENT_SORTS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
+            {EVENT_SORTS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
-          </Select>
-        </div>
+          </select>
+        </label>
+
+        <button
+          type="submit"
+          className={cx(shell.btn, shell["btn-primary"], shell["btn-sm"], content.submit)}
+          disabled={pending}
+        >
+          {pending ? (
+            <LoaderCircle className={cx(shell.icon, content.spin)} aria-hidden="true" />
+          ) : (
+            <Search className={shell.icon} aria-hidden="true" />
+          )}
+          {pending ? "Recherche…" : "Rechercher"}
+        </button>
       </div>
 
-      <details className="border-border border-t pt-2 sm:hidden">
-        <summary className="text-fg-muted min-h-10 cursor-pointer py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2">
+      <details className={content.filtersAdvanced}>
+        <summary>
           Filtres supplémentaires
           {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
         </summary>
-        <div className="grid gap-3 pt-2 pb-1">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label
-                htmlFor="explorer-city-mobile"
-                className="text-fg-muted mb-1.5 block text-xs font-semibold"
-              >
-                Ville
-              </label>
-              <Select
-                id="explorer-city-mobile"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              >
-                <option value="">Toutes villes</option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <label
-                htmlFor="explorer-sort-mobile"
-                className="text-fg-muted mb-1.5 block text-xs font-semibold"
-              >
-                Trier par
-              </label>
-              <Select
-                id="explorer-sort-mobile"
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-              >
-                {EVENT_SORTS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </div>
-          <CategoryChoices category={category} setCategory={setCategory} compact />
-          <FreeOnlyChoice freeOnly={freeOnly} setFreeOnly={setFreeOnly} />
+        <div className={content.filterRow} style={{ marginTop: 12 }}>
+          <label className={shell.field} htmlFor="explorer-city-mobile">
+            <span className={shell["field-label"]}>Ville</span>
+            <select
+              id="explorer-city-mobile"
+              value={city}
+              onChange={(event) => setCity(event.target.value)}
+              className={shell.select}
+            >
+              <option value="">Toutes villes</option>
+              {cities.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={shell.field} htmlFor="explorer-sort-mobile">
+            <span className={shell["field-label"]}>Trier par</span>
+            <select
+              id="explorer-sort-mobile"
+              value={sort}
+              onChange={(event) => setSort(event.target.value)}
+              className={shell.select}
+            >
+              {EVENT_SORTS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </details>
 
-      <div className="hidden sm:block">
-        <CategoryChoices category={category} setCategory={setCategory} />
-      </div>
+      <CategoryChoices category={category} setCategory={setCategory} />
 
-      <div className="hidden sm:flex">
-        <FreeOnlyChoice freeOnly={freeOnly} setFreeOnly={setFreeOnly} />
-      </div>
+      <label className={shell.check}>
+        <input
+          type="checkbox"
+          checked={freeOnly}
+          onChange={(event) => setFreeOnly(event.target.checked)}
+        />
+        Gratuits uniquement
+      </label>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="text-fg-subtle text-xs" role="status">
+      <div className={content.filtersFoot}>
+        <span className={content.filtersCount} role="status">
           {total} événement{total > 1 ? "s" : ""}
+          {activeFilterCount > 0 ? " · filtres actifs" : ""}
         </span>
-        {(query || category || city || freeOnly || sort !== "date_asc") && (
-          <Button type="button" variant="ghost" size="sm" onClick={reset}>
+        {hasFilters ? (
+          <button
+            type="button"
+            className={cx(shell.btn, shell["btn-outline"], shell["btn-sm"])}
+            onClick={reset}
+          >
+            <X className={shell.icon} aria-hidden="true" />
             Réinitialiser
-          </Button>
-        )}
-        <Button
-          type="submit"
-          size="sm"
-          loading={pending}
-          loadingLabel="Recherche…"
-          className="ml-auto"
-        >
-          Rechercher
-        </Button>
+          </button>
+        ) : null}
       </div>
     </form>
   );
@@ -190,21 +210,21 @@ function ExploreFiltersInner({
 function CategoryChoices({
   category,
   setCategory,
-  compact = false,
 }: {
   category: string;
   setCategory: (value: string) => void;
-  compact?: boolean;
 }) {
   return (
-    <fieldset className="border-border border-t pt-3">
-      <legend className="text-fg-muted mb-2 text-xs font-semibold">Type d’événement</legend>
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par catégorie">
+    <fieldset className={content.chipSet}>
+      <legend className={shell["field-label"]} style={{ marginBottom: 8 }}>
+        Type d’événement
+      </legend>
+      <div className={content.chips} role="group" aria-label="Filtrer par catégorie">
         <button
           type="button"
           aria-pressed={!category}
           onClick={() => setCategory("")}
-          className={`focus-visible:ring-border-focus ${compact ? "min-h-9 px-2.5 text-xs" : "min-h-10 px-3 text-sm"} border font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${category ? "border-border bg-bg text-fg-muted hover:bg-bg-muted" : "border-primary-solid bg-primary-solid text-primary-solid-fg"}`}
+          className={content.chip}
         >
           Toutes
         </button>
@@ -214,7 +234,7 @@ function CategoryChoices({
             type="button"
             aria-pressed={category === item.slug}
             onClick={() => setCategory(item.slug)}
-            className={`focus-visible:ring-border-focus ${compact ? "min-h-9 px-2.5 text-xs" : "min-h-10 px-3 text-sm"} border font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${category === item.slug ? "border-primary-solid bg-primary-solid text-primary-solid-fg" : "border-border bg-bg text-fg-muted hover:bg-bg-muted"}`}
+            className={content.chip}
           >
             {item.label}
           </button>
@@ -224,31 +244,17 @@ function CategoryChoices({
   );
 }
 
-function FreeOnlyChoice({
-  freeOnly,
-  setFreeOnly,
-}: {
-  freeOnly: boolean;
-  setFreeOnly: (value: boolean) => void;
-}) {
-  return (
-    <label className="text-fg-muted flex min-h-10 cursor-pointer items-center gap-2 text-sm">
-      <input
-        type="checkbox"
-        checked={freeOnly}
-        onChange={(e) => setFreeOnly(e.target.checked)}
-        className="size-4 accent-[var(--color-primary-solid)]"
-      />
-      Gratuits uniquement
-    </label>
-  );
-}
-
-/* Point d'entrée : isole useSearchParams + navigation sous Suspense (build statique). */
+/* Point d'entrée : isole useSearchParams + navigation sous Suspense. */
 
 export function ExploreFiltersBar({ cities, total }: { cities: string[]; total: number }) {
   return (
-    <Suspense fallback={<Spinner label="Chargement des filtres…" />}>
+    <Suspense
+      fallback={
+        <div className={content.filters} aria-busy="true">
+          <div className={content.skeleton} style={{ height: 46 }} />
+        </div>
+      }
+    >
       <ExploreFiltersWithRouter cities={cities} total={total} />
     </Suspense>
   );

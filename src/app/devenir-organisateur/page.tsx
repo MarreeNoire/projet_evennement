@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
-import { ButtonLink } from "@/components/ui/button";
+import { BecomeOrganizerForm } from "@/components/auth/become-organizer-form";
+import { EditorialShell } from "@/components/layout/editorial/editorial-shell";
 import { APP_NAME, CURRENCY_LABEL, PLATFORM_COMMISSION_RATE, ROUTES } from "@/lib/constants";
 import { createSupabaseServerClient, getCurrentProfile } from "@/lib/supabase/server";
-import { BecomeOrganizerForm } from "@/components/auth/become-organizer-form";
 
-export const metadata: Metadata = { title: "Devenir organisateur | Event" };
+import content from "@/components/editorial/editorial.module.css";
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
+
+export const metadata: Metadata = { title: "Devenir organisateur" };
 
 const BENEFITS = [
   {
@@ -23,7 +25,7 @@ const BENEFITS = [
   {
     title: "Check-in par QR code",
     description:
-      "Scanne les billets à l'entrée avec validation en temps réel côté serveur : plus de doublons, plus de fraude.",
+      "Scanne les billets à l’entrée avec validation en temps réel côté serveur : plus de doublons, plus de fraude.",
   },
   {
     title: "Statistiques de vente",
@@ -37,19 +39,19 @@ const BENEFITS = [
   },
   {
     title: "Paiements simples",
-    description: `Commission unique de ${Math.round(PLATFORM_COMMISSION_RATE * 100)} % par billet vendu, sans frais caché.`,
+    description: `Commission unique de ${Math.round(PLATFORM_COMMISSION_RATE * 100)} % par billet vendu, sans frais cachés.`,
   },
 ];
 
 const PLANS = [
   {
     name: "Gratuit",
-    price: "0",
+    price: `0 ${CURRENCY_LABEL}`,
     tagline: "Pour démarrer et tester la plateforme.",
-    features: ["Création d'événement", "Billetterie basique", "Salon basique"],
+    features: ["Création d’événement", "Billetterie basique", "Salon basique"],
     cta: "Créer mon compte",
     href: ROUTES.register,
-    variant: "secondary" as const,
+    highlighted: false,
   },
   {
     name: "Pro",
@@ -63,7 +65,6 @@ const PLANS = [
     ],
     cta: "Créer mon compte",
     href: ROUTES.register,
-    variant: "primary" as const,
     highlighted: true,
   },
   {
@@ -73,7 +74,7 @@ const PLANS = [
     features: ["Accompagnement dédié", "Intégrations sur mesure", "Volumes importants"],
     cta: "Nous contacter",
     href: "/contact",
-    variant: "secondary" as const,
+    highlighted: false,
   },
 ];
 
@@ -95,147 +96,141 @@ export default async function BecomeOrganizerPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <main id="contenu" className="flex flex-col">
-        {/* Hero */}
-        <section className="border-border bg-surface border-b">
-          <div className="container-page grid gap-8 py-14 md:py-20 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:gap-16">
-            <div className="flex flex-col gap-6">
-              <p className="eyebrow">Pour les organisateurs</p>
-              <h1 className="font-display text-4xl leading-[1.02] font-semibold md:text-6xl">
-                Organise ton événement,{" "}
-                <span className="text-primary font-normal italic">{APP_NAME}</span> s&apos;occupe du
-                reste.
+    <EditorialShell>
+      <div className={shell.wrap}>
+        <div className={shell.page} style={{ display: "grid", gap: 56 }}>
+          {/* Hero + activation */}
+          <section className={content.heroSplit} aria-labelledby="organiser-titre">
+            <div className={content.heroCopy}>
+              <p className={shell.eyebrow}>Pour les organisateurs</p>
+              <h1 id="organiser-titre" className={shell["page-title"]}>
+                Organise ton événement, <em>{APP_NAME}</em> s’occupe du reste.
               </h1>
-              <p className="text-fg-muted text-base leading-relaxed">
+              <p className={content.heroLead}>
                 Billetterie mobile money, check-in par QR code, salon communautaire et statistiques
-                de vente : tout ce qu&apos;il faut pour vendre des billets et garder le lien avec
-                tes participants, avant, pendant et après.
+                de vente : tout ce qu’il faut pour vendre des billets et garder le lien avec tes
+                participants, avant, pendant et après.
               </p>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div>
               {profile ? (
                 hasOrganization ? (
-                  <div className="border-success/30 bg-success-subtle/20 space-y-4 rounded-xl border p-6 text-center">
-                    <p className="text-fg text-lg font-bold">Vous êtes déjà organisateur !</p>
-                    <p className="text-fg-muted text-sm">
+                  <div className={content.organizerPanel}>
+                    <h2>Vous êtes déjà organisateur.</h2>
+                    <p>
                       Accédez directement à votre tableau de bord pour créer et gérer vos
                       événements.
                     </p>
-                    <ButtonLink href="/org" size="lg" className="w-full justify-center">
+                    <Link
+                      href="/org"
+                      className={`${shell.btn} ${shell["btn-primary"]} ${content.organizerPanelBtn}`}
+                    >
                       Accéder à mon espace organisateur
-                    </ButtonLink>
+                    </Link>
                   </div>
                 ) : (
-                  <BecomeOrganizerForm user={{ displayName: profile.display_name }} />
+                  <BecomeOrganizerForm
+                    user={{ displayName: profile.display_name }}
+                    variant="editorial"
+                  />
                 )
               ) : (
-                <div className="border-border bg-bg-subtle space-y-4 rounded-xl border p-6">
-                  <p className="text-fg text-lg font-bold">Prêt à vous lancer ?</p>
-                  <p className="text-fg-muted text-sm">
-                    Créez votre compte gratuit en moins d&apos;une minute pour activer votre espace
+                <div className={content.organizerPanel}>
+                  <h2>Prêt à vous lancer ?</h2>
+                  <p>
+                    Créez votre compte gratuit en moins d’une minute pour activer votre espace
                     organisateur.
                   </p>
-                  <div className="flex flex-col gap-2">
-                    <ButtonLink href={ROUTES.register} size="lg" fullWidth>
-                      Créer mon compte
-                    </ButtonLink>
-                    <ButtonLink href={ROUTES.login} variant="secondary" size="lg" fullWidth>
-                      Déjà inscrit ? Connexion
-                    </ButtonLink>
-                  </div>
+                  <Link
+                    href={ROUTES.register}
+                    className={`${shell.btn} ${shell["btn-primary"]} ${content.organizerPanelBtn}`}
+                  >
+                    Créer mon compte
+                  </Link>
+                  <Link
+                    href={ROUTES.login}
+                    className={`${shell.btn} ${shell["btn-outline"]} ${content.organizerPanelBtn}`}
+                  >
+                    Déjà inscrit ? Connexion
+                  </Link>
                 </div>
               )}
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Bénéfices */}
-        <section className="container-page py-16 md:py-20" aria-labelledby="avantages">
-          <div className="grid gap-10 lg:grid-cols-[1fr_2.2fr] lg:gap-16">
-            <div>
-              <p className="eyebrow">Ce qui est inclus</p>
-              <h2
-                id="avantages"
-                className="font-display mt-3 text-3xl leading-[1.05] font-semibold md:text-4xl"
-              >
-                Tout pour réussir ton événement.
+          {/* Bénéfices */}
+          <section aria-labelledby="avantages" className={content.benefitSplit}>
+            <div className={content.heroCopy}>
+              <p className={shell.eyebrow}>Ce qui est inclus</p>
+              <h2 id="avantages" className={shell["section-title"]}>
+                Tout pour réussir <em>ton événement.</em>
               </h2>
-              <p className="text-fg-muted mt-3 text-sm">
-                De la mise en vente du premier billet aux souvenirs après l&apos;événement.
+              <p className={content.heroLead}>
+                De la mise en vente du premier billet aux souvenirs après l’événement.
               </p>
             </div>
 
-            <ul className="grid gap-x-10 sm:grid-cols-2">
+            <ul className={content.benefitList}>
               {BENEFITS.map(({ title, description }) => (
-                <li key={title} className="border-border border-t py-5">
-                  <h3 className="font-display text-lg font-semibold">{title}</h3>
-                  <p className="text-fg-muted mt-1.5 text-sm leading-relaxed">{description}</p>
+                <li key={title}>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
                 </li>
               ))}
             </ul>
-          </div>
-        </section>
+          </section>
 
-        {/* Formules */}
-        <section className="border-border bg-bg-subtle border-y" aria-labelledby="formules">
-          <div className="container-page flex flex-col gap-10 py-16 md:py-20">
-            <div className="max-w-2xl">
-              <p className="eyebrow">Tarifs</p>
-              <h2
-                id="formules"
-                className="font-display mt-3 text-3xl leading-[1.05] font-semibold md:text-4xl"
-              >
-                Des formules simples.
-              </h2>
-              <p className="text-fg-muted mt-3 text-sm">
+          {/* Formules */}
+          <section aria-labelledby="formules" style={{ display: "grid", gap: 28 }}>
+            <header className={`${shell["page-head"]} ${shell["page-head--split"]}`}>
+              <div>
+                <p className={shell.eyebrow}>Tarifs</p>
+                <h2 id="formules" className={shell["section-title"]} style={{ marginTop: 10 }}>
+                  Des formules simples.
+                </h2>
+              </div>
+              <p className={shell["page-lead"]} style={{ maxWidth: "42ch" }}>
                 Commission unique de {Math.round(PLATFORM_COMMISSION_RATE * 100)} % en{" "}
                 {CURRENCY_LABEL} sur les billets payants, sans engagement.
               </p>
-            </div>
+            </header>
 
-            <div className="grid gap-x-8 gap-y-10 md:grid-cols-3">
+            <div className={content.planGrid}>
               {PLANS.map((plan) => (
                 <article
                   key={plan.name}
-                  className={
-                    plan.highlighted
-                      ? "border-primary flex flex-col gap-5 border-t-4 pt-4"
-                      : "border-border flex flex-col gap-5 border-t-4 pt-4"
-                  }
+                  className={`${content.plan}${plan.highlighted ? ` ${content["plan--featured"]}` : ""}`}
                 >
-                  <div className="flex flex-col gap-1.5">
-                    <p className="eyebrow">{plan.highlighted ? "Le plus choisi" : "Formule"}</p>
-                    <h3 className="font-display text-2xl font-semibold">{plan.name}</h3>
-                    <p className="font-display text-3xl font-semibold tabular-nums">
-                      {plan.price === "0" ? `0 ${CURRENCY_LABEL}` : plan.price}
+                  <div style={{ display: "grid", gap: 6 }}>
+                    <p className={shell.eyebrow}>
+                      {plan.highlighted ? "Le plus choisi" : "Formule"}
                     </p>
-                    <p className="text-fg-muted text-sm">{plan.tagline}</p>
+                    <h3 className={content.planName}>{plan.name}</h3>
+                    <p className={content.planPrice}>{plan.price}</p>
+                    <p className={content.planTagline}>{plan.tagline}</p>
                   </div>
 
-                  <ul className="border-border-strong flex flex-col gap-2 border-t border-dashed pt-4">
+                  <ul className={content.planFeatures}>
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-baseline gap-2.5 text-sm">
-                        <span aria-hidden="true" className="text-primary font-semibold">
-                          +
-                        </span>
+                      <li key={feature}>
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <ButtonLink href={plan.href} variant={plan.variant} fullWidth className="mt-auto">
+                  <Link
+                    href={plan.href}
+                    className={`${shell.btn} ${plan.highlighted ? shell["btn-primary"] : shell["btn-outline"]} ${content.planCta}`}
+                  >
                     {plan.cta}
-                  </ButtonLink>
+                  </Link>
                 </article>
               ))}
             </div>
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </div>
+          </section>
+        </div>
+      </div>
+    </EditorialShell>
   );
 }

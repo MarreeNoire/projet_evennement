@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 interface PublicStorageImageProps {
   src: string;
@@ -42,6 +43,10 @@ export function PublicStorageImage({
   quality = 75,
   preload = false,
 }: PublicStorageImageProps) {
+  const fillStyle: CSSProperties | undefined = fill
+    ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
+    : undefined;
+
   if (isPublicSupabaseImage(src)) {
     return (
       <Image
@@ -70,7 +75,7 @@ export function PublicStorageImage({
       loading={preload ? "eager" : "lazy"}
       decoding="async"
       fetchPriority={preload ? "high" : "auto"}
-      style={fill ? { position: "absolute", inset: 0, width: "100%", height: "100%" } : undefined}
+      style={fillStyle}
     />
   );
 }

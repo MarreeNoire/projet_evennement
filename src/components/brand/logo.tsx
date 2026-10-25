@@ -1,34 +1,41 @@
 import { cn } from "@/lib/utils";
 
-/* Event's mark is a ticket shape with a center perforation. */
+/* =============================================================================
+   Marque Event
+   --------------------------------------------------------------------------
+   Tuile encre + « e » italique + mot-symbole serif minuscule + point vermillon.
+   Même dessin que l'en-tête éditorial public, pour que le chrome applicatif
+   (espace membre, /org, /admin) parle la même langue visuelle.
+   ========================================================================== */
 
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      role="img"
-      aria-label="Event"
+    <span
+      aria-hidden="true"
       className={cn(
-        "bg-primary-solid text-primary-solid-fg size-8 shrink-0 rounded-[10px] p-1.5 shadow-sm",
+        "bg-fg text-bg font-display grid size-8 shrink-0 place-items-center rounded-[4px] text-[20px] italic leading-none",
         className,
       )}
-      fill="currentColor"
     >
-      <path d="M8 6.5h16a2.5 2.5 0 0 1 2.5 2.5v4.2a2.8 2.8 0 0 0 0 5.6V23a2.5 2.5 0 0 1-2.5 2.5H8A2.5 2.5 0 0 1 5.5 23v-4.2a2.8 2.8 0 0 0 0-5.6V9A2.5 2.5 0 0 1 8 6.5Z" fill="currentColor" />
-      <path d="M18.5 9.5v13" stroke="var(--primary-solid-fg)" strokeWidth="1.5" strokeDasharray="1.8 2.1" strokeLinecap="round" />
-      <path d="m12.5 11.2 1.1 2.2 2.4.3-1.7 1.7.4 2.4-2.2-1.1-2.2 1.1.4-2.4L9 13.7l2.4-.3 1.1-2.2Z" fill="var(--primary-solid-fg)" />
-    </svg>
+      e
+    </span>
   );
 }
 
 export function Logo({ className, showWordmark = true }: { className?: string; showWordmark?: boolean }) {
   return (
-    <span className={cn("inline-flex items-center gap-2 text-primary", className)}>
-      <LogoMark className="size-7" />
+    <span className={cn("inline-flex items-baseline gap-2", className)}>
+      <LogoMark className="size-7 translate-y-[2px]" />
       {showWordmark ? (
-        <span className="font-display text-lg leading-none font-bold tracking-tight text-fg">
-          Event
-        </span>
+        <>
+          <span className="font-display text-fg text-[22px] font-bold leading-none tracking-[-0.045em]">
+            event
+          </span>
+          <span
+            aria-hidden="true"
+            className="bg-primary size-[5px] -translate-y-[6px] rounded-full"
+          />
+        </>
       ) : null}
     </span>
   );

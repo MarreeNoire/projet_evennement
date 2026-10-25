@@ -17,6 +17,81 @@
         "rule": "design-system-font-size",
         "value": "1.5rem",
         "createdAt": "2026-10-16T13:07:44.838Z"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "ibm plex sans",
+        "createdAt": "2026-10-20T08:48:53.750Z",
+        "reason": "Agent: the new standalone preview intentionally uses a distinct font pair for the proposed replacement identity, pending user approval."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "newsreader",
+        "createdAt": "2026-10-20T08:48:57.704Z",
+        "reason": "Agent: the new standalone preview intentionally uses a distinct font pair for the proposed replacement identity, pending user approval."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "dm mono",
+        "files": [
+          "hero-video-preview.html"
+        ],
+        "createdAt": "2026-10-20T08:56:22.572Z",
+        "reason": "Agent: intentional type choice for this standalone preview of the user's requested new visual identity; no application tokens changed"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "manrope",
+        "files": [
+          "hero-video-preview.html"
+        ],
+        "createdAt": "2026-10-20T08:56:25.322Z",
+        "reason": "Agent: intentional type choice for this standalone preview of the user's requested new visual identity; no application tokens changed"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "bodoni moda",
+        "files": [
+          "hero-video-preview.html"
+        ],
+        "createdAt": "2026-10-20T08:56:28.362Z",
+        "reason": "Agent: intentional display type for this standalone preview of the user's requested new visual identity; no application tokens changed"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "hero-video-preview.html"
+        ],
+        "createdAt": "2026-10-20T08:56:30.537Z",
+        "reason": "Agent: full-bleed imagery is intentional for the immersive video frame; edge-to-edge content is the requested hero effect"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "manrope",
+        "files": [
+          "hero-film-preview.html"
+        ],
+        "createdAt": "2026-10-20T09:02:43.028Z",
+        "reason": "Agent: this standalone preview establishes a new visual identity inspired by the user's MotionSites reference; no application typography tokens changed"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "dm mono",
+        "files": [
+          "hero-film-preview.html"
+        ],
+        "createdAt": "2026-10-20T09:02:44.672Z",
+        "reason": "Agent: this standalone preview uses a deliberately separate film-caption type voice; no application typography tokens changed"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "bodoni moda",
+        "files": [
+          "hero-film-preview.html"
+        ],
+        "createdAt": "2026-10-20T09:02:47.586Z",
+        "reason": "Agent: this standalone preview uses a deliberate editorial display face; no application typography tokens changed"
       }
     ]
   }

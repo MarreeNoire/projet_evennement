@@ -2,8 +2,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { EditorialFooter } from "@/components/layout/editorial/editorial-footer";
+import { EditorialScope } from "@/components/layout/editorial/editorial-shell";
+import { loadHeaderUser } from "@/lib/auth/viewer";
 import { PaymentSuccessMark } from "@/components/checkout/payment-success-mark";
 import { ClearCheckoutAttempt } from "@/components/checkout/clear-checkout-attempt";
 import { PaymentStatusPoller } from "@/components/checkout/payment-status-poller";
@@ -29,6 +31,7 @@ export default async function PaymentReturnPage({
 
   const user = await getCurrentUser();
   if (!user) redirect(`/connexion?redirect=/commandes/${orderId}/retour`);
+  const viewer = await loadHeaderUser();
 
   const supabase = await createSupabaseServerClient();
   const { data: order } = await supabase
@@ -89,9 +92,10 @@ export default async function PaymentReturnPage({
   }
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <main id="contenu" className="container-page flex max-w-xl flex-col gap-6 py-12 text-center">
+    <EditorialScope>
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <main id="contenu" className="container-page flex max-w-xl flex-col gap-6 py-12 text-center">
         {status === "paid" ? (
           <>
             <ClearCheckoutAttempt eventId={order.event_id} />
@@ -149,8 +153,9 @@ export default async function PaymentReturnPage({
             </div>
           </>
         )}
-      </main>
-      <SiteFooter />
-    </div>
+        </main>
+        <EditorialFooter viewer={viewer} />
+      </div>
+    </EditorialScope>
   );
 }

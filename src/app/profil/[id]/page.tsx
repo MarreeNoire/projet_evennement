@@ -3,9 +3,11 @@ import { MapPin } from "lucide-react";
 
 import { RequestConnectionButton } from "@/components/social/request-connection-button";
 import { ButtonLink } from "@/components/ui/button";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { EditorialFooter } from "@/components/layout/editorial/editorial-footer";
+import { EditorialScope } from "@/components/layout/editorial/editorial-shell";
 import { SiteHeader } from "@/components/layout/site-header";
 import { ProfileAvatarPreview } from "@/components/social/profile-avatar-preview";
+import { loadHeaderUser } from "@/lib/auth/viewer";
 import { env, isSupabaseAdminConfigured } from "@/lib/env";
 import { verifyBadgeSignature } from "@/lib/social/badge-url";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -56,11 +58,13 @@ export default async function ProfilPublicPage({
   if (!profile) notFound();
 
   const isOwnProfile = currentUser?.id === profile.id;
+  const viewer = await loadHeaderUser();
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <main id="contenu" className="container-page flex flex-col gap-8 py-10">
+    <EditorialScope>
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <main id="contenu" className="container-page flex flex-col gap-8 py-10">
         <section className="border-border grid gap-6 border-y py-8 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
           <ProfileAvatarPreview src={profile.avatar_url} name={profile.display_name} />
 
@@ -110,8 +114,9 @@ export default async function ProfilPublicPage({
             </ul>
           </section>
         ) : null}
-      </main>
-      <SiteFooter />
-    </div>
+        </main>
+        <EditorialFooter viewer={viewer} />
+      </div>
+    </EditorialScope>
   );
 }

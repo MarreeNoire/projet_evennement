@@ -1,0 +1,207 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  border-radius: var(--radius-badge);
+  white-space: nowrap;
+  gap: var(--space-1);
+  transition:
+    background-color var(--duration-fast) var(--easing-out),
+    color var(--duration-fast) var(--easing-out),
+    box-shadow var(--duration-fast) var(--easing-out);
+}
+
+/* --- Sizes --- */
+.xs {
+  height: 18px;
+  padding-inline: var(--space-1);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sm {
+  height: 22px;
+  padding-inline: var(--space-2);
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.md {
+  height: 26px;
+  padding-inline: var(--space-2);
+  font-size: 12px;
+}
+
+.lg {
+  height: 32px;
+  padding-inline: var(--space-3);
+  font-size: 13px;
+}
+
+/* --- Variants --- */
+.default {
+  background: var(--semantic-primary-subtle);
+  color: var(--semantic-primary-solid-fg);
+}
+
+.primary {
+  background: var(--color-vermilion-600);
+  color: #fff;
+}
+
+.success {
+  background: var(--color-success-dark);
+  color: #fff;
+}
+
+.warning {
+  background: var(--color-warning-dark);
+  color: #fff;
+}
+
+.error {
+  background: var(--color-error-dark);
+  color: #fff;
+}
+
+.outline {
+  background: transparent;
+  color: var(--semantic-fg);
+  border: 1px solid var(--semantic-border);
+}
+
+.subtle {
+  background: var(--semantic-surface-raised);
+  color: var(--semantic-fg-muted);
+  border: 1px solid var(--semantic-border);
+}
+
+/* --- Dot indicator --- */
+.dot {
+  gap: var(--space-1.5);
+}
+
+.dotIndicator {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* --- Removable --- */
+.removable {
+  padding-right: var(--space-1);
+}
+
+.removeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity var(--duration-fast), background-color var(--duration-fast);
+  margin-left: var(--space-1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.removeButton:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.removeButton:active {
+  transform: scale(0.9);
+}
+
+.dark .removeButton:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* --- Content ensures centering --- */
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================================
+   TAG — Pill-shaped with optional count
+   ========================================================================== */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  border-radius: var(--radius-badge);
+  gap: var(--space-1);
+}
+
+.tag-sm {
+  height: 24px;
+  padding-inline: var(--space-2);
+  font-size: 11px;
+  gap: var(--space-1);
+}
+
+.tag-md {
+  height: 28px;
+  padding-inline: var(--space-3);
+  font-size: 12px;
+  gap: var(--space-1.5);
+}
+
+.tag-default { background: var(--semantic-surface-raised); color: var(--semantic-fg); border: 1px solid var(--semantic-border); }
+.tag-primary { background: var(--color-vermilion-600); color: #fff; }
+.tag-success { background: var(--color-success-dark); color: #fff; }
+.tag-warning { background: var(--color-warning-dark); color: #fff; }
+.tag-error { background: var(--color-error-dark); color: #fff; }
+
+.tagContent {
+  display: flex;
+  align-items: center;
+}
+
+.tagCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-1.5);
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  font-variant-numeric: tabular-nums;
+}
+
+.tag-count-default { background: var(--semantic-border); color: var(--semantic-fg-muted); }
+.tag-count-primary { background: rgba(255, 255, 255, 0.2); color: #fff; }
+.tag-count-success { background: rgba(255, 255, 255, 0.2); color: #fff; }
+.tag-count-warning { background: rgba(255, 255, 255, 0.2); color: #fff; }
+.tag-count-error { background: rgba(255, 255, 255, 0.2); color: #fff; }
+
+/* --- Status Badge --- */
+.statusBadge {
+  text-transform: capitalize;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .badge,
+  .tag,
+  .removeButton {
+    transition: none;
+  }
+}

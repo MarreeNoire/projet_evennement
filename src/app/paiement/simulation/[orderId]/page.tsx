@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 import { MockPayWidget } from "@/components/checkout/mock-pay-widget";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { EditorialFooter } from "@/components/layout/editorial/editorial-footer";
+import { EditorialScope } from "@/components/layout/editorial/editorial-shell";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Alert } from "@/components/ui/states";
+import { loadHeaderUser } from "@/lib/auth/viewer";
 import { env } from "@/lib/env";
 import { getCurrentUser, createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/utils";
@@ -29,6 +31,7 @@ export default async function MockPayPage({
 
   const user = await getCurrentUser();
   if (!user) redirect(`/connexion?redirect=/paiement/simulation/${orderId}`);
+  const viewer = await loadHeaderUser();
 
   const supabase = await createSupabaseServerClient();
   const { data: order } = await supabase
@@ -41,9 +44,10 @@ export default async function MockPayPage({
   if (order.status === "paid") redirect("/mes-billets");
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <main id="contenu" className="container-page flex max-w-2xl flex-col gap-6 py-10">
+    <EditorialScope>
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <main id="contenu" className="container-page flex max-w-2xl flex-col gap-6 py-10">
         <div>
           <h1 className="font-display text-2xl font-bold">Paiement de {formatPrice(order.total)}</h1>
           <p className="mt-1 text-sm text-fg-muted">
@@ -62,8 +66,9 @@ export default async function MockPayPage({
             transactionId={tx}
           />
         )}
-      </main>
-      <SiteFooter />
-    </div>
+        </main>
+        <EditorialFooter viewer={viewer} />
+      </div>
+    </EditorialScope>
   );
 }

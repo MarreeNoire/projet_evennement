@@ -1,11 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import QRCode from "react-qr-code";
 
-import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { EditorialFooter } from "@/components/layout/editorial/editorial-footer";
+import { EditorialScope } from "@/components/layout/editorial/editorial-shell";
 import { AccessLevelBadge, Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
+import { loadHeaderUser } from "@/lib/auth/viewer";
 import { ROUTES, TICKET_STATUS_LABELS } from "@/lib/constants";
 import { getCurrentUser, createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatDateTime, formatPrice } from "@/lib/utils";
@@ -17,6 +19,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
 
   const user = await getCurrentUser();
   if (!user) redirect(`/connexion?redirect=/billets/${id}`);
+  const viewer = await loadHeaderUser();
 
   const supabase = await createSupabaseServerClient();
   const { data: ticket } = await supabase.from("my_tickets").select("*").eq("id", id).maybeSingle();
@@ -24,9 +27,10 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
   if (!ticket) notFound();
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <main id="contenu" className="container-page flex max-w-xl flex-col gap-6 py-8">
+    <EditorialScope>
+      <div className="flex min-h-dvh flex-col">
+        <SiteHeader />
+        <main id="contenu" className="container-page flex max-w-xl flex-col gap-6 py-8">
         <div className="text-center">
           <h1 className="font-display text-2xl font-bold">{ticket.event_title}</h1>
           <p className="mt-1 text-sm text-fg-muted">
@@ -58,7 +62,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
               <AccessLevelBadge level={ticket.access_level} />
             </p>
             <p className="text-center text-xs text-fg-subtle">
-              Présente ce QR à l'entrée. Il est personnel et à usage unique. Ne le partage pas.
+              Présente ce QR à l&apos;entrée. Il est personnel et à usage unique. Ne le partage pas.
               {ticket.checked_in_at ? ` Scanné le ${formatDateTime(ticket.checked_in_at)}.` : ""}
             </p>
           </CardContent>
@@ -72,8 +76,9 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
             Rejoindre le salon
           </ButtonLink>
         </div>
-      </main>
-      <SiteFooter />
-    </div>
+        </main>
+        <EditorialFooter viewer={viewer} />
+      </div>
+    </EditorialScope>
   );
 }

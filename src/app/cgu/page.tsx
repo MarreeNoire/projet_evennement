@@ -1,8 +1,9 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { EditorialShell } from "@/components/layout/editorial/editorial-shell";
+
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
 
 export const metadata = {
-  title: "Conditions générales d’utilisation | Event",
+  title: "Conditions générales d’utilisation",
   description: "Règles d’utilisation de la plateforme Event.",
 };
 
@@ -31,31 +32,37 @@ const sections = [
 
 export default function CGUPage() {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <main id="contenu" className="container-page mx-auto w-full max-w-4xl flex-1 py-10 md:py-14">
-        <header className="mb-8 border-b border-border pb-5">
-          <p className="eyebrow">Informations légales</p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight md:text-4xl">
-            Conditions générales d’utilisation
-          </h1>
-          <p className="mt-3 text-sm text-fg-muted">Version du 26 septembre 2026</p>
-        </header>
-        <div className="space-y-8 text-sm leading-7 text-fg-muted">
-          <p>
-            Ces conditions décrivent les principales règles d’utilisation du service. Elles doivent être relues et complétées par l’éditeur, notamment avec son identité et ses coordonnées, avant publication définitive.
-          </p>
-          {sections.map((section, index) => (
-            <section key={section.title} className="border-t border-border pt-5">
-              <h2 className="mb-2 text-lg font-semibold text-fg">
-                {index + 1}. {section.title}
-              </h2>
-              <p>{section.text}</p>
-            </section>
-          ))}
+    <EditorialShell>
+      <div className={shell.wrap}>
+        <div className={shell.page} style={{ display: "grid", gap: 34, maxWidth: 900 }}>
+          <header className={shell["page-head"]}>
+            <p className={shell.eyebrow}>Informations légales</p>
+            <h1
+              className={shell["page-title"]}
+              style={{ fontSize: "clamp(30px, 4.4vw, 50px)" }}
+            >
+              Conditions générales d’utilisation
+            </h1>
+            <p className={shell["mono-label"]}>Version du 26 septembre 2026</p>
+          </header>
+
+          <div className={shell.prose}>
+            <p>
+              Ces conditions décrivent les principales règles d’utilisation du service. Elles
+              doivent être relues et complétées par l’éditeur, notamment avec son identité et ses
+              coordonnées, avant publication définitive.
+            </p>
+            {sections.map((section, index) => (
+              <section key={section.title}>
+                <h2>
+                  {index + 1}. {section.title}
+                </h2>
+                <p>{section.text}</p>
+              </section>
+            ))}
+          </div>
         </div>
-      </main>
-      <SiteFooter />
-    </div>
+      </div>
+    </EditorialShell>
   );
 }

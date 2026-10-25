@@ -1,8 +1,9 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { EditorialShell } from "@/components/layout/editorial/editorial-shell";
+
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
 
 export const metadata = {
-  title: "Politique de confidentialité | Event",
+  title: "Politique de confidentialité",
   description: "Informations sur les données personnelles traitées par Event.",
 };
 
@@ -39,37 +40,39 @@ const sections = [
 
 export default function ConfidentialitePage() {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <main id="contenu" className="container-page mx-auto w-full max-w-4xl flex-1 py-10 md:py-14">
-        <header className="border-border mb-8 border-b pb-5">
-          <p className="eyebrow">Informations légales</p>
-          <h1 className="font-display mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-            Politique de confidentialité
-          </h1>
-          <p className="text-fg-muted mt-3 text-sm">Version du 26 septembre 2026</p>
-        </header>
-        <div className="text-fg-muted space-y-8 text-sm leading-7">
-          <p>
-            Cette politique décrit les catégories de données susceptibles d’être traitées lorsque
-            vous utilisez Event. Les traitements effectifs et les durées de conservation doivent
-            être confirmés par l’éditeur du service.
-          </p>
-          {sections.map((section, index) => (
-            <section key={section.title} className="border-border border-t pt-5">
-              <h2 className="text-fg mb-2 text-lg font-semibold">
-                {index + 1}. {section.title}
-              </h2>
-              {section.paragraphs.map((paragraph) => (
-                <p key={paragraph} className="mt-2">
-                  {paragraph}
-                </p>
-              ))}
-            </section>
-          ))}
+    <EditorialShell>
+      <div className={shell.wrap}>
+        <div className={shell.page} style={{ display: "grid", gap: 34, maxWidth: 900 }}>
+          <header className={shell["page-head"]}>
+            <p className={shell.eyebrow}>Informations légales</p>
+            <h1
+              className={shell["page-title"]}
+              style={{ fontSize: "clamp(30px, 4.4vw, 50px)" }}
+            >
+              Politique de confidentialité
+            </h1>
+            <p className={shell["mono-label"]}>Version du 26 septembre 2026</p>
+          </header>
+
+          <div className={shell.prose}>
+            <p>
+              Cette politique décrit les catégories de données susceptibles d’être traitées lorsque
+              vous utilisez Event. Les traitements effectifs et les durées de conservation doivent
+              être confirmés par l’éditeur du service.
+            </p>
+            {sections.map((section, index) => (
+              <section key={section.title}>
+                <h2>
+                  {index + 1}. {section.title}
+                </h2>
+                {section.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </section>
+            ))}
+          </div>
         </div>
-      </main>
-      <SiteFooter />
-    </div>
+      </div>
+    </EditorialShell>
   );
 }

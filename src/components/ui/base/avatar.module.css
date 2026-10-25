@@ -1,0 +1,112 @@
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--semantic-surface-raised);
+  vertical-align: middle;
+  transition: box-shadow var(--duration-fast) var(--easing-out);
+}
+
+/* --- Sizes --- */
+.xs { width: 24px; height: 24px; font-size: 10px; }
+.sm { width: 32px; height: 32px; font-size: 12px; }
+.md { width: 40px; height: 40px; font-size: 14px; }
+.lg { width: 56px; height: 56px; font-size: 18px; }
+.xl { width: 72px; height: 72px; font-size: 22px; }
+.xl2 { width: 96px; height: 96px; font-size: 28px; }
+
+/* --- Shapes --- */
+.circle { border-radius: var(--radius-full); }
+.square { border-radius: var(--radius-lg); }
+
+/* --- Image --- */
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- Fallback (initials) --- */
+.fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--semantic-primary-solid-fg);
+  background: var(--semantic-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* --- Status indicator --- */
+.hasStatus { }
+
+.status {
+  position: absolute;
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--semantic-bg);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+}
+
+.status-online { background: var(--color-success-dark); }
+.status-offline { background: var(--semantic-fg-subtle); }
+.status-busy { background: var(--color-error-dark); }
+.status-away { background: var(--color-warning-dark); }
+
+/* Status positions */
+.status-bottom-right { bottom: 0; right: 0; }
+.status-bottom-left { bottom: 0; left: 0; }
+.status-top-right { top: 0; right: 0; }
+.status-top-left { top: 0; left: 0; }
+
+/* --- Group --- */
+.group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.overlap > * + * {
+  margin-left: -8px;
+}
+
+.overlap > *:first-child {
+  z-index: 10;
+}
+
+.overlap > *:nth-child(2) { z-index: 9; }
+.overlap > *:nth-child(3) { z-index: 8; }
+.overlap > *:nth-child(4) { z-index: 7; }
+.overlap > *:nth-child(5) { z-index: 6; }
+
+.lastVisible {
+  z-index: 11 !important;
+  box-shadow: 0 0 0 2px var(--semantic-bg), var(--shadow-card);
+}
+
+/* Overflow avatar */
+.overflow {
+  background: var(--semantic-border);
+  color: var(--semantic-fg-muted);
+}
+
+.overflowText {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: inherit;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .avatar {
+    transition: none;
+  }
+}

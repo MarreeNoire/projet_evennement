@@ -1,0 +1,208 @@
+.mascot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-vermilion-600);
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.mascotBody {
+  width: 100%;
+  height: 100%;
+}
+
+.mascotShape {
+  /* transition handled by animations */
+}
+
+.mascotFace {
+  /* face elements */
+}
+
+.mascotEye {
+  transition: transform var(--duration-base) var(--easing-spring);
+}
+
+.mascotPupil {
+  transition: transform var(--duration-fast) var(--easing-out);
+}
+
+.mascotMouth {
+  transition: transform var(--duration-base) var(--easing-spring),
+    stroke-dashoffset var(--duration-base) var(--easing-spring);
+}
+
+.mascotCheek {
+  opacity: 0.4;
+  transition: opacity var(--duration-fast) var(--easing-out);
+}
+
+.mascotAccessory {
+  transition: transform var(--duration-slow) var(--easing-spring),
+    opacity var(--duration-fast) var(--easing-out);
+}
+
+.mascotParticles {
+  pointer-events: none;
+}
+
+.confetti {
+  animation: confetti-fall 1.5s var(--easing-out) infinite;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* --- Animations par variante --- */
+
+/* Wave - bras qui bouge */
+.mascot-wave .mascotShape {
+  animation: mascot-wave 2s var(--easing-spring) infinite;
+}
+
+@keyframes mascot-wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+/* Bounce - célébration */
+.mascot-celebrate {
+  animation: mascot-bounce 0.6s var(--easing-spring) infinite;
+}
+
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.05); }
+}
+
+/* Tilt - réflexion */
+.mascot-think {
+  animation: mascot-tilt 3s var(--easing-spring) infinite;
+}
+
+@keyframes mascot-tilt {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-3deg); }
+  70% { transform: rotate(3deg); }
+}
+
+/* Sleep - flottement doux + yeux fermés */
+.mascot-sleep .mascotEye {
+  transform: scaleY(0.1);
+  transform-origin: center;
+}
+
+.mascot-sleep .mascotPupil {
+  opacity: 0;
+}
+
+.mascot-sleep .mascotMouth {
+  transform: scaleX(0.5);
+}
+
+.mascot-sleep {
+  animation: mascot-float 4s var(--easing-spring) infinite;
+}
+
+@keyframes mascot-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Search - regard qui bouge */
+.mascot-search .mascotPupil {
+  animation: mascot-look 2s var(--easing-spring) infinite;
+}
+
+@keyframes mascot-look {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, -1px); }
+  75% { transform: translate(2px, 1px); }
+}
+
+/* Party - rotation légère + chapeau qui bouge */
+.mascot-party .mascotAccessory {
+  animation: mascot-party-hat 0.5s var(--easing-spring) infinite;
+}
+
+@keyframes mascot-party-hat {
+  0%, 100% { transform: rotate(-5deg) translateY(0); }
+  50% { transform: rotate(5deg) translateY(-3px); }
+}
+
+/* Ticket - perforation qui pulse */
+.mascot-ticket .mascotAccessory rect {
+  animation: mascot-ticket-pulse 2s var(--easing-in-out) infinite;
+}
+
+@keyframes mascot-ticket-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* --- Mascot with Text --- */
+.mascotWithText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.mascotTextContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 280px;
+  text-align: center;
+}
+
+.mascotTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--space-5);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--semantic-fg);
+  letter-spacing: -0.02em;
+}
+
+.mascotDescription {
+  margin: 0;
+  font-size: var(--space-3);
+  line-height: 1.6;
+  color: var(--semantic-fg-muted);
+}
+
+.mascotAction {
+  margin-top: var(--space-2);
+  display: flex;
+  justify-content: center;
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .mascot,
+  .mascot * {
+    animation: none !important;
+  }
+  .mascot-celebrate,
+  .mascot-wave,
+  .mascot-think,
+  .mascot-sleep,
+  .mascot-search,
+  .mascot-party,
+  .mascot-ticket {
+    animation: none !important;
+  }
+}

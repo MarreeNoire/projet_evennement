@@ -1,0 +1,530 @@
+/* ============================================================================
+   AUTHENTIFICATION — module éditorial
+   --------------------------------------------------------------------------
+   Reprend le langage visuel de l'accueil : papier chaud, encre, vermillon,
+   typographie serif, filets fins. Le module est scopé sous `.screen` afin de
+   ne pas toucher aux formulaires ni au reste de l'application.
+   ========================================================================== */
+
+.screen {
+  --paper: #f7f4ee;
+  --paper-2: #efe9de;
+  --surface: #fffdfa;
+  --ink: #202a35;
+  --ink-2: #39434f;
+  --muted: #5d6672;
+  --line: rgba(32, 42, 53, 0.14);
+  --line-strong: rgba(32, 42, 53, 0.3);
+  --accent: #b83f22;
+  --accent-deep: #96301a;
+  --on-accent: #fff8f1;
+  --danger: #b3261e;
+  --display: var(--font-display);
+  --sans: var(--font-bricolage), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  overflow-x: clip;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:global(html.dark) .screen {
+  --paper: #141a22;
+  --paper-2: #1b242f;
+  --surface: #1f2935;
+  --ink: #f2ede3;
+  --ink-2: #d9d3c7;
+  --muted: #a9b1bc;
+  --line: rgba(242, 237, 227, 0.14);
+  --line-strong: rgba(242, 237, 227, 0.32);
+  --accent: #e8735a;
+  --accent-deep: #f08b74;
+  --on-accent: #26120c;
+  --danger: #ff8f86;
+}
+
+.screen *,
+.screen *::before,
+.screen *::after {
+  box-sizing: border-box;
+}
+
+.screen ::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.screen :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: var(--grain);
+  background-size: 160px;
+  mix-blend-mode: multiply;
+}
+
+:global(html.dark) .grain {
+  opacity: 0.03;
+  mix-blend-mode: screen;
+}
+
+.frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  width: min(1240px, 100%);
+  min-height: 100dvh;
+  margin-inline: auto;
+  border-inline: 1px solid var(--line);
+}
+
+/* ------------------------------- Colonne éditoriale ---------------------- */
+
+.aside {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: clamp(28px, 4vw, 56px);
+  border-right: 1px solid var(--line);
+}
+
+.asideTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.wordmark {
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.dot {
+  color: var(--accent);
+}
+
+.edition {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.asideBody {
+  position: relative;
+  z-index: 1;
+}
+
+.asideIndex {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.asideIndex::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.statement {
+  margin: 22px 0 0;
+  font-family: var(--display);
+  font-size: clamp(52px, 6.4vw, 92px);
+  font-weight: 700;
+  line-height: 0.88;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+.line {
+  display: block;
+}
+
+.statement em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.asideNote {
+  margin: 26px 0 0;
+  max-width: 26ch;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.asideFoot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------- Colonne formulaire ---------------------- */
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(28px, 5vw, 64px);
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 27rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: var(--surface);
+  padding: clamp(24px, 3vw, 36px);
+  box-shadow: 0 30px 70px -46px rgba(32, 42, 53, 0.5);
+  animation: card-in 0.5s var(--ease-out) both;
+}
+
+:global(html.dark) .card {
+  box-shadow: 0 30px 70px -46px rgba(0, 0, 0, 0.85);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--accent);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cardLabel {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.cardHeader :global(button) {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.cardHeader :global(button:hover) {
+  color: var(--accent);
+}
+
+.heading {
+  padding-top: 26px;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.title {
+  margin: 14px 0 0;
+  font-family: var(--display);
+  font-size: clamp(38px, 3.6vw, 50px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* ------------------------------- Champs ---------------------------------- */
+
+.card :global(form) {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card :global(form label) {
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.card :global(input:not([type="checkbox"])) {
+  height: 46px;
+  border-radius: 3px;
+  border-color: var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.card :global(input:not([type="checkbox"]):hover) {
+  border-color: var(--ink-2);
+}
+
+.card :global(input:not([type="checkbox"]):focus) {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.card :global(input::placeholder) {
+  color: color-mix(in srgb, var(--muted) 72%, transparent);
+}
+
+.card :global(input[aria-invalid="true"]) {
+  border-color: var(--danger);
+}
+
+.card :global(input[type="checkbox"]) {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  background-color: var(--surface);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.card :global(input[type="checkbox"]:hover) {
+  border-color: var(--ink-2);
+}
+
+.card :global(input[type="checkbox"]:checked) {
+  border-color: var(--accent);
+  background-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5.2 4.2 8.4 11 1.6' fill='none' stroke='%23fff8f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+:global(html.dark) .card :global(input[type="checkbox"]:checked) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5.2 4.2 8.4 11 1.6' fill='none' stroke='%2326120c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.card :global([role="alert"]) {
+  border-radius: 3px;
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+  padding: 12px 14px;
+  font-size: 12.5px;
+}
+
+.card :global(a) {
+  color: var(--ink);
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+}
+
+.card :global(a:hover) {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+.card :global(form button[type="submit"]) {
+  min-height: 50px;
+  margin-top: 4px;
+  border-radius: 3px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  box-shadow: none;
+  transform: none;
+}
+
+.card :global(form button[type="submit"]:hover) {
+  background: var(--accent-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -18px rgba(32, 42, 53, 0.65);
+}
+
+.card :global(form button[type="submit"]:active) {
+  transform: scale(0.985);
+}
+
+/* ------------------------------- Pied de carte --------------------------- */
+
+.switch {
+  margin: 26px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.switch :global(a) {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+.switch :global(a:hover) {
+  color: var(--accent);
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ------------------------------- Adaptations ----------------------------- */
+
+@media (max-width: 959px) {
+  .frame {
+    grid-template-columns: minmax(0, 1fr);
+    border-inline: 0;
+  }
+
+  .aside {
+    gap: 24px;
+    padding: 22px 20px 26px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .asideTop {
+    padding-bottom: 14px;
+  }
+
+  .asideBody {
+    max-width: none;
+  }
+
+  .asideIndex {
+    display: none;
+  }
+
+  .statement {
+    margin-top: 0;
+    font-size: clamp(34px, 8.6vw, 44px);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
+  }
+
+  .statement br {
+    display: none;
+  }
+
+  .asideNote {
+    display: none;
+  }
+
+  .asideFoot {
+    display: none;
+  }
+
+  .content {
+    align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+
+  .card {
+    max-width: 30rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .card {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+
+  .card :global(form button[type="submit"]:hover) {
+    transform: none;
+  }
+}

@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, Calendar } from "lucide-react";
 
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { formatEventDate, formatEventPrice } from "./home-data";
+import { Card, CardMedia, CardContent, CardFooter, CardBadge } from "@/components/ui/base";
 import styles from "./trending-events.module.css";
 import type { PublishedEventView } from "@/types/database";
 
@@ -65,7 +66,7 @@ export function TrendingEvents({ events = [] }: TrendingEventsProps) {
                 onClick={() => scrollRail(-1)}
                 disabled={!canScrollBack}
                 aria-label="Sorties précédentes"
-                className="border-border text-fg-muted hover:border-border-strong hover:text-fg disabled:text-fg-subtle grid size-9 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-45"
+                className="press border-border text-fg-muted hover:border-border-strong hover:text-fg disabled:text-fg-subtle grid size-9 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-45"
               >
                 <ArrowLeft aria-hidden="true" className="size-4" />
               </button>
@@ -74,7 +75,7 @@ export function TrendingEvents({ events = [] }: TrendingEventsProps) {
                 onClick={() => scrollRail(1)}
                 disabled={!canScrollForward}
                 aria-label="Sorties suivantes"
-                className="border-border text-fg-muted hover:border-border-strong hover:text-fg disabled:text-fg-subtle grid size-9 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-45"
+                className="press border-border text-fg-muted hover:border-border-strong hover:text-fg disabled:text-fg-subtle grid size-9 place-items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-45"
               >
                 <ArrowRight aria-hidden="true" className="size-4" />
               </button>
@@ -97,69 +98,68 @@ export function TrendingEvents({ events = [] }: TrendingEventsProps) {
           aria-describedby="trending-scroll-hint"
           tabIndex={0}
         >
-          {displayEvents.map((event) => {
+          {displayEvents.map((event, index) => {
             const image = event.cover_url ?? event.gallery?.[0];
             const dateInfo = formatEventDate(event.start_at);
             const priceLabel = formatEventPrice(event);
 
             return (
-              <article
-                key={event.id}
-                className={`${styles.event} group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors duration-200 hover:border-border-strong`}
-              >
-                <Link
-                  href={`/evenements/${event.slug}`}
-                  aria-label={`Voir ${event.title}`}
-                  className="relative block aspect-[4/3] w-full overflow-hidden bg-bg-subtle"
+              <article key={event.id} className={styles.event} style={{ "--stagger-index": index + 1 } as React.CSSProperties}>
+                <Card
+                  variant="interactive"
+                  padding="none"
+                  hoverable
+                  pressable
+                  className="motion-scale-in motion-stagger"
                 >
-                  {image ? (
-                    <PublicStorageImage
-                      src={image}
-                      alt=""
-                      fill
-                      sizes="(min-width: 1280px) 22vw, (min-width: 900px) 30vw, (min-width: 600px) 46vw, 80vw"
-                      quality={72}
-                      className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                    />
-                  ) : (
-                    <div className="text-fg-subtle flex size-full items-end p-4 text-[11px] font-semibold tracking-[0.14em] uppercase">
-                      {event.category}
+                  <CardMedia ratio="4:3" fit="cover" className={styles.eventMedia}>
+                    {image ? (
+                      <PublicStorageImage
+                        src={image}
+                        alt=""
+                        fill
+                        sizes="(min-width: 1280px) 22vw, (min-width: 900px) 30vw, (min-width: 600px) 46vw, 80vw"
+                        quality={72}
+                        className="motion-scale-in"
+                      />
+                    ) : (
+                      <div className="text-fg-subtle flex size-full items-end p-4 text-[11px] font-semibold tracking-[0.14em] uppercase">
+                        {event.category}
+                      </div>
+                    )}
+                  </CardMedia>
+                  <CardContent className={styles.eventContent}>
+                    <div className="flex items-center gap-1.5 text-xs text-fg-subtle mb-2">
+                      <Calendar aria-hidden="true" className="size-3.5 shrink-0" />
+                      <span className="truncate">
+                        {dateInfo.weekday} {dateInfo.dayMonth} · {dateInfo.time}
+                      </span>
                     </div>
-                  )}
-                </Link>
-
-                <div className="flex flex-1 flex-col gap-1.5 p-4">
-                  <p className="text-fg-subtle flex items-center gap-1.5 text-xs">
-                    <Calendar aria-hidden="true" className="size-3.5 shrink-0" />
-                    <span className="truncate">
-                      {dateInfo.weekday} {dateInfo.dayMonth} · {dateInfo.time}
-                    </span>
-                  </p>
-
-                  <h3 className="text-fg font-display line-clamp-2 text-[0.9375rem] leading-snug font-semibold">
-                    <Link
-                      href={`/evenements/${event.slug}`}
-                      className="decoration-border-strong underline-offset-4 hover:underline"
-                    >
-                      {event.title}
-                    </Link>
-                  </h3>
-
-                  <p className="text-fg-muted truncate text-xs">
-                    {event.venue_name || event.city}
-                  </p>
-
-                  <div className="mt-auto flex items-end justify-between gap-3 pt-3">
-                    <span className="text-fg text-sm font-semibold">{priceLabel}</span>
-                    <Link
-                      href={`/evenements/${event.slug}/billets`}
-                      className="text-fg-muted hover:text-fg inline-flex shrink-0 items-center gap-1 text-xs font-semibold transition-colors"
-                    >
-                      Réserver
-                      <ArrowUpRight aria-hidden="true" className="size-3.5" />
-                    </Link>
-                  </div>
-                </div>
+                    <h3 className="text-fg font-display line-clamp-2 text-[0.9375rem] leading-snug font-semibold">
+                      <Link
+                        href={`/evenements/${event.slug}`}
+                        className="decoration-border-strong underline-offset-4 hover:underline"
+                      >
+                        {event.title}
+                      </Link>
+                    </h3>
+                    <p className="text-fg-muted truncate text-xs mb-2">
+                      {event.venue_name || event.city}
+                    </p>
+                    <CardFooter className={styles.eventFooter}>
+                      <CardBadge variant="primary" size="sm" className={styles.eventPrice}>
+                        {priceLabel}
+                      </CardBadge>
+                      <Link
+                        href={`/evenements/${event.slug}/billets`}
+                        className="press text-fg-muted hover:text-fg inline-flex shrink-0 items-center gap-1 text-xs font-semibold transition-colors"
+                      >
+                        Réserver
+                        <ArrowUpRight aria-hidden="true" className="size-3.5" />
+                      </Link>
+                    </CardFooter>
+                  </CardContent>
+                </Card>
               </article>
             );
           })}

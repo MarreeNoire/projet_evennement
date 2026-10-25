@@ -35,6 +35,8 @@ const nextConfig: NextConfig = {
           ]
         : []),
     ],
+    // Autoriser les IPs locales/privées pour Supabase en dev (SSRF protection bypass)
+    dangerouslyAllowLocalIP: true,
     formats: ["image/avif", "image/webp"],
   },
 

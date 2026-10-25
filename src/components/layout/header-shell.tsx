@@ -53,6 +53,9 @@ export function HeaderShell({
   );
   const [, startTransition] = useTransition();
   const mobileTitle = getMobileHeaderTitle(pathname);
+  /* /org et /admin n'affichent pas le rail latéral global : la marque doit
+     rester visible dans la barre, même sur grand écran. */
+  const hasSideRail = !pathname.startsWith("/org") && !pathname.startsWith("/admin");
 
   /* Temps réel : badge de notifications (logique inchangée). */
   useEffect(() => {
@@ -255,7 +258,7 @@ export function HeaderShell({
           aria-label="Accueil — Event"
           className={cn(
             "press shrink-0 rounded-xl",
-            "md:ml-0 md:hidden",
+            hasSideRail && "md:ml-0 md:hidden",
             mobileTitle && "hidden",
           )}
         >

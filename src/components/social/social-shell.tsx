@@ -1,15 +1,17 @@
 import type { ReactNode } from "react";
 
+import { EditorialFooter } from "@/components/layout/editorial/editorial-footer";
+import { EditorialScope } from "@/components/layout/editorial/editorial-shell";
 import { SiteHeader } from "@/components/layout/site-header";
+import { loadHeaderUser } from "@/lib/auth/viewer";
 
 /* =============================================================================
    Espace membre — coque de page
    --------------------------------------------------------------------------
    La navigation (mobile : barre d'onglets, tablette : rail, ordinateur :
-   barre latérale) est rendue une seule fois par `SiteHeader`. Cette coque
-   apporte le conteneur, l'en-tête éditorial et l'accessibilité de page ;
-   l'ancien rail vertical, redondant avec la barre latérale globale, a été
-   retiré. Les sections members vivent dans `app-nav.tsx`.
+   barre latérale) est rendue une seule fois par `SiteHeader`. `EditorialScope`
+   applique la palette et la typographie éditoriales sans remplacer ce chrome
+   applicatif : les fonctions (recherche, notifications, rail) restent intactes.
    ========================================================================== */
 
 export type SocialSection =
@@ -21,7 +23,7 @@ export type SocialSection =
   | "badge"
   | "profil";
 
-export function SocialShell({
+export async function SocialShell({
   children,
 }: {
   /** Section active conservée dans l'API (la barre latérale globale
@@ -29,8 +31,10 @@ export function SocialShell({
   active?: SocialSection;
   children: ReactNode;
 }) {
+  const viewer = await loadHeaderUser();
+
   return (
-    <div className="flex min-h-dvh flex-col">
+    <EditorialScope>
       <SiteHeader />
 
       <main
@@ -39,7 +43,9 @@ export function SocialShell({
       >
         <div className="min-w-0">{children}</div>
       </main>
-    </div>
+
+      <EditorialFooter viewer={viewer} />
+    </EditorialScope>
   );
 }
 

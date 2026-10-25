@@ -1,6 +1,6 @@
 "use client";
 
-import { HeroCarousel3D } from "./hero-carousel-3d";
+import { HomeHero } from "./home-hero";
 import { TrendingEvents } from "./trending-events";
 import { isThisWeekEvent, ThisWeekEvents } from "./this-week-events";
 import type { PublishedEventView } from "@/types/database";
@@ -21,7 +21,10 @@ export function HomeExperience({ events, weekNow }: HomeExperienceProps) {
 
   return (
     <div className="home-editorial relative min-h-screen">
-      <HeroCarousel3D events={events} />
+      <HomeHero featuredEvents={events} />
+
+      {/* Gradient de transition hero → contenu */}
+      <div className="hero-content-transition" aria-hidden="true" />
 
       {/* Événements publiés à venir — le héros les présente sur mobile, sauf
           si aucune sortie cette semaine (le repli évite le blanc sous l'anneau). */}

@@ -1,11 +1,12 @@
 ﻿import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { EventGrid } from "@/components/events/event-card";
+import { EditorialEventGrid } from "@/components/editorial/event-card";
 import { ExploreFiltersBar } from "@/components/events/explore-filters";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
-import { ButtonLink } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/states";
+import { EditorialShell } from "@/components/layout/editorial/editorial-shell";
+import content from "@/components/editorial/editorial.module.css";
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
 import { getCategoryLabel } from "@/lib/constants";
 import { getEventCities, searchPublishedEvents, type ExploreFilters } from "@/lib/events/queries";
 import { isDateInput } from "@/lib/events/date-range";
@@ -80,67 +81,98 @@ export default async function ExplorePage({
     return query ? `/explorer?${query}` : "/explorer";
   };
 
+  const activeLabel = filters.category ? getCategoryLabel(filters.category) : null;
+
   return (
-    <div className="flex min-h-dvh flex-col">
-      <SiteHeader />
-      <main id="contenu" className="explorer-page container-page flex flex-col gap-8 py-10">
-          <div className="border-border border-t pt-4">
-            <p className="eyebrow">Agenda</p>
-            <h1 className="font-display mt-2 text-4xl leading-[1.02] font-semibold md:text-5xl">
-              Explorer
+    <EditorialShell>
+      <div className={`${shell.wrap} ${shell.page}`} style={{ display: "grid", gap: 32 }}>
+        <header className={`${shell["page-head"]} ${shell["page-head--split"]}`}>
+          <div>
+            <p className={shell.eyebrow}>Agenda</p>
+            <h1 className={shell["page-title"]} style={{ marginTop: 14 }}>
+              {activeLabel ? (
+                <>
+                  Sorties <em>{activeLabel.toLowerCase()}</em>
+                </>
+              ) : (
+                <>
+                  Toutes les <em>sorties.</em>
+                </>
+              )}
             </h1>
-            <p className="text-fg-muted mt-2 text-sm">
-              {filters.category
-                ? `Catégorie : ${getCategoryLabel(filters.category)}`
-                : "Tous les événements à venir."}
-            </p>
           </div>
+          <p className={shell["page-lead"]}>
+            {filters.city ? `À ${filters.city}. ` : ""}
+            {total > 0
+              ? `${total} événement${total > 1 ? "s" : ""} publié${total > 1 ? "s" : ""} par leurs organisateurs.`
+              : "Les événements publiés par leurs organisateurs, à Abidjan et partout en Côte d’Ivoire."}
+          </p>
+        </header>
 
-          <ExploreFiltersBar cities={cities} total={total} />
+        <ExploreFiltersBar cities={cities} total={total} />
 
-          {loadError ? (
-            <EmptyState
-              title="Recherche momentanément indisponible"
-              description="Réessaie dans un instant."
-            />
-          ) : events.length === 0 ? (
-            <EmptyState
-              title="Aucun événement trouvé"
-              description="Essaie d'autres mots-clés ou réinitialise les filtres."
-              action={<ButtonLink href="/explorer">Voir tous les événements</ButtonLink>}
-            />
-          ) : (
-            <div id="resultats" className="flex flex-col gap-6 scroll-mt-24">
-              <div className="flex items-center justify-between">
-                <p className="text-fg-muted text-sm">
-                  {total} événement{total > 1 ? "s" : ""} à découvrir
-                </p>
-              </div>
-              <EventGrid events={events} />
-              {totalPages > 1 ? (
-                <nav
-                  aria-label="Pagination"
-                  className="flex items-center justify-center gap-2 pt-2"
-                >
-                  {page > 1 ? (
-                    <ButtonLink href={pageHref(page - 1)} variant="secondary" size="sm">
-                      ← Page précédente
-                    </ButtonLink>
-                  ) : null}
-                  <span className="text-fg-muted text-sm" role="status">
-                    Page {page} sur {totalPages}
-                  </span>
-                  {page < totalPages ? (
-                    <ButtonLink href={pageHref(page + 1)} variant="secondary" size="sm">
-                      Page suivante →
-                    </ButtonLink>
-                  ) : null}
-                </nav>
-              ) : null}
+        {loadError ? (
+          <div className={shell.empty}>
+            <h2>Recherche momentanément indisponible</h2>
+            <p>La liste n’a pas pu être chargée. Réessaie dans un instant.</p>
+            <Link href="/explorer" className={`${shell.btn} ${shell["btn-outline"]} ${shell["btn-sm"]}`}>
+              Recharger la liste
+            </Link>
+          </div>
+        ) : events.length === 0 ? (
+          <div className={shell.empty}>
+            <h2>Aucun événement trouvé</h2>
+            <p>
+              Essaie un autre mot-clé, une autre ville, ou réinitialise les filtres pour voir tout
+              l’agenda.
+            </p>
+            <Link href="/explorer" className={`${shell.btn} ${shell["btn-outline"]} ${shell["btn-sm"]}`}>
+              Voir tous les événements
+            </Link>
+          </div>
+        ) : (
+          <div className={content.section} id="resultats">
+            <div className={shell["section-head"]}>
+              <h2 className={shell["section-title"]}>
+                {filters.query ? `Résultats pour « ${filters.query} »` : "À l’affiche"}
+              </h2>
+              <span className={shell["mono-label"]}>
+                Page {page} / {totalPages}
+              </span>
             </div>
-          )}
-      </main>
-      <SiteFooter />
-    </div>
+
+            <EditorialEventGrid events={events} />
+
+            {totalPages > 1 ? (
+              <nav className={shell.pager} aria-label="Pagination">
+                <span>
+                  Page {page} sur {totalPages}
+                </span>
+                <div className={shell["pager-links"]}>
+                  {page > 1 ? (
+                    <Link
+                      href={pageHref(page - 1)}
+                      className={`${shell.btn} ${shell["btn-outline"]} ${shell["btn-sm"]}`}
+                    >
+                      <ArrowLeft aria-hidden="true" className={shell.icon} />
+                      Précédente
+                    </Link>
+                  ) : null}
+                  {page < totalPages ? (
+                    <Link
+                      href={pageHref(page + 1)}
+                      className={`${shell.btn} ${shell["btn-outline"]} ${shell["btn-sm"]}`}
+                    >
+                      Suivante
+                      <ArrowRight aria-hidden="true" className={shell.icon} />
+                    </Link>
+                  ) : null}
+                </div>
+              </nav>
+            ) : null}
+          </div>
+        )}
+      </div>
+    </EditorialShell>
   );
 }

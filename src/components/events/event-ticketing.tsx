@@ -1,84 +1,112 @@
-import { ButtonLink } from "@/components/ui/button";
-import { AccessLevelBadge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+
+import { ACCESS_LEVEL_LABELS, type AccessLevel } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
-import type { TicketTypeRow, PublishedEventView } from "@/types/database";
+import type { PublishedEventView, TicketTypeRow } from "@/types/database";
+
+import styles from "@/components/editorial/editorial.module.css";
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
 
 /* =============================================================================
-   Billetterie : chaque type de billet est présenté comme un billet.
-   Informations à gauche, perforation en pointillés, prix et action à droite.
+   Billetterie (version éditoriale)
+   --------------------------------------------------------------------------
+   Chaque type de billet est un coupon : informations à gauche, perforation,
+   prix et action à droite. Le salon communautaire reste un bandeau à filets.
    ========================================================================== */
 
-export function TicketPicker({ ticketTypes, slug }: { ticketTypes: TicketTypeRow[]; slug: string }) {
-  const available = ticketTypes.filter((t) => t.is_active && t.sold_count < t.quantity);
+function levelLabel(level: string) {
+  return ACCESS_LEVEL_LABELS[level as AccessLevel] ?? level;
+}
+
+export function TicketPicker({
+  ticketTypes,
+  slug,
+}: {
+  ticketTypes: TicketTypeRow[];
+  slug: string;
+}) {
+  const available = ticketTypes.filter(
+    (type) => type.is_active && type.sold_count < type.quantity,
+  );
 
   if (available.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-display">Billetterie</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-fg-muted">
-            La billetterie est complète ou momentanément indisponible pour cet événement.
-          </p>
-        </CardContent>
-      </Card>
+      <section aria-labelledby="billetterie">
+        <p className={shell.eyebrow}>Billetterie</p>
+        <h2 id="billetterie" className={styles.asideTitle} style={{ marginTop: 10 }}>
+          Choisir mes billets
+        </h2>
+        <p className={styles.asideNote} style={{ marginTop: 12 }}>
+          La billetterie est complète ou momentanément indisponible pour cet événement.
+        </p>
+      </section>
     );
   }
 
   return (
-    <section aria-labelledby="billetterie" className="flex flex-col gap-4">
-      <div className="border-t border-border pt-4">
-        <p className="eyebrow">Billetterie</p>
-        <h2 id="billetterie" className="mt-2 font-display text-2xl font-semibold">
-          Choisir mes billets
-        </h2>
-      </div>
+    <section aria-labelledby="billetterie">
+      <p className={shell.eyebrow}>Billetterie</p>
+      <h2 id="billetterie" className={styles.asideTitle} style={{ marginTop: 10 }}>
+        Choisir mes billets
+      </h2>
 
-      <ul className="flex flex-col gap-3">
+      <ul className={styles.ticketList} style={{ marginTop: 16 }}>
         {available.map((type) => {
           const remaining = type.quantity - type.sold_count;
+          const isPremium = type.access_level !== "standard";
+
           return (
-            <li
-              key={type.id}
-              className="flex overflow-hidden rounded-lg border border-border bg-surface transition-colors duration-150 hover:border-border"
-            >
-              <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-4">
-                <p className="flex flex-wrap items-center gap-2 font-semibold">
+            <li key={type.id} className={styles.ticket}>
+              <div className={styles.ticketMain}>
+                <p className={styles.ticketName}>
                   {type.name}
-                  <AccessLevelBadge level={type.access_level} />
+                  {isPremium ? (
+                    <span
+                      style={{
+                        padding: "2px 6px",
+                        border: "1px solid var(--accent)",
+                        borderRadius: 2,
+                        color: "var(--accent)",
+                        fontSize: 8.5,
+                        fontWeight: 700,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {levelLabel(type.access_level)}
+                    </span>
+                  ) : null}
                 </p>
                 {type.description ? (
-                  <p className="line-clamp-2 text-sm text-fg-muted">{type.description}</p>
+                  <p className={styles.ticketDesc}>{type.description}</p>
                 ) : null}
                 {remaining <= 20 ? (
-                  <p className="text-xs font-medium text-accent">Plus que {remaining} places</p>
+                  <p className={styles.ticketLow}>Plus que {remaining} places</p>
                 ) : null}
               </div>
 
-              {/* Talon : perforation + prix + action */}
-              <div className="flex shrink-0 flex-col items-stretch justify-center gap-2 border-l-2 border-dashed border-border-strong bg-surface-raised px-4 py-3 text-center">
-                <p className="font-display text-lg leading-none font-semibold tabular-nums">
+              <div className={styles.ticketStub}>
+                <p className={styles.ticketPrice}>
                   {type.price <= 0 ? "Gratuit" : formatPrice(type.price)}
                 </p>
-                <ButtonLink href={`/evenements/${slug}/billets?type=${type.id}`} size="sm">
+                <Link
+                  href={`/evenements/${slug}/billets?type=${type.id}`}
+                  className={`${shell.btn} ${shell["btn-primary"]} ${shell["btn-sm"]} ${styles.ticketCta}`}
+                >
                   Choisir
-                </ButtonLink>
+                </Link>
               </div>
             </li>
           );
         })}
       </ul>
 
-      <p className="text-xs text-fg-subtle">
+      <p className={styles.asideNote} style={{ marginTop: 14 }}>
         Paiement sécurisé par mobile money (Wave, Orange, MTN, Moov) ou carte bancaire.
       </p>
     </section>
   );
 }
-
-/* Bandeau salon communautaire : rejoindre la discussion de l'événement. */
 
 export function SalonTeaser({
   slug,
@@ -91,24 +119,22 @@ export function SalonTeaser({
     privacy === "public"
       ? "Salon public : tout le monde peut échanger."
       : privacy === "members"
-        ? "Salon réservé aux participants munis d'un billet."
+        ? "Salon réservé aux participants munis d’un billet."
         : "Salon privé sur invitation.";
 
   return (
-    <aside
-      aria-labelledby="salon-titre"
-      className="flex flex-col gap-4 border-y border-border py-6 sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div className="flex flex-col gap-1.5">
-        <p className="eyebrow">Avant, pendant, après</p>
-        <h2 id="salon-titre" className="font-display text-2xl font-semibold">
-          Le salon de l&apos;événement
-        </h2>
-        <p className="max-w-md text-sm text-fg-muted">{label} Présente-toi, pose tes questions.</p>
+    <aside aria-labelledby="salon-titre" className={styles.salonBand}>
+      <div>
+        <p className={shell.eyebrow}>Avant, pendant, après</p>
+        <h2 id="salon-titre">Le salon de l’événement</h2>
+        <p>{label} Présente-toi, pose tes questions.</p>
       </div>
-      <ButtonLink href={`/evenements/${slug}/salon`} variant="secondary" className="shrink-0">
+      <Link
+        href={`/evenements/${slug}/salon`}
+        className={`${shell.btn} ${shell["btn-outline"]} ${shell["btn-sm"]}`}
+      >
         Découvrir le salon
-      </ButtonLink>
+      </Link>
     </aside>
   );
 }
