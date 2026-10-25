@@ -1,0 +1,270 @@
+/* ============================================================================
+   Chrome mobile — barre d'onglets et feuille de compte
+   --------------------------------------------------------------------------
+   Module dédié au chrome mobile : la barre n'est rendue que sous 768 px et la
+   feuille ne s'ouvre que depuis l'avatar mobile. Le desktop (rail + menu du
+   compte) n'emprunte aucune de ces règles.
+
+   Les couleurs passent par les jetons sémantiques : dans la portée éditoriale
+   (`EditorialScope`), ils pointent déjà vers papier / encre / vermillon, et le
+   thème sombre suit sans duplication.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Barre d'onglets
+   -------------------------------------------------------------------------- */
+
+.tabbar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 -1px 0 var(--border);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Le contenu s'efface progressivement sous la barre : pas de filet dur. */
+.tabbar::before {
+  content: "";
+  position: absolute;
+  top: -18px;
+  right: 0;
+  left: 0;
+  height: 18px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--bg) 84%, transparent)
+  );
+  pointer-events: none;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  height: 64px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tab {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--fg-muted);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.iconWrap {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 27px;
+  border-radius: 14px;
+  transition:
+    background-color 0.18s var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
+    color 0.18s var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+.tab:active .iconWrap {
+  background: var(--bg-muted);
+}
+
+/* L'actif se lit à trois signaux : pastille, graisse et teinte. */
+.tab[aria-current="page"] {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.tab[aria-current="page"] .iconWrap {
+  background: color-mix(in srgb, var(--primary) 11%, var(--bg));
+}
+
+:global(html.dark) .tab[aria-current="page"] .iconWrap {
+  background: color-mix(in srgb, var(--primary) 16%, var(--bg));
+}
+
+.label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -4px;
+  border-radius: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Feuille de compte
+   -------------------------------------------------------------------------- */
+
+/* Le portail sort du conteneur `.editorial` : on réapplique les jetons
+   éditoriaux sur sa racine pour que la feuille garde le même papier / encre /
+   vermillon, y compris en thème sombre. Valeurs alignées sur
+   `editorial-shell.module.css`. */
+.sheetScope {
+  --surface: #fffdfa;
+  --bg: #f7f4ee;
+  --bg-muted: color-mix(in srgb, #202a35 8%, #f7f4ee);
+  --fg: #202a35;
+  --fg-muted: #5d6672;
+  --fg-subtle: color-mix(in srgb, #5d6672 76%, #f7f4ee);
+  --border: rgba(32, 42, 53, 0.14);
+  --border-strong: rgba(32, 42, 53, 0.3);
+  --primary: #b83f22;
+  --danger: color-mix(in srgb, #b3261e 88%, #202a35);
+}
+
+:global(html.dark) .sheetScope {
+  --surface: #1f2935;
+  --bg: #141a22;
+  --bg-muted: color-mix(in srgb, #f2ede3 8%, #141a22);
+  --fg: #f2ede3;
+  --fg-muted: #a9b1bc;
+  --fg-subtle: color-mix(in srgb, #a9b1bc 76%, #141a22);
+  --border: rgba(242, 237, 227, 0.14);
+  --border-strong: rgba(242, 237, 227, 0.32);
+  --primary: #e8735a;
+  --danger: color-mix(in srgb, #b3261e 88%, #f2ede3);
+}
+
+.sheetBody {
+  padding-bottom: 4px;
+}
+
+.groupLabel {
+  margin: 0;
+  padding: 16px 18px 4px;
+  color: var(--fg-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  gap: 13px;
+  padding: 0 14px 0 18px;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 15.5px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background-color 0.12s var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+}
+
+/* Séparateurs rentrés : ils commencent après l'icône, comme sur iOS. */
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 51px;
+  height: 1px;
+  background: var(--border);
+}
+
+.row:active {
+  background: var(--bg-muted);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.rowIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: var(--fg-muted);
+}
+
+.rowLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fg-muted);
+  opacity: 0.7;
+}
+
+.danger,
+.danger .rowIcon {
+  color: var(--danger);
+}
+
+.sheetFoot {
+  margin: 0;
+  padding: 14px 18px 2px;
+  color: var(--fg-muted);
+  font-size: 11.5px;
+}
+
+/* --------------------------------------------------------------------------
+   Replis et limites
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .iconWrap,
+  .row {
+    transition: none;
+  }
+}
+
+/* Transparence refusée : la barre redevient opaque, sans bord fondu. */
+@media (prefers-reduced-transparency: reduce) {
+  .tabbar {
+    background: var(--bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .tabbar::before {
+    display: none;
+  }
+}
+
+/* La barre appartient au mobile : rien ne doit filtrer sur grand écran. */
+@media (min-width: 768px) {
+  .tabbar {
+    display: none;
+  }
+}

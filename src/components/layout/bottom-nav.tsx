@@ -2,12 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, MessageSquare, Ticket, User } from "lucide-react";
+import { Compass, Home, MessageSquare, Ticket, User } from "lucide-react";
 
 import { ROUTES } from "@/lib/constants";
 import { haptic } from "@/lib/ui/haptics";
 import { cn } from "@/lib/utils";
+
 import type { HeaderUser } from "./header-types";
+import styles from "./mobile-chrome.module.css";
+
+/* =============================================================================
+   Barre d'onglets mobile
+   --------------------------------------------------------------------------
+   Matière translucide, filet d'un pixel et contenu qui s'efface dessous : la
+   barre flotte au-dessus de la page au lieu de la clore. L'onglet actif se lit
+   à la pastille, à la graisse et à la teinte — jamais à la couleur seule.
+
+   Rendu uniquement sous 768 px (règle du module + `md:hidden`) et masqué dans
+   l'espace organisateur et l'administration, qui ont leur propre navigation.
+   ========================================================================== */
 
 export function BottomNav({ user }: { user: HeaderUser | null }) {
   const pathname = usePathname();
@@ -51,34 +64,22 @@ export function BottomNav({ user }: { user: HeaderUser | null }) {
   ];
 
   return (
-    <nav
-      aria-label="Navigation mobile"
-      className="mobile-tabbar bg-bg border-border-strong fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_28px_rgba(10,8,18,0.22)] md:hidden"
-    >
-      <ul className="grid h-14 grid-cols-5 items-stretch">
+    <nav aria-label="Navigation mobile" className={cn(styles.tabbar, "md:hidden")}>
+      <ul className={styles.list}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
-            <li key={item.label}>
+            <li key={item.label} className="min-w-0">
               <Link
                 href={item.href}
                 aria-current={item.active ? "page" : undefined}
                 onPointerDown={() => haptic("light")}
-                className={cn(
-                  "-mt-px flex h-14 flex-col items-center justify-center gap-1 border-t-2 transition-colors duration-200 active:scale-95",
-                  item.active
-                    ? "border-primary text-primary font-semibold"
-                    : "text-fg-muted hover:text-fg border-transparent",
-                )}
+                className={styles.tab}
               >
-                <Icon
-                  className={cn(
-                    "size-5 transition-transform duration-200 motion-reduce:transform-none motion-reduce:transition-none",
-                    item.active && "-translate-y-0.5 scale-110",
-                  )}
-                  aria-hidden="true"
-                />
-                <span className="text-2xs leading-none tracking-tight">{item.label}</span>
+                <span className={styles.iconWrap}>
+                  <Icon className="size-5" strokeWidth={1.8} aria-hidden="true" />
+                </span>
+                <span className={styles.label}>{item.label}</span>
               </Link>
             </li>
           );

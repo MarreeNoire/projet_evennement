@@ -755,6 +755,16 @@
   color: var(--band-ink);
 }
 
+/* La barre d'onglets mobile est fixe : le pied de page lui réserve sa hauteur
+   pour que la dernière ligne (copyright, retour en haut) reste atteignable.
+   La règle ne s'applique que si la barre est réellement rendue — donc jamais
+   dans /org ni /admin, qui n'ont pas de barre. */
+@media (max-width: 767px) {
+  .editorial:has(> nav[aria-label="Navigation mobile"]) .site-foot {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 .editorial .foot-grid {
   display: grid;
   grid-template-columns: 1.7fr 0.8fr 0.8fr 0.8fr;

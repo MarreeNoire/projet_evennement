@@ -15,6 +15,7 @@ import { haptic } from "@/lib/ui/haptics";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
+import { AccountSheet } from "./account-sheet";
 import type { HeaderUser } from "./header-types";
 import { getMobileHeaderTitle, useSideCollapsed } from "./app-nav";
 import { ThemeToggle } from "./theme-toggle";
@@ -44,6 +45,7 @@ export function HeaderShell({
   const pathname = usePathname();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [sideCollapsed, setSideCollapsed] = useSideCollapsed();
   const [navigatingFromPath, setNavigatingFromPath] = useState<string | null>(null);
   const navigating = navigatingFromPath === pathname;
@@ -56,6 +58,9 @@ export function HeaderShell({
   /* /org et /admin n'affichent pas le rail latéral global : la marque doit
      rester visible dans la barre, même sur grand écran. */
   const hasSideRail = !pathname.startsWith("/org") && !pathname.startsWith("/admin");
+  /* La feuille de compte suit la même règle que la barre d'onglets : elle
+     n'entre pas dans les espaces qui portent déjà leur propre navigation. */
+  const hasAccountSheet = hasSideRail;
 
   /* Temps réel : badge de notifications (logique inchangée). */
   useEffect(() => {
@@ -308,7 +313,29 @@ export function HeaderShell({
               <div className="hidden lg:block">
                 <UserMenu user={user} />
               </div>
-              <Link href={ROUTES.profile} aria-label="Mon profil" className="press shrink-0 lg:hidden">
+              {hasAccountSheet ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    haptic("light");
+                    setAccountOpen(true);
+                  }}
+                  aria-label="Ouvrir le menu du compte"
+                  aria-haspopup="dialog"
+                  aria-expanded={accountOpen}
+                  className="press shrink-0 rounded-full md:hidden"
+                >
+                  <Avatar src={user.avatarUrl} name={user.displayName} size="md" />
+                </button>
+              ) : null}
+              <Link
+                href={ROUTES.profile}
+                aria-label="Mon profil"
+                className={cn(
+                  "press shrink-0",
+                  hasAccountSheet ? "max-md:hidden lg:hidden" : "lg:hidden",
+                )}
+              >
                 <Avatar src={user.avatarUrl} name={user.displayName} size="md" />
               </Link>
             </>
@@ -346,6 +373,11 @@ export function HeaderShell({
           n&apos;importe quelle page.
         </p>
       </BottomSheet>
+
+      {/* Compte, mobile uniquement : la feuille reprend le chrome natif. */}
+      {user && hasAccountSheet ? (
+        <AccountSheet open={accountOpen} onClose={() => setAccountOpen(false)} user={user} />
+      ) : null}
     </header>
   );
 }
