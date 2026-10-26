@@ -7,20 +7,20 @@
    ========================================================================== */
 
 .screen {
-  --paper: #f7f4ee;
-  --paper-2: #efe9de;
-  --surface: #fffdfa;
-  --ink: #202a35;
-  --ink-2: #39434f;
-  --muted: #5d6672;
-  --line: rgba(32, 42, 53, 0.14);
-  --line-strong: rgba(32, 42, 53, 0.3);
-  --accent: #b83f22;
-  --accent-deep: #96301a;
-  --on-accent: #fff8f1;
+  --paper: var(--editorial-paper);
+  --paper-2: var(--editorial-paper-alt);
+  --surface: var(--editorial-surface);
+  --ink: var(--editorial-ink);
+  --ink-2: var(--editorial-ink-secondary);
+  --muted: var(--editorial-muted);
+  --line: var(--editorial-line);
+  --line-strong: var(--editorial-line-strong);
+  --accent: var(--editorial-accent);
+  --accent-deep: var(--editorial-accent-strong);
+  --on-accent: var(--editorial-on-accent);
   --danger: #b3261e;
   --display: var(--font-display);
-  --sans: var(--font-bricolage), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans: var(--font-body);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 
@@ -38,17 +38,6 @@
 }
 
 :global(html.dark) .screen {
-  --paper: #141a22;
-  --paper-2: #1b242f;
-  --surface: #1f2935;
-  --ink: #f2ede3;
-  --ink-2: #d9d3c7;
-  --muted: #a9b1bc;
-  --line: rgba(242, 237, 227, 0.14);
-  --line-strong: rgba(242, 237, 227, 0.32);
-  --accent: #e8735a;
-  --accent-deep: #f08b74;
-  --on-accent: #26120c;
   --danger: #ff8f86;
 }
 

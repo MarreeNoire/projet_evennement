@@ -104,7 +104,7 @@ function TicketStub({ ticket }: { ticket: Record<string, any> }) {
         className="border-border-strong border-t-2 border-dashed sm:h-auto sm:w-0 sm:border-t-0 sm:border-l-2"
       />
       <div className="bg-surface-raised flex shrink-0 items-center gap-4 p-5 sm:w-56 sm:flex-col sm:items-center sm:justify-center sm:gap-3 sm:p-6">
-        <div className="border-border-strong rounded-md border bg-white p-2 shadow-xs">
+        <div className="border-border-strong rounded-md border bg-surface p-2">
           <QRCode value={ticket.qr_token} size={76} aria-label="QR code du billet" />
         </div>
         <div className="min-w-0 text-center sm:text-center">

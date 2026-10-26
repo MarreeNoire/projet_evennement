@@ -15,8 +15,7 @@ import { EventQuickPreview } from "./event-quick-preview";
    --------------------------------------------------------------------------
    Une seule source de vérité visuelle, réutilisée sur l'accueil, l'explorer et
    les salons. La structure reprend le billet de la maquette `accueil/` : bloc de
-   date en menthe, filet perforé, prix composté, action principale franche.
-   La surface est un panneau de verre (voir `.event-card` dans globals.css).
+   date accentuée, filet fin, prix composté et action franche sur papier plein.
 
    Le prix, la date et le lieu restent toujours en texte, jamais portés par la
    couleur seule. Sans image de couverture, on génère une « affiche » : aplat de
@@ -85,7 +84,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
             className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[rgba(11,11,12,0.62)] to-transparent"
           />
 
-          <span className="absolute top-3 left-3 inline-flex items-center rounded-md border border-[rgba(244,242,236,0.28)] bg-[rgba(11,11,12,0.58)] px-2 py-1 text-[0.62rem] font-bold tracking-[0.12em] text-[var(--paper)] uppercase backdrop-blur-md">
+          <span className="absolute top-3 left-3 inline-flex items-center rounded-sm border border-white/30 bg-black/70 px-2 py-1 text-[0.62rem] font-bold tracking-[0.12em] text-white uppercase">
             {getCategoryLabel(event.category)}
           </span>
 
@@ -107,14 +106,14 @@ export function EventCard({ event }: { event: PublishedEventView }) {
           <Link
             href={eventHref}
             prefetch={false}
-            className="focus-visible:outline-border-focus transition-colors hover:text-(--mint-deep) focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="focus-visible:outline-border-focus transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             {event.title}
           </Link>
         </h3>
 
         <p className="text-fg-muted flex items-center gap-1.5 text-xs">
-          <MapPin className="text-(--mint-deep) size-3.5 shrink-0" aria-hidden="true" />
+          <MapPin className="text-primary size-3.5 shrink-0" aria-hidden="true" />
           <span className="truncate">
             {event.venue_name ? `${event.venue_name}, ` : ""}
             {event.city}
@@ -147,7 +146,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
           <span className="text-fg-subtle flex max-w-[9rem] items-center gap-1 truncate text-[0.7rem]">
             {event.organizer_verified ? (
               <BadgeCheck
-                className="text-(--mint-deep) size-3.5 shrink-0"
+                className="text-primary size-3.5 shrink-0"
                 aria-label="Organisateur vérifié"
               />
             ) : null}

@@ -132,7 +132,7 @@ export function AppSideRail({ user, unreadCount }: { user: HeaderUser | null; un
       aria-label="Navigation latérale"
       className={cn(
         "bg-bg border-border-strong fixed inset-y-0 left-0 z-40 hidden w-[var(--rail-w)] flex-col",
-        "border-r shadow-[4px_0_24px_rgba(10,8,18,0.16)]",
+        "border-r",
         "transition-[width] duration-200 ease-[var(--ease-out-soft)] motion-reduce:transition-none",
         "md:flex lg:w-[var(--side-w)] lg:data-[collapsed=true]:w-[var(--rail-w)]",
       )}

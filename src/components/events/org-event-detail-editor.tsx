@@ -130,10 +130,14 @@ export function OrgEventDetailEditor({
     startAt !== initialStartAt ||
     endAt !== initialEndAt;
 
-  // Calculé après le montage : évite les écarts d'hydratation
+  // Calculé après l'hydratation : évite que l'heure serveur et navigateur
+  // produisent un statut différent au rendu initial.
   useEffect(() => {
-    const endsAt = endAt ? new Date(endAt).getTime() : Number.NaN;
-    setIsFinished(!Number.isNaN(endsAt) && endsAt <= Date.now());
+    const frame = window.requestAnimationFrame(() => {
+      const endsAt = endAt ? new Date(endAt).getTime() : Number.NaN;
+      setIsFinished(!Number.isNaN(endsAt) && endsAt <= Date.now());
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [endAt]);
 
   const ticketsSold = stats?.tickets_sold ?? 0;
@@ -384,7 +388,7 @@ export function OrgEventDetailEditor({
       )}
 
       {/* Header Héro de l'événement */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface via-surface/95 to-surface-raised p-5 sm:p-6 shadow-sm">
+      <div className="relative overflow-hidden rounded-md border border-border bg-surface p-5 sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-4 sm:gap-5 min-w-0">
             {/* Miniature Cover */}
@@ -781,7 +785,7 @@ export function OrgEventDetailEditor({
           </Card>
 
           {/* Barre d'action d'enregistrement */}
-          <div className="sticky bottom-4 z-10 flex items-center justify-between gap-4 rounded-xl border border-border bg-surface/95 p-4 shadow-lg backdrop-blur-md">
+          <div className="sticky bottom-4 z-10 flex items-center justify-between gap-4 rounded-md border border-border bg-surface p-4">
             <div className="text-xs">
               {isDirty ? (
                 <span className="font-medium text-warning flex items-center gap-1.5">
@@ -846,7 +850,7 @@ export function OrgEventDetailEditor({
                       size="sm"
                       onClick={() => coverInputRef.current?.click()}
                       disabled={pending}
-                      className="bg-white/90 text-black hover:bg-white backdrop-blur-sm shadow-md"
+                      className="bg-white text-black hover:bg-white shadow-sm"
                     >
                       <ImagePlus className="size-4 mr-1.5" /> Remplacer
                     </Button>
@@ -968,7 +972,7 @@ export function OrgEventDetailEditor({
                           onClick={() => promoteToCover(url)}
                           disabled={pending}
                           title="Définir comme couverture principale"
-                          className="flex size-7 items-center justify-center rounded-md bg-white/20 text-white hover:bg-white/40 backdrop-blur-xs transition-colors"
+                          className="flex size-7 items-center justify-center rounded-md bg-black/65 text-white hover:bg-black/85 transition-colors"
                         >
                           <Star className="size-3.5" />
                         </button>

@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   output: "standalone",
+  // Permet de lancer un build isolé sans entrer en conflit avec `next dev`.
+  distDir: process.env.NEXT_BUILD_DIST_DIR || ".next",
 
   experimental: {
     // Étend la durée du cache côté client du routeur Next.js.

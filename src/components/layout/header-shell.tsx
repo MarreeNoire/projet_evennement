@@ -210,7 +210,7 @@ export function HeaderShell({
   };
 
   return (
-    <header className="site-header bg-bg/92 border-border-strong sticky top-0 z-40 border-b shadow-md backdrop-blur-md md:bg-bg md:supports-[backdrop-filter]:bg-bg/80">
+    <header className="site-header bg-bg border-border-strong sticky top-0 z-40 border-b">
       {navigating ? (
         <>
           <div aria-hidden="true" className="navigation-progress-track">
@@ -246,15 +246,17 @@ export function HeaderShell({
           </>
         ) : null}
 
-        <button
-          type="button"
-          onClick={toggleSide}
-          aria-label={sideCollapsed ? "Étendre la barre latérale" : "Réduire la barre latérale"}
-          aria-pressed={sideCollapsed}
-          className="press text-fg-muted hover:bg-bg-muted hover:text-fg hidden size-11 shrink-0 items-center justify-center rounded-xl lg:inline-flex"
-        >
-          <PanelLeft className="size-5" aria-hidden="true" />
-        </button>
+        {hasSideRail ? (
+          <button
+            type="button"
+            onClick={toggleSide}
+            aria-label={sideCollapsed ? "Étendre la barre latérale" : "Réduire la barre latérale"}
+            aria-pressed={sideCollapsed}
+            className="press text-fg-muted hover:bg-bg-muted hover:text-fg hidden size-11 shrink-0 items-center justify-center rounded-xl lg:inline-flex"
+          >
+            <PanelLeft className="size-5" aria-hidden="true" />
+          </button>
+        ) : null}
 
         {/* Identité — le rail/sidebar porte déjà la marque dès 768 px ;
             en mode « détail » sur mobile, le titre la remplace. */}

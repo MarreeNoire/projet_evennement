@@ -94,7 +94,7 @@ export function BecomeOrganizerForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className={variant === "editorial" ? content.organizerPanel : "flex flex-col gap-4 rounded-xl border border-primary/30 bg-surface p-6 shadow-sm"}
+      className={variant === "editorial" ? content.organizerPanel : "flex flex-col gap-4 rounded-sm border border-border bg-surface p-6"}
     >
       {error ? (
         <Alert tone="danger" title="Activation impossible">

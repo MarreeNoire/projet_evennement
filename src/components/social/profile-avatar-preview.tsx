@@ -36,7 +36,7 @@ export function ProfileAvatarPreview({ src, name }: { src: string | null; name: 
 
       {open ? (
         <div
-          className="bg-overlay/70 fixed inset-0 z-[100] flex items-center justify-center p-5 backdrop-blur-sm"
+          className="bg-overlay/70 fixed inset-0 z-[100] flex items-center justify-center p-5"
           role="dialog"
           aria-modal="true"
           aria-label={`Photo de profil de ${name}`}

@@ -72,7 +72,7 @@ export default async function MonBadgePage() {
               </div>
 
               <div className="bg-bg-subtle flex flex-col items-center gap-3 px-6 py-6">
-                <div className="border-border-strong rounded-md border bg-white p-3">
+                <div className="border-border-strong bg-surface rounded-md border p-3">
                   <QRCode value={badgeUrl} size={160} aria-label="QR code de mise en réseau" />
                 </div>
                 <p className="text-fg-subtle text-center text-xs">

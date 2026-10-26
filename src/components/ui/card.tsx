@@ -3,8 +3,7 @@ import { cn } from "@/lib/utils";
 /* =============================================================================
    Carte
    --------------------------------------------------------------------------
-   Surface réutilisable des listes et tableaux de bord. Le verre fumé laisse
-   l'ambiance de la page respirer tout en gardant un contraste fort.
+   Surface éditoriale partagée : papier plein, filet fin et accent vermillon.
    ========================================================================== */
 
 export function Card({
@@ -16,9 +15,9 @@ export function Card({
     <div
       data-scroll-reveal
       className={cn(
-        "border-border bg-surface/80 rounded-xl border shadow-sm backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] duration-300 ease-[var(--ease-out-soft)]",
+        "border-border bg-surface rounded-sm border transition-colors duration-160 ease-[var(--ease-out-soft)]",
         interactive &&
-          "hover:border-primary/35 hover:bg-surface-raised focus-within:border-border-focus hover:-translate-y-0.5 hover:shadow-lg",
+          "hover:border-primary/55 hover:bg-bg-subtle focus-within:border-border-focus",
         className,
       )}
       {...props}

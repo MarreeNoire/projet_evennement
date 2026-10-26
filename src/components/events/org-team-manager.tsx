@@ -306,7 +306,7 @@ export function OrgTeamManager({
 
       {/* Modal / Formulaire d'invitation In-App */}
       {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <Card className="w-full max-w-lg shadow-2xl border-2 border-primary/40 bg-surface">
             <CardHeader className="border-b border-border p-5">
               <div className="flex items-center justify-between">
@@ -458,7 +458,7 @@ export function OrgTeamManager({
 
       {/* Modal de modification de rôle */}
       {editingMember && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <Card className="w-full max-w-md shadow-2xl border-border bg-surface">
             <CardHeader className="border-b border-border p-5">
               <div className="flex items-center justify-between">

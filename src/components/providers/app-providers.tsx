@@ -109,7 +109,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         richColors
         toastOptions={{
           classNames: {
-            toast: "rounded-xl border border-border shadow-lg",
+            toast: "rounded-sm border border-border bg-surface text-fg shadow-md",
             title: "text-sm font-semibold",
             description: "text-sm text-fg-muted",
           },

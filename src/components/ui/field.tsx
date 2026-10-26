@@ -13,12 +13,12 @@ import { cn } from "@/lib/utils";
    ========================================================================== */
 
 export const fieldBase = [
-  "w-full rounded-md border border-border-strong bg-surface text-fg",
+  "w-full rounded-sm border border-border-strong bg-surface text-fg",
   "px-3 py-2.5 text-sm",
   "placeholder:text-fg-subtle",
-  "transition-[border-color,background-color,box-shadow,transform] duration-200 ease-[var(--ease-out-soft)]",
+  "transition-[border-color,background-color,box-shadow] duration-160 ease-[var(--ease-out-soft)]",
   "hover:border-border",
-  "focus:scale-[1.003] focus:border-border-focus focus:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-border-focus/35",
+  "focus:border-border-focus focus:outline-none focus:ring-2 focus:ring-border-focus/35",
   "disabled:cursor-not-allowed disabled:bg-bg-muted disabled:opacity-60",
   "aria-[invalid=true]:border-danger",
 ].join(" ");

@@ -581,7 +581,7 @@ export function RegisterForm() {
                 aria-hidden="true"
               />
             </summary>
-            <div className="border-border-strong bg-surface absolute top-[calc(100%+0.35rem)] left-0 z-30 w-[min(19rem,calc(100vw-3rem))] overflow-hidden rounded-lg border shadow-lg">
+            <div className="border-border-strong bg-surface absolute top-[calc(100%+0.35rem)] left-0 z-30 w-[min(19rem,calc(100vw-3rem))] overflow-hidden rounded-sm border shadow-md">
               <label className="border-border flex items-center gap-2 border-b px-3">
                 <Search className="text-fg-muted size-4 shrink-0" aria-hidden="true" />
                 <input

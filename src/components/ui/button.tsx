@@ -16,8 +16,8 @@ export const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 whitespace-nowrap",
     "font-semibold",
-    "rounded-lg border border-transparent",
-    "transition-[background-color,border-color,color,box-shadow,transform] duration-160",
+    "rounded-sm border border-transparent",
+    "transition-[background-color,border-color,color] duration-160",
     "ease-[var(--ease-out-soft)]",
     "select-none",
     // Feedback immédiat au clic
@@ -31,17 +31,17 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         // Action principale : contraste 5.55:1 dans les deux thèmes
-        primary: "bg-primary-solid text-primary-solid-fg hover:-translate-y-0.5 hover:bg-primary-solid-hover hover:shadow-md",
+        primary: "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover",
         // Action secondaire
-        secondary: "bg-bg-muted text-fg hover:-translate-y-0.5 hover:bg-border hover:shadow-sm",
+        secondary: "border-border-strong bg-surface text-fg hover:border-primary/50 hover:bg-bg-subtle",
         // Action discrète
         ghost: "text-fg hover:bg-bg-muted",
         // Lien textuel
         link: "text-primary underline underline-offset-4 decoration-1 hover:decoration-2 px-0",
         // Action destructive (annulation, suppression)
-        danger: "bg-danger-solid text-white hover:-translate-y-0.5 hover:bg-danger-solid-hover hover:shadow-md",
+        danger: "bg-danger-solid text-white hover:bg-danger-solid-hover",
         // Accent chaud : réservé aux mises en avant (VIP, CTA promotionnel)
-        accent: "bg-accent-solid text-accent-solid-fg hover:-translate-y-0.5 hover:brightness-95 hover:shadow-md",
+        accent: "bg-accent-solid text-accent-solid-fg hover:brightness-95",
         // Sur photo de couverture
         overlay: "border-white/30 bg-black/85 text-white hover:bg-black",
       },

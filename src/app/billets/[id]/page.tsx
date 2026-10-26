@@ -55,7 +55,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
             </Badge>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
-            <div className="rounded-2xl border border-border bg-white p-4">
+            <div className="rounded-md border border-border bg-surface p-4">
               <QRCode value={ticket.qr_token} size={220} aria-label={`QR code du billet ${ticket.reference}`} />
             </div>
             <p>

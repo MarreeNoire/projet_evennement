@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Bricolage_Grotesque } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { ServiceWorkerCleanup } from "@/components/providers/service-worker-cleanup";
@@ -7,21 +6,6 @@ import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
 import "./globals.css";
-
-/* Polices de la maquette `accueil/`, auto-hébergées : aucun appel réseau au
-   chargement et aucun décalage de mise en page. */
-const anton = Anton({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-  variable: "--font-anton",
-});
-
-const bricolage = Bricolage_Grotesque({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-bricolage",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl),
@@ -84,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`light ${anton.variable} ${bricolage.variable}`}
+      className="light"
     >
       <head />
       <body className="min-h-dvh antialiased">

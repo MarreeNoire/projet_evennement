@@ -129,7 +129,7 @@ export default async function SalonDetailPage({
         )}
         <div className={cn("relative z-10", event?.cover_url ? "text-white" : "text-fg")}>
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="bg-surface/15 text-2xs rounded-full px-3 py-1 font-semibold tracking-[0.12em] uppercase backdrop-blur-sm">
+            <span className="bg-black/70 text-2xs rounded-sm px-3 py-1 font-semibold tracking-[0.12em] text-white uppercase">
               Salon de l&apos;événement
             </span>
             {event && phase ? (

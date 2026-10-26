@@ -25,7 +25,7 @@ import styles from "./mobile-chrome.module.css";
 export function BottomNav({ user }: { user: HeaderUser | null }) {
   const pathname = usePathname();
 
-  // Ne pas afficher dans l'espace organisateur ni dans l'administration (qui ont leur propre menu)
+  // Les espaces admin et organisateur ont leur propre barre mobile, adaptée à leurs nombreuses sections.
   if (pathname.startsWith("/org") || pathname.startsWith("/admin")) {
     return null;
   }

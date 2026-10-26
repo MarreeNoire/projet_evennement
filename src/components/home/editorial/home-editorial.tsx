@@ -68,10 +68,10 @@ type SalonPhase = "avant" | "pendant" | "apres";
 const TIME_ZONE = "Africa/Abidjan";
 
 const MAIN_NAV = [
-  { label: "Découvrir", href: "#decouvrir" },
-  { label: "Les salons", href: "#salons" },
-  { label: "Billetterie", href: "#billets" },
-  { label: "Organiser", href: "#organiser" },
+  { label: "Explorer", href: ROUTES.explore },
+  { label: "Mes billets", href: ROUTES.myTickets },
+  { label: "Mes salons", href: ROUTES.mySalons },
+  { label: "Organiser", href: "/devenir-organisateur" },
 ];
 
 const SHORT_WEEKDAY = new Intl.DateTimeFormat("fr-FR", {
@@ -473,6 +473,12 @@ export function HomeEditorial({
   viewer: HeaderUser | null;
 }) {
   const featured = events[0] ?? null;
+  const mainNav = MAIN_NAV.map((item) => {
+    if (item.href === ROUTES.myTickets || item.href === ROUTES.mySalons) {
+      return { ...item, href: viewer ? item.href : `${ROUTES.login}?redirect=${item.href}` };
+    }
+    return item;
+  });
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -700,10 +706,10 @@ export function HomeEditorial({
           </Link>
 
           <nav className={cx("main-nav")} aria-label="Navigation principale">
-            {MAIN_NAV.map((item) => (
-              <a key={item.href} href={item.href}>
+            {mainNav.map((item) => (
+              <Link key={item.href} href={item.href}>
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -761,11 +767,11 @@ export function HomeEditorial({
         </div>
 
         <nav aria-label="Menu principal">
-          {MAIN_NAV.map((item, index) => (
-            <a key={item.href} href={item.href} onClick={closeMenu}>
+          {mainNav.map((item, index) => (
+            <Link key={item.href} href={item.href} onClick={closeMenu}>
               <span>{String(index + 1).padStart(2, "0")}</span>
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -809,31 +815,22 @@ export function HomeEditorial({
             </p>
             <h1 id="hero-title">
               <span className={cx("line")}>
-                <span style={{ "--d": "130ms" } as React.CSSProperties}>La sortie</span>
+                <span style={{ "--d": "130ms" } as React.CSSProperties}>Trouve ta</span>
               </span>
               <span className={cx("line")}>
                 <span style={{ "--d": "190ms" } as React.CSSProperties}>
-                  commence ici<span className={cx("dot")}>.</span>
-                </span>
-              </span>
-              <span className={cx("line")}>
-                <span style={{ "--d": "250ms" } as React.CSSProperties}>
-                  <em>La rencontre</em>
-                </span>
-              </span>
-              <span className={cx("line")}>
-                <span style={{ "--d": "310ms" } as React.CSSProperties}>
-                  continue<span className={cx("dot")}>.</span>
+                  prochaine <em>sortie</em><span className={cx("dot")}>.</span>
                 </span>
               </span>
             </h1>
             <p className={cx("hero-sub", "intro-rise")} style={{ "--d": "430ms" } as React.CSSProperties}>
-              Trouve les événements publiés en Côte d&apos;Ivoire, réserve ta place en francs
-              CFA et retrouve les participants dans le salon de chaque sortie.
+              Explore les événements à venir, compare les dates et les lieux, puis réserve ta
+              place en quelques étapes. Tes billets et tes salons restent accessibles depuis
+              ton compte.
             </p>
             <div className={cx("hero-cta", "intro-rise")} style={{ "--d": "500ms" } as React.CSSProperties}>
               <a className={cx("btn", "btn-primary")} href="#decouvrir">
-                Découvrir les sorties
+                Explorer les événements
                 <ArrowRight className={cx("icon")} aria-hidden="true" />
               </a>
               <Link className={cx("link-arrow")} href="/devenir-organisateur">
@@ -914,6 +911,35 @@ export function HomeEditorial({
               </div>
             </div>
           </div>
+        </section>
+
+        <section className={cx("quick-access", "wrap")} aria-labelledby="quick-access-title">
+          <div className={cx("quick-access-heading")}>
+            <p className={cx("eyebrow")}><b>Accès direct</b></p>
+            <h2 id="quick-access-title">Où veux-tu aller ?</h2>
+          </div>
+          <nav className={cx("quick-access-links")} aria-label="Accès rapides">
+            <Link href={ROUTES.explore} className={cx("quick-link", "quick-link-primary")}>
+              <CalendarDays className={cx("icon")} aria-hidden="true" />
+              <span><strong>Trouver un événement</strong><small>Dates, lieux et catégories</small></span>
+              <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
+            </Link>
+            <Link href={viewer ? ROUTES.myTickets : ROUTES.login} className={cx("quick-link")}>
+              <Ticket className={cx("icon")} aria-hidden="true" />
+              <span><strong>Mes billets</strong><small>{viewer ? "Retrouver mes réservations" : "Se connecter pour les retrouver"}</small></span>
+              <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
+            </Link>
+            <Link href={viewer ? ROUTES.mySalons : ROUTES.login} className={cx("quick-link")}>
+              <MessageCircle className={cx("icon")} aria-hidden="true" />
+              <span><strong>Mes salons</strong><small>{viewer ? "Rejoindre les conversations" : "Se connecter pour participer"}</small></span>
+              <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
+            </Link>
+            <Link href={viewer?.isOrganizer ? ROUTES.orgDashboard : "/devenir-organisateur"} className={cx("quick-link")}>
+              <Users className={cx("icon")} aria-hidden="true" />
+              <span><strong>{viewer?.isOrganizer ? "Espace organisateur" : "Organiser un événement"}</strong><small>Créer et gérer une sortie</small></span>
+              <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
+            </Link>
+          </nav>
         </section>
 
         <section className={cx("capabilities")} aria-label="Ce que permet Event">
