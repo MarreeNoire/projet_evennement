@@ -577,12 +577,15 @@ function visibleExtras(
 ): ExtraComment[] {
   if (extras.length === 0 || !viewerId) return [];
   const server = new Set<string>();
+  const echoKey = (parentId: string | null, content: string) => JSON.stringify([parentId, content]);
   const visit = (comment: CommentWithAuthor) => {
-    if (comment.author_id === viewerId) server.add(comment.content);
+    if (comment.author_id === viewerId) server.add(echoKey(comment.parent_id, comment.content));
     (comment.replies ?? []).forEach(visit);
   };
   comments.forEach(visit);
-  return extras.filter((extra) => extra.status !== "error" && !server.has(extra.content));
+  return extras.filter(
+    (extra) => extra.status !== "error" && !server.has(echoKey(extra.parentId, extra.content)),
+  );
 }
 
 /* -------------------------- Ligne optimiste -------------------------------- */

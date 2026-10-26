@@ -696,7 +696,7 @@ export async function getCommentsByPost(
   const { data, error } = await supabase
     .from("comments")
     .select(
-      `id, post_id, parent_id, content, created_at, updated_at, reaction_count, is_hidden,
+      `id, post_id, parent_id, author_id, content, created_at, updated_at, reaction_count, is_hidden,
        author:profiles!comments_author_id_fkey ( id, display_name, avatar_url, is_verified )`,
     )
     .in("post_id", postIds)
