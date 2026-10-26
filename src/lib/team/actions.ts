@@ -242,6 +242,9 @@ export async function updateTeamMemberRoleAction(input: {
   role: "manager" | "checkin_agent" | "moderator";
 }): Promise<{ ok: boolean; error?: string }> {
   try {
+    if (!["manager", "checkin_agent", "moderator"].includes(input.role)) {
+      return { ok: false, error: "Ce rôle n'est pas valide." };
+    }
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -254,25 +257,32 @@ export async function updateTeamMemberRoleAction(input: {
       return { ok: false, error: "Non autorisé à modifier les membres de cette organisation." };
     }
 
-    const { data: member } = await supabase
+    const { data: member, error: memberError } = await supabase
       .from("organization_members")
       .select("id, user_id, organization_id, role")
       .eq("id", input.memberId)
       .eq("organization_id", input.organizationId)
       .maybeSingle();
 
-    if (!member) {
+    if (memberError || !member) {
       return { ok: false, error: "Membre introuvable." };
     }
+    if (member.role === "owner") {
+      return { ok: false, error: "Le rôle du propriétaire ne peut pas être modifié ici." };
+    }
 
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("organization_members")
       .update({ role: input.role })
-      .eq("id", input.memberId);
+      .eq("id", input.memberId)
+      .eq("organization_id", input.organizationId)
+      .select("id")
+      .maybeSingle();
 
     if (error) {
       return { ok: false, error: error.message };
     }
+    if (!updated) return { ok: false, error: "Le membre n'existe plus dans cette équipe." };
 
     // Notification in-app au membre concerné
     if (member.user_id) {
@@ -301,6 +311,7 @@ export async function updateTeamMemberRoleAction(input: {
     }
 
     revalidatePath("/org/equipe");
+    revalidatePath("/org");
     return { ok: true };
   } catch (err: any) {
     return { ok: false, error: err?.message || "Erreur lors de la modification du rôle." };
@@ -325,17 +336,33 @@ export async function removeTeamMemberAction(input: {
       return { ok: false, error: "Non autorisé à retirer ce collaborateur." };
     }
 
-    const { error } = await supabase
+    const { data: member, error: memberError } = await supabase
+      .from("organization_members")
+      .select("id, user_id, role")
+      .eq("id", input.memberId)
+      .eq("organization_id", input.organizationId)
+      .maybeSingle();
+
+    if (memberError || !member) return { ok: false, error: "Membre introuvable." };
+    if (member.role === "owner") {
+      return { ok: false, error: "Le propriétaire ne peut pas être révoqué de cette façon." };
+    }
+
+    const { data: removed, error } = await supabase
       .from("organization_members")
       .delete()
       .eq("id", input.memberId)
-      .eq("organization_id", input.organizationId);
+      .eq("organization_id", input.organizationId)
+      .select("id")
+      .maybeSingle();
 
     if (error) {
       return { ok: false, error: error.message };
     }
+    if (!removed) return { ok: false, error: "Le membre n'existe plus dans cette équipe." };
 
     revalidatePath("/org/equipe");
+    revalidatePath("/org");
     return { ok: true };
   } catch (err: any) {
     return { ok: false, error: err?.message || "Erreur lors du retrait du collaborateur." };

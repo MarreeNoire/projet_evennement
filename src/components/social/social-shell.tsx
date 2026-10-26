@@ -39,7 +39,7 @@ export async function SocialShell({
 
       <main
         id="contenu"
-        className="container-page flex flex-1 flex-col gap-10 py-8 pb-24 lg:pb-14"
+        className="container-page flex flex-1 flex-col gap-10 py-8 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:pb-14"
       >
         <div className="min-w-0">{children}</div>
       </main>

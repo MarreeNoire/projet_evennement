@@ -48,6 +48,7 @@ export function CommentComposer({
 }) {
   const [text, setText] = useState(() => readDraft(draftKey));
   const [sending, setSending] = useState(false);
+  const sendingRef = useRef(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
 
@@ -81,15 +82,22 @@ export function CommentComposer({
 
   const submit = async () => {
     const value = text.trim();
-    if (!value || sending) return;
+    if (!value || sendingRef.current) return;
+    sendingRef.current = true;
     setSending(true);
-    const ok = await onSend(value, [...mentionIds.current]);
-    setSending(false);
-    if (ok) {
-      mentionIds.current = [];
-      setTextAndSave("");
-      setMentionQuery(null);
-      haptic("light");
+    try {
+      const ok = await onSend(value, [...mentionIds.current]);
+      if (ok) {
+        mentionIds.current = [];
+        setTextAndSave("");
+        setMentionQuery(null);
+        haptic("light");
+      }
+    } catch {
+      // Le brouillon reste présent et peut être renvoyé après une erreur réseau.
+    } finally {
+      sendingRef.current = false;
+      setSending(false);
     }
   };
 

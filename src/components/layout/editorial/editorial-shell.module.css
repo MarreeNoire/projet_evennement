@@ -757,6 +757,12 @@
   flex: 1 0 auto;
 }
 
+@media (max-width: 767px) {
+  .editorial .main {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 .editorial .page {
   padding-block: clamp(32px, 4.4vw, 56px) clamp(56px, 7vw, 96px);
 }

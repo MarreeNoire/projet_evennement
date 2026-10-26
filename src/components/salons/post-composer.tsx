@@ -108,9 +108,10 @@ export function PostComposer({
             viewer={viewer}
             allowMedia={allowMedia}
             canAnnounce={canAnnounce}
-            onDone={() => {
+            onDone={(pollCreated) => {
               setOpen(false);
-              router.refresh();
+              if (pollCreated) router.push(`/salons/${salonId}?tab=sondages`);
+              else router.refresh();
             }}
           />
         </section>
@@ -160,9 +161,10 @@ export function PostComposer({
             viewer={viewer}
             allowMedia={allowMedia}
             canAnnounce={canAnnounce}
-            onDone={() => {
+            onDone={(pollCreated) => {
               setOpen(false);
-              router.refresh();
+              if (pollCreated) router.push(`/salons/${salonId}?tab=sondages`);
+              else router.refresh();
             }}
           />
         </BottomSheet>
@@ -184,7 +186,7 @@ export function PostEditor({
   viewer: ViewerInfo;
   allowMedia: boolean;
   canAnnounce: boolean;
-  onDone: () => void;
+  onDone: (pollCreated: boolean) => void;
 }) {
   const storedDraft = useMemo(() => readDraft(salonId), [salonId]);
   const [content, setContent] = useState(storedDraft?.content ?? "");
@@ -203,6 +205,7 @@ export function PostEditor({
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -283,7 +286,7 @@ export function PostEditor({
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     const text = content.trim();
-    if (!text || submitting) return;
+    if (!text || submittingRef.current) return;
 
     const wantsPoll = showPoll && (pollQuestion.trim() || pollOptions.some(Boolean));
     if (wantsPoll) {
@@ -295,8 +298,10 @@ export function PostEditor({
     }
 
     setError(null);
+    submittingRef.current = true;
     setSubmitting(true);
 
+    try {
     /* 1. Photos : préparation + envoi séquentiel avec progression */
     const uploaded: { storage_path: string; size_bytes: number }[] = [];
     if (allowMedia && photos.length > 0) {
@@ -318,7 +323,6 @@ export function PostEditor({
             prev.map((item) => (item.id === photo.id ? { ...item, status: "error" } : item)),
           );
           setUploadProgress(null);
-          setSubmitting(false);
           setError("Une photo n’a pas pu être envoyée. Réessaie ou retire-la du message.");
           return;
         }
@@ -339,7 +343,6 @@ export function PostEditor({
       isAnnouncement && canAnnounce ? { kind: "announcement" } : {},
     );
     if (!result.success) {
-      setSubmitting(false);
       setUploadProgress(null);
       setError(result.error ?? "La publication n’a pas pu être créée. Réessaie.");
       return;
@@ -350,8 +353,31 @@ export function PostEditor({
       /* meilleur effort : l'épinglage ne bloque pas la publication */
       void setPostPinned(result.postId, true);
     }
+    let pollCreated = false;
     if (wantsPoll && pollQuestion.trim()) {
-      await createSalonPoll(salonId, pollQuestion, pollOptions.map((option) => option.trim()).filter(Boolean));
+      try {
+        const pollResult = await createSalonPoll(
+          salonId,
+          pollQuestion,
+          pollOptions.map((option) => option.trim()).filter(Boolean),
+        );
+        pollCreated = pollResult.success;
+        if (!pollResult.success) {
+          setError(
+            `La publication est créée, mais pas le sondage : ${pollResult.error ?? "réessaie depuis l’onglet Sondages."}`,
+          );
+        }
+      } catch {
+        setError(
+          "La publication est créée, mais le sondage n’a pas pu être enregistré. Tu peux le créer depuis l’onglet Sondages.",
+        );
+      }
+      if (!pollCreated) {
+        setContent("");
+        photos.forEach((photo) => URL.revokeObjectURL(photo.previewUrl));
+        setPhotos([]);
+        cleanDraft();
+      }
     }
 
     setSubmitting(false);
@@ -366,7 +392,15 @@ export function PostEditor({
     setIsAnnouncement(false);
     setPinAfter(false);
     haptic("light");
-    onDone();
+    if (pollCreated) onDone(true);
+    else if (!wantsPoll) onDone(false);
+    } catch {
+      setError("La publication n’a pas pu être terminée. Vérifie le fil avant de réessayer.");
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+      setUploadProgress(null);
+    }
   };
 
   const categories = useMemo(() => POST_CATEGORY_ORDER.map((key) => ({ value: key, ...{ label: CATEGORY_LABELS[key] } })), []);
@@ -673,7 +707,7 @@ export function PostEditor({
       <div className="bg-surface sticky bottom-0 flex justify-end gap-2 pt-2 pb-1">
         <button
           type="button"
-          onClick={onDone}
+          onClick={() => onDone(false)}
           disabled={submitting}
           className="text-fg-muted hover:bg-bg-muted min-h-11 rounded-lg px-4 text-sm font-semibold disabled:opacity-60"
         >
