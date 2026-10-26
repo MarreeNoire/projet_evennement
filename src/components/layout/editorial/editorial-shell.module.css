@@ -702,8 +702,15 @@
    La règle ne s'applique que si la barre est réellement rendue — donc jamais
    dans /org ni /admin, qui n'ont pas de barre. */
 @media (max-width: 767px) {
-  .editorial:has(> nav[aria-label="Navigation mobile"]) .site-foot {
+  .editorial:has(nav[aria-label="Navigation mobile"]) .site-foot {
     padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Les pages qui composent elles-mêmes SiteHeader (paiement, billet, profil,
+     réglages...) ont la barre dans leur conteneur interne. Le contenu doit
+     pouvoir défiler au-dessus de la tabbar fixe. */
+  .editorial:has(nav[aria-label="Navigation mobile"]) main:not(.main) {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 1rem);
   }
 
   :global(.dashboard-shell) .site-foot {
