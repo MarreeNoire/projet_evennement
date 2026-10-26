@@ -770,7 +770,7 @@ export function HomeEditorial({
                       <span>{heroDate?.time || "À venir"}</span>
                       <span>
                         <MapPin className={cx("icon")} aria-hidden="true" />
-                        {heroEvent?.venueName || heroEvent?.city || "Abidjan"}
+                        <span className={cx("venue-name")}>{heroEvent?.venueName || heroEvent?.city || "Abidjan"}</span>
                       </span>
                     </span>
                   </div>

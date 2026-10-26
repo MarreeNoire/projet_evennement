@@ -4353,7 +4353,6 @@
 /* Hero carousel: image and event details move as one editorial scene. */
 .home .feature-image-backdrop { overflow: hidden; }
 .home .hero-image-slide { position: absolute; inset: 0; }
-.home .hero-image-slide::after { position: absolute; z-index: 1; inset: 0; content: ""; background: linear-gradient(90deg, #18171112 34%, #19191296 100%), linear-gradient(0deg, #16140fc9, transparent 58%); pointer-events: none; }
 .home .hero-carousel-controls { position: absolute; z-index: 4; top: 19px; right: 20px; display: flex; min-height: 38px; align-items: center; gap: 3px; padding: 3px; border: 1px solid #fff8eb6b; background: #181711a8; color: #fff8eb; backdrop-filter: blur(10px); }
 .home .hero-carousel-controls button { display: grid; width: 33px; height: 31px; place-items: center; border: 0; background: transparent; color: inherit; cursor: pointer; transition: background .18s ease, color .18s ease; }
 .home .hero-carousel-controls button:hover { background: #fff8eb20; color: #edc55c; }
@@ -4370,4 +4369,31 @@
   .home .feature-image .hero-cover-image { object-position: center 56%; }
   .home .feature-info { display: block; flex: 0 0 168px; }
   .home .feature-info-content { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 13px 7px; padding: 15px; }
+}
+
+
+/* PWA phone layout: reserve the real safe-area and tab-bar space. */
+@media (max-width: 700px) {
+  .home .hero-pin {
+    top: calc(66px + env(safe-area-inset-top, 0px) + 8px);
+    height: min(610px, calc(100svh - 66px - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px));
+  }
+  .home .feature-image { flex: 1 1 0; min-height: 0; }
+  .home .feature-image .hero-cover-image { object-position: center 56%; }
+  .home .feature-details { min-width: 0; overflow: hidden; }
+  .home .feature-details h3 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .home .feature-location { min-width: 0; }
+  .home .feature-location .venue-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+@media (max-width: 700px) and (max-height: 680px) {
+  .home .feature-info { flex-basis: 150px; }
+  .home .feature-info-content { gap: 8px 6px; padding: 12px; }
+  .home .feature-details h3 { font-size: 19px; }
+  .home .cta { min-height: 32px; padding-inline: 9px; }
 }
