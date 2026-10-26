@@ -80,8 +80,7 @@ export function ImageCarousel({
 
     const gap = Number.parseFloat(getComputedStyle(track).columnGap || "0");
     const amount = firstSlide.getBoundingClientRect().width + gap;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    track.scrollBy({ left: amount * direction, behavior: reducedMotion ? "auto" : "smooth" });
+    track.scrollBy({ left: amount * direction, behavior: "smooth" });
   }
 
   if (images.length === 0) return null;
@@ -93,7 +92,7 @@ export function ImageCarousel({
         role="region"
         aria-label={label}
         tabIndex={0}
-        className="no-scrollbar flex h-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary motion-reduce:scroll-auto"
+        className="no-scrollbar flex h-full snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary "
       >
         {images.map((image, index) => (
           <div
@@ -108,7 +107,7 @@ export function ImageCarousel({
                 src={image.src}
                 alt={image.alt}
                 className={cn(
-                  "size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover/image:scale-[1.04] motion-reduce:transform-none motion-reduce:transition-none",
+                  "size-full object-cover transition-transform duration-300 ease-[var(--ease-out-soft)] group-hover/image:scale-[1.04]  ",
                   imageClassName,
                 )}
                 sizes={sizes}

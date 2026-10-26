@@ -132,8 +132,7 @@ export function SalonFeed({
     const raf = window.requestAnimationFrame(() => {
       const target = document.getElementById(`post-${focusPostId}`);
       if (!target) return;
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
       setFocusedId(focusPostId);
       timer = window.setTimeout(() => setFocusedId(null), 2600);
     });

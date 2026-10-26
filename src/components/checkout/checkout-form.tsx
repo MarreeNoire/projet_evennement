@@ -193,7 +193,7 @@ export function CheckoutForm({
           <span className="text-fg-muted">{stepLabels[step]}</span>
         </div>
         <div role="progressbar" aria-label="Avancement de la commande" aria-valuemin={1} aria-valuemax={stepLabels.length} aria-valuenow={step + 1} aria-valuetext={`Étape ${step + 1} sur ${stepLabels.length} : ${stepLabels[step]}`} className="h-1.5 overflow-hidden rounded-full bg-bg-muted">
-          <div className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${((step + 1) / stepLabels.length) * 100}%` }} />
+          <div className="h-full rounded-full bg-primary transition-[width] duration-300 " style={{ width: `${((step + 1) / stepLabels.length) * 100}%` }} />
         </div>
         <ol className="mt-4 hidden grid-cols-4 gap-2 sm:grid">
           {stepLabels.map((label, index) => (

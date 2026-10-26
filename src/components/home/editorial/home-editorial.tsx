@@ -3,18 +3,23 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
   Check,
   CheckCircle2,
+  ChevronLeft,
   ChevronDown,
+  ChevronRight,
   LogOut,
   MapPin,
   MessageCircle,
   Moon,
+  Pause,
   Plus,
+  Play,
   QrCode,
   Search,
   Send,
@@ -158,17 +163,6 @@ function artVariant(category: string) {
   }
 }
 
-function posterTitle(title: string) {
-  const words = title.trim().split(/\s+/);
-  if (words.length < 2) return <em>{title}</em>;
-  const last = words.pop();
-  return (
-    <>
-      {words.join(" ")} <em>{last}</em>
-    </>
-  );
-}
-
 type SalonPhaseDefinition = {
   id: SalonPhase;
   label: string;
@@ -244,8 +238,8 @@ function buildQr(seed: string): QrRect[] {
   const cell = 4;
   const reserved = Array.from({ length: size }, () => Array<boolean>(size).fill(false));
   const rects: QrRect[] = [];
-  const ink = "#202a35";
-  const paper = "#fffdfa";
+  const ink = "#22231f";
+  const paper = "#fbf9f4";
 
   const reserve = (x: number, y: number, width: number, height: number) => {
     for (let row = y; row < y + height; row += 1) {
@@ -480,7 +474,18 @@ export function HomeEditorial({
     return item;
   });
   const rootRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
+  const heroTrackRef = useRef<HTMLDivElement>(null);
+  const heroPinRef = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const [heroScrollRange, setHeroScrollRange] = useState<[number, number]>([0, 1]);
+  const heroProgress = useTransform(scrollY, heroScrollRange, [0, 1], { clamp: true });
+  const backdropScale = useTransform(heroProgress, [0, 1], [1.02, 1.12]);
+  const backdropY = useTransform(heroProgress, [0, 1], [0, -8]);
+  const cueOpacity = useTransform(heroProgress, [0, 0.28], [1, 0]);
+  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
+  const [heroAutoplayPaused, setHeroAutoplayPaused] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(true);
+  const [isHeroVisible, setIsHeroVisible] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState("tout");
   const [salonPhase, setSalonPhase] = useState<SalonPhase>("avant");
@@ -507,9 +512,37 @@ export function HomeEditorial({
   }, []);
 
   useEffect(() => {
+    const updateVisibility = () => setIsPageVisible(document.visibilityState === "visible");
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
+
+  useEffect(() => {
+    const hero = heroPinRef.current;
+    if (!hero) return;
+    if (!("IntersectionObserver" in window)) {
+      setIsHeroVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => setIsHeroVisible(entry?.isIntersecting ?? false), { threshold: 0.1 });
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (events.length < 2 || heroAutoplayPaused || !isPageVisible || !isHeroVisible) return;
+
+    const timeout = window.setTimeout(() => {
+      setActiveHeroIndex((current) => (current + 1) % events.length);
+    }, 7600);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeHeroIndex, events.length, heroAutoplayPaused, isPageVisible, isHeroVisible]);
+
+  useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (!("IntersectionObserver" in window)) return;
 
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"));
@@ -543,52 +576,38 @@ export function HomeEditorial({
   }, []);
 
   useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    const track = heroTrackRef.current;
+    const pin = heroPinRef.current;
+    if (!track || !pin) return;
 
-    let targetX = 0;
-    let targetY = 0;
-    let currentX = 0;
-    let currentY = 0;
-    let frame = 0;
+    const updateScrollRange = () => {
+      const trackTop = track.getBoundingClientRect().top + window.scrollY;
+      const pinStyle = window.getComputedStyle(pin);
+      const stickyTop = pinStyle.position === "sticky" ? Number.parseFloat(pinStyle.top) || 0 : 0;
+      const travel = Math.max(0, track.offsetHeight - pin.offsetHeight);
+      const start = trackTop - stickyTop;
+      const end = start + Math.max(1, travel);
 
-    const animate = () => {
-      currentX += (targetX - currentX) * 0.08;
-      currentY += (targetY - currentY) * 0.08;
-      stage.style.setProperty("--px", `${currentX.toFixed(2)}px`);
-      stage.style.setProperty("--py", `${currentY.toFixed(2)}px`);
-      if (Math.abs(targetX - currentX) > 0.08 || Math.abs(targetY - currentY) > 0.08) {
-        frame = window.requestAnimationFrame(animate);
-      } else {
-        frame = 0;
-      }
+      setHeroScrollRange((previous) =>
+        Math.abs(previous[0] - start) < 1 && Math.abs(previous[1] - end) < 1
+          ? previous
+          : [start, end],
+      );
     };
 
-    const start = () => {
-      if (!frame) frame = window.requestAnimationFrame(animate);
-    };
+    updateScrollRange();
+    const observer = typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(updateScrollRange);
+    observer?.observe(track);
+    observer?.observe(pin);
+    const welcome = rootRef.current?.querySelector(`.${styles.welcome}`);
+    if (welcome) observer?.observe(welcome);
+    window.addEventListener("resize", updateScrollRange, { passive: true });
 
-    const onPointerMove = (event: PointerEvent) => {
-      const rect = stage.getBoundingClientRect();
-      targetX = ((event.clientX - rect.left) / rect.width - 0.5) * 18;
-      targetY = ((event.clientY - rect.top) / rect.height - 0.5) * 18;
-      start();
-    };
-
-    const onPointerLeave = () => {
-      targetX = 0;
-      targetY = 0;
-      start();
-    };
-
-    stage.addEventListener("pointermove", onPointerMove);
-    stage.addEventListener("pointerleave", onPointerLeave);
     return () => {
-      stage.removeEventListener("pointermove", onPointerMove);
-      stage.removeEventListener("pointerleave", onPointerLeave);
-      if (frame) window.cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener("resize", updateScrollRange);
     };
   }, []);
 
@@ -616,7 +635,16 @@ export function HomeEditorial({
 
   const featuredDate = featured ? dateParts(featured.startAt) : null;
   const featuredPrice = featured ? priceParts(featured) : null;
+  const heroIndex = events.length ? activeHeroIndex % events.length : 0;
+  const heroEvent = events[heroIndex] ?? null;
+  const heroDate = heroEvent ? dateParts(heroEvent.startAt) : null;
+  const heroPrice = heroEvent ? priceParts(heroEvent) : null;
   const currentYear = new Date().getFullYear();
+
+  const moveHero = (direction: -1 | 1) => {
+    if (events.length < 2) return;
+    setActiveHeroIndex((current) => (current + direction + events.length) % events.length);
+  };
 
   return (
     <div ref={rootRef} className={cx("home")}>
@@ -651,7 +679,7 @@ export function HomeEditorial({
               href="/devenir-organisateur"
               className={cx("btn", "btn-outline", "btn-sm")}
             >
-              Publier un événement
+              Publier un événemen
             </Link>
             <ThemeButton />
           </div>
@@ -659,110 +687,122 @@ export function HomeEditorial({
       </header>
 
       <main id="accueil-contenu">
-        <section className={cx("hero", "wrap")} aria-labelledby="hero-title">
-          <div className={cx("hero-copy")}>
-            <p className={cx("eyebrow", "intro-rise")} style={{ "--d": "60ms" } as React.CSSProperties}>
-              <b>Abidjan</b> Côte d&apos;Ivoire · Billetterie en FCFA
-            </p>
-            <h1 id="hero-title">
-              <span className={cx("line")}>
-                <span style={{ "--d": "130ms" } as React.CSSProperties}>Trouve ta</span>
-              </span>
-              <span className={cx("line")}>
-                <span style={{ "--d": "190ms" } as React.CSSProperties}>
-                  prochaine <em>sortie</em><span className={cx("dot")}>.</span>
-                </span>
-              </span>
-            </h1>
-            <p className={cx("hero-sub", "intro-rise")} style={{ "--d": "430ms" } as React.CSSProperties}>
-              Explore les événements à venir, compare les dates et les lieux, puis réserve ta
-              place en quelques étapes. Tes billets et tes salons restent accessibles depuis
-              ton compte.
-            </p>
-            <div className={cx("hero-cta", "intro-rise")} style={{ "--d": "500ms" } as React.CSSProperties}>
-              <a className={cx("btn", "btn-primary")} href="#decouvrir">
-                Explorer les événements
-                <ArrowRight className={cx("icon")} aria-hidden="true" />
-              </a>
-              <Link className={cx("link-arrow")} href="/devenir-organisateur">
-                Publier un événement
-                <ArrowUpRight className={cx("icon")} aria-hidden="true" />
-              </Link>
+        <div className={cx("content")}>
+          <motion.section
+            className={cx("welcome")}
+            aria-labelledby="welcome-title"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.72, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <div>
+              <p className={cx("city-date")}>
+                <span className={cx("city-dot")} aria-hidden="true" />
+                {heroDate
+                  ? `${heroDate.weekday} ${heroDate.day} ${heroDate.month} · Abidjan`
+                  : "Abidjan · Côte d’Ivoire"}
+              </p>
+              <h1 id="welcome-title" className={cx("welcome-title")}>
+                La ville se passe <span>dehors.</span>
+              </h1>
             </div>
-            <p className={cx("hero-note", "intro-rise")} style={{ "--d": "570ms" } as React.CSSProperties}>
-              <Ticket className={cx("icon")} aria-hidden="true" />
-              <span>
-                <strong>Billets numériques</strong> · Paiement en FCFA, selon les options de
-                l&apos;événement.
-              </span>
+            <p className={cx("welcome-note")}>
+              <strong>Ta prochaine sortie commence ici.</strong>
+              Découvre les événements à venir, puis retrouve les participants dans leur salon.
             </p>
-          </div>
+          </motion.section>
 
-          <div className={cx("hero-art")} aria-hidden="true">
-            <div ref={stageRef} className={cx("art-stage")}>
-              <div className={cx("art-layer", "art-back")}>
-                <span>Programme {featuredDate?.year || currentYear}</span>
-              </div>
+          <div ref={heroTrackRef} className={cx("hero-track")}>
+            <div ref={heroPinRef} className={cx("hero-pin")}>
+              <article className={cx("feature")} id="billets" aria-label="Événement à la une" aria-roledescription="carrousel">
+                <motion.div
+                  className={cx("feature-image")}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.82, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  <motion.div
+                    className={cx("feature-image-backdrop")}
+                    style={{ scale: backdropScale, y: backdropY }}
+                  >
+                    <AnimatePresence initial={false} mode="sync">
+                      <motion.div key={heroEvent?.id ?? "empty-hero"} className={cx("hero-image-slide")} initial={{ opacity: 0, scale: 1.045 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.99 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}>
+                        {heroEvent?.coverUrl ? <PublicStorageImage src={heroEvent.coverUrl} alt="" fill sizes="(max-width: 700px) 100vw, 68vw" preload={heroIndex === 0} className={cx("hero-cover-image")} /> : null}
+                      </motion.div>
+                    </AnimatePresence>
+                  </motion.div>
+                  <motion.span className={cx("scene-number")} style={{ opacity: cueOpacity }} aria-hidden="true">
+                    {heroDate?.day || "01"}
+                  </motion.span>
+                  <div className={cx("image-topline")}>
+                    <span className={cx("live-dot")} aria-hidden="true" />
+                    La sélection Event
+                  </div>
+                  {events.length > 1 ? <div className={cx("hero-carousel-controls")} aria-label="Navigation des événements">
+                    <button type="button" onClick={() => moveHero(-1)} aria-label="Événement précédent"><ChevronLeft className={cx("icon")} aria-hidden="true" /></button>
+                    <span aria-live="polite" aria-atomic="true">{String(heroIndex + 1).padStart(2, "0")} <i>/</i> {String(events.length).padStart(2, "0")}</span>
+                    <button type="button" onClick={() => setHeroAutoplayPaused((paused) => !paused)} aria-label={heroAutoplayPaused ? "Reprendre le défilement automatique" : "Mettre en pause le défilement automatique"}>{heroAutoplayPaused ? <Play className={cx("icon")} aria-hidden="true" /> : <Pause className={cx("icon")} aria-hidden="true" />}</button>
+                    <button type="button" onClick={() => moveHero(1)} aria-label="Événement suivant"><ChevronRight className={cx("icon")} aria-hidden="true" /></button>
+                  </div> : null}
+                  <div className={cx("image-caption")}>
+                    <span className={cx("genre")}>
+                      {heroEvent
+                        ? `${heroEvent.categoryLabel} · ${heroEvent.city}`.toUpperCase()
+                        : "SORTIES · ABIDJAN"}
+                    </span>
+                    <h2>Une sortie qui mérite le détour.</h2>
+                  </div>
+                  <motion.span className={cx("hero-scroll-cue")} style={{ opacity: cueOpacity }} aria-hidden="true">
+                    <span>Fais défiler pour découvrir</span>
+                    <i />
+                  </motion.span>
+                </motion.div>
 
-              <div className={cx("art-layer", "art-poster-wrap")}>
-                <div className={cx("poster")}>
-                  <div className={cx("poster-lines")} />
-                  <div className={cx("poster-sun")} />
-                  <div className={cx("poster-top")}>
-                    <span>Event · {featured?.city || "Abidjan"}</span>
-                    <span>
-                      {featuredDate ? `${featuredDate.weekday} ${featuredDate.day} ${featuredDate.month}` : "Programme"}
+                <div className={cx("feature-info")}><AnimatePresence mode="wait" initial={false}><motion.div key={heroEvent?.id ?? "empty-hero-info"} className={cx("feature-info-content")} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}>
+                  <div className={cx("feature-date")}>
+                    <span className={cx("date-block")}>
+                      <b>{heroDate?.day || "À"}</b>
+                      <span>{heroDate?.month || "VEN"}</span>
+                    </span>
+                    <span className={cx("feature-location")}>
+                      <span>{heroDate?.time || "À venir"}</span>
+                      <span>
+                        <MapPin className={cx("icon")} aria-hidden="true" />
+                        {heroEvent?.venueName || heroEvent?.city || "Abidjan"}
+                      </span>
                     </span>
                   </div>
-                  <div className={cx("poster-mid")}>
-                    <span className={cx("poster-kicker")}>
-                      {featured?.venueName || (featured ? featured.city : "Plateforme événementielle")}
-                    </span>
-                    <span className={cx("poster-title")}>
-                      {posterTitle(featured?.title || "La sortie commence ici")}
-                    </span>
+                  <div className={cx("feature-details")}>
+                    <p className={cx("eyebrow")}>Sélection du moment</p>
+                    <h3>{heroEvent?.title || "Les prochaines sorties"}</h3>
+                    <p>
+                      {heroEvent?.summary ||
+                        (heroEvent
+                          ? `${heroEvent.categoryLabel} à ${heroEvent.city}. Consulte les détails et réserve ta place.`
+                          : "Les événements publiés apparaîtront ici dès leur mise en ligne.")}
+                    </p>
                   </div>
-                  <div className={cx("poster-foot")}>
-                    <span>
-                      {featuredDate?.time ? `${featuredDate.time} · ${featured?.city}` : "Abidjan · Côte d'Ivoire"}
+                  <div className={cx("feature-foot")}>
+                    <span className={cx("price")}>
+                      {heroPrice?.label || "Programme"}
+                      <strong>{heroPrice?.value || "À découvrir"}</strong>
                     </span>
-                    <span>{featuredPrice ? featuredPrice.value : "Billetterie FCFA"}</span>
+                    <Link
+                      className={cx("cta")}
+                      href={heroEvent ? `/evenements/${heroEvent.slug}` : ROUTES.explore}
+                    >
+                      Voir l’événement
+                      <ArrowUpRight className={cx("icon")} aria-hidden="true" />
+                    </Link>
                   </div>
-                </div>
-              </div>
-
-              <aside className={cx("art-layer", "art-note")}>
-                <p className={cx("note-label")}>
-                  {featured ? "Prochain rendez-vous" : "Les prochaines sorties"}
-                </p>
-                <p className={cx("note-date")}>{featuredDate ? featuredDate.longDate : "À venir"}</p>
-                <p className={cx("note-title")}>{featured?.title || "Les sorties publiées"}</p>
-                <p className={cx("note-place")}>
-                  {featured
-                    ? [featured.venueName, featured.city].filter(Boolean).join(" · ")
-                    : "Abidjan · Côte d'Ivoire"}
-                </p>
-                <span className={cx("note-tag")}>
-                  {featuredPrice ? featuredPrice.value : "Découvrir le programme"}
-                </span>
-              </aside>
-
-              <div className={cx("art-layer", "art-stub")}>
-                <div className={cx("stub-main")}>
-                  <p className={cx("stub-label")}>Admission</p>
-                  <p className={cx("stub-event")}>{featured?.title || "Billet numérique"}</p>
-                  <p className={cx("stub-meta")}>
-                    {featuredDate?.time ? `${featuredDate.day}.${featuredDate.month} · ${featuredDate.time}` : "À venir"}
-                  </p>
-                  <p className={cx("stub-number")}>Billet nominatif · 1 personne</p>
-                </div>
-                <div className={cx("stub-qr")}>
-                  <QrArt seed={featured?.slug || "event"} />
-                </div>
+                </motion.div></AnimatePresence></div>
+              </article>
+              <div className={cx("hero-progress")} aria-hidden="true">
+                <motion.span style={{ scaleX: heroProgress }} />
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
         <section className={cx("quick-access", "wrap")} aria-labelledby="quick-access-title">
           <div className={cx("quick-access-heading")}>
@@ -862,7 +902,7 @@ export function HomeEditorial({
                       aria-pressed={activeCategory === "tout"}
                       onClick={() => setActiveCategory("tout")}
                     >
-                      Tout
+                      Tou
                     </button>
                     {categories.map((category) => (
                       <button
@@ -968,7 +1008,7 @@ export function HomeEditorial({
                 Les prochains événements apparaîtront ici dès leur publication par un organisateur.
               </p>
               <Link href="/devenir-organisateur" className={cx("btn", "btn-primary")}>
-                Publier un événement
+                Publier un événemen
                 <ArrowRight className={cx("icon")} aria-hidden="true" />
               </Link>
             </div>
@@ -1209,9 +1249,9 @@ export function HomeEditorial({
                 </p>
               </div>
               <span className={cx("ticket-stamp")} aria-hidden="true">
-                Event
+                Even
                 <br />
-                Billet
+                Bille
                 <br />
                 {featuredDate?.year || currentYear}
               </span>
@@ -1376,7 +1416,7 @@ export function HomeEditorial({
                 <ArrowRight className={cx("icon")} aria-hidden="true" />
               </Link>
               <Link href="/devenir-organisateur" className={cx("link-arrow")}>
-                Créer un événement
+                Créer un événemen
                 <ArrowUpRight className={cx("icon")} aria-hidden="true" />
               </Link>
             </div>

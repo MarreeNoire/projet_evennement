@@ -32,7 +32,7 @@
   border: 1px solid rgba(23, 30, 40, 0.18);
   border-radius: 2px;
   isolation: isolate;
-  color: #fff6ea;
+  color: #fbf9f4;
 }
 
 .art::after {
@@ -61,29 +61,29 @@
 }
 
 .artJazz {
-  background: #b83f22;
-  color: #fff6ea;
+  background: #bd3b25;
+  color: #fbf9f4;
 }
 
 .artJazz .artFill {
-  background-image: radial-gradient(circle at 112% 12%, #d5a638 0 31%, transparent 31.4%),
+  background-image: radial-gradient(circle at 112% 12%, #edc55c 0 31%, transparent 31.4%),
     repeating-linear-gradient(0deg, transparent 0 30px, rgba(255, 246, 234, 0.16) 30px 31px);
 }
 
 .artMarche {
-  background: #425dc6;
-  color: #fff6ea;
+  background: #344d67;
+  color: #fbf9f4;
 }
 
 .artMarche .artFill {
-  background-image: radial-gradient(circle at 18% 88%, #b83f22 0 24%, transparent 24.4%),
+  background-image: radial-gradient(circle at 18% 88%, #bd3b25 0 24%, transparent 24.4%),
     repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 246, 234, 0.14) 34px 35px),
     repeating-linear-gradient(0deg, transparent 0 34px, rgba(255, 246, 234, 0.07) 34px 35px);
 }
 
 .artAtelier {
-  background: #d5a638;
-  color: #202a35;
+  background: #edc55c;
+  color: #22231f;
 }
 
 .artAtelier .artFill {
@@ -97,8 +97,8 @@
 }
 
 .artRencontre {
-  background: #202a35;
-  color: #fff6ea;
+  background: #22231f;
+  color: #fbf9f4;
 }
 
 .artRencontre .artFill {
@@ -179,7 +179,7 @@
 }
 
 .artHasCover {
-  color: #fff6ea;
+  color: #fbf9f4;
 }
 
 .artHasCover::before {

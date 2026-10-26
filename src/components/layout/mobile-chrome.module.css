@@ -140,29 +140,29 @@
    vermillon, y compris en thème sombre. Valeurs alignées sur
    `editorial-shell.module.css`. */
 .sheetScope {
-  --surface: #fffdfa;
-  --bg: #f7f4ee;
-  --bg-muted: color-mix(in srgb, #202a35 8%, #f7f4ee);
-  --fg: #202a35;
-  --fg-muted: #5d6672;
-  --fg-subtle: color-mix(in srgb, #5d6672 76%, #f7f4ee);
-  --border: rgba(32, 42, 53, 0.14);
-  --border-strong: rgba(32, 42, 53, 0.3);
-  --primary: #b83f22;
-  --danger: color-mix(in srgb, #b3261e 88%, #202a35);
+  --surface: #fbf9f4;
+  --bg: #f4f0e8;
+  --bg-muted: color-mix(in srgb, #22231f 8%, #f4f0e8);
+  --fg: #22231f;
+  --fg-muted: #73736c;
+  --fg-subtle: color-mix(in srgb, #73736c 76%, #f4f0e8);
+  --border: rgba(34, 35, 31, 0.14);
+  --border-strong: rgba(34, 35, 31, 0.3);
+  --primary: #bd3b25;
+  --danger: color-mix(in srgb, #b3261e 88%, #22231f);
 }
 
 :global(html.dark) .sheetScope {
-  --surface: #1f2935;
-  --bg: #141a22;
-  --bg-muted: color-mix(in srgb, #f2ede3 8%, #141a22);
-  --fg: #f2ede3;
-  --fg-muted: #a9b1bc;
-  --fg-subtle: color-mix(in srgb, #a9b1bc 76%, #141a22);
-  --border: rgba(242, 237, 227, 0.14);
-  --border-strong: rgba(242, 237, 227, 0.32);
-  --primary: #e8735a;
-  --danger: color-mix(in srgb, #b3261e 88%, #f2ede3);
+  --surface: #2b2c26;
+  --bg: #191a17;
+  --bg-muted: color-mix(in srgb, #f4f0e8 8%, #191a17);
+  --fg: #f4f0e8;
+  --fg-muted: #c7c1b6;
+  --fg-subtle: color-mix(in srgb, #c7c1b6 76%, #191a17);
+  --border: rgba(244, 240, 232, 0.14);
+  --border-strong: rgba(244, 240, 232, 0.32);
+  --primary: #ed7656;
+  --danger: color-mix(in srgb, #b3261e 88%, #f4f0e8);
 }
 
 .sheetBody {
@@ -263,12 +263,7 @@
    Replis et limites
    -------------------------------------------------------------------------- */
 
-@media (prefers-reduced-motion: reduce) {
-  .iconWrap,
-  .row {
-    transition: none;
-  }
-}
+
 
 /* Transparence refusée : la barre redevient opaque, sans bord fondu. */
 @media (prefers-reduced-transparency: reduce) {

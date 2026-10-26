@@ -518,11 +518,11 @@ export function OrgEventDetailEditor({
         <Card className="p-4 sm:p-5 transition-all hover:border-border-strong hover:shadow-sm">
           <div className="flex items-start justify-between gap-2">
             <span className="text-xs sm:text-sm font-medium text-fg-muted">Revenus Générés</span>
-            <span className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-success-subtle text-success">
               <Wallet className="size-4" />
             </span>
           </div>
-          <p className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-emerald-500 mt-2 tabular-nums">
+          <p className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-success mt-2 tabular-nums">
             {formatPrice(grossRevenue)}
           </p>
           <div className="mt-2">
@@ -558,17 +558,17 @@ export function OrgEventDetailEditor({
         <Card className="p-4 sm:p-5 transition-all hover:border-border-strong hover:shadow-sm">
           <div className="flex items-start justify-between gap-2">
             <span className="text-xs sm:text-sm font-medium text-fg-muted">Check-in</span>
-            <span className="flex size-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-500">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-info-subtle text-info">
               <CheckCircle2 className="size-4" />
             </span>
           </div>
-          <p className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-sky-500 mt-2 tabular-nums">
+          <p className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-info mt-2 tabular-nums">
             {formatNumber(checkedIn)}
           </p>
           <div className="mt-2 space-y-1">
             <div className="h-1.5 w-full rounded-full bg-bg-muted overflow-hidden">
               <div
-                className="h-full bg-sky-500 transition-all duration-500 rounded-full"
+                className="h-full bg-info transition-all duration-500 rounded-full"
                 style={{ width: `${Math.min(100, checkinRate * 100)}%` }}
               />
             </div>

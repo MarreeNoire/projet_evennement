@@ -57,7 +57,7 @@ const ROLES_INFO = [
     role: "checkin_agent" as const,
     label: "Agent de contrôle",
     icon: QrCode,
-    color: "text-sky-500 bg-sky-500/10 border-sky-500/30",
+    color: "text-info bg-info-subtle border-info/30",
     badgeVariant: "info" as const,
     description: "Accès opérationnel : scanner de QR code et validation des billets à l'entrée lors des événements (/org/check-in).",
   },
@@ -65,8 +65,8 @@ const ROLES_INFO = [
     role: "moderator" as const,
     label: "Modérateur",
     icon: MessageSquare,
-    color: "text-purple-500 bg-purple-500/10 border-purple-500/30",
-    badgeVariant: "accent" as const,
+    color: "text-info bg-info-subtle border-info/30",
+    badgeVariant: "info" as const,
     description: "Accès communautaire : modération des échanges dans les salons de l'événement, signalements et respect des règles.",
   },
 ];
@@ -554,8 +554,8 @@ export function OrgTeamManager({
                           </Badge>
                         )}
 
-                        <span className="inline-flex items-center gap-1 text-2xs text-emerald-600 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          <span className="size-1.5 rounded-full bg-emerald-500" /> Actif
+                        <span className="inline-flex items-center gap-1 text-2xs text-success font-semibold bg-success-subtle px-2 py-0.5 rounded-full">
+                          <span className="size-1.5 rounded-full bg-success" /> Actif
                         </span>
                       </div>
 

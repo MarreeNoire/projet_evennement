@@ -381,7 +381,7 @@ export function CommentsOverlay({
         type="button"
         aria-label="Fermer"
         tabIndex={-1}
-        className="animate-in fade-in motion-reduce:animate-none absolute inset-0 cursor-default bg-black/45 duration-200"
+        className="animate-in fade-in  absolute inset-0 cursor-default bg-black/45 duration-200"
         onClick={onClose}
       />
 
@@ -390,7 +390,7 @@ export function CommentsOverlay({
         aria-modal="true"
         aria-label={`Commentaires · ${totalCount}`}
         className={cn(
-          "bg-surface animate-in fade-in motion-reduce:animate-none absolute flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 duration-200 max-md:slide-in-from-bottom-6",
+          "bg-surface animate-in fade-in  absolute flex flex-col overflow-hidden shadow-2xl ring-1 ring-black/5 duration-200 max-md:slide-in-from-bottom-6",
           /* Mobile : feuille quasi plein écran, sous la zone sûre de l'encoche. */
           "max-md:inset-x-0 max-md:bottom-0 max-md:top-[max(2rem,env(safe-area-inset-top))] max-md:rounded-t-3xl",
           /* Desktop : vraie boîte de dialogue centrée, pas un tiroir de téléphone. */

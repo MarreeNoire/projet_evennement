@@ -1,12 +1,12 @@
 /* ============================================================================
-   SOCLE PUBLIC EDITORIAL — module scopé
+   SOCLE ÉDITORIAL — module partagé
    --------------------------------------------------------------------------
    En-tête, pied de page et primitives de page pour le parcours public.
    Même direction artistique que l'accueil : papier chaud, encre, vermillon,
    cobalt, serif éditorial et filets fins.
 
-   Tout est préfixé par `.editorial` : les espaces connecté, organisateur et
-   administration gardent leur propre shell et ne sont jamais touchés.
+   `.editorial` enveloppe les parcours publics, membres, organisateur et admin :
+   mêmes matières et composants, avec une structure propre à chaque espace.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -30,9 +30,21 @@
   --gold: var(--editorial-gold);
   --band: var(--editorial-band);
   --band-ink: var(--editorial-band-ink);
-  --band-muted: #a7b0bc;
-  --head-bg: rgba(247, 244, 238, 0.82);
-  --shadow: 0 30px 70px -40px rgba(32, 42, 53, 0.55);
+  --band-muted: #c7c1b6;
+  --head-bg: rgba(244, 240, 232, 0.94);
+  --shadow: 0 20px 48px -36px rgba(34, 35, 31, 0.34);
+  --sans: Arial, "Helvetica Neue", sans-serif;
+  --display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
+  --shadow-card: 0 1px 2px rgba(34, 35, 31, 0.08);
+  --shadow-sm: 0 1px 2px rgba(34, 35, 31, 0.08);
+  --shadow-md: 0 4px 12px rgba(34, 35, 31, 0.1);
+  --shadow-lg: 0 8px 24px rgba(34, 35, 31, 0.12);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   --display: var(--font-display);
   --sans: var(--font-body);
@@ -42,7 +54,7 @@
 
 :global(html.dark) .editorial {
   color-scheme: dark;
-  --head-bg: rgba(20, 26, 34, 0.82);
+  --head-bg: rgba(25, 26, 23, 0.94);
   --shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.85);
 }
 
@@ -75,14 +87,14 @@
   --border-strong: var(--line-strong);
   --border-focus: var(--accent);
 
-  --primary: var(--accent);
-  --primary-hover: var(--accent-deep);
-  --primary-active: var(--accent-deep);
-  --primary-solid: var(--accent);
-  --primary-solid-hover: var(--accent-deep);
-  --primary-solid-fg: var(--on-accent);
-  --primary-subtle: color-mix(in srgb, var(--accent) 12%, var(--paper));
-  --primary-subtle-fg: var(--accent-deep);
+  --primary: var(--editorial-accent);
+  --primary-hover: var(--editorial-accent-strong);
+  --primary-active: var(--editorial-accent-strong);
+  --primary-solid: var(--editorial-accent);
+  --primary-solid-hover: var(--editorial-accent-strong);
+  --primary-solid-fg: var(--editorial-on-accent);
+  --primary-subtle: color-mix(in srgb, var(--editorial-accent) 12%, var(--paper));
+  --primary-subtle-fg: var(--editorial-accent-strong);
 
   /* Retours d'état : teintes désaturées pour rester lisibles sur le papier. */
   --success: color-mix(in srgb, #2f6b46 88%, var(--ink));
@@ -126,9 +138,34 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.editorial :where(h1, h2, h3) {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+
+.editorial :where(input, select, textarea) {
+  border-radius: 2px;
+}
+
+@keyframes editorial-scroll-reveal {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@supports (animation-timeline: view()) {
+  .editorial [data-scroll-reveal] {
+    view-timeline-name: --editorial-card;
+    view-timeline-axis: block;
+    animation: editorial-scroll-reveal linear both;
+    animation-timeline: --editorial-card;
+    animation-range: entry 0% entry 38%;
+  }
+}
+
 /* Les remises à zéro vivent dans la couche `base` de Tailwind : les utilitaires
    des composants applicatifs (couleur, fond, bordure) restent prioritaires.
-   Sans couche, le CSS non stratifié l'emporterait sur `bg-*`, `border-*` et
+   Sans couche, le CSS non stratifié l'emporterait sur `bg-*`, `border-*` e
    `text-*`, et les boutons du design system perdraient leur fond. */
 @layer base {
   :where(.editorial) :where(img, svg) {
@@ -1127,16 +1164,7 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .editorial *,
-  .editorial *::before,
-  .editorial *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
+
 
 @media (display-mode: standalone) and (max-width: 767px) {
   .editorial .site-foot {

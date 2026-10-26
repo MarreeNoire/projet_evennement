@@ -21,7 +21,7 @@ export const buttonVariants = cva(
     "ease-[var(--ease-out-soft)]",
     "select-none",
     // Feedback immédiat au clic
-    "active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none",
+    "active:scale-[0.97]  ",
     // Accessibilité : jamais de contenu masqué par l'état désactivé
     "disabled:pointer-events-none disabled:opacity-50",
     "aria-busy:cursor-progress",

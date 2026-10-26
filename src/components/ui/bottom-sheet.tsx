@@ -132,7 +132,7 @@ export function BottomSheet({
         aria-hidden="true"
         onClick={onClose}
         className={cn(
-          "pointer-events-auto absolute inset-0 motion-reduce:transition-none",
+          "pointer-events-auto absolute inset-0 ",
           isMenu ? "bg-void-950/40" : "bg-void-950/55",
         )}
       />
@@ -149,7 +149,7 @@ export function BottomSheet({
             ? "rounded-t-[26px] border-t shadow-[0_-24px_60px_rgba(10,8,18,0.4)]"
             : "rounded-t-2xl border-t shadow-[0_-24px_60px_rgba(10,8,18,0.4)]",
           "md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:w-[min(32rem,calc(100vw-4rem))] md:max-h-[85dvh] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-2xl md:border",
-          "transition-transform duration-200 ease-[var(--ease-out-soft)] motion-reduce:transition-none",
+          "transition-transform duration-200 ease-[var(--ease-out-soft)] ",
         )}
         style={{
           paddingBottom: "calc(1rem + env(safe-area-inset-bottom))",

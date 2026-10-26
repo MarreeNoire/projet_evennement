@@ -507,13 +507,3 @@
     font-size: 34px;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .card {
-    animation: none;
-  }
-
-  .card :global(form button[type="submit"]:hover) {
-    transform: none;
-  }
-}
