@@ -4372,28 +4372,65 @@
 }
 
 
-/* PWA phone layout: reserve the real safe-area and tab-bar space. */
+/* PWA phone layout: compact hero, safe-area aware and with a fixed action row. */
 @media (max-width: 700px) {
   .home .hero-pin {
     top: calc(66px + env(safe-area-inset-top, 0px) + 8px);
-    height: min(610px, calc(100svh - 66px - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px));
+    height: min(62svh, 520px, calc(100svh - 66px - 64px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px));
   }
   .home .feature-image { flex: 1 1 0; min-height: 0; }
   .home .feature-image .hero-cover-image { object-position: center 56%; }
-  .home .feature-details { min-width: 0; overflow: hidden; }
+  .home .feature-info { display: block; flex: 0 0 158px; min-height: 0; padding: 0; }
+  .home .feature-info-content {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-rows: minmax(18px, auto) minmax(0, 1fr);
+    gap: 7px 10px;
+    box-sizing: border-box;
+    padding: 11px 13px;
+  }
+  .home .feature-date { grid-column: 1 / -1; min-width: 0; gap: 8px; font-size: 9px; line-height: 1.1; }
+  .home .feature-location { min-width: 0; }
+  .home .feature-location .venue-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .home .date-block { min-width: 36px; gap: 4px; padding-right: 8px; }
+  .home .feature-details { grid-column: 1; grid-row: 2; align-self: center; min-width: 0; overflow: hidden; margin: 0; }
+  .home .feature-details .eyebrow { margin-bottom: 3px; font-size: 8px; }
   .home .feature-details h3 {
     display: -webkit-box;
     overflow: hidden;
+    margin: 0;
+    font-size: clamp(17px, 4.5vw, 20px);
+    line-height: 1.05;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  .home .feature-location { min-width: 0; }
-  .home .feature-location .venue-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .home .feature-foot {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    justify-self: end;
+    width: auto;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+  }
+  .home .price { font-size: 8px; text-align: right; }
+  .home .price strong { margin-top: 1px; font-size: 15px; }
+  .home .cta { min-height: 34px; gap: 5px; padding-inline: 9px; font-size: 9px; white-space: nowrap; }
+  .home .hero-carousel-controls { top: 55px; right: 12px; min-height: 34px; gap: 0; padding: 2px; }
+  .home .hero-carousel-controls button { width: 30px; height: 28px; }
+  .home .hero-carousel-controls span { min-width: 46px; font-size: 9px; }
 }
 
 @media (max-width: 700px) and (max-height: 680px) {
-  .home .feature-info { flex-basis: 150px; }
-  .home .feature-info-content { gap: 8px 6px; padding: 12px; }
-  .home .feature-details h3 { font-size: 19px; }
-  .home .cta { min-height: 32px; padding-inline: 9px; }
+  .home .feature-info { flex-basis: 146px; }
+  .home .feature-info-content { grid-template-rows: minmax(17px, auto) minmax(0, 1fr); gap: 6px 8px; padding: 10px 11px; }
+  .home .feature-details h3 { font-size: 17px; }
+  .home .feature-foot { gap: 5px; }
+  .home .price strong { font-size: 14px; }
+  .home .cta { min-height: 32px; padding-inline: 8px; }
 }
