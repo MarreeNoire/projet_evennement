@@ -23,18 +23,16 @@ import styles from "./editorial-shell.module.css";
 export async function EditorialShell({
   children,
   nav,
-  menuId,
 }: {
   children: React.ReactNode;
   nav?: EditorialNavItem[];
-  menuId?: string;
 }) {
   const viewer = await loadHeaderUser();
 
   return (
     <div className={styles.editorial}>
       <div className={styles.grain} aria-hidden="true" />
-      <EditorialHeader viewer={viewer} nav={nav ?? EDITORIAL_NAV} menuId={menuId} />
+      <EditorialHeader viewer={viewer} nav={nav ?? EDITORIAL_NAV} />
       <main className={styles.main}>{children}</main>
       <EditorialFooter viewer={viewer} />
       {/* Barre d'onglets mobile : le pied de page lui réserve déjà sa hauteur

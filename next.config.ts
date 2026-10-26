@@ -61,10 +61,10 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Le worker d'auto-destruction de l'ancienne PWA ne doit jamais être mis
-        // en cache HTTP : les téléphones doivent le récupérer pour se libérer.
+        // Le navigateur doit pouvoir vérifier les mises à jour du worker PWA.
         source: "/sw.js",
         headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
           { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
           { key: "Service-Worker-Allowed", value: "/" },
         ],

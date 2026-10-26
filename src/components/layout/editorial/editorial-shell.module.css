@@ -641,94 +641,12 @@
   display: none;
 }
 
-:global(html.dark) .editorial .theme-btn .icon-moon {
-  display: block;
-}
-
-.editorial .menu-btn {
+.editorial .search-btn {
   display: none;
 }
 
-/* --------------------------------------------------------------------------
-   Menu mobile
-   -------------------------------------------------------------------------- */
-
-.editorial .mobile-menu {
-  position: fixed;
-  inset: 0;
-  z-index: 120;
-  display: flex;
-  flex-direction: column;
-  padding: 22px 24px max(24px, env(safe-area-inset-bottom));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: var(--paper);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-8px);
-  transition:
-    opacity 0.22s ease,
-    transform 0.3s var(--ease-out),
-    visibility 0s linear 0.3s;
-}
-
-.editorial .mobile-menu.is-open {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  transition:
-    opacity 0.22s ease,
-    transform 0.3s var(--ease-out),
-    visibility 0s;
-}
-
-.editorial .mobile-menu-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--line);
-}
-
-.editorial .mobile-menu nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 26px 0;
-}
-
-.editorial .mobile-menu nav a {
-  display: flex;
-  align-items: baseline;
-  padding: 9px 0;
-  font-family: var(--display);
-  font-size: clamp(30px, 8vw, 40px);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.15;
-}
-
-.editorial .mobile-menu nav a span {
-  margin-right: 10px;
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-  vertical-align: super;
-}
-
-.editorial .mobile-menu-foot {
-  display: grid;
-  gap: 10px;
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
-}
-
-.editorial .head-signout {
-  color: var(--accent);
+:global(html.dark) .editorial .theme-btn .icon-moon {
+  display: block;
 }
 
 /* --------------------------------------------------------------------------
@@ -1132,7 +1050,7 @@
     display: none;
   }
 
-  .editorial .menu-btn {
+  .editorial .search-btn {
     display: grid;
   }
 
@@ -1211,5 +1129,15 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (display-mode: standalone) and (max-width: 767px) {
+  .editorial .site-foot {
+    display: none;
+  }
+
+  :global(.dashboard-shell) .site-foot {
+    display: none;
   }
 }

@@ -12,22 +12,22 @@ import {
   ChevronDown,
   LogOut,
   MapPin,
-  Menu,
   MessageCircle,
   Moon,
   Plus,
   QrCode,
+  Search,
   Send,
   ShieldCheck,
   Sun,
   Ticket,
   Users,
-  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { useTheme } from "@/components/providers/app-providers";
+import { PwaInstallPrompt } from "@/components/pwa/install-prompt";
 import type { HeaderUser } from "@/components/layout/header-types";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { APP_NAME, ROUTES } from "@/lib/constants";
@@ -481,13 +481,7 @@ export function HomeEditorial({
   });
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const menuCloseRef = useRef<HTMLButtonElement>(null);
-  const router = useRouter();
-
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("tout");
   const [salonPhase, setSalonPhase] = useState<SalonPhase>("avant");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -505,60 +499,12 @@ export function HomeEditorial({
       ? events.length
       : events.filter((event) => event.category === activeCategory).length;
 
-  const closeMenu = () => {
-    setMobileOpen(false);
-    window.requestAnimationFrame(() => menuButtonRef.current?.focus());
-  };
-
-  const handleSignOut = async () => {
-    if (isSupabaseConfigured) {
-      await createSupabaseBrowserClient().auth.signOut();
-    }
-    setMobileOpen(false);
-    router.push(ROUTES.home);
-    router.refresh();
-  };
-
-  const openMenu = () => {
-    setMobileOpen(true);
-  };
-
-  /* Le focus entre dans le menu après son montage : un rAF lancé depuis le
-     clic s'exécute avant le commit React et laisse le focus derrière l'overlay. */
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const frame = window.requestAnimationFrame(() => menuCloseRef.current?.focus());
-    return () => window.cancelAnimationFrame(frame);
-  }, [mobileOpen]);
-
-  /* Échap ferme le menu même si le focus a quitté le panneau. */
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      setMobileOpen(false);
-      window.requestAnimationFrame(() => menuButtonRef.current?.focus());
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [mobileOpen]);
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [mobileOpen]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -646,29 +592,6 @@ export function HomeEditorial({
     };
   }, []);
 
-  const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      closeMenu();
-      return;
-    }
-    if (event.key !== "Tab") return;
-    const focusable = Array.from(
-      menuRef.current?.querySelectorAll<HTMLElement>("a[href], button:not([disabled])") ?? [],
-    ).filter((element) => element.offsetParent !== null);
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (!first || !last) return;
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
-
   const selectSalonTab = (phase: SalonPhase, moveFocus: boolean) => {
     setSalonPhase(phase);
     if (moveFocus) {
@@ -714,6 +637,9 @@ export function HomeEditorial({
           </nav>
 
           <div className={cx("head-actions")}>
+            <Link href={ROUTES.explore} className={cx("icon-btn", "search-btn")} aria-label="Rechercher un événement">
+              <Search className={cx("icon")} aria-hidden="true" />
+            </Link>
             {viewer ? (
               <AccountMenu viewer={viewer} />
             ) : (
@@ -728,84 +654,9 @@ export function HomeEditorial({
               Publier un événement
             </Link>
             <ThemeButton />
-            <button
-              ref={menuButtonRef}
-              type="button"
-              className={cx("icon-btn", "menu-btn")}
-              aria-label="Ouvrir le menu"
-              aria-expanded={mobileOpen}
-              aria-controls="accueil-menu"
-              onClick={openMenu}
-            >
-              <Menu className={cx("icon")} aria-hidden="true" />
-            </button>
           </div>
         </div>
       </header>
-
-      <div
-        ref={menuRef}
-        id="accueil-menu"
-        className={cx("mobile-menu", mobileOpen && "is-open")}
-        aria-hidden={!mobileOpen}
-        inert={!mobileOpen}
-        onKeyDown={handleMenuKeyDown}
-      >
-        <div className={cx("mobile-menu-top")}>
-          <Link href="/" className={cx("brand")} aria-label={`${APP_NAME} — Accueil`}>
-            <Brand />
-          </Link>
-          <button
-            ref={menuCloseRef}
-            type="button"
-            className={cx("icon-btn")}
-            aria-label="Fermer le menu"
-            onClick={closeMenu}
-          >
-            <X className={cx("icon")} aria-hidden="true" />
-          </button>
-        </div>
-
-        <nav aria-label="Menu principal">
-          {mainNav.map((item, index) => (
-            <Link key={item.href} href={item.href} onClick={closeMenu}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className={cx("mobile-menu-foot")}>
-          <a href="#decouvrir" className={cx("btn", "btn-primary")} onClick={closeMenu}>
-            Découvrir les sorties
-          </a>
-          <Link
-            href="/devenir-organisateur"
-            className={cx("btn", "btn-outline")}
-            onClick={closeMenu}
-          >
-            Publier un événement
-          </Link>
-          {viewer ? (
-            <>
-              <Link href={ROUTES.profile} className={cx("head-login")} onClick={closeMenu}>
-                Mon profil
-              </Link>
-              <button
-                type="button"
-                className={cx("head-login", "head-signout")}
-                onClick={() => void handleSignOut()}
-              >
-                Se déconnecter
-              </button>
-            </>
-          ) : (
-            <Link href={ROUTES.login} className={cx("head-login")} onClick={closeMenu}>
-              Connexion
-            </Link>
-          )}
-        </div>
-      </div>
 
       <main id="accueil-contenu">
         <section className={cx("hero", "wrap")} aria-labelledby="hero-title">
@@ -940,6 +791,7 @@ export function HomeEditorial({
               <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
             </Link>
           </nav>
+          <PwaInstallPrompt />
         </section>
 
         <section className={cx("capabilities")} aria-label="Ce que permet Event">

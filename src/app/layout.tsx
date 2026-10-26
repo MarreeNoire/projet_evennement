@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 import { AppProviders } from "@/components/providers/app-providers";
-import { ServiceWorkerCleanup } from "@/components/providers/service-worker-cleanup";
+import { PwaServiceWorker } from "@/components/providers/pwa-service-worker";
 import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   description:
     "Recherche des événements en Côte d'Ivoire, consulte les détails et réserve ta place en ligne.",
   applicationName: APP_NAME,
+  appleWebApp: {
+    capable: true,
+    title: APP_NAME,
+    statusBarStyle: "default",
+  },
   icons: {
     icon: [
       { url: "/app-icon-192.png", sizes: "192x192", type: "image/png" },
@@ -55,9 +60,10 @@ export const viewport: Viewport = {
   // (env(safe-area-inset-*) exploitées par la tabbar et les sheets).
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f2ec" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0b0c" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f4ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#141a22" },
   ],
+  interactiveWidget: "resizes-content",
 };
 
 export const dynamic = "force-dynamic";
@@ -78,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppProviders>
           <div id="contenu">{children}</div>
         </AppProviders>
-        <ServiceWorkerCleanup />
+        <PwaServiceWorker />
       </body>
     </html>
   );

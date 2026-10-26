@@ -595,6 +595,10 @@
         transform: scale(0.95);
       }
 
+      .home .search-btn {
+        display: none;
+      }
+
       .home .theme-btn .icon-moon,
 :global(html.dark) .home .theme-btn .icon-sun {
         display: none;
@@ -602,82 +606,6 @@
 
       :global(html.dark) .home .theme-btn .icon-moon {
         display: block;
-      }
-
-      .home .menu-btn {
-        display: none;
-      }
-
-      /* Menu mobile */
-      .home .mobile-menu {
-        position: fixed;
-        inset: 0;
-        z-index: 120;
-        display: flex;
-        flex-direction: column;
-        padding: 22px 24px max(24px, env(safe-area-inset-bottom));
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        background: var(--paper);
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition:
-          opacity 0.24s ease,
-          transform 0.3s var(--ease-soft),
-          visibility 0s linear 0.24s;
-      }
-
-      .home .mobile-menu.is-open {
-        opacity: 1;
-        visibility: visible;
-        transform: none;
-        transition:
-          opacity 0.24s ease,
-          transform 0.3s var(--ease-soft),
-          visibility 0s linear 0s;
-      }
-
-      .home .mobile-menu-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-bottom: 18px;
-        border-bottom: 1px solid var(--line);
-      }
-
-      .home .mobile-menu nav {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        padding: 26px 0;
-      }
-
-      .home .mobile-menu nav a {
-        padding: 10px 0;
-        font-family: var(--display);
-        font-size: clamp(34px, 9vw, 46px);
-        font-weight: 700;
-        letter-spacing: -0.04em;
-        line-height: 1.15;
-      }
-
-      .home .mobile-menu nav a span {
-        font-family: var(--sans);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        color: var(--accent);
-        vertical-align: super;
-        margin-right: 10px;
-      }
-
-      .home .mobile-menu-foot {
-        margin-top: auto;
-        display: grid;
-        gap: 10px;
-        padding-top: 18px;
-        border-top: 1px solid var(--line);
       }
 
       /* ---------------------------------------------------------------
@@ -2831,7 +2759,7 @@
           display: none;
         }
 
-        .home .menu-btn {
+        .home .search-btn {
           display: grid;
         }
 
@@ -2867,16 +2795,49 @@
         }
 
         .home .hero h1 {
-          font-size: clamp(44px, 12.4vw, 68px);
+          font-size: clamp(38px, 10vw, 52px);
         }
 
         .home .hero-sub {
-          font-size: 15px;
+          display: none;
         }
 
         .home .hero-art {
-          height: auto;
-          aspect-ratio: 1 / 1.06;
+          display: none;
+        }
+
+        .home .hero-note {
+          display: none;
+        }
+
+        .home .capabilities,
+        .home .salon-band,
+        .home .organizer,
+        .home .closing {
+          display: none;
+        }
+
+        .home .hero {
+          grid-template-columns: minmax(0, 1fr);
+          padding-block: 24px 18px;
+        }
+
+        .home .hero h1 {
+          margin-block: 10px 18px;
+        }
+
+        .home .hero-cta {
+          flex-direction: row;
+          align-items: center;
+          gap: 14px;
+        }
+
+        .home .hero-cta .link-arrow {
+          display: none;
+        }
+
+        .home .search-btn {
+          display: grid;
         }
 
         .home .quick-access {
@@ -3060,50 +3021,12 @@
           display: none;
         }
 
-        .home .hero {
-          padding-top: 34px;
-        }
-
-        .home .hero h1 {
-          margin-top: 16px;
-        }
-
-        .home .hero-cta {
-          align-items: stretch;
-          flex-direction: column;
-          gap: 12px;
-        }
-
         .home .hero-cta .btn {
-          width: 100%;
-        }
-
-        .home .hero-cta .link-arrow {
-          width: max-content;
+          width: auto;
         }
 
         .home .hero-note {
-          margin-top: 22px;
-        }
-
-        .home .hero-art {
-          aspect-ratio: 1 / 1.06;
-        }
-
-        .home .art-note {
           display: none;
-        }
-
-        .home .art-poster-wrap {
-          width: 82%;
-          top: 0;
-        }
-
-        .home .art-stub {
-          width: 206px;
-          top: 0;
-          right: 0;
-          bottom: auto;
         }
 
         .home .poster-title {
@@ -3385,8 +3308,7 @@
       @media print {
         .home .site-head,
 .home .grain,
-.home .toast,
-.home .mobile-menu {
+.home .toast {
           display: none !important;
         }
 
@@ -3464,12 +3386,6 @@
 
 .home .card-art.has-cover {
   color: #fff6ea;
-}
-
-.home .mobile-menu-foot .head-login {
-  display: block;
-  justify-self: start;
-  color: var(--ink-2);
 }
 
 .home .card-art.has-cover .art-inner {
@@ -3686,5 +3602,79 @@
 @media (max-width: 767px) {
   .home .site-foot {
     padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.home :global(.pwa-install-card) {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto 32px;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.home :global(.pwa-install-icon) {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 10%, var(--paper));
+  color: var(--accent);
+}
+
+.home :global(.pwa-install-copy) {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.home :global(.pwa-install-copy strong) {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.home :global(.pwa-install-copy span) {
+  color: var(--muted);
+}
+
+.home :global(.pwa-install-copy .pwa-install-instructions) {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  color: var(--ink-2);
+}
+
+.home :global(.pwa-install-button) {
+  min-height: 40px;
+  padding-inline: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 12px;
+  font-weight: 650;
+  touch-action: manipulation;
+}
+
+.home :global(.pwa-install-button:active),
+.home :global(.pwa-install-dismiss:active) {
+  transform: scale(0.96);
+}
+
+.home :global(.pwa-install-dismiss) {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  color: var(--muted);
+  touch-action: manipulation;
+}
+
+@media (display-mode: standalone) and (max-width: 767px) {
+  .home .site-foot {
+    display: none;
   }
 }
