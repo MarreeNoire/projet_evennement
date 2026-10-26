@@ -111,7 +111,7 @@ Cette section est plus récente que l’état historique ci-dessus et le remplac
 
 ### Préférences produit à conserver
 
-- L’application Event est une plateforme événementielle avec billetterie et espaces communautaires. Priorité à une expérience mobile soignée, y compris la PWA.
+- L’application Event est une plateforme événementielle avec billetterie et espaces communautaires. Priorité à une expérience mobile soignée, en site web classique : la PWA et son service worker ont été retirés (ils servaient d’anciennes pages sur téléphone).
 - La personne souhaite réduire la friction d’achat : les informations déjà recueillies au compte, notamment le téléphone, doivent préremplir le parcours de paiement lorsqu’elles sont disponibles.
 - Expliquer les changements en français, avec des indications pratiques et sans prétendre qu’un déploiement ou une migration a eu lieu sans vérification.
 

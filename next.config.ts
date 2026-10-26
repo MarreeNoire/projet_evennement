@@ -13,9 +13,9 @@ const nextConfig: NextConfig = {
   experimental: {
     // Étend la durée du cache côté client du routeur Next.js.
     // Par défaut à 0 s (Next 15+) pour les pages dynamiques, ce qui entraîne
-    // un rechargement complet des Server Components à chaque retour sur l'app PWA.
+    // un rechargement complet des Server Components à chaque retour arrière.
     // Avec 300 s, le contenu affiché reste intact si l'utilisateur revient
-    // dans les 5 minutes — comportement standard des apps mobiles natives.
+    // dans les 5 minutes — comportement attendu d'une navigation fluide.
     staleTimes: {
       dynamic: 300, // 5 minutes
       static: 600,  // 10 minutes
@@ -59,8 +59,8 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Le service worker ne doit jamais être mis en cache HTTP —
-        // le navigateur doit toujours le télécharger pour détecter les mises à jour.
+        // Le worker d'auto-destruction de l'ancienne PWA ne doit jamais être mis
+        // en cache HTTP : les téléphones doivent le récupérer pour se libérer.
         source: "/sw.js",
         headers: [
           { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },

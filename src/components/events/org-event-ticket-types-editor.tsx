@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, Edit2, Ticket, Check, X, Sparkles, Layers, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Edit2, Ticket, Check, X, Sparkles, Layers } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

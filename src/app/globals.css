@@ -7,12 +7,12 @@
 
 /* ============================================================================
    DESIGN TOKENS — CSS Variables (source unique)
-   Générés depuis src/lib/design-tokens.ts
+   Tous les jetons sont définis ici ; aucun fichier TypeScript ne les duplique.
    ========================================================================== */
 
 :root {
   /* --- Vermilion (accent principal) --- */
-  --color-vermilion-50:  #fff4ed;
+  --color-vermilion-50: #fff4ed;
   --color-vermilion-100: #ffe5d7;
   --color-vermilion-200: #ffd0b8;
   --color-vermilion-300: #ffb28e;
@@ -64,7 +64,7 @@
   --color-paper-deep: #e4e0d6;
 
   /* --- Void (neutre foncé / dark mode) --- */
-  --color-void-50:  #f7f4ee;
+  --color-void-50: #f7f4ee;
   --color-void-100: #e8e4dc;
   --color-void-200: #d2d0ca;
   --color-void-300: #b5b9b8;
@@ -214,13 +214,13 @@
   --shadow-none: none;
   --shadow-xs: 0 1px 2px rgba(11, 11, 12, 0.06);
   --shadow-sm: 0 2px 4px rgba(11, 11, 12, 0.08);
-  --shadow-md: 0 4px 8px rgba(11, 11, 12, 0.10);
+  --shadow-md: 0 4px 8px rgba(11, 11, 12, 0.1);
   --shadow-lg: 0 8px 16px rgba(11, 11, 12, 0.12);
   --shadow-xl: 0 16px 32px rgba(11, 11, 12, 0.14);
   --shadow-2xl: 0 24px 48px rgba(11, 11, 12, 0.16);
   --shadow-card: 0 2px 8px rgba(11, 11, 12, 0.08), 0 1px 2px rgba(11, 11, 12, 0.06);
   --shadow-elevated: 0 8px 24px rgba(11, 11, 12, 0.12), 0 2px 6px rgba(11, 11, 12, 0.08);
-  --shadow-modal: 0 24px 48px rgba(11, 11, 12, 0.20), 0 8px 16px rgba(11, 11, 12, 0.12);
+  --shadow-modal: 0 24px 48px rgba(11, 11, 12, 0.2), 0 8px 16px rgba(11, 11, 12, 0.12);
   --shadow-press: 0 0 0 1px rgba(11, 11, 12, 0.08);
   --shadow-focus: 0 0 0 2px #e0f9e4, 0 0 0 4px rgba(11, 11, 12, 0.08);
   --shadow-inner: inset 0 1px 2px rgba(11, 11, 12, 0.06);
@@ -306,8 +306,7 @@
   --glass-bg-strong: rgba(244, 242, 236, 0.12);
   --glass-border: rgba(244, 242, 236, 0.2);
   --glass-blur: 22px;
-  --glass-shadow:
-    0 24px 60px -32px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   --ambient-primary: rgba(224, 249, 228, 0.1);
   --ambient-fuchsia: rgba(244, 242, 236, 0.05);
 
@@ -386,8 +385,7 @@
   --glass-bg-strong: rgba(11, 11, 12, 0.12);
   --glass-border: rgba(11, 11, 12, 0.2);
   --glass-blur: 22px;
-  --glass-shadow:
-    0 24px 60px -32px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 24px 60px -32px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   --ambient-primary: rgba(30, 90, 55, 0.1);
   --ambient-fuchsia: rgba(11, 11, 12, 0.05);
 
@@ -658,19 +656,6 @@
   box-shadow: 0 0 0 1px var(--border-focus);
 }
 
-/* sr-only-focusable - regular CSS since @utility doesn't support pseudo-classes */
-.sr-only-focusable:not(:focus):not(:focus-within) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 /* skip-link - regular CSS since @utility doesn't support pseudo-classes */
 .skip-link {
   position: absolute;
@@ -696,138 +681,6 @@
 }
 
 /* ============================================================================
-   COMPONENT STYLES — Home Hero, Event Cards, etc.
-   ========================================================================== */
-
-@layer base {
-  /* ... existing component styles ... */
-}
-
-/* ... rest of existing component styles ... */
-
-/* ============================================================================
-   MOTION LANGUAGE — Keyframes & Utility Classes
-   ========================================================================== */
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-down {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-left {
-  from { opacity: 0; transform: translateX(8px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes slide-right {
-  from { opacity: 0; transform: translateX(-8px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes scale-in {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes scale-out {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(0.96); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-@keyframes bounce-subtle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-/* --- Utility Classes --- */
-.motion-fade-in {
-  animation: fade-in var(--duration-fast) var(--easing-spring) forwards;
-}
-.motion-fade-out {
-  animation: fade-out var(--duration-fast) var(--easing-spring) forwards;
-}
-.motion-slide-up {
-  animation: slide-up var(--duration-base) var(--easing-spring) forwards;
-}
-.motion-slide-down {
-  animation: slide-down var(--duration-base) var(--easing-spring) forwards;
-}
-.motion-slide-left {
-  animation: slide-left var(--duration-base) var(--easing-spring) forwards;
-}
-.motion-slide-right {
-  animation: slide-right var(--duration-base) var(--easing-spring) forwards;
-}
-.motion-scale-in {
-  animation: scale-in var(--duration-fast) var(--easing-spring) forwards;
-}
-.motion-scale-out {
-  animation: scale-out var(--duration-fast) var(--easing-spring) forwards;
-}
-.motion-shimmer {
-  background: linear-gradient(90deg, var(--semantic-bg-muted) 25%, var(--semantic-bg) 50%, var(--semantic-bg-muted) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s var(--easing-linear) infinite;
-}
-.motion-pulse-soft {
-  animation: pulse-soft 2s var(--easing-in-out) infinite;
-}
-.motion-bounce-subtle {
-  animation: bounce-subtle 3s var(--easing-spring) infinite;
-}
-
-/* Stagger helper */
-.motion-stagger > * {
-  --stagger-index: 0;
-  animation-delay: calc(var(--duration-fast) * var(--stagger-index));
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .motion-fade-in,
-  .motion-fade-out,
-  .motion-slide-up,
-  .motion-slide-down,
-  .motion-slide-left,
-  .motion-slide-right,
-  .motion-scale-in,
-  .motion-scale-out,
-  .motion-shimmer,
-  .motion-pulse-soft,
-  .motion-bounce-subtle,
-  .animate-slide-up {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-/* ============================================================================
    FOCUS VISIBLE — Global accessible focus
    ========================================================================== */
 
@@ -840,362 +693,12 @@
 :focus:not(:focus-visible) {
   outline: none;
 }
-
-/* ============================================================================
-   SCROLL INDICATOR — Hero scroll hint
-   ========================================================================== */
-
-.scroll-indicator {
-  position: absolute;
-  bottom: var(--space-6);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  color: var(--semantic-fg-subtle);
-  font-size: var(--space-3);
-  animation: bounce-subtle 2s var(--easing-spring) infinite;
-  pointer-events: none;
-  z-index: var(--z-sticky);
-}
-
-.scroll-indicator.hidden {
-  display: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scroll-indicator {
-    animation: none;
-  }
-}
-
-/* ============================================================================
-   PWA Install Prompt Animations
-   ========================================================================== */
-
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 300ms var(--easing-out-soft) forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-slide-up {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* Safe area padding for mobile */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-/* ============================================================================
-   HERO → CONTENT TRANSITION
-   ========================================================================== */
-
-.hero-content-transition {
-  position: relative;
-  height: 80px;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    var(--semantic-bg) 0%,
-    transparent 100%
-  );
-  z-index: var(--z-sticky);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-content-transition {
-    height: 0;
-  }
-}
-
-/* ============================================================================
-   BRAND IDENTITY — Single Accent Color Enforcement
-   ========================================================================== */
-
-/* Vermilion 600 = SEULE couleur d'accent interactive
-   - Tous les CTA, liens, focus, bordures actives utilisent cette variable
-   - Interdit : bleu générique, vert générique, violet générique pour actions */
-
-:root {
-  /* Accent unique - NE PAS CHANGER */
-  --brand-accent: var(--color-vermilion-600);
-  --brand-accent-hover: var(--color-vermilion-700);
-  --brand-accent-active: var(--color-vermilion-800);
-  --brand-accent-light: var(--color-vermilion-100);
-  --brand-accent-subtle: rgba(212, 81, 44, 0.12);
-  --brand-accent-fg: #ffffff;
-
-  /* Aliases pour migration progressive */
-  --primary-action: var(--brand-accent);
-  --primary-action-hover: var(--brand-accent-hover);
-  --primary-action-active: var(--brand-accent-active);
-  --focus-ring: var(--brand-accent);
-  --link-color: var(--brand-accent);
-  --link-hover: var(--brand-accent-hover);
-}
-
-/* Enforcement utilities */
-.brand-accent {
-  background: var(--brand-accent);
-  color: var(--brand-accent-fg);
-}
-
-.brand-accent-hover:hover {
-  background: var(--brand-accent-hover);
-}
-
-.brand-accent-text {
-  color: var(--brand-accent);
-}
-
-.brand-accent-border {
-  border-color: var(--brand-accent);
-}
-
-.brand-focus:focus-visible {
-  outline: 2px solid var(--brand-accent);
-  outline-offset: 2px;
-}
-
-/* Migration helpers - à remplacer progressivement */
-.btn-primary {
-  background: var(--primary-action);
-  color: var(--primary-action-fg);
-}
-.btn-primary:hover {
-  background: var(--primary-action-hover);
-}
-.btn-primary:active {
-  background: var(--primary-action-active);
-}
-
-.link-primary {
-  color: var(--link-color);
-}
-.link-primary:hover {
-  color: var(--link-hover);
-}
-
-/* ============================================================================
-   ILLUSTRATION COLOR UTILITIES
-   ========================================================================== */
-
-.illustration-primary {
-  color: var(--color-vermilion-600);
-}
-
-.illustration-primary-dark {
-  color: var(--color-vermilion-700);
-}
-
-.illustration-primary-light {
-  color: var(--color-vermilion-400);
-}
-
-.dark .illustration-primary {
-  color: var(--color-vermilion-400);
-}
-
-.dark .illustration-primary-dark {
-  color: var(--color-vermilion-300);
-}
-
-.dark .illustration-primary-light {
-  color: var(--color-vermilion-500);
-}
-
-/* ============================================================================
-   MASCOT COLOR
-   ========================================================================== */
-
-.mascot-primary {
-  color: var(--color-vermilion-600);
-}
-
-.dark .mascot-primary {
-  color: var(--color-vermilion-400);
-}
-
-/* ============================================================================
-   MOBILE-NATIVE POLISH — Touch targets, haptics, pull-to-refresh, safe areas
-   ========================================================================== */
-
-/* Minimum touch target 44x44px (Apple HIG / Material) */
-.touch-target {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-.touch-target-sm {
-  min-height: 40px;
-  min-width: 40px;
-}
-
-/* Disable pull-to-refresh on scrollable containers */
-.no-pull-to-refresh {
-  overscroll-behavior-y: contain;
-}
-
-/* Disable pull-to-refresh on full page (when not needed) */
-html.no-refresh {
-  overscroll-behavior-y: none;
-}
-
-/* Safe area utilities */
-.safe-top {
-  padding-top: env(safe-area-inset-top, 0);
-}
-
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-.safe-left {
-  padding-left: env(safe-area-inset-left, 0);
-}
-
-.safe-right {
-  padding-right: env(safe-area-inset-right, 0);
-}
-
-.safe-all {
-  padding: env(safe-area-inset-top, 0)
-    env(safe-area-inset-right, 0)
-    env(safe-area-inset-bottom, 0)
-    env(safe-area-inset-left, 0);
-}
-
 /* iOS input zoom prevention - font-size >= 16px */
 @media screen and (max-width: 768px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   textarea,
   select {
     font-size: 16px !important;
-  }
-}
-
-/* Tab bar backdrop blur enhancement */
-.mobile-tabbar {
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  background: rgba(var(--semantic-surface-rgb, 22, 22, 23), 0.85);
-  border-top: 1px solid var(--semantic-border);
-}
-
-/* Light mode tab bar */
-.light .mobile-tabbar {
-  background: rgba(255, 253, 250, 0.9);
-  border-top: 1px solid var(--semantic-border);
-}
-
-/* Active tab indicator */
-.tab-indicator {
-  position: relative;
-}
-
-.tab-indicator::before {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 2px;
-  background: var(--brand-accent);
-  border-radius: 1px;
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--easing-out);
-}
-
-.tab-indicator.active::before {
-  opacity: 1;
-}
-
-/* Touch feedback - press state */
-.pressable {
-  touch-action: manipulation;
-  -webkit-user-select: none;
-  user-select: none;
-  transition: transform var(--duration-fast) var(--easing-out),
-    opacity var(--duration-fast) var(--easing-out);
-}
-
-.pressable:active {
-  transform: scale(0.97);
-  opacity: 0.85;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pressable,
-  .pressable:active {
-    transform: none;
-    opacity: 1;
-  }
-}
-
-/* Swipeable card hint */
-.swipe-hint {
-  position: relative;
-}
-
-.swipe-hint::after {
-  content: "← Fais glisser";
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  color: var(--semantic-fg-subtle);
-  white-space: nowrap;
-  opacity: 0;
-  animation: swipe-hint-show 3s var(--easing-out) forwards;
-  pointer-events: none;
-}
-
-@keyframes swipe-hint-show {
-  0%, 20% { opacity: 0; transform: translateX(-50%) translateY(4px); }
-  30%, 80% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
-}
-
-/* Haptic feedback utility class (use with JS haptic() call) */
-.haptic-light { }
-.haptic-medium { }
-.haptic-success { }
-
-/* Focus visible enhancement for mobile */
-@media (pointer: coarse) {
-  :focus-visible {
-    outline: 3px solid var(--brand-accent);
-    outline-offset: 3px;
-  }
-}
-
-/* Reduce motion for all mobile interactions */
-@media (prefers-reduced-motion: reduce) {
-  .pressable:active,
-  .tab-indicator::before,
-  .swipe-hint::after {
-    animation: none;
-    transform: none;
-    opacity: 0;
   }
 }
 
@@ -1211,8 +714,8 @@ html.no-refresh {
 }
 
 /* ============================================================================
-   STYLES RESTAURÉS — composants encore en place (carte d'événement,
-   authentification, paiement, compte à rebours, retour d'appui).
+   STYLES PARTAGÉS — composants encore en place (tunnel de paiement, carte
+   d'événement, compte à rebours, retour d'appui).
    ========================================================================== */
 .checkout-dialog {
   position: fixed;
@@ -1393,28 +896,6 @@ html.no-refresh {
   }
 }
 
-@supports (animation-timeline: view()) {
-    .event-card-reveal,
-    main > section,
-    main > div > section {
-      animation: card-rise linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 38%;
-    }
-}
-
-.animate-like-confirm {
-  animation: like-confirm 300ms var(--ease-out-soft) both;
-}
-
-.event-card-reveal {
-  animation: card-rise 560ms var(--ease-out-soft) both;
-}
-
-.dashboard-menu-panel {
-  animation: mobile-menu-arrive 280ms var(--ease-out-soft) both;
-}
-
 .event-countdown {
   display: inline-flex;
   align-items: center;
@@ -1427,7 +908,6 @@ html.no-refresh {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   box-shadow: var(--glow-sm);
-  animation: countdown-arrive 200ms var(--ease-out-soft) both;
 }
 
 .payment-success-mark {
@@ -1463,110 +943,10 @@ html.no-refresh {
   animation-delay: 80ms;
 }
 
-.auth-screen {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  min-height: 100dvh;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(1rem, 4vh, 3rem) 1rem;
-}
-
-.auth-screen-backdrop {
-  position: fixed;
-  z-index: 0;
-  inset: 0;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse at 18% 20%, var(--ambient-fuchsia), transparent 48%),
-    linear-gradient(135deg, var(--void-900), var(--void-950));
-  pointer-events: none;
-}
-
-.auth-screen-image {
-  object-fit: cover;
-  opacity: 0.82;
-  filter: saturate(0.78) brightness(0.68);
-  transform: scale(1.025);
-}
-
-.auth-screen-scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--void-950) 66%, transparent),
-    color-mix(in srgb, var(--void-950) 48%, transparent) 48%,
-    color-mix(in srgb, var(--void-950) 76%, transparent)
-  );
-}
-
-.auth-screen-content {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 30rem);
-  margin-block: auto;
-}
-
-.auth-card {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-2xl);
-  background: color-mix(in srgb, var(--surface-overlay) 96%, transparent);
-  padding: clamp(1.25rem, 5vw, 2rem);
-  color: var(--fg);
-  box-shadow: var(--shadow-xl);
-  backdrop-filter: blur(18px);
-}
-
-.auth-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.875rem;
-}
-
-.auth-card-heading {
-  border-top: 1px solid var(--border);
-  padding-top: 1rem;
-}
-
-@media (max-width: 480px) {
-  .auth-screen {
-    align-items: flex-start;
-    padding: max(1rem, env(safe-area-inset-top)) 0.875rem max(1rem, env(safe-area-inset-bottom));
-  }
-
-  .auth-card {
-    gap: 1.125rem;
-    border-radius: var(--radius-xl);
-  }
-}
-
-@media (max-width: 767px) {
-  .site-footer {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .animate-card-rise,
-  .animate-slide-left,
-  .animate-slide-right,
-  .animate-fade-in,
-  .animate-glow-pulse,
-  .animate-like-confirm,
-  .event-card-reveal,
   [data-checkout-step],
   .navigation-progress-indicator,
   .checkout-dialog,
-  .home-hero-backdrop-image,
-  .home-hero-featured-event,
   .payment-success-ring,
   .payment-success-check,
   .event-countdown {
@@ -1765,22 +1145,15 @@ html.no-refresh {
   .event-card:focus-within,
   .event-card-cover,
   .event-card:hover .event-card-cover,
-  .event-card-media::after { transform: none; translate: none; transition: none; }
+  .event-card-media::after {
+    transform: none;
+    translate: none;
+    transition: none;
+  }
   .event-card:hover .event-card-media::after,
-  .event-card:focus-within .event-card-media::after { translate: -120% 0; }
-}
-
-.auth-card {
-  border-color: var(--border) !important;
-  border-radius: 1.35rem !important;
-  background: var(--surface) !important;
-  box-shadow: var(--shadow-lg) !important;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-}
-
-.site-footer {
-  background: var(--bg-subtle);
+  .event-card:focus-within .event-card-media::after {
+    translate: -120% 0;
+  }
 }
 
 .press {
@@ -1814,54 +1187,6 @@ html.no-refresh {
   }
 }
 
-@keyframes card-rise {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes like-confirm {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.35);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes mobile-menu-arrive {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes countdown-arrive {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 @keyframes payment-check-draw {
   from {
     stroke-dashoffset: var(--dash-length);
@@ -1882,7 +1207,7 @@ html.no-refresh {
 
 :root {
   --rail-w: 4.75rem; /* 76 px */
-  --side-w: 17rem;   /* 272 px */
+  --side-w: 17rem; /* 272 px */
 }
 
 /* Décalage horizontal du contenu quand la barre latérale est affichée. */

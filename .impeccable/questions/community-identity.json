@@ -1,0 +1,130 @@
+{
+  "title": "Choisir la nouvelle identité visuelle",
+  "question": "Quelle direction donne le plus envie de découvrir les événements et de rejoindre les salons ?",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "La ville en équilibre",
+      "kicker": "THE ROLL",
+      "lineage": "Sculpture cinétique à tensegrité",
+      "thesis": "Les événements tiennent la ville ensemble, reliés par les communautés qui les font vivre.",
+      "palette": ["#e8e6df", "#151719", "#c83a32"],
+      "materials": ["carbone mat", "cordon rouge", "béton clair"],
+      "viewport": "Une structure de fils relie la recherche d’événements aux salons actifs; les fils s’écartent sur les jours et les lieux.",
+      "risk": "La sculpture peut sembler abstraite si la recherche n’est pas directement intégrée à sa structure.",
+      "raised": [
+        {"from":"challenger-teletext", "raise":"Les chemins de navigation restent explicites et numérotés comme des rendez-vous lisibles."},
+        {"from":"challenger-arcade", "raise":"Chaque filtre montre un état de sélection immédiat, sans animation obligatoire."},
+        {"from":"challenger-wpa", "raise":"Les lieux gardent une hiérarchie spatiale stable sur tous les écrans."},
+        {"from":"challenger-nixie", "raise":"Les dates et nombres ne s’animent que lorsqu’ils proviennent des données réelles."},
+        {"from":"challenger-silkscreen", "raise":"Les affiches réelles des organisateurs gardent une place éditoriale dominante."}
+      ],
+      "html": ".impeccable/mocks/decision/assigned.html"
+    },
+    {
+      "id": "model-pick",
+      "label": "La fréquence commune",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "Émission radio participative",
+      "thesis": "Un événement lance le signal; les salons prolongent la conversation avant et après.",
+      "palette": ["#0e2530", "#f4eddc", "#e74a35", "#55c9b2"],
+      "materials": ["papier d’antenne", "ondes imprimées", "encre bleu pétrole"],
+      "viewport": "La recherche prend la forme d’un sélecteur d’antenne; les rendez-vous apparaissent sur une programmation reliée aux salons.",
+      "risk": "Le vocabulaire radio peut dater la plateforme si l’onde ne sert pas réellement à explorer.",
+      "html": ".impeccable/mocks/decision/model-pick.html"
+    },
+    {
+      "id": "challenger-city-fold",
+      "label": "La ville à déplier",
+      "verdict": "wins",
+      "lineage": "Carte textile d’une ville endormie",
+      "thesis": "Chaque quartier devient une invitation à sortir et à rencontrer sa communauté.",
+      "palette": ["#182238", "#f1e7cf", "#e6b85c", "#9cb5a0"],
+      "materials": ["toile bleu nuit", "coutures crème", "fil doré"],
+      "viewport": "La carte pliée d’Abidjan se déploie autour d’un vrai formulaire de recherche; chaque pli ouvre les événements et le salon de son quartier.",
+      "case": "Gagne en identification par le lien à la ville et en clarté par le parcours quartier → événement → salon.",
+      "risk": "Le plan de ville doit rester discret pour que la recherche et les événements restent immédiats.",
+      "html": ".impeccable/mocks/decision/challenger-city-fold.html"
+    },
+    {
+      "id": "challenger-arcade",
+      "label": "Le quartier en jeu",
+      "verdict": "competitive",
+      "lineage": "Écran d’arcade pixel-art",
+      "thesis": "Les rencontres deviennent des niveaux que l’on découvre à plusieurs.",
+      "palette": ["#080d17", "#59edc5", "#f8c74f", "#f4f4ec"],
+      "materials": ["pixels francs", "noir phosphore", "lueur écran"],
+      "viewport": "Un écran de ville en tuiles affiche des rendez-vous sélectionnables et leurs salons.",
+      "case": "Apporte un langage communautaire joueur, mais identifie moins naturellement les publics qui cherchent des sorties réelles.",
+      "risk": "Les pixels peuvent faire passer les événements pour un jeu fictif.",
+      "html": ".impeccable/mocks/decision/challenger-arcade.html"
+    },
+    {
+      "id": "challenger-teletext",
+      "label": "Le canal des sorties",
+      "verdict": "competitive",
+      "lineage": "Sommaire télétexte de programme TV",
+      "thesis": "L’agenda devient un canal direct où les rendez-vous restent faciles à parcourir.",
+      "palette": ["#080b14", "#fff05a", "#63e6a5", "#ffffff"],
+      "materials": ["mosaïque de caractères", "phosphore", "noir écran"],
+      "viewport": "La recherche agit comme une page d’index; les événements conduisent vers leurs salons.",
+      "case": "Clarifie le parcours événementiel, mais la grammaire d’un annuaire télévisé porte moins l’idée de communauté.",
+      "risk": "Le langage d’index peut sembler utilitaire et rétro.",
+      "html": ".impeccable/mocks/decision/challenger-teletext.html"
+    },
+    {
+      "id": "challenger-nixie",
+      "label": "Compteur de laboratoire",
+      "verdict": "declined",
+      "lineage": "Compteur à tubes Nixie",
+      "thesis": "La date de chaque rendez-vous s’affiche comme un chiffre physique sous verre.",
+      "palette": ["#101418", "#ff9a47", "#9ba8b1"],
+      "materials": ["verre", "acier noir", "lueur orange"],
+      "viewport": "Des tubes lumineux alignent l’heure et la date des événements sélectionnés.",
+      "case": "Les compteurs mettent l’accent sur des métriques plutôt que sur les personnes et les rencontres.",
+      "kept": "Les dates et valeurs ne changent que si les données réelles le justifient.",
+      "risk": "Les chiffres prennent plus de place que les interactions.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-nixie-laboratory-counter-hero.webp"
+    },
+    {
+      "id": "challenger-wpa",
+      "label": "Atlas des rendez-vous",
+      "verdict": "declined",
+      "lineage": "Affiches de parcs nationaux WPA",
+      "thesis": "Chaque sortie s’ancre dans un paysage à explorer.",
+      "palette": ["#f2e9ce", "#183d39", "#cf733d", "#5f9996"],
+      "materials": ["aplats sérigraphiés", "papier crème", "plans de paysage"],
+      "viewport": "Des lieux se composent en plans plats de premier plan, milieu et horizon.",
+      "case": "La lecture en plans donne un repère géographique, mais l’affiche aplatie n’exprime pas les échanges communautaires.",
+      "kept": "Les lieux restent des repères spatiaux cohérents et consultables.",
+      "risk": "Le décor peut prendre le dessus sur les rencontres réelles.",
+      "hero": "https://impeccable.style/worlds/cards/posters-covers-sleeves-wpa-park-poster-hero.webp"
+    },
+    {
+      "id": "challenger-silkscreen",
+      "label": "Atelier des affiches",
+      "verdict": "declined",
+      "lineage": "Atelier de sérigraphie",
+      "thesis": "Les annonces arrivent comme des tirages successifs sur un étendoir d’atelier.",
+      "palette": ["#eee9df", "#181616", "#ec4b94", "#f1b52c"],
+      "materials": ["papier argenté", "trame d’encre", "repérage décalé"],
+      "viewport": "Les événements forment une série d’affiches imprimées, chacune avec son propre calage d’encre.",
+      "case": "Les affiches conviennent aux annonces d’événement, mais la répétition d’éditions met l’objet au premier plan.",
+      "kept": "Les visuels d’événement réels gardent leur singularité.",
+      "risk": "Les affiches peuvent éclipser les conversations et le parcours de réservation.",
+      "hero": "https://impeccable.style/worlds/cards/design-canon-factory-silkscreen-loft-hero.webp"
+    }
+  ],
+  "reroll": {"registers":["safer","bolder"]},
+  "canon": true,
+  "canonCard": {
+    "label": "Agenda événementiel classique",
+    "thesis": "Un agenda sobre met les rendez-vous au premier plan.",
+    "palette": ["#f8f8f6", "#17191d", "#275ce8"],
+    "materials": ["grille nette", "photographies d’événements"],
+    "viewport": "Recherche en haut, événements en liste, accès aux salons dans chaque détail.",
+    "risk": "Une composition familière qui distingue moins la communauté du produit.",
+    "html": ".impeccable/mocks/decision/canon.html"
+  },
+  "steer": true
+}

@@ -179,7 +179,7 @@ export const env = {
 
 /** Vérifie que les deux clés GeniusPay appartiennent au même environnement. */
 export function isGeniusPayCredentialPairValid(): boolean {
-  const { apiKey, apiSecret, environment } = env.payment.geniuspay;
+  const { apiSecret, environment } = env.payment.geniuspay;
   if (environment === "sandbox") return apiSecret.startsWith("sk_sandbox_");
   if (environment === "live") return apiSecret.startsWith("sk_live_");
   return false;

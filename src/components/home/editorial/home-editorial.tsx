@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { useTheme } from "@/components/providers/app-providers";
 import type { HeaderUser } from "@/components/layout/header-types";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
@@ -759,7 +760,7 @@ export function HomeEditorial({
           </button>
         </div>
 
-        <nav aria-label="Navigation mobile">
+        <nav aria-label="Menu principal">
           {MAIN_NAV.map((item, index) => (
             <a key={item.href} href={item.href} onClick={closeMenu}>
               <span>{String(index + 1).padStart(2, "0")}</span>
@@ -1559,6 +1560,10 @@ export function HomeEditorial({
           </div>
         </div>
       </footer>
+
+      {/* Même chrome mobile que les pages éditoriales : la barre d'onglets
+          flotte au-dessus du pied de page, qui lui réserve sa hauteur. */}
+      <BottomNav user={viewer} />
     </div>
   );
 }

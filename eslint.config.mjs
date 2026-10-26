@@ -26,12 +26,28 @@ const config = defineConfig([
   },
   globalIgnores([
     ".next/**",
+    ".open-next/**",
+    ".wrangler/**",
+    ".vercel/**",
     "node_modules/**",
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
     "next-env.d.ts",
     "promo-video/**",
+    // Brouillons et ressources locales hors application : ils ne font pas
+    // partie du build et ne doivent pas ralentir ni polluer `npm run lint`.
+    ".agents/**",
+    ".claude/**",
+    ".opencode/**",
+    "agent/**",
+    "accueil/**",
+    "exemple_couleur/**",
+    "projet_cassé/**",
+    "scripts/captures/**",
+    // Scripts de diagnostic / rendu ponctuels à la racine, hors application.
+    "test_*.js",
+    "render_showreel.js",
   ]),
 ]);
 

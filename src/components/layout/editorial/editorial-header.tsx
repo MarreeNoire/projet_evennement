@@ -354,7 +354,7 @@ export function EditorialHeader({
           </button>
         </div>
 
-        <nav aria-label="Navigation mobile">
+        <nav aria-label="Menu principal">
           {nav.map((item, index) => (
             <Link
               key={item.href}

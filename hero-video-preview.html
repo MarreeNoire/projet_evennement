@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#11110f" />
+  <title>Preview — Une soirée, du premier clic à la piste</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { color-scheme:dark; --black:#11110f; --paper:#efeee7; --muted:#aaa99e; --acid:#d9f36a; --orange:#ff6841; --mono:'DM Mono',monospace; --display:'Bodoni Moda',Georgia,serif; --sans:'Manrope',Arial,sans-serif; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; min-height:100%; background:var(--black); color:var(--paper); font-family:var(--sans); }
+    body { min-height:100vh; overflow-x:hidden; }
+    button,a { font:inherit; }
+    a { color:inherit; text-decoration:none; }
+    a:focus-visible,button:focus-visible { outline:2px solid var(--acid); outline-offset:5px; }
+    .page { min-height:100vh; max-width:1720px; margin:auto; padding:0 clamp(22px,5.4vw,88px); position:relative; isolation:isolate; overflow:hidden; }
+    .page::before { content:""; position:absolute; z-index:-1; inset:0; pointer-events:none; opacity:.12; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E"); }
+    header { height:86px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #ffffff1c; position:relative; z-index:5; }
+    .logo { font:500 17px var(--mono); letter-spacing:-.06em; display:flex; align-items:center; gap:11px; }
+    .logo-mark { height:27px; width:27px; display:grid; place-items:center; color:var(--black); background:var(--acid); transform:rotate(45deg); font-size:15px; }
+    .logo-mark span { transform:rotate(-45deg); }
+    nav { display:flex; gap:34px; color:#c6c5bb; font-size:13px; }
+    nav a { transition:color .2s; } nav a:hover { color:var(--acid); }
+    .top-cta { border:1px solid #ffffff54; padding:11px 16px; font-size:12px; transition:background .2s,color .2s; }
+    .top-cta:hover { background:var(--acid); color:var(--black); border-color:var(--acid); }
+    main { min-height:calc(100vh - 87px); display:grid; grid-template-columns:minmax(320px,.76fr) minmax(520px,1.24fr); gap:clamp(28px,6vw,100px); align-items:center; padding:42px 0 50px; }
+    .copy { position:relative; z-index:3; padding:0 0 16px; }
+    h1 { margin:0; max-width:610px; font:500 clamp(56px,7.2vw,108px)/.92 var(--display); letter-spacing:-.07em; }
+    h1 span { color:var(--acid); font-style:italic; }
+    .lede { margin:25px 0 27px; max-width:390px; color:#c7c6bd; font-size:15px; line-height:1.7; }
+    .actions { display:flex; flex-wrap:wrap; align-items:center; gap:14px; }
+    .primary { display:inline-flex; min-height:50px; align-items:center; justify-content:center; gap:13px; padding:0 19px; background:var(--acid); color:var(--black); font-size:13px; font-weight:700; transition:transform .2s,background .2s; }
+    .primary:hover { transform:translateY(-2px); background:#e7ff8b; }
+    .primary span { font-size:18px; }
+    .play { min-height:50px; display:inline-flex; align-items:center; gap:10px; padding:0 10px; border:0; color:var(--paper); background:transparent; cursor:pointer; font-size:13px; }
+    .play-icon { height:28px; width:28px; display:grid; place-items:center; border:1px solid #ffffff69; border-radius:50%; font-size:10px; transition:background .2s,color .2s; }
+    .play:hover .play-icon { background:var(--paper); color:var(--black); }
+    .social-proof { display:flex; gap:15px; align-items:center; margin-top:51px; color:#bdbcb2; font-size:12px; }
+    .faces { display:flex; padding-left:4px; }
+    .face { width:29px; height:29px; margin-left:-5px; border:2px solid var(--black); border-radius:50%; background:linear-gradient(140deg,#d38b60,#512d2d 55%,#1d2828); }
+    .face:nth-child(2) { background:linear-gradient(140deg,#efd2a0,#765735 55%,#30332b); }
+    .face:nth-child(3) { background:linear-gradient(140deg,#a8b99b,#314f40 55%,#252224); }
+    .face:nth-child(4) { background:linear-gradient(140deg,#e6a899,#734245 55%,#211b25); }
+    .social-proof strong { color:var(--paper); font-weight:600; }
+    .film-wrap { position:relative; min-width:0; perspective:1200px; }
+    .film { position:relative; width:100%; aspect-ratio:1.13; min-height:450px; overflow:hidden; background:#30251e; border:1px solid #ffffff29; box-shadow:0 34px 90px #0009; isolation:isolate; }
+    .frame { position:absolute; inset:0; overflow:hidden; }
+    .bar-scene { opacity:0; animation:bar-cut 11s ease-in-out infinite; }
+    .buy-scene { opacity:1; animation:buy-cut 11s ease-in-out infinite; }
+    .cinema-wash { position:absolute; z-index:2; inset:0; pointer-events:none; background:linear-gradient(90deg,#11110f6b 0%,transparent 44%),linear-gradient(0deg,#11110fa8 0%,transparent 46%); }
+    .film::after { content:""; position:absolute; z-index:4; inset:0; pointer-events:none; border:1px solid #fff2; box-shadow:inset 0 0 80px #0005; }
+    .phone { position:absolute; z-index:2; width:34%; height:66%; left:14%; top:18%; padding:10px; border:2px solid #e3e0d4; border-radius:27px; background:#131310; box-shadow:0 22px 55px #0008; transform:rotate(-7deg); animation:phone-breathe 4s ease-in-out infinite alternate; }
+    .phone-screen { height:100%; overflow:hidden; border-radius:18px; background:#eeece3; color:#161712; padding:15px 13px; }
+    .phone-head { display:flex; justify-content:space-between; align-items:center; font:12px var(--mono); }
+    .phone-head b { font-size:12px; }
+    .event-photo { height:42%; margin:15px -13px 12px; position:relative; overflow:hidden; background:linear-gradient(160deg,#d98744,#542e26 55%,#1c1815); }
+    .event-photo::before { content:""; position:absolute; width:68%; height:115%; left:14%; top:3%; border-radius:48% 48% 15% 15%; background:linear-gradient(90deg,#30201e,#a84f37 45%,#482a25); transform:rotate(12deg); }
+    .event-photo::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,#150f0dc7,transparent 62%); }
+    .event-title { font:600 17px/1.05 var(--sans); letter-spacing:-.06em; }
+    .event-sub { margin-top:5px; font:12px var(--mono); color:#69665d; }
+    .ticket-row { display:flex; justify-content:space-between; margin-top:11px; padding:9px 0; border-top:1px solid #c6c2b6; font-size:12px; }
+    .buy-button { width:100%; margin-top:5px; border:0; padding:11px 4px; color:#151711; background:#d9f36a; font-size:12px; font-weight:800; text-align:center; }
+    .tap-ring { position:absolute; z-index:4; left:65%; top:70%; width:43px; height:43px; border:1px solid #d9f36a; border-radius:50%; animation:tap 2.7s ease-out infinite; }
+    .person { position:absolute; bottom:-6%; width:46%; height:80%; }
+    .person.one { left:4%; transform:rotate(3deg); }
+    .person.two { right:0; width:45%; height:83%; transform:scaleX(-1) rotate(8deg); }
+    .person.three { right:27%; width:35%; height:72%; opacity:.82; transform:rotate(-12deg); }
+    .body-shape { position:absolute; bottom:0; left:15%; width:73%; height:64%; border-radius:48% 46% 0 0; background:linear-gradient(110deg,#18231f,#536148 44%,#18231e); clip-path:polygon(20% 0,77% 0,100% 100%,0 100%); }
+    .person.two .body-shape { background:linear-gradient(110deg,#401c25,#af573d 44%,#35191f); }
+    .person.three .body-shape { background:linear-gradient(110deg,#2e223a,#755164 50%,#211a29); }
+    .head { position:absolute; z-index:2; left:36%; top:7%; width:39%; aspect-ratio:.83; border-radius:47% 48% 42% 44%; background:linear-gradient(120deg,#a65a3b,#603423 66%,#341f1b); }
+    .person.two .head { background:linear-gradient(120deg,#dc9b63,#935033 66%,#502d24); }
+    .person.three .head { background:linear-gradient(120deg,#b2765c,#714338 66%,#3a2722); }
+    .hair { position:absolute; z-index:3; left:32%; top:3%; width:45%; height:25%; border-radius:55% 55% 25% 20%; background:#171516; transform:rotate(-8deg); }
+    .arm { position:absolute; z-index:4; left:4%; top:26%; width:15%; height:56%; border-radius:30px; background:#75412e; transform:rotate(27deg); transform-origin:top; }
+    .person.two .arm { left:72%; background:#ba734f; transform:rotate(-47deg); }
+    .person.three .arm { left:69%; background:#774339; transform:rotate(-58deg); }
+    .bar-back { position:absolute; inset:0; background:linear-gradient(180deg,#1c1717,#392019 47%,#171310); }
+    .bar-back::before { content:""; position:absolute; top:0; left:0; right:0; height:52%; background:linear-gradient(180deg,#7e3427,#351e20 76%,transparent); opacity:.94; }
+    .bar-back::after { content:""; position:absolute; inset:0; background:linear-gradient(170deg,transparent 36%,#f0a14824 37%,transparent 44%),linear-gradient(0deg,#11110f 4%,transparent 42%); }
+    .lamp { position:absolute; top:7%; width:2px; height:39%; background:linear-gradient(#ffbc5c,transparent); opacity:.8; }
+    .lamp::after { content:""; position:absolute; top:0; left:-16px; width:34px; height:7px; background:#f7b65e; }
+    .lamp.l1 { left:18%; } .lamp.l2 { right:23%; height:34%; }
+    .bar-name { position:absolute; z-index:1; top:13%; left:40%; color:#e4a65e; font:500 12px var(--mono); letter-spacing:.08em; }
+    .floor-light { position:absolute; bottom:-15%; left:16%; width:76%; height:36%; border-radius:50%; background:linear-gradient(0deg,#d5543124,transparent); }
+    .dancers { position:absolute; inset:0; animation:dance-camera 5s ease-in-out infinite alternate; transform-origin:60% 60%; }
+    .dancers .person { animation:groove 1.8s ease-in-out infinite alternate; transform-origin:50% 88%; }
+    .dancers .person.two { animation-delay:-.7s; }
+    .dancers .person.three { animation-delay:-1.1s; }
+    .movie-caption { position:absolute; z-index:5; left:23px; bottom:23px; display:flex; align-items:center; gap:10px; color:#fff3df; font:12px var(--mono); letter-spacing:.02em; }
+    .caption-line { width:27px; height:1px; background:var(--acid); }
+    .ticket-fly { position:absolute; z-index:3; left:33%; top:45%; width:145px; height:67px; display:flex; align-items:center; justify-content:center; border:1px dashed #171713; background:var(--acid); color:#171713; font:500 12px var(--mono); letter-spacing:.02em; transform:rotate(-10deg) scale(.16); opacity:0; animation:ticket-travel 11s ease-in-out infinite; }
+    .film-ui { display:flex; align-items:center; justify-content:space-between; padding:12px 2px 0; color:#aaa99e; font:12px var(--mono); }
+    .film-ui .steps { display:flex; gap:9px; align-items:center; }
+    .step { width:26px; height:2px; background:#4d4c45; transition:background .25s; }
+    .step.active { background:var(--acid); }
+    .sound { color:var(--paper); }
+    .side-note { position:absolute; z-index:2; top:6%; right:0; writing-mode:vertical-rl; color:#9d9b90; font:12px var(--mono); letter-spacing:.04em; }
+    @keyframes buy-cut { 0%,37% {opacity:1} 46%,90% {opacity:0} 100% {opacity:1} }
+    @keyframes bar-cut { 0%,37% {opacity:0} 46%,90% {opacity:1} 100% {opacity:0} }
+    @keyframes phone-breathe { to { transform:rotate(-5deg) translateY(-7px); } }
+    @keyframes tap { 0% { transform:scale(.35); opacity:0; } 35% {opacity:.95} 100% {transform:scale(1.8);opacity:0} }
+    @keyframes ticket-travel { 0%,23% { opacity:0; transform:translate(-100px,30px) rotate(-10deg) scale(.16); } 30% {opacity:1;transform:translate(0,0) rotate(-10deg) scale(1)} 43% {opacity:0;transform:translate(185px,-70px) rotate(14deg) scale(3.8)} 100% {opacity:0;transform:translate(185px,-70px) rotate(14deg) scale(3.8)} }
+    @keyframes groove { from { transform:rotate(-4deg) translateY(0); } to { transform:rotate(5deg) translateY(-14px); } }
+    @keyframes dance-camera { from { transform:scale(1) translateX(0); } to { transform:scale(1.06) translateX(-1.2%); } }
+    @media(max-width:980px) { main { grid-template-columns:1fr; gap:28px; padding-top:52px; } .copy { max-width:680px; } h1 { max-width:700px; font-size:clamp(62px,12vw,98px); } .lede { max-width:480px; } .social-proof { margin-top:28px; } .film-wrap { width:min(760px,100%); margin:0 auto; } .film { min-height:0; } }
+    @media(max-width:580px) { header { height:72px; } nav { display:none; } .top-cta { padding:10px 12px; font-size:12px; } main { padding-top:44px; } h1 { font-size:clamp(57px,16vw,83px); } .lede { font-size:14px; } .film { aspect-ratio:.95; } .phone { left:9%; width:42%; height:67%; } .person.one { left:-1%; width:56%; } .person.two { right:-10%; width:57%; } .person.three { right:22%; } .ticket-fly { left:30%; } .movie-caption { left:15px; bottom:16px; font-size:12px; } .film-ui { font-size:12px; } .side-note { display:none; } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:1ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="logo" href="#top" aria-label="Nuit Commune, accueil"><span class="logo-mark"><span>n</span></span>nuit commune</a>
+      <nav aria-label="Navigation"><a href="#film">Comment ça se passe</a><a href="#communaute">La communauté</a></nav>
+      <a class="top-cta" href="#communaute">Rejoindre le mouvement</a>
+    </header>
+    <main id="top">
+      <section class="copy" id="communaute">
+        <h1>Un billet.<br /><span>Une vraie</span><br />rencontre.</h1>
+        <p class="lede">Tu choisis la soirée. Tu prends ta place. Et quelques heures plus tard, tu danses avec des gens qui étaient encore des inconnus.</p>
+        <div class="actions">
+          <a class="primary" href="#film">Trouver ma prochaine soirée <span aria-hidden="true">↗</span></a>
+          <button class="play" type="button" id="replay"><span class="play-icon" aria-hidden="true">▶</span><span>Revoir la séquence</span></button>
+        </div>
+        <div class="social-proof"><div class="faces" aria-hidden="true"><span class="face"></span><span class="face"></span><span class="face"></span><span class="face"></span></div><span><strong>La prochaine rencontre est là.</strong><br />Il ne manque que toi.</span></div>
+      </section>
+      <section class="film-wrap" id="film" aria-label="Aperçu animé : achat d'un billet, puis soirée dans un bar">
+        <span class="side-note">ABIDJAN · 20H12 → 23H48</span>
+        <div class="film" id="filmFrame">
+          <div class="frame buy-scene" aria-hidden="true">
+            <svg viewBox="0 0 900 800" preserveAspectRatio="xMidYMid slice" style="position:absolute;width:100%;height:100%;inset:0">
+              <defs><linearGradient id="wall" x2="1" y2="1"><stop stop-color="#8a593b"/><stop offset=".48" stop-color="#443025"/><stop offset="1" stop-color="#141411"/></linearGradient><linearGradient id="sleeve" x2="1" y2="1"><stop stop-color="#d4a16f"/><stop offset="1" stop-color="#764b34"/></linearGradient></defs>
+              <rect width="900" height="800" fill="url(#wall)"/><path d="M0 0h900v180H0z" fill="#151513"/><path d="M0 178h900" stroke="#d5a35e" stroke-opacity=".5" stroke-width="3"/>
+              <path d="M20 250h236v9H20zm290-46h198v9H310zm328 63h220v9H638z" fill="#e9a94d" opacity=".65"/><path d="M75 250v248m149-239v221m174-229v235m184-196v200m187-188v176" stroke="#ffb45d" stroke-opacity=".35" stroke-width="5"/>
+              <path d="M0 616h900v184H0z" fill="#151411"/><path d="M0 620h900" stroke="#e7934b" stroke-opacity=".4" stroke-width="6"/>
+              <ellipse cx="408" cy="672" rx="395" ry="99" fill="#bf5932" opacity=".14"/>
+              <path d="M0 524c92-62 156-47 226-14s126 33 194-3 154-42 226-7 154 66 254 12v108H0z" fill="#211d18"/>
+            </svg>
+            <div class="phone"><div class="phone-screen"><div class="phone-head"><b>nuit commune</b><span>•••</span></div><div class="event-photo"></div><div class="event-title">Rooftop Session<br />Vol. 04</div><div class="event-sub">VEN. 24 OCT. · COCODY</div><div class="ticket-row"><span>Entrée standard</span><b>8 000 F</b></div><div class="buy-button">PRENDRE MA PLACE　↗</div></div></div>
+            <span class="tap-ring"></span>
+            <div class="ticket-fly">✳　 TON BILLET EST À TOI　✳</div>
+          </div>
+          <div class="frame bar-scene" aria-hidden="true">
+            <div class="bar-back"></div><span class="lamp l1"></span><span class="lamp l2"></span><span class="bar-name">LE SALON · COCODY</span><span class="floor-light"></span>
+            <div class="dancers">
+              <div class="person one"><span class="head"></span><span class="hair"></span><span class="arm"></span><span class="body-shape"></span></div>
+              <div class="person three"><span class="head"></span><span class="hair"></span><span class="arm"></span><span class="body-shape"></span></div>
+              <div class="person two"><span class="head"></span><span class="hair"></span><span class="arm"></span><span class="body-shape"></span></div>
+            </div>
+          </div>
+          <div class="cinema-wash"></div>
+          <div class="movie-caption"><span class="caption-line"></span><span id="caption">TU PRENDS TA PLACE</span></div>
+        </div>
+        <div class="film-ui"><span class="steps" aria-hidden="true"><i class="step active"></i><i class="step"></i></span><span>UNE HISTOIRE EN 11 SECONDES</span><span class="sound">SON OFF</span></div>
+      </section>
+    </main>
+  </div>
+  <script>
+    (function(){
+      var film=document.getElementById('filmFrame'), caption=document.getElementById('caption'), steps=document.querySelectorAll('.step'), replay=document.getElementById('replay'), startedAt=Date.now();
+      function sync(){ var bar=((Date.now()-startedAt)%11000)>=5000; caption.textContent=bar?'TU RETROUVES TA BANDE':'TU PRENDS TA PLACE'; steps[0].classList.toggle('active',!bar); steps[1].classList.toggle('active',bar); window.setTimeout(sync,180); }
+      replay.addEventListener('click',function(){ startedAt=Date.now(); film.getAnimations({subtree:true}).forEach(function(animation){animation.cancel();animation.play();}); caption.textContent='TU PRENDS TA PLACE'; });
+      sync();
+    }());
+  </script>
+</body>
+</html>

@@ -1,0 +1,4158 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Event · La sortie commence ici</title>
+    <meta name="description" content="Découvre les événements publiés en Côte d'Ivoire, réserve ta place en francs CFA et rejoins le salon de chaque sortie." />
+    <meta name="theme-color" content="#F7F4EE" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23202A35'/%3E%3Ctext x='16' y='24' font-family='Georgia,serif' font-size='22' font-style='italic' fill='%23F7F4EE' text-anchor='middle'%3Ee%3C/text%3E%3C/svg%3E" />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("event-theme");
+          if (saved === "dark" || saved === "light") {
+            document.documentElement.dataset.theme = saved;
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      /* ---------------------------------------------------------------
+         Jetons
+      --------------------------------------------------------------- */
+      :root {
+        color-scheme: light;
+        --paper: #f7f4ee;
+        --paper-2: #efe9de;
+        --surface: #fffdfa;
+        --ink: #202a35;
+        --ink-2: #39434f;
+        --muted: #5d6672;
+        --line: rgba(32, 42, 53, 0.14);
+        --line-strong: rgba(32, 42, 53, 0.3);
+        --accent: #b83f22;
+        --accent-deep: #96301a;
+        --on-accent: #fff8f1;
+        --cobalt: #425dc6;
+        --gold: #d5a638;
+        --band: #171e28;
+        --band-ink: #f2ede3;
+        --band-muted: #a7b0bc;
+        --head-bg: rgba(247, 244, 238, 0.82);
+        --shadow: 0 30px 70px -40px rgba(32, 42, 53, 0.55);
+        --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+        --display: "Palatino Linotype", "Book Antiqua", Palatino, "Iowan Old Style", Georgia, serif;
+        --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+        --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
+      }
+
+      [data-theme="dark"] {
+        color-scheme: dark;
+        --paper: #141a22;
+        --paper-2: #1b242f;
+        --surface: #1f2935;
+        --ink: #f2ede3;
+        --ink-2: #d9d3c7;
+        --muted: #a9b1bc;
+        --line: rgba(242, 237, 227, 0.14);
+        --line-strong: rgba(242, 237, 227, 0.32);
+        --accent: #e8735a;
+        --accent-deep: #f08b74;
+        --on-accent: #26120c;
+        --cobalt: #8ca0ee;
+        --gold: #e4bc5a;
+        --head-bg: rgba(20, 26, 34, 0.82);
+        --shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.85);
+      }
+
+      /* ---------------------------------------------------------------
+         Base
+      --------------------------------------------------------------- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: clip;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      html.theme-transition *,
+      html.theme-transition *::before,
+      html.theme-transition *::after {
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, fill 0.3s ease, stroke 0.3s ease !important;
+      }
+
+      body.menu-open {
+        overflow: hidden;
+      }
+
+      img,
+      svg {
+        display: block;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+        color: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        border: 0;
+        background: none;
+      }
+
+      ::selection {
+        background: var(--accent);
+        color: var(--on-accent);
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+        border-radius: 2px;
+      }
+
+      .wrap {
+        width: min(1240px, calc(100% - 64px));
+        margin-inline: auto;
+      }
+
+      .grain {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        pointer-events: none;
+        opacity: 0.035;
+        background-image: var(--grain);
+        background-size: 160px;
+        mix-blend-mode: multiply;
+      }
+
+      [data-theme="dark"] .grain {
+        opacity: 0.03;
+        mix-blend-mode: screen;
+      }
+
+      .skip {
+        position: fixed;
+        z-index: 300;
+        top: 12px;
+        left: 12px;
+        padding: 10px 16px;
+        background: var(--ink);
+        color: var(--paper);
+        font-size: 13px;
+        border-radius: 3px;
+        transform: translateY(-160%);
+        transition: transform 0.2s var(--ease-out);
+      }
+
+      .skip:focus-visible {
+        transform: none;
+      }
+
+      .icon {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 auto;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .mono-label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .eyebrow b {
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 22px;
+        height: 1px;
+        background: var(--accent);
+      }
+
+      /* ---------------------------------------------------------------
+         Boutons et liens
+      --------------------------------------------------------------- */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 50px;
+        padding: 0 22px;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.14s var(--ease-out);
+      }
+
+      .btn:active {
+        transform: scale(0.975);
+      }
+
+      .btn .icon {
+        width: 17px;
+        height: 17px;
+        transition: transform 0.24s var(--ease-out);
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .btn:hover .icon {
+          transform: translateX(3px);
+        }
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: var(--on-accent);
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-deep);
+      }
+
+      .btn-outline {
+        border-color: var(--line-strong);
+        color: var(--ink);
+      }
+
+      .btn-outline:hover {
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      .btn-light {
+        border-color: rgba(242, 237, 227, 0.32);
+        color: var(--band-ink);
+      }
+
+      .btn-light:hover {
+        background: var(--band-ink);
+        color: var(--band);
+      }
+
+      .link-arrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 12px 0;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink);
+        border-bottom: 1px solid var(--line-strong);
+        transition: border-color 0.2s ease, color 0.2s ease;
+      }
+
+      .link-arrow .icon {
+        width: 15px;
+        height: 15px;
+        transition: transform 0.22s var(--ease-out);
+      }
+
+      .link-arrow:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .link-arrow:hover .icon {
+        transform: translateX(3px);
+      }
+
+      /* ---------------------------------------------------------------
+         En-tête
+      --------------------------------------------------------------- */
+      .site-head {
+        position: sticky;
+        top: 0;
+        z-index: 90;
+        background: var(--head-bg);
+        border-bottom: 1px solid transparent;
+        -webkit-backdrop-filter: blur(18px) saturate(150%);
+        backdrop-filter: blur(18px) saturate(150%);
+        transition: border-color 0.25s ease, background-color 0.25s ease;
+      }
+
+      .site-head.is-scrolled {
+        border-bottom-color: var(--line);
+      }
+
+      .head-inner {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 40px;
+        min-height: 76px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 10px;
+        width: max-content;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 27px;
+        height: 27px;
+        background: var(--ink);
+        color: var(--paper);
+        border-radius: 4px;
+        font-family: var(--display);
+        font-size: 20px;
+        font-style: italic;
+        line-height: 1;
+        transform: translateY(2px);
+      }
+
+      .brand-word {
+        font-family: var(--display);
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+
+      .brand-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--accent);
+        transform: translateY(-8px);
+      }
+
+      .main-nav {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        justify-self: center;
+      }
+
+      .main-nav a {
+        position: relative;
+        padding: 9px 0;
+        font-size: 13.5px;
+        font-weight: 500;
+        color: var(--ink-2);
+        transition: color 0.18s ease;
+      }
+
+      .main-nav a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 2px;
+        height: 1px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.24s var(--ease-out);
+      }
+
+      .main-nav a:hover {
+        color: var(--ink);
+      }
+
+      .main-nav a:hover::after {
+        transform: scaleX(1);
+      }
+
+      .head-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .head-login {
+        padding: 8px 0;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink-2);
+        border-bottom: 1px solid transparent;
+        transition: color 0.18s ease, border-color 0.18s ease;
+      }
+
+      .head-login:hover {
+        color: var(--ink);
+        border-bottom-color: var(--line-strong);
+      }
+
+      .btn-sm {
+        min-height: 42px;
+        padding: 0 16px;
+        font-size: 13px;
+      }
+
+      .icon-btn {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        color: var(--ink-2);
+        transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.14s var(--ease-out);
+      }
+
+      .icon-btn:hover {
+        border-color: var(--line-strong);
+        color: var(--ink);
+        background: var(--surface);
+      }
+
+      .icon-btn:active {
+        transform: scale(0.95);
+      }
+
+      .theme-btn .icon-moon,
+      [data-theme="dark"] .theme-btn .icon-sun {
+        display: none;
+      }
+
+      [data-theme="dark"] .theme-btn .icon-moon {
+        display: block;
+      }
+
+      .menu-btn {
+        display: none;
+      }
+
+      /* Menu mobile */
+      .mobile-menu {
+        position: fixed;
+        inset: 0;
+        z-index: 120;
+        display: flex;
+        flex-direction: column;
+        padding: 22px 24px 32px;
+        background: var(--paper);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: opacity 0.24s ease, transform 0.3s var(--ease-soft), visibility 0.3s;
+      }
+
+      .mobile-menu.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+      }
+
+      .mobile-menu-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .mobile-menu nav {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 32px 0;
+      }
+
+      .mobile-menu nav a {
+        padding: 10px 0;
+        font-family: var(--display);
+        font-size: clamp(34px, 9vw, 46px);
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1.15;
+      }
+
+      .mobile-menu nav a span {
+        font-family: var(--sans);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        vertical-align: super;
+        margin-right: 10px;
+      }
+
+      .mobile-menu-foot {
+        margin-top: auto;
+        display: grid;
+        gap: 12px;
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+      }
+
+      /* ---------------------------------------------------------------
+         Hero
+      --------------------------------------------------------------- */
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+        align-items: center;
+        gap: clamp(28px, 4vw, 56px);
+        padding-block: clamp(46px, 6vw, 78px) clamp(34px, 4vw, 54px);
+      }
+
+      .hero-copy {
+        position: relative;
+        z-index: 2;
+      }
+
+      .hero h1 {
+        margin: 20px 0 22px;
+        font-family: var(--display);
+        font-size: clamp(46px, 6.15vw, 90px);
+        font-weight: 700;
+        line-height: 0.91;
+        letter-spacing: -0.05em;
+        text-wrap: balance;
+      }
+
+      .hero h1 em {
+        font-style: italic;
+        font-weight: 700;
+      }
+
+      .hero h1 .dot {
+        color: var(--accent);
+      }
+
+      .line {
+        display: block;
+        overflow: hidden;
+        padding-bottom: 0.07em;
+        margin-bottom: -0.07em;
+      }
+
+      .line > span {
+        display: block;
+        transform: translateY(112%);
+        animation: line-up 0.82s var(--ease-out) forwards;
+        animation-delay: var(--d, 0ms);
+      }
+
+      @keyframes line-up {
+        to {
+          transform: translateY(0);
+        }
+      }
+
+      .hero-sub {
+        max-width: 44ch;
+        margin: 0;
+        color: var(--muted);
+        font-size: 16.5px;
+        line-height: 1.62;
+      }
+
+      .hero-cta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px 26px;
+        margin-top: 30px;
+      }
+
+      .hero-note {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 28px 0 0;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+        max-width: 420px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .hero-note .icon {
+        width: 16px;
+        height: 16px;
+        color: var(--accent);
+      }
+
+      .hero-note strong {
+        color: var(--ink-2);
+        font-weight: 600;
+      }
+
+      .intro-rise {
+        opacity: 0;
+        transform: translateY(14px);
+        animation: intro-up 0.7s var(--ease-out) forwards;
+        animation-delay: var(--d, 0ms);
+      }
+
+      @keyframes intro-up {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* ---------------------------------------------------------------
+         Composition d'affiches
+      --------------------------------------------------------------- */
+      .hero-art {
+        position: relative;
+        height: clamp(470px, 44vw, 556px);
+        z-index: 1;
+      }
+
+      .art-stage {
+        position: absolute;
+        inset: 0;
+        --px: 0px;
+        --py: 0px;
+      }
+
+      .art-layer {
+        position: absolute;
+        opacity: 0;
+        transform: rotate(var(--rot, 0deg));
+        animation: art-in 0.95s var(--ease-out) forwards;
+        animation-delay: var(--d, 0ms);
+        will-change: transform;
+      }
+
+      @keyframes art-in {
+        from {
+          opacity: 0;
+          transform: translateY(20px) rotate(var(--rot, 0deg)) scale(0.985);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) rotate(var(--rot, 0deg)) scale(1);
+        }
+      }
+
+      .art-back {
+        --rot: 3.4deg;
+        --d: 340ms;
+        right: 1%;
+        top: 4%;
+        width: 57%;
+        height: 70%;
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        background-image: repeating-linear-gradient(
+          135deg,
+          transparent 0 12px,
+          rgba(32, 42, 53, 0.055) 12px 13px
+        );
+      }
+
+      .art-back span {
+        position: absolute;
+        bottom: 18px;
+        right: 16px;
+        writing-mode: vertical-rl;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .art-poster-wrap {
+        --rot: -1.7deg;
+        --d: 240ms;
+        left: 0;
+        top: 1%;
+        width: 70%;
+        z-index: 2;
+      }
+
+      .poster {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        aspect-ratio: 3 / 4;
+        padding: 21px 20px 18px;
+        overflow: hidden;
+        background: #b83f22;
+        color: #fff6ea;
+        border: 1px solid rgba(23, 30, 40, 0.3);
+        isolation: isolate;
+        transform: translate3d(calc(var(--px, 0px) * 0.35), calc(var(--py, 0px) * 0.35), 0);
+        box-shadow: 0 30px 60px -34px rgba(32, 42, 53, 0.6);
+        transition: transform 0.5s var(--ease-out);
+      }
+
+      .poster-lines {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        opacity: 0.16;
+        background: repeating-linear-gradient(0deg, transparent 0 26px, #fff6ea 26px 27px);
+      }
+
+      .poster-sun {
+        position: absolute;
+        z-index: -1;
+        top: 16%;
+        right: -15%;
+        width: 64%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: radial-gradient(circle at 38% 32%, #efd37e, #d5a638 58%, #b98c24);
+        box-shadow: inset 0 0 0 1px rgba(255, 246, 234, 0.55);
+      }
+
+      .poster-sun::after {
+        content: "";
+        position: absolute;
+        inset: 11%;
+        border: 1px solid rgba(255, 246, 234, 0.55);
+        border-radius: 50%;
+      }
+
+      .poster::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+        background-image: var(--grain);
+        background-size: 140px;
+        opacity: 0.2;
+        mix-blend-mode: multiply;
+      }
+
+      .poster-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 8.5px;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        opacity: 0.92;
+      }
+
+      .poster-mid {
+        position: relative;
+        margin-top: auto;
+        padding-bottom: 16px;
+      }
+
+      .poster-kicker {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .poster-title {
+        display: block;
+        font-family: var(--display);
+        font-size: clamp(38px, 4.1vw, 57px);
+        font-weight: 700;
+        line-height: 0.82;
+        letter-spacing: -0.055em;
+      }
+
+      .poster-title em {
+        font-style: italic;
+        font-weight: 700;
+      }
+
+      .poster-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding-top: 11px;
+        border-top: 1px solid rgba(255, 246, 234, 0.45);
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .art-note {
+        --rot: 1.6deg;
+        --d: 520ms;
+        top: 3%;
+        right: 0;
+        width: 218px;
+        z-index: 3;
+        padding: 16px 17px 15px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: 0 22px 48px -30px rgba(32, 42, 53, 0.55);
+        transform: translate3d(calc(var(--px, 0px) * -0.55), calc(var(--py, 0px) * -0.55), 0);
+      }
+
+      .note-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin: 0 0 10px;
+        font-size: 8.5px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .note-label::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .note-date {
+        margin: 0;
+        font-family: var(--display);
+        font-size: 25px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.035em;
+      }
+
+      .note-title {
+        margin: 6px 0 0;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .note-place {
+        margin: 3px 0 0;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .note-tag {
+        display: inline-block;
+        margin-top: 12px;
+        padding-top: 9px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 9.5px;
+        letter-spacing: 0.02em;
+      }
+
+      .art-stub {
+        --rot: 2.6deg;
+        --d: 660ms;
+        right: 2%;
+        bottom: 1%;
+        width: 252px;
+        z-index: 4;
+        display: flex;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: 0 26px 50px -28px rgba(32, 42, 53, 0.6);
+        transform: translate3d(calc(var(--px, 0px) * -0.8), calc(var(--py, 0px) * -0.8), 0);
+      }
+
+      .stub-main {
+        flex: 1;
+        min-width: 0;
+        padding: 13px 13px 12px;
+      }
+
+      .stub-label {
+        margin: 0;
+        font-size: 7.5px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .stub-event {
+        margin: 5px 0 0;
+        font-family: var(--display);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .stub-meta {
+        margin: 4px 0 0;
+        font-size: 9.5px;
+        color: var(--muted);
+      }
+
+      .stub-number {
+        margin: 8px 0 0;
+        font-size: 8px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .stub-qr {
+        display: grid;
+        place-items: center;
+        width: 78px;
+        flex: 0 0 78px;
+        padding: 8px;
+        border-left: 1px dashed var(--line-strong);
+        background: #fffdfa;
+      }
+
+      .stub-qr svg {
+        width: 100%;
+        height: auto;
+      }
+
+      /* ---------------------------------------------------------------
+         Bandeau capacités
+      --------------------------------------------------------------- */
+      .capabilities {
+        border-block: 1px solid var(--line);
+      }
+
+      .caps {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .cap {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 21px 24px;
+        border-left: 1px solid var(--line);
+      }
+
+      .cap:first-child {
+        border-left: 0;
+        padding-left: 0;
+      }
+
+      .cap .icon {
+        width: 17px;
+        height: 17px;
+        margin-top: 1px;
+        color: var(--accent);
+      }
+
+      .cap strong {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+      }
+
+      .cap span {
+        display: block;
+        margin-top: 2px;
+        font-size: 11.5px;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+
+      /* ---------------------------------------------------------------
+         Sections
+      --------------------------------------------------------------- */
+      .section {
+        padding-block: clamp(64px, 8vw, 106px);
+        scroll-margin-top: 88px;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 32px;
+        margin-bottom: 34px;
+      }
+
+      .section-head h2 {
+        margin: 15px 0 0;
+        font-family: var(--display);
+        font-size: clamp(34px, 4.4vw, 58px);
+        font-weight: 700;
+        line-height: 0.96;
+        letter-spacing: -0.045em;
+        text-wrap: balance;
+        max-width: 19ch;
+      }
+
+      .head-side {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 14px;
+        padding-bottom: 4px;
+      }
+
+      .head-side p {
+        max-width: 32ch;
+        margin: 0;
+        text-align: right;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .head-side .link-arrow {
+        padding: 7px 0;
+      }
+
+      .filters {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .filter-list {
+        display: flex;
+        gap: clamp(16px, 2.6vw, 32px);
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .filter-list::-webkit-scrollbar {
+        display: none;
+      }
+
+      .filter {
+        position: relative;
+        padding: 12px 1px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        white-space: nowrap;
+        transition: color 0.18s ease;
+      }
+
+      .filter::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1px;
+        height: 2px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.24s var(--ease-out);
+      }
+
+      .filter:hover {
+        color: var(--ink);
+      }
+
+      .filter[aria-pressed="true"] {
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .filter[aria-pressed="true"]::after {
+        transform: scaleX(1);
+      }
+
+      .filter-count {
+        padding-bottom: 15px;
+        font-size: 11px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      /* ---------------------------------------------------------------
+         Cartes événement
+      --------------------------------------------------------------- */
+      .events {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 34px 22px;
+      }
+
+      .event-card {
+        min-width: 0;
+        transition: opacity 0.18s ease, transform 0.24s var(--ease-out);
+      }
+
+      .event-card.is-filtered {
+        opacity: 0;
+        transform: translateY(8px) scale(0.99);
+      }
+
+      .card-link {
+        display: block;
+        height: 100%;
+      }
+
+      .card-art {
+        position: relative;
+        aspect-ratio: 4 / 5;
+        overflow: hidden;
+        border: 1px solid rgba(23, 30, 40, 0.18);
+        border-radius: 2px;
+        isolation: isolate;
+        color: #fff6ea;
+      }
+
+      .card-art::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+        background-image: var(--grain);
+        background-size: 140px;
+        opacity: 0.18;
+        mix-blend-mode: multiply;
+      }
+
+      .art-fill {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        transition: transform 0.6s var(--ease-out);
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .card-link:hover .art-fill {
+          transform: scale(1.035);
+        }
+      }
+
+      .art-jazz {
+        background: #b83f22;
+        color: #fff6ea;
+      }
+
+      .art-jazz .art-fill {
+        background-image: radial-gradient(circle at 112% 12%, #d5a638 0 31%, transparent 31.4%),
+          repeating-linear-gradient(0deg, transparent 0 30px, rgba(255, 246, 234, 0.16) 30px 31px);
+      }
+
+      .art-marche {
+        background: #425dc6;
+        color: #fff6ea;
+      }
+
+      .art-marche .art-fill {
+        background-image: radial-gradient(circle at 18% 88%, #b83f22 0 24%, transparent 24.4%),
+          repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 246, 234, 0.14) 34px 35px),
+          repeating-linear-gradient(0deg, transparent 0 34px, rgba(255, 246, 234, 0.07) 34px 35px);
+      }
+
+      .art-atelier {
+        background: #d5a638;
+        color: #202a35;
+      }
+
+      .art-atelier .art-fill {
+        background-image: linear-gradient(115deg, transparent 0 54%, rgba(32, 42, 53, 0.12) 54% 76%, transparent 76%),
+          repeating-linear-gradient(0deg, transparent 0 42px, rgba(32, 42, 53, 0.08) 42px 43px);
+      }
+
+      .art-rencontre {
+        background: #202a35;
+        color: #fff6ea;
+      }
+
+      .art-rencontre .art-fill {
+        background-image: radial-gradient(circle at 88% 96%, transparent 0 26%, rgba(184, 63, 34, 0.9) 26.2% 29%, transparent 29.2%),
+          radial-gradient(circle at 88% 96%, transparent 0 36%, rgba(213, 166, 56, 0.55) 36.2% 37%, transparent 37.2%);
+      }
+
+      .art-inner {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        padding: 15px 14px 16px;
+      }
+
+      .art-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .art-tag {
+        padding: 4px 7px 3px;
+        border: 1px solid currentColor;
+        border-radius: 2px;
+        font-size: 7.5px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+
+      .art-num {
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        opacity: 0.75;
+      }
+
+      .art-word {
+        font-family: var(--display);
+        font-size: clamp(28px, 2.9vw, 42px);
+        font-weight: 700;
+        line-height: 0.82;
+        letter-spacing: -0.05em;
+      }
+
+      .art-word em {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.4em;
+        font-style: italic;
+        font-weight: 400;
+        letter-spacing: -0.01em;
+        line-height: 1.1;
+        opacity: 0.92;
+      }
+
+      .card-body {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 12px;
+        margin-top: 14px;
+        padding-top: 13px;
+        border-top: 1px solid var(--line);
+      }
+
+      .card-date {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 39px;
+        padding-right: 12px;
+        border-right: 1px solid var(--line);
+      }
+
+      .card-date .dow {
+        font-size: 8.5px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .card-date strong {
+        font-family: var(--display);
+        font-size: 23px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .card-date .month {
+        font-size: 8.5px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .card-main h3 {
+        margin: 0 0 3px;
+        font-family: var(--display);
+        font-size: 19.5px;
+        font-weight: 700;
+        line-height: 1.12;
+        letter-spacing: -0.025em;
+        text-wrap: balance;
+      }
+
+      .card-main p {
+        margin: 0;
+        font-size: 11px;
+        line-height: 1.4;
+        color: var(--muted);
+      }
+
+      .card-side {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .card-price {
+        font-size: 11.5px;
+        font-weight: 600;
+        white-space: nowrap;
+        text-align: right;
+      }
+
+      .card-price span {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .card-go {
+        display: grid;
+        place-items: center;
+        width: 25px;
+        height: 25px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        color: var(--ink);
+        opacity: 0;
+        transform: translateY(5px);
+        transition: opacity 0.2s ease, transform 0.24s var(--ease-out), border-color 0.2s ease;
+      }
+
+      .card-go .icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      .card-link:hover .card-go,
+      .card-link:focus-visible .card-go {
+        opacity: 1;
+        transform: none;
+        border-color: var(--line-strong);
+      }
+
+      /* ---------------------------------------------------------------
+         Salon
+      --------------------------------------------------------------- */
+      .salon-band {
+        background: var(--paper-2);
+        border-block: 1px solid var(--line);
+        scroll-margin-top: 88px;
+      }
+
+      .salon-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        align-items: center;
+        gap: clamp(36px, 6vw, 78px);
+        padding-block: clamp(64px, 8vw, 100px);
+      }
+
+      .salon-copy h2,
+      .ticket-copy h2,
+      .organizer h2 {
+        margin: 15px 0 0;
+        font-family: var(--display);
+        font-size: clamp(34px, 4.2vw, 56px);
+        font-weight: 700;
+        line-height: 0.96;
+        letter-spacing: -0.045em;
+        text-wrap: balance;
+        max-width: 18ch;
+      }
+
+      .salon-copy .lead,
+      .ticket-copy .lead {
+        max-width: 40ch;
+        margin: 18px 0 26px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .phase-list {
+        margin: 0 0 26px;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--line);
+      }
+
+      .phase {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr);
+        gap: 10px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .phase > span {
+        padding-top: 3px;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        color: var(--accent);
+      }
+
+      .phase strong {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+      }
+
+      .phase p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .salon-ui {
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        box-shadow: var(--shadow);
+      }
+
+      .salon-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 13px 15px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .salon-title {
+        margin: 0;
+        font-family: var(--display);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .salon-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 8.5px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .live-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 3px rgba(184, 63, 34, 0.14);
+      }
+
+      .salon-tabs {
+        display: flex;
+        gap: 2px;
+        padding: 3px;
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+      }
+
+      .salon-tab {
+        padding: 5px 9px;
+        border-radius: 2px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        transition: background-color 0.18s ease, color 0.18s ease;
+      }
+
+      .salon-tab[aria-selected="true"] {
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: 0 1px 2px rgba(32, 42, 53, 0.14);
+      }
+
+      .salon-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 17px 16px 18px;
+      }
+
+      .salon-panel[hidden] {
+        display: none;
+      }
+
+      .salon-panel.is-entering {
+        animation: panel-in 0.34s var(--ease-out);
+      }
+
+      @keyframes panel-in {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .msg {
+        display: flex;
+        gap: 10px;
+      }
+
+      .avatar {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        border-radius: 50%;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      .avatar-cobalt {
+        background: #425dc6;
+        color: #fff6ea;
+      }
+
+      .avatar-gold {
+        background: #d5a638;
+        color: #202a35;
+      }
+
+      .avatar-ink {
+        background: #202a35;
+        color: #fff6ea;
+      }
+
+      .msg-body {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .msg-head {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+
+      .msg-head strong {
+        font-size: 11.5px;
+        font-weight: 600;
+      }
+
+      .msg-head time {
+        font-size: 9.5px;
+        color: var(--muted);
+      }
+
+      .msg p {
+        margin: 2px 0 0;
+        color: var(--ink-2);
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+
+      .msg-connection {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 11px;
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        color: var(--muted);
+        font-size: 10.5px;
+        line-height: 1.4;
+      }
+
+      .msg-connection .icon {
+        width: 13px;
+        height: 13px;
+        color: var(--cobalt);
+      }
+
+      .composer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 0 16px 16px;
+        padding: 7px 7px 7px 12px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+      }
+
+      .composer span {
+        color: var(--muted);
+        font-size: 11.5px;
+      }
+
+      .composer button {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 2px;
+        background: var(--accent);
+        color: var(--on-accent);
+        transition: background-color 0.18s ease, transform 0.14s var(--ease-out);
+      }
+
+      .composer button:hover {
+        background: var(--accent-deep);
+      }
+
+      .composer button:active {
+        transform: scale(0.94);
+      }
+
+      .composer .icon {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* ---------------------------------------------------------------
+         Billet
+      --------------------------------------------------------------- */
+      .ticket-section {
+        display: grid;
+        grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+        align-items: center;
+        gap: clamp(36px, 6vw, 80px);
+      }
+
+      .steps {
+        margin: 26px 0 24px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr);
+        gap: 10px;
+        padding: 13px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .step:last-child {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .step-num {
+        font-family: var(--display);
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.03em;
+        color: var(--accent);
+      }
+
+      .step h3 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+      }
+
+      .step p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .ticket-stage {
+        position: relative;
+        padding: 22px 0;
+      }
+
+      .ticket-shadow {
+        position: absolute;
+        inset: 16% 2% 2% 7%;
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        transform: rotate(2.4deg);
+      }
+
+      .ticket {
+        position: relative;
+        display: flex;
+        background: var(--surface);
+        border: 1px solid var(--line-strong);
+        border-radius: 3px;
+        box-shadow: var(--shadow);
+        transform: rotate(-1.4deg);
+      }
+
+      .ticket::before,
+      .ticket::after {
+        content: "";
+        position: absolute;
+        right: 121px;
+        width: 18px;
+        height: 18px;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        background: var(--paper);
+        z-index: 2;
+      }
+
+      .ticket::before {
+        top: -10px;
+      }
+
+      .ticket::after {
+        bottom: -10px;
+      }
+
+      .ticket-main {
+        flex: 1;
+        min-width: 0;
+        padding: 21px 22px 18px;
+      }
+
+      .ticket-brand {
+        display: flex;
+        align-items: baseline;
+        gap: 7px;
+        margin: 0 0 18px;
+        font-family: var(--display);
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      .ticket-brand::after {
+        content: "";
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--accent);
+        transform: translateY(-7px);
+      }
+
+      .ticket-kicker {
+        margin: 0 0 4px;
+        color: var(--accent);
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .ticket-title {
+        margin: 0;
+        font-family: var(--display);
+        font-size: clamp(26px, 2.6vw, 34px);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.045em;
+      }
+
+      .ticket-dl {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 16px;
+        margin: 17px 0 0;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      .ticket-dl div {
+        min-width: 0;
+      }
+
+      .ticket-dl dt {
+        font-size: 7.5px;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .ticket-dl dd {
+        margin: 2px 0 0;
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1.35;
+      }
+
+      .ticket-foot {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 15px;
+        padding-top: 12px;
+        border-top: 1px dashed var(--line-strong);
+      }
+
+      .ticket-price {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+      }
+
+      .ticket-price small {
+        display: block;
+        margin-bottom: 1px;
+        color: var(--muted);
+        font-size: 7.5px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .ticket-ref {
+        margin: 0;
+        color: var(--muted);
+        font-size: 8px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-align: right;
+      }
+
+      .ticket-stub {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        width: 122px;
+        flex: 0 0 122px;
+        padding: 16px 12px 14px;
+        border-left: 1px dashed var(--line-strong);
+      }
+
+      .ticket-qr {
+        display: grid;
+        place-items: center;
+        width: 88px;
+        padding: 7px;
+        background: #fffdfa;
+        border: 1px solid rgba(32, 42, 53, 0.16);
+      }
+
+      .ticket-qr svg {
+        width: 100%;
+        height: auto;
+      }
+
+      .ticket-scan {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 7px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-align: center;
+        line-height: 1.5;
+      }
+
+      .ticket-stub .ticket-price {
+        font-size: 12.5px;
+        text-align: center;
+      }
+
+      .ticket-stamp {
+        position: absolute;
+        z-index: 3;
+        left: -22px;
+        bottom: 30px;
+        display: grid;
+        place-items: center;
+        width: 70px;
+        height: 70px;
+        padding: 8px;
+        border: 1.5px solid var(--accent);
+        border-radius: 50%;
+        color: var(--accent);
+        background: var(--surface);
+        font-size: 6.5px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        line-height: 1.5;
+        text-align: center;
+        text-transform: uppercase;
+        transform: rotate(-9deg);
+        opacity: 0.9;
+      }
+
+      .ticket-stamp::before {
+        content: "";
+        position: absolute;
+        inset: 4px;
+        border: 1px dashed currentColor;
+        border-radius: 50%;
+        opacity: 0.55;
+      }
+
+      /* ---------------------------------------------------------------
+         Espace organisateur
+      --------------------------------------------------------------- */
+      .organizer {
+        background: var(--band);
+        color: var(--band-ink);
+        scroll-margin-top: 88px;
+      }
+
+      .organizer-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+        align-items: center;
+        gap: clamp(40px, 6vw, 76px);
+        padding-block: clamp(66px, 8vw, 104px);
+      }
+
+      .organizer .eyebrow {
+        color: var(--band-muted);
+      }
+
+      .organizer .eyebrow::before {
+        background: var(--gold);
+      }
+
+      .organizer .eyebrow b {
+        color: var(--gold);
+      }
+
+      .organizer h2 {
+        color: var(--band-ink);
+      }
+
+      .organizer .lead {
+        max-width: 38ch;
+        margin: 18px 0 24px;
+        color: var(--band-muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .org-list {
+        margin: 0 0 28px;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid rgba(242, 237, 227, 0.16);
+      }
+
+      .org-item {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr);
+        gap: 9px;
+        padding: 11px 0;
+        border-bottom: 1px solid rgba(242, 237, 227, 0.16);
+      }
+
+      .org-item .icon {
+        width: 15px;
+        height: 15px;
+        margin-top: 3px;
+        color: var(--gold);
+      }
+
+      .org-item strong {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 600;
+      }
+
+      .org-item span {
+        display: block;
+        margin-top: 1px;
+        color: var(--band-muted);
+        font-size: 11.5px;
+        line-height: 1.45;
+      }
+
+      .dash {
+        --ink: #202a35;
+        --ink-2: #39434f;
+        --muted: #5d6672;
+        --line: rgba(32, 42, 53, 0.14);
+        --line-strong: rgba(32, 42, 53, 0.3);
+        --paper: #f7f4ee;
+        --paper-2: #efe9de;
+        --surface: #fffdfa;
+        --accent: #b83f22;
+        --cobalt: #425dc6;
+        --gold: #d5a638;
+        position: relative;
+        overflow: hidden;
+        color: #202a35;
+        background: #fffdfa;
+        border: 1px solid rgba(242, 237, 227, 0.2);
+        border-radius: 4px;
+        box-shadow: 0 44px 90px -36px rgba(0, 0, 0, 0.8);
+        transform: rotate(0.7deg);
+      }
+
+      .dash-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 11px 15px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .dash-brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .dash-brand .brand-mark {
+        width: 22px;
+        height: 22px;
+        font-size: 16px;
+        background: #202a35;
+        color: #f7f4ee;
+      }
+
+      .dash-brand p {
+        margin: 0;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .dash-avatar {
+        display: grid;
+        place-items: center;
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        background: #b83f22;
+        color: #fff6ea;
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      .dash-body {
+        display: grid;
+        grid-template-columns: 142px minmax(0, 1fr);
+      }
+
+      .dash-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        padding: 12px 8px;
+        border-right: 1px solid var(--line);
+        background: #faf7f1;
+      }
+
+      .dash-nav span {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 8px;
+        border-radius: 2px;
+        color: var(--muted);
+        font-size: 9.5px;
+        font-weight: 500;
+      }
+
+      .dash-nav span .icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      .dash-nav span.is-active {
+        position: relative;
+        background: #efe9de;
+        color: #202a35;
+        font-weight: 600;
+      }
+
+      .dash-nav span.is-active::before {
+        content: "";
+        position: absolute;
+        left: -8px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background: #b83f22;
+      }
+
+      .dash-main {
+        min-width: 0;
+        padding: 13px 15px 46px;
+      }
+
+      .dash-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .dash-head h3 {
+        margin: 0;
+        font-family: var(--display);
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .dash-publish {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 25px;
+        padding: 0 8px;
+        background: #202a35;
+        color: #f7f4ee;
+        border-radius: 2px;
+        font-size: 8.5px;
+        font-weight: 600;
+      }
+
+      .dash-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .dash-row-title {
+        min-width: 0;
+      }
+
+      .dash-row-title strong {
+        display: block;
+        overflow: hidden;
+        font-size: 10.5px;
+        font-weight: 600;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .dash-row-title span {
+        display: block;
+        color: var(--muted);
+        font-size: 8.5px;
+      }
+
+      .status {
+        padding: 2px 6px;
+        border: 1px solid;
+        border-radius: 2px;
+        font-size: 7px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .status-live {
+        color: #425dc6;
+        border-color: rgba(66, 93, 198, 0.4);
+        background: rgba(66, 93, 198, 0.06);
+      }
+
+      .status-draft {
+        color: #5d6672;
+        border-color: rgba(32, 42, 53, 0.22);
+      }
+
+      .dash-row .icon {
+        width: 11px;
+        height: 11px;
+        color: #5d6672;
+      }
+
+      .dash-toast {
+        position: absolute;
+        right: 13px;
+        bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 210px;
+        padding: 8px 10px;
+        background: #fffdfa;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.5);
+      }
+
+      .dash-toast .check {
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        flex: 0 0 22px;
+        border-radius: 50%;
+        background: rgba(66, 93, 198, 0.12);
+        color: #425dc6;
+      }
+
+      .dash-toast .check .icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      .dash-toast strong {
+        display: block;
+        font-size: 9px;
+        font-weight: 600;
+        line-height: 1.3;
+      }
+
+      .dash-toast small {
+        display: block;
+        color: #5d6672;
+        font-size: 7.5px;
+        line-height: 1.35;
+      }
+
+      /* ---------------------------------------------------------------
+         Clôture
+      --------------------------------------------------------------- */
+      .closing {
+        position: relative;
+        overflow: hidden;
+        padding-block: clamp(70px, 9vw, 116px);
+        border-top: 1px solid var(--line);
+        scroll-margin-top: 88px;
+      }
+
+      .closing::before {
+        content: "";
+        position: absolute;
+        right: 17%;
+        top: 50%;
+        width: 190px;
+        height: 190px;
+        border: 1px solid var(--accent);
+        border-radius: 50%;
+        opacity: 0.28;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+
+      .closing::after {
+        content: "";
+        position: absolute;
+        right: -150px;
+        top: 50%;
+        width: 540px;
+        height: 540px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+
+      .closing-inner {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 36px;
+      }
+
+      .closing h2 {
+        max-width: 15ch;
+        margin: 16px 0 0;
+        font-family: var(--display);
+        font-size: clamp(42px, 6vw, 84px);
+        font-weight: 700;
+        line-height: 0.94;
+        letter-spacing: -0.05em;
+        text-wrap: balance;
+      }
+
+      .closing h2 em {
+        font-style: italic;
+      }
+
+      .closing p {
+        max-width: 38ch;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .closing-cta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 13px;
+        padding-bottom: 8px;
+      }
+
+      /* ---------------------------------------------------------------
+         Pied de page
+      --------------------------------------------------------------- */
+      .site-foot {
+        background: var(--band);
+        color: var(--band-ink);
+        padding-top: 56px;
+      }
+
+      .foot-grid {
+        display: grid;
+        grid-template-columns: 1.7fr 0.8fr 0.8fr 0.8fr;
+        gap: 40px;
+        padding-bottom: 46px;
+      }
+
+      .foot-brand .brand-mark {
+        background: var(--band-ink);
+        color: var(--band);
+      }
+
+      .foot-brand .brand-word {
+        color: var(--band-ink);
+      }
+
+      .foot-brand p {
+        max-width: 30ch;
+        margin: 14px 0 0;
+        color: var(--band-muted);
+        font-size: 12px;
+        line-height: 1.65;
+      }
+
+      .foot-col h3 {
+        margin: 4px 0 12px;
+        color: var(--band-muted);
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .foot-col a {
+        display: block;
+        width: max-content;
+        max-width: 100%;
+        padding: 4px 0;
+        color: rgba(242, 237, 227, 0.82);
+        font-size: 12px;
+        transition: color 0.18s ease;
+      }
+
+      .foot-col a:hover {
+        color: var(--band-ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .foot-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px 24px;
+        padding: 17px 0 26px;
+        border-top: 1px solid rgba(242, 237, 227, 0.16);
+        color: var(--band-muted);
+        font-size: 10.5px;
+      }
+
+      .foot-bottom p {
+        margin: 0;
+      }
+
+      .foot-bottom a {
+        color: var(--band-ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .foot-note {
+        max-width: 56ch;
+      }
+
+      /* ---------------------------------------------------------------
+         Notification
+      --------------------------------------------------------------- */
+      .toast {
+        position: fixed;
+        z-index: 200;
+        left: 24px;
+        bottom: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        max-width: min(360px, calc(100vw - 48px));
+        padding: 13px 16px;
+        background: #0f141b;
+        color: #f2ede3;
+        border: 1px solid rgba(242, 237, 227, 0.18);
+        border-radius: 3px;
+        box-shadow: 0 22px 50px -20px rgba(0, 0, 0, 0.65);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: opacity 0.22s ease, transform 0.3s var(--ease-out), visibility 0.3s;
+      }
+
+      .toast.is-visible {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+      }
+
+      .toast .icon {
+        width: 16px;
+        height: 16px;
+        margin-top: 1px;
+        color: #e8735a;
+      }
+
+      .toast p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .toast strong {
+        display: block;
+        margin-bottom: 2px;
+        color: #a7b0bc;
+        font-size: 8px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      /* ---------------------------------------------------------------
+         Apparitions
+      --------------------------------------------------------------- */
+      .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out);
+        transition-delay: var(--rd, 0ms);
+      }
+
+      .reveal.is-in {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* ---------------------------------------------------------------
+         Adaptations
+      --------------------------------------------------------------- */
+      @media (max-width: 1100px) {
+        .events {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 32px 24px;
+        }
+
+        .art-word {
+          font-size: clamp(30px, 4.2vw, 46px);
+        }
+      }
+
+      @media (max-width: 980px) {
+        .hero {
+          grid-template-columns: minmax(0, 1fr);
+          padding-block: 40px 30px;
+        }
+
+        .hero h1 {
+          font-size: clamp(48px, 9.4vw, 82px);
+        }
+
+        .hero-art {
+          width: min(560px, 100%);
+          height: auto;
+          aspect-ratio: 1 / 1.03;
+          margin: 6px auto 0;
+        }
+
+        .salon-grid,
+        .ticket-section,
+        .organizer-inner {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 38px;
+        }
+
+        .salon-copy h2,
+        .ticket-copy h2,
+        .organizer h2 {
+          max-width: 22ch;
+        }
+
+        .ticket-stage {
+          width: min(560px, 100%);
+        }
+
+        .organizer-inner .dash {
+          width: 100%;
+        }
+
+        .closing-inner {
+          grid-template-columns: minmax(0, 1fr);
+          align-items: start;
+        }
+
+        .closing-cta {
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-items: center;
+          padding-bottom: 0;
+        }
+
+        .closing::before {
+          right: -40px;
+          opacity: 0.2;
+        }
+
+        .closing::after {
+          right: -260px;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .main-nav {
+          display: none;
+        }
+
+        .menu-btn {
+          display: grid;
+        }
+
+        .head-inner {
+          grid-template-columns: auto 1fr;
+          gap: 16px;
+        }
+
+        .head-actions {
+          justify-self: end;
+        }
+
+        .foot-grid {
+          grid-template-columns: 1.4fr 1fr 1fr;
+        }
+
+        .foot-brand {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .wrap {
+          width: calc(100% - 40px);
+        }
+
+        .head-inner {
+          min-height: 66px;
+        }
+
+        .head-login {
+          display: none;
+        }
+
+        .hero h1 {
+          font-size: clamp(44px, 12.4vw, 68px);
+        }
+
+        .hero-sub {
+          font-size: 15px;
+        }
+
+        .hero-art {
+          height: auto;
+          aspect-ratio: 1 / 1.06;
+        }
+
+        .art-back {
+          display: none;
+        }
+
+        .art-poster-wrap {
+          width: 78%;
+        }
+
+        .poster {
+          padding: 18px 16px 15px;
+        }
+
+        .poster-sun {
+          width: 70%;
+          right: -16%;
+        }
+
+        .art-note {
+          width: 186px;
+          padding: 13px 14px;
+        }
+
+        .note-date {
+          font-size: 22px;
+        }
+
+        .art-stub {
+          width: 224px;
+        }
+
+        .stub-qr {
+          width: 68px;
+          flex-basis: 68px;
+        }
+
+        .caps {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .cap {
+          padding: 16px 18px;
+        }
+
+        .cap:nth-child(odd) {
+          border-left: 0;
+          padding-left: 0;
+        }
+
+        .cap:nth-child(n + 3) {
+          border-top: 1px solid var(--line);
+        }
+
+        .section-head {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 18px;
+          margin-bottom: 26px;
+        }
+
+        .head-side {
+          align-items: flex-start;
+          gap: 8px;
+          padding-bottom: 0;
+        }
+
+        .head-side p {
+          max-width: 42ch;
+          text-align: left;
+        }
+
+        .filters {
+          gap: 14px;
+        }
+
+        .filter-count {
+          display: none;
+        }
+
+        .events {
+          gap: 30px 18px;
+        }
+
+        .salon-head {
+          flex-wrap: wrap;
+        }
+
+        .ticket {
+          transform: none;
+        }
+
+        .ticket::before,
+        .ticket::after {
+          right: 108px;
+        }
+
+        .ticket-stub {
+          width: 109px;
+          flex-basis: 109px;
+          padding: 14px 9px 12px;
+        }
+
+        .ticket-main {
+          padding: 18px 16px 16px;
+        }
+
+        .ticket-qr {
+          width: 76px;
+        }
+
+        .ticket-stamp {
+          left: -12px;
+          bottom: 22px;
+          width: 60px;
+          height: 60px;
+          font-size: 5.5px;
+        }
+
+        .dash-body {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .dash-nav {
+          display: none;
+        }
+
+        .dash-main {
+          padding: 13px 13px 48px;
+        }
+
+        .closing h2 {
+          font-size: clamp(38px, 10vw, 64px);
+        }
+
+        .foot-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 28px 24px;
+        }
+
+        .foot-brand {
+          grid-column: 1 / -1;
+        }
+
+        .foot-bottom {
+          font-size: 10px;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .head-actions .btn-outline {
+          display: none;
+        }
+
+        .hero {
+          padding-top: 34px;
+        }
+
+        .hero h1 {
+          margin-top: 16px;
+        }
+
+        .hero-cta {
+          align-items: stretch;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .hero-cta .btn {
+          width: 100%;
+        }
+
+        .hero-cta .link-arrow {
+          width: max-content;
+        }
+
+        .hero-note {
+          margin-top: 22px;
+        }
+
+        .hero-art {
+          aspect-ratio: 1 / 1.06;
+        }
+
+        .art-note {
+          display: none;
+        }
+
+        .art-poster-wrap {
+          width: 82%;
+          top: 0;
+        }
+
+        .art-stub {
+          width: 206px;
+          right: 0;
+          bottom: 0;
+        }
+
+        .poster-title {
+          font-size: clamp(36px, 10.4vw, 52px);
+        }
+
+        .eyebrow {
+          font-size: 10px;
+        }
+
+        .events {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 22px;
+        }
+
+        .card-link {
+          display: grid;
+          grid-template-columns: 116px minmax(0, 1fr);
+          gap: 14px;
+          align-items: start;
+        }
+
+        .card-art {
+          aspect-ratio: 4 / 5;
+        }
+
+        .art-word {
+          font-size: 25px;
+        }
+
+        .art-inner {
+          padding: 10px 9px 11px;
+        }
+
+        .art-tag {
+          font-size: 6.5px;
+          padding: 3px 4px;
+        }
+
+        .art-num {
+          font-size: 7.5px;
+        }
+
+        .card-body {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-content: space-between;
+          height: 100%;
+          gap: 8px;
+          margin-top: 0;
+          padding-top: 2px;
+          border-top: 0;
+        }
+
+        .card-date {
+          grid-column: 1 / -1;
+          flex-direction: row;
+          align-items: baseline;
+          justify-content: flex-start;
+          gap: 5px;
+          padding: 0;
+          border-right: 0;
+        }
+
+        .card-date strong {
+          font-size: 18px;
+        }
+
+        .card-date .month {
+          font-size: 8px;
+        }
+
+        .card-main h3 {
+          font-size: 19px;
+        }
+
+        .card-main p {
+          font-size: 10.5px;
+        }
+
+        .card-side {
+          justify-content: flex-start;
+          padding-top: 2px;
+        }
+
+        .card-price {
+          font-size: 10.5px;
+        }
+
+        .card-go {
+          display: none;
+        }
+
+        .cap {
+          gap: 9px;
+        }
+
+        .cap span {
+          font-size: 10.5px;
+        }
+
+        .filter-list {
+          gap: 18px;
+        }
+
+        .salon-grid,
+        .organizer-inner {
+          padding-block: 54px;
+        }
+
+        .salon-tab {
+          padding: 5px 8px;
+        }
+
+        .msg p {
+          font-size: 12px;
+        }
+
+        .ticket-dl {
+          grid-template-columns: 1fr 1fr;
+          gap: 8px 10px;
+        }
+
+        .ticket-dl dd {
+          font-size: 10px;
+        }
+
+        .ticket-stamp {
+          display: none;
+        }
+
+        .ticket-section {
+          gap: 28px;
+        }
+
+        .closing-cta {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .closing-cta .btn {
+          width: 100%;
+        }
+
+        .closing-cta .link-arrow {
+          width: max-content;
+        }
+
+        .foot-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .toast {
+          left: 16px;
+          right: 16px;
+          bottom: 16px;
+          max-width: none;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .poster-top {
+          font-size: 7px;
+          letter-spacing: 0.1em;
+        }
+
+        .poster-foot {
+          font-size: 7px;
+          letter-spacing: 0.08em;
+        }
+
+        .art-stub {
+          width: 190px;
+        }
+
+        .stub-main {
+          padding: 10px;
+        }
+
+        .stub-qr {
+          width: 62px;
+          flex-basis: 62px;
+          padding: 6px;
+        }
+
+        .card-link {
+          grid-template-columns: 98px minmax(0, 1fr);
+          gap: 12px;
+        }
+
+        .ticket-main {
+          padding: 15px 12px 14px;
+        }
+
+        .ticket-stub {
+          width: 96px;
+          flex-basis: 96px;
+          padding: 12px 7px 10px;
+        }
+
+        .ticket::before,
+        .ticket::after {
+          right: 95px;
+        }
+
+        .ticket-main::before {
+          display: none;
+        }
+
+        .ticket-dl {
+          grid-template-columns: 1fr;
+        }
+
+        .ticket-title {
+          font-size: 24px;
+        }
+
+        .ticket-qr {
+          width: 68px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-delay: 0ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+
+        .art-layer {
+          opacity: 1;
+        }
+
+        .toast {
+          transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        }
+      }
+
+      @media (prefers-reduced-transparency: reduce) {
+        .site-head {
+          background: var(--paper);
+          -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+        }
+
+        .grain {
+          display: none;
+        }
+      }
+
+      @media (prefers-contrast: more) {
+        :root {
+          --line: rgba(32, 42, 53, 0.38);
+          --line-strong: rgba(32, 42, 53, 0.6);
+          --muted: #414b57;
+        }
+
+        [data-theme="dark"] {
+          --line: rgba(242, 237, 227, 0.38);
+          --line-strong: rgba(242, 237, 227, 0.62);
+          --muted: #c7ced6;
+        }
+
+        .site-head {
+          background: var(--paper);
+          -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+        }
+
+        .card-art {
+          border-width: 2px;
+        }
+      }
+
+      @media print {
+        .site-head,
+        .grain,
+        .toast,
+        .mobile-menu {
+          display: none !important;
+        }
+
+        body {
+          background: #fff;
+          color: #000;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6" /></symbol>
+      <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9" /></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" /><circle cx="12" cy="10" r="2.4" /></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2" /><path d="M3.5 10h17M8 3v4M16 3v4" /></symbol>
+      <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 9V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a3 3 0 0 0 0 6v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a3 3 0 0 0 0-6Z" /><path d="M14 8v8" stroke-dasharray="1.5 2.5" /></symbol>
+      <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6" height="6" rx="1" /><rect x="14.5" y="3.5" width="6" height="6" rx="1" /><rect x="3.5" y="14.5" width="6" height="6" rx="1" /><path d="M14.5 14.5h2v2h-2zM18.5 18.5h2v2h-2zM14.5 20.5h2M20.5 14.5v2" /></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M16 4.5a3 3 0 0 1 0 6M17.5 14.6c2.1.7 3.5 2.6 3.5 5.4" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17 19 7" /></symbol>
+      <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="m8 12.3 2.7 2.7L16 9.5" /></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6" /></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" /></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H4l2-4a8 8 0 1 1 15-4Z" /></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" /><path d="m9 11.8 2 2 4-4" /></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" /></symbol>
+    </svg>
+
+    <a class="skip" href="#contenu">Aller au contenu</a>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-head" id="haut">
+      <div class="wrap head-inner">
+        <a class="brand" href="#haut" aria-label="Event, retour en haut de page">
+          <span class="brand-mark" aria-hidden="true">e</span>
+          <span class="brand-word">event</span>
+          <span class="brand-dot" aria-hidden="true"></span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navigation principale">
+          <a href="#decouvrir">Découvrir</a>
+          <a href="#salon">Les salons</a>
+          <a href="#billets">Billetterie</a>
+          <a href="#organiser">Organiser</a>
+        </nav>
+
+        <div class="head-actions">
+          <a class="head-login" href="#connexion">Connexion</a>
+          <a class="btn btn-outline btn-sm" href="#organiser">Publier un événement</a>
+          <button class="icon-btn theme-btn" id="theme-toggle" type="button" aria-label="Passer en thème sombre" aria-pressed="false">
+            <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun" /></svg>
+            <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon" /></svg>
+          </button>
+          <button class="icon-btn menu-btn" id="menu-open" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu">
+            <svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="mobile-menu" id="mobile-menu" aria-hidden="true" inert>
+      <div class="mobile-menu-top">
+        <a class="brand" href="#haut" aria-label="Event, retour en haut de page">
+          <span class="brand-mark" aria-hidden="true">e</span>
+          <span class="brand-word">event</span>
+          <span class="brand-dot" aria-hidden="true"></span>
+        </a>
+        <button class="icon-btn" id="menu-close" type="button" aria-label="Fermer le menu">
+          <svg class="icon" aria-hidden="true"><use href="#i-close" /></svg>
+        </button>
+      </div>
+      <nav aria-label="Navigation mobile">
+        <a href="#decouvrir"><span>01</span>Découvrir</a>
+        <a href="#salon"><span>02</span>Les salons</a>
+        <a href="#billets"><span>03</span>Billetterie</a>
+        <a href="#organiser"><span>04</span>Organiser</a>
+      </nav>
+      <div class="mobile-menu-foot">
+        <a class="btn btn-primary" href="#decouvrir">Découvrir les sorties</a>
+        <a class="btn btn-outline" href="#organiser">Publier un événement</a>
+        <a class="head-login" href="#connexion">Connexion</a>
+      </div>
+    </div>
+
+    <main id="contenu">
+      <section class="hero wrap" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow intro-rise" style="--d: 60ms"><b>Abidjan</b> Côte d'Ivoire · Billetterie en FCFA</p>
+          <h1 id="hero-title">
+            <span class="line"><span style="--d: 130ms">La sortie</span></span>
+            <span class="line"><span style="--d: 190ms">commence ici<span class="dot">.</span></span></span>
+            <span class="line"><span style="--d: 250ms"><em>La rencontre</em></span></span>
+            <span class="line"><span style="--d: 310ms">continue<span class="dot">.</span></span></span>
+          </h1>
+          <p class="hero-sub intro-rise" style="--d: 430ms">
+            Trouve les événements publiés en Côte d'Ivoire, réserve ta place en francs CFA et
+            retrouve les participants dans le salon de chaque sortie.
+          </p>
+          <div class="hero-cta intro-rise" style="--d: 500ms">
+            <a class="btn btn-primary" href="#decouvrir">
+              Découvrir les sorties
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+            </a>
+            <a class="link-arrow" href="#organiser">
+              Publier un événement
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>
+            </a>
+          </div>
+          <p class="hero-note intro-rise" style="--d: 570ms">
+            <svg class="icon" aria-hidden="true"><use href="#i-ticket" /></svg>
+            <span><strong>Billets numériques</strong> · Paiement en FCFA, selon les options de l'événement.</span>
+          </p>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <div class="art-stage" id="art-stage">
+            <div class="art-layer art-back"><span>Programme 2026</span></div>
+
+            <div class="art-layer art-poster-wrap">
+              <div class="poster">
+                <div class="poster-lines"></div>
+                <div class="poster-sun"></div>
+                <div class="poster-top"><span>Event · Abidjan</span><span>Sam 07.11</span></div>
+                <div class="poster-mid">
+                  <span class="poster-kicker">Palais de la Culture</span>
+                  <span class="poster-title">Nuit<br /><em>du jazz</em></span>
+                </div>
+                <div class="poster-foot"><span>21h00 · Treichville</span><span>12 000 FCFA</span></div>
+              </div>
+            </div>
+
+            <aside class="art-layer art-note">
+              <p class="note-label">Prochain rendez-vous</p>
+              <p class="note-date">Sam. 7 novembre</p>
+              <p class="note-title">Nuit du jazz</p>
+              <p class="note-place">Treichville · 21h00</p>
+              <span class="note-tag">Billets disponibles</span>
+            </aside>
+
+            <div class="art-layer art-stub">
+              <div class="stub-main">
+                <p class="stub-label">Admission</p>
+                <p class="stub-event">Nuit du jazz</p>
+                <p class="stub-meta">07.11 · 21h00</p>
+                <p class="stub-number">Nº 0711 · 1 personne</p>
+              </div>
+              <div class="stub-qr">
+                <svg class="qr-art" data-qr viewBox="0 0 84 84" role="presentation"></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="capabilities" aria-label="Ce que permet Event">
+        <div class="wrap caps">
+          <div class="cap">
+            <svg class="icon" aria-hidden="true"><use href="#i-ticket" /></svg>
+            <div><strong>Billets avec QR code</strong><span>Un billet numérique vérifié à l'entrée.</span></div>
+          </div>
+          <div class="cap">
+            <svg class="icon" aria-hidden="true"><use href="#i-chat" /></svg>
+            <div><strong>Un salon par événement</strong><span>Les échanges continuent avant et après.</span></div>
+          </div>
+          <div class="cap">
+            <svg class="icon" aria-hidden="true"><use href="#i-pin" /></svg>
+            <div><strong>Paiement en FCFA</strong><span>Mobile money ou carte, selon les options proposées.</span></div>
+          </div>
+          <div class="cap">
+            <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+            <div><strong>Espace organisateur</strong><span>Publication, participants et accès au même endroit.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section wrap" id="decouvrir" aria-labelledby="decouvrir-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow"><b>01</b> Découvrir</p>
+            <h2 id="decouvrir-title">Ce qui se prépare à Abidjan.</h2>
+          </div>
+          <div class="head-side">
+            <p>Une sélection de sorties publiées par leurs organisateurs. Dates, lieux et tarifs viennent de leurs fiches.</p>
+            <a class="link-arrow" href="#decouvrir">
+              Tout le programme
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="filters">
+          <div class="filter-list" role="group" aria-label="Filtrer les événements par envie">
+            <button class="filter" type="button" data-filter="tout" aria-pressed="true">Tout</button>
+            <button class="filter" type="button" data-filter="concert" aria-pressed="false">Concert</button>
+            <button class="filter" type="button" data-filter="culture" aria-pressed="false">Culture</button>
+            <button class="filter" type="button" data-filter="atelier" aria-pressed="false">Atelier</button>
+            <button class="filter" type="button" data-filter="rencontre" aria-pressed="false">Rencontre</button>
+          </div>
+          <p class="filter-count" id="filter-count" aria-live="polite">4 sorties affichées</p>
+        </div>
+
+        <div class="events" id="events">
+          <article class="event-card" data-cat="concert">
+            <a class="card-link" href="#evenement-nuit-du-jazz" data-demo="Aperçu : la fiche « Nuit du jazz » s'ouvrirait ici.">
+              <div class="card-art art-jazz">
+                <div class="art-fill" aria-hidden="true"></div>
+                <div class="art-inner">
+                  <div class="art-top"><span class="art-tag">Concert</span><span class="art-num">01</span></div>
+                  <div class="art-word">JAZZ<em>Nuit du jazz</em></div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-date"><span class="dow">Sam.</span><strong>07</strong><span class="month">nov.</span></div>
+                <div class="card-main">
+                  <h3>Nuit du jazz</h3>
+                  <p>Palais de la Culture · Treichville</p>
+                </div>
+                <div class="card-side">
+                  <p class="card-price"><span>Dès</span>12 000 FCFA</p>
+                  <span class="card-go"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="event-card" data-cat="culture">
+            <a class="card-link" href="#evenement-marche-des-createurs" data-demo="Aperçu : la fiche « Marché des créateurs » s'ouvrirait ici.">
+              <div class="card-art art-marche">
+                <div class="art-fill" aria-hidden="true"></div>
+                <div class="art-inner">
+                  <div class="art-top"><span class="art-tag">Culture</span><span class="art-num">02</span></div>
+                  <div class="art-word">MATIÈRE<em>Marché des créateurs</em></div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-date"><span class="dow">Dim.</span><strong>08</strong><span class="month">nov.</span></div>
+                <div class="card-main">
+                  <h3>Marché des créateurs</h3>
+                  <p>Jardin botanique · Cocody</p>
+                </div>
+                <div class="card-side">
+                  <p class="card-price"><span>Tarif</span>Entrée libre</p>
+                  <span class="card-go"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="event-card" data-cat="atelier">
+            <a class="card-link" href="#evenement-atelier-photo" data-demo="Aperçu : la fiche de l'atelier photo s'ouvrirait ici.">
+              <div class="card-art art-atelier">
+                <div class="art-fill" aria-hidden="true"></div>
+                <div class="art-inner">
+                  <div class="art-top"><span class="art-tag">Atelier</span><span class="art-num">03</span></div>
+                  <div class="art-word">LUMIÈRE<em>Photographier la ville</em></div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-date"><span class="dow">Jeu.</span><strong>12</strong><span class="month">nov.</span></div>
+                <div class="card-main">
+                  <h3>Photographier la ville</h3>
+                  <p>Maison des arts · Plateau</p>
+                </div>
+                <div class="card-side">
+                  <p class="card-price"><span>Dès</span>8 000 FCFA</p>
+                  <span class="card-go"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="event-card" data-cat="rencontre">
+            <a class="card-link" href="#evenement-batir-en-collectif" data-demo="Aperçu : la fiche « Bâtir en collectif » s'ouvrirait ici.">
+              <div class="card-art art-rencontre">
+                <div class="art-fill" aria-hidden="true"></div>
+                <div class="art-inner">
+                  <div class="art-top"><span class="art-tag">Rencontre</span><span class="art-num">04</span></div>
+                  <div class="art-word">LIENS<em>Bâtir en collectif</em></div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-date"><span class="dow">Ven.</span><strong>13</strong><span class="month">nov.</span></div>
+                <div class="card-main">
+                  <h3>Bâtir en collectif</h3>
+                  <p>Impact Hub · Cocody</p>
+                </div>
+                <div class="card-side">
+                  <p class="card-price"><span>Dès</span>5 000 FCFA</p>
+                  <span class="card-go"><svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+        </div>
+      </section>
+
+      <section class="salon-band" id="salon" aria-labelledby="salon-title">
+        <div class="wrap salon-grid">
+          <div class="salon-copy">
+            <p class="eyebrow"><b>02</b> Les salons</p>
+            <h2 id="salon-title">Le fil ne se coupe pas à la sortie.</h2>
+            <p class="lead">
+              Chaque événement a son salon. Les participants s'y organisent avant la date,
+              partagent ce qui se passe sur place et gardent le contact après la dernière chanson.
+            </p>
+            <ul class="phase-list">
+              <li class="phase">
+                <span>AVANT</span>
+                <div>
+                  <strong>Se donner rendez-vous</strong>
+                  <p>Covoiturage, dernière question pratique, heure et point de rencontre.</p>
+                </div>
+              </li>
+              <li class="phase">
+                <span>PENDANT</span>
+                <div>
+                  <strong>Suivre le moment ensemble</strong>
+                  <p>Le programme en direct et les photos prises sur place.</p>
+                </div>
+              </li>
+              <li class="phase">
+                <span>APRÈS</span>
+                <div>
+                  <strong>Rester en lien</strong>
+                  <p>Retrouver les photos, prolonger la discussion et garder les contacts utiles.</p>
+                </div>
+              </li>
+            </ul>
+            <a class="link-arrow" href="#decouvrir">
+              Voir un salon en contexte
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+            </a>
+          </div>
+
+          <div class="salon-ui">
+            <div class="salon-head">
+              <div>
+                <p class="salon-title">Salon · Nuit du jazz</p>
+                <p class="salon-status"><span class="live-dot" aria-hidden="true"></span>Ouvert avant l'événement</p>
+              </div>
+              <div class="salon-tabs" role="tablist" aria-label="Moment du salon">
+                <button class="salon-tab" type="button" role="tab" id="tab-avant" aria-selected="true" aria-controls="panel-avant" tabindex="0">Avant</button>
+                <button class="salon-tab" type="button" role="tab" id="tab-pendant" aria-selected="false" aria-controls="panel-pendant" tabindex="-1">Pendant</button>
+                <button class="salon-tab" type="button" role="tab" id="tab-apres" aria-selected="false" aria-controls="panel-apres" tabindex="-1">Après</button>
+              </div>
+            </div>
+
+            <div class="salon-panel" role="tabpanel" id="panel-avant" aria-labelledby="tab-avant" tabindex="0">
+              <div class="msg">
+                <span class="avatar avatar-cobalt" aria-hidden="true">AK</span>
+                <div class="msg-body">
+                  <div class="msg-head"><strong>Aïcha K.</strong><time>18:42</time></div>
+                  <p>Quelqu'un part de Cocody pour la Nuit du jazz ?</p>
+                </div>
+              </div>
+              <div class="msg">
+                <span class="avatar avatar-gold" aria-hidden="true">YN</span>
+                <div class="msg-body">
+                  <div class="msg-head"><strong>Yann N.</strong><time>18:44</time></div>
+                  <p>Oui, je pars vers 20h. Il reste deux places dans la voiture.</p>
+                </div>
+              </div>
+              <div class="msg-connection">
+                <svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg>
+                Connexion acceptée entre Aïcha et Yann.
+              </div>
+              <div class="msg">
+                <span class="avatar avatar-ink" aria-hidden="true">MT</span>
+                <div class="msg-body">
+                  <div class="msg-head"><strong>Mariam T.</strong><time>18:47</time></div>
+                  <p>Je vous retrouve à l'entrée à 20h45.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="salon-panel" role="tabpanel" id="panel-pendant" aria-labelledby="tab-pendant" tabindex="0" hidden>
+              <div class="msg">
+                <span class="avatar avatar-ink" aria-hidden="true">MT</span>
+                <div class="msg-body">
+                  <div class="msg-head"><strong>Mariam T.</strong><time>21:12</time></div>
+                  <p>Le set commence dans dix minutes. On est au balcon, côté scène.</p>
+                </div>
+              </div>
+              <div class="msg">
+                <span class="avatar avatar-cobalt" aria-hidden="true">AK</span>
+                <div class="msg-body">
+                  <div class="msg-head"><strong>Aïcha K.</strong><time>21:30</time></div>
+                  <p>La section cuivres, c'est quelque chose. Je mets les photos dans l'album.</p>
+                </div>
+              </div>
+              <div class="msg-connection">
+                <svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg>
+                Les photos de la soirée sont dans l'album du salon.
+              </div>
+            </div>
+
+            <div class="salon-panel" role="tabpanel" id="panel-apres" aria-labelledby="tab-apres" tabindex="0" hidden>
+              <div class="msg">
+                <span class="avatar avatar-gold" aria-hidden="true">YN</span>
+                <div class="msg-body">
+                  <div class="msg-head"><strong>Yann N.</strong><time>09:12</time></div>
+                  <p>Merci pour hier soir. On remet ça au prochain rendez-vous ?</p>
+                </div>
+              </div>
+              <div class="msg">
+                <span class="avatar avatar-cobalt" aria-hidden="true">AK</span>
+                <div class="msg-body">
+                  <div class="msg-head"><strong>Aïcha K.</strong><time>09:15</time></div>
+                  <p>Avec plaisir. Je t'envoie les photos par ici.</p>
+                </div>
+              </div>
+              <div class="msg-connection">
+                <svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg>
+                Aïcha et Yann restent connectés après l'événement.
+              </div>
+            </div>
+
+            <div class="composer" aria-hidden="true">
+              <span>Écrire dans le salon</span>
+              <button type="button" tabindex="-1">
+                <svg class="icon" aria-hidden="true"><use href="#i-send" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section wrap ticket-section" id="billets" aria-labelledby="billets-title">
+        <div class="ticket-copy">
+          <p class="eyebrow"><b>03</b> Billetterie</p>
+          <h2 id="billets-title">Ta place, en trois gestes.</h2>
+          <p class="lead">
+            Le parcours reste court et lisible : le prix, les conditions et les moyens de paiement
+            sont annoncés avant de valider la commande.
+          </p>
+          <ol class="steps">
+            <li class="step">
+              <span class="step-num" aria-hidden="true">01</span>
+              <div>
+                <h3>Choisis ton événement</h3>
+                <p>Date, lieu, tarif et conditions figurent sur la fiche publiée.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">02</span>
+              <div>
+                <h3>Paie en FCFA</h3>
+                <p>Mobile money ou carte, selon les options proposées pour cette sortie.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">03</span>
+              <div>
+                <h3>Présente ton billet</h3>
+                <p>Le QR code est vérifié à l'entrée. Ton billet reste accessible depuis ton compte.</p>
+              </div>
+            </li>
+          </ol>
+          <p class="hero-note" style="margin-top: 0; padding-top: 0; border-top: 0">
+            <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+            <span><strong>Un accès par personne.</strong> Le contrôle d'accès évite les doubles entrées.</span>
+          </p>
+        </div>
+
+        <div class="ticket-stage">
+          <div class="ticket-shadow" aria-hidden="true"></div>
+          <article class="ticket" aria-label="Exemple de billet pour la Nuit du jazz">
+            <div class="ticket-main">
+              <p class="ticket-brand">event</p>
+              <p class="ticket-kicker">Admission générale</p>
+              <h3 class="ticket-title">Nuit du jazz</h3>
+              <dl class="ticket-dl">
+                <div><dt>Date</dt><dd>Sam. 7 novembre 2026</dd></div>
+                <div><dt>Heure</dt><dd>21h00</dd></div>
+                <div><dt>Lieu</dt><dd>Palais de la Culture</dd></div>
+                <div><dt>Ville</dt><dd>Treichville, Abidjan</dd></div>
+              </dl>
+              <div class="ticket-foot">
+                <p class="ticket-price"><small>Tarif</small>12 000 FCFA</p>
+                <p class="ticket-ref">Billet nº 0711<br />1 personne</p>
+              </div>
+            </div>
+            <div class="ticket-stub">
+              <div>
+                <div class="ticket-qr">
+                  <svg class="qr-art" data-qr viewBox="0 0 84 84" role="presentation"></svg>
+                </div>
+                <p class="ticket-scan">Scanner<br />à l'entrée</p>
+              </div>
+              <p class="ticket-price">12 000<small>FCFA</small></p>
+            </div>
+            <span class="ticket-stamp" aria-hidden="true">Event<br />Billet<br />2026</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="organizer" id="organiser" aria-labelledby="organiser-title">
+        <div class="wrap organizer-inner">
+          <div>
+            <p class="eyebrow"><b>04</b> Organiser</p>
+            <h2 id="organiser-title">Organise sans perdre le fil.</h2>
+            <p class="lead">
+              Publie ton événement, suis les participants et contrôle les accès depuis le même
+              espace. Les informations affichées restent celles de ta fiche.
+            </p>
+            <ul class="org-list">
+              <li class="org-item">
+                <svg class="icon" aria-hidden="true"><use href="#i-calendar" /></svg>
+                <div>
+                  <strong>Publication</strong>
+                  <span>Une fiche claire, une couverture, des tarifs et des conditions.</span>
+                </div>
+              </li>
+              <li class="org-item">
+                <svg class="icon" aria-hidden="true"><use href="#i-ticket" /></svg>
+                <div>
+                  <strong>Billetterie</strong>
+                  <span>Les commandes et les billets émis, au même endroit.</span>
+                </div>
+              </li>
+              <li class="org-item">
+                <svg class="icon" aria-hidden="true"><use href="#i-qr" /></svg>
+                <div>
+                  <strong>Contrôle d'accès</strong>
+                  <span>Scanne les billets à l'entrée et suis les validations.</span>
+                </div>
+              </li>
+              <li class="org-item">
+                <svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>
+                <div>
+                  <strong>Équipe</strong>
+                  <span>Donne les bons accès aux personnes qui t'accompagnent.</span>
+                </div>
+              </li>
+            </ul>
+            <a class="btn btn-light" href="#organiser" data-demo="Aperçu : l'espace organisateur s'ouvrirait ici.">
+              Ouvrir l'espace organisateur
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+            </a>
+          </div>
+
+          <div class="dash" aria-hidden="true">
+            <div class="dash-top">
+              <div class="dash-brand">
+                <span class="brand-mark">e</span>
+                <p>Espace organisateur</p>
+              </div>
+              <span class="dash-avatar">AK</span>
+            </div>
+            <div class="dash-body">
+              <div class="dash-nav">
+                <span class="is-active"><svg class="icon"><use href="#i-calendar" /></svg>Événements</span>
+                <span><svg class="icon"><use href="#i-users" /></svg>Participants</span>
+                <span><svg class="icon"><use href="#i-qr" /></svg>Contrôle d'accès</span>
+                <span><svg class="icon"><use href="#i-shield" /></svg>Équipe</span>
+              </div>
+              <div class="dash-main">
+                <div class="dash-head">
+                  <h3>Mes événements</h3>
+                  <span class="dash-publish"><svg class="icon" style="width: 10px; height: 10px"><use href="#i-plus" /></svg>Publier</span>
+                </div>
+                <div class="dash-row">
+                  <div class="dash-row-title">
+                    <strong>Nuit du jazz</strong>
+                    <span>Sam. 7 nov. · Palais de la Culture</span>
+                  </div>
+                  <span class="status status-live">Publié</span>
+                  <svg class="icon"><use href="#i-arrow" /></svg>
+                </div>
+                <div class="dash-row">
+                  <div class="dash-row-title">
+                    <strong>Marché des créateurs</strong>
+                    <span>Dim. 8 nov. · Jardin botanique</span>
+                  </div>
+                  <span class="status status-live">Publié</span>
+                  <svg class="icon"><use href="#i-arrow" /></svg>
+                </div>
+                <div class="dash-row">
+                  <div class="dash-row-title">
+                    <strong>Photographier la ville</strong>
+                    <span>Jeu. 12 nov. · Maison des arts</span>
+                  </div>
+                  <span class="status status-draft">Brouillon</span>
+                  <svg class="icon"><use href="#i-arrow" /></svg>
+                </div>
+                <div class="dash-toast">
+                  <span class="check"><svg class="icon"><use href="#i-check" /></svg></span>
+                  <div>
+                    <strong>Accès validé</strong>
+                    <small>Billet vérifié à l'entrée</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing" id="rejoindre" aria-labelledby="rejoindre-title">
+        <div class="wrap closing-inner">
+          <div>
+            <p class="eyebrow"><b>05</b> Rejoindre</p>
+            <h2 id="rejoindre-title">Ta prochaine sortie a <em>déjà</em> son salon.</h2>
+            <p>
+              Découvre les événements publiés, réserve ta place et retrouve les participants
+              avant, pendant et après la rencontre.
+            </p>
+          </div>
+          <div class="closing-cta">
+            <a class="btn btn-primary" href="#decouvrir">
+              Découvrir les sorties
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow" /></svg>
+            </a>
+            <a class="link-arrow" href="#organiser">
+              Créer un événement
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <div class="foot-grid">
+          <div class="foot-brand">
+            <a class="brand" href="#haut" aria-label="Event, retour en haut de page">
+              <span class="brand-mark" aria-hidden="true">e</span>
+              <span class="brand-word">event</span>
+              <span class="brand-dot" aria-hidden="true"></span>
+            </a>
+            <p>
+              La plateforme événementielle de Côte d'Ivoire. Découvrir une sortie, réserver sa
+              place et rester en lien avec les personnes rencontrées.
+            </p>
+          </div>
+          <div class="foot-col">
+            <h3>Découvrir</h3>
+            <a href="#decouvrir">Tous les événements</a>
+            <a href="#decouvrir">Cette semaine</a>
+            <a href="#decouvrir">Villes</a>
+            <a href="#salon">Les salons</a>
+          </div>
+          <div class="foot-col">
+            <h3>Organiser</h3>
+            <a href="#organiser">Publier un événement</a>
+            <a href="#billets">Billetterie</a>
+            <a href="#organiser">Contrôle d'accès</a>
+            <a href="#organiser">Équipe</a>
+          </div>
+          <div class="foot-col">
+            <h3>Informations</h3>
+            <a href="#connexion">Connexion</a>
+            <a href="#connexion">Créer un compte</a>
+            <a href="#mentions">Conditions</a>
+            <a href="#confidentialite">Confidentialité</a>
+          </div>
+        </div>
+        <div class="foot-bottom">
+          <p>© <span id="year">2026</span> Event · Abidjan, Côte d'Ivoire</p>
+          <p class="foot-note">Aperçu de direction artistique. Les événements, dates et tarifs affichés sont des exemples.</p>
+          <a href="#haut">Retour en haut</a>
+        </div>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+      <svg class="icon" aria-hidden="true"><use href="#i-check-circle" /></svg>
+      <p><strong>Aperçu</strong><span id="toast-text"></span></p>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var $ = function (selector, context) {
+          return (context || document).querySelector(selector);
+        };
+        var $$ = function (selector, context) {
+          return Array.prototype.slice.call((context || document).querySelectorAll(selector));
+        };
+        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+        /* Thème clair et sombre */
+        var root = document.documentElement;
+        var themeBtn = $("#theme-toggle");
+        var themeMeta = document.querySelector('meta[name="theme-color"]');
+
+        function applyTheme(theme, persist) {
+          root.dataset.theme = theme;
+          if (themeBtn) {
+            themeBtn.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+            themeBtn.setAttribute("aria-label", theme === "dark" ? "Passer en thème clair" : "Passer en thème sombre");
+          }
+          if (themeMeta) {
+            themeMeta.setAttribute("content", theme === "dark" ? "#141A22" : "#F7F4EE");
+          }
+          if (persist) {
+            try {
+              localStorage.setItem("event-theme", theme);
+            } catch (error) {}
+          }
+        }
+
+        applyTheme(root.dataset.theme === "dark" ? "dark" : "light", false);
+
+        if (themeBtn) {
+          themeBtn.addEventListener("click", function () {
+            var next = root.dataset.theme === "dark" ? "light" : "dark";
+            if (!reduceMotion.matches) {
+              root.classList.add("theme-transition");
+              window.setTimeout(function () {
+                root.classList.remove("theme-transition");
+              }, 340);
+            }
+            applyTheme(next, true);
+          });
+        }
+
+        /* En-tête au défilement */
+        var head = $(".site-head");
+        function onScroll() {
+          if (head) head.classList.toggle("is-scrolled", window.scrollY > 8);
+        }
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+
+        /* Menu mobile */
+        var menu = $("#mobile-menu");
+        var menuOpen = $("#menu-open");
+        var menuClose = $("#menu-close");
+        var lastFocus = null;
+
+        function openMenu() {
+          if (!menu || !menuOpen) return;
+          lastFocus = document.activeElement;
+          menu.classList.add("is-open");
+          menu.removeAttribute("inert");
+          menu.setAttribute("aria-hidden", "false");
+          menuOpen.setAttribute("aria-expanded", "true");
+          document.body.classList.add("menu-open");
+          if (menuClose) menuClose.focus();
+        }
+
+        function closeMenu() {
+          if (!menu || !menuOpen) return;
+          menu.classList.remove("is-open");
+          menu.setAttribute("aria-hidden", "true");
+          menu.setAttribute("inert", "");
+          menuOpen.setAttribute("aria-expanded", "false");
+          document.body.classList.remove("menu-open");
+          if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+          else menuOpen.focus();
+        }
+
+        if (menuOpen) menuOpen.addEventListener("click", openMenu);
+        if (menuClose) menuClose.addEventListener("click", closeMenu);
+        if (menu) {
+          $$("a", menu).forEach(function (link) {
+            link.addEventListener("click", closeMenu);
+          });
+          menu.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              closeMenu();
+              return;
+            }
+            if (event.key !== "Tab") return;
+            var focusable = $$("a[href], button:not([disabled])", menu).filter(function (el) {
+              return el.offsetParent !== null;
+            });
+            if (!focusable.length) return;
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          });
+        }
+
+        /* Apparitions au défilement */
+        if (!reduceMotion.matches && "IntersectionObserver" in window) {
+          var targets = $$(
+            ".section-head, .event-card, .salon-copy, .salon-ui, .ticket-copy, .ticket-stage, .organizer-inner > *, .closing-inner > *, .cap",
+          );
+          targets.forEach(function (el) {
+            el.classList.add("reveal");
+            if (el.classList.contains("event-card")) {
+              var siblings = Array.prototype.slice.call(el.parentElement.children);
+              var index = siblings.indexOf(el);
+              el.style.setProperty("--rd", index * 55 + "ms");
+            }
+          });
+          var observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add("is-in");
+                observer.unobserve(entry.target);
+              });
+            },
+            { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+          );
+          targets.forEach(function (el) {
+            observer.observe(el);
+          });
+        }
+
+        /* Filtres */
+        var cards = $$(".event-card");
+        var filters = $$(".filter");
+        var count = $("#filter-count");
+        var hideTimers = new WeakMap();
+
+        function setFilter(category) {
+          filters.forEach(function (button) {
+            button.setAttribute("aria-pressed", String(button.dataset.filter === category));
+          });
+          var visible = 0;
+          cards.forEach(function (card) {
+            var show = category === "tout" || card.dataset.cat === category;
+            var timer = hideTimers.get(card);
+            if (timer) window.clearTimeout(timer);
+            if (show) {
+              visible += 1;
+              if (card.hidden) {
+                card.hidden = false;
+                card.classList.add("is-filtered");
+                window.requestAnimationFrame(function () {
+                  window.requestAnimationFrame(function () {
+                    card.classList.remove("is-filtered");
+                  });
+                });
+              } else {
+                card.classList.remove("is-filtered");
+              }
+            } else {
+              card.classList.add("is-filtered");
+              hideTimers.set(
+                card,
+                window.setTimeout(function () {
+                  card.hidden = true;
+                  card.classList.remove("is-filtered");
+                }, 190),
+              );
+            }
+          });
+          if (count) {
+            count.textContent = visible + (visible > 1 ? " sorties affichées" : " sortie affichée");
+          }
+        }
+
+        filters.forEach(function (button) {
+          button.addEventListener("click", function () {
+            setFilter(button.dataset.filter);
+          });
+        });
+
+        /* Onglets du salon */
+        var tabs = $$(".salon-tab");
+        function selectTab(tab, moveFocus) {
+          tabs.forEach(function (item) {
+            var selected = item === tab;
+            item.setAttribute("aria-selected", String(selected));
+            item.tabIndex = selected ? 0 : -1;
+            var panel = document.getElementById(item.getAttribute("aria-controls"));
+            if (panel) panel.hidden = !selected;
+          });
+          var current = document.getElementById(tab.getAttribute("aria-controls"));
+          if (current) {
+            current.classList.remove("is-entering");
+            void current.offsetWidth;
+            current.classList.add("is-entering");
+          }
+          if (moveFocus) tab.focus();
+        }
+
+        tabs.forEach(function (tab, index) {
+          tab.addEventListener("click", function () {
+            selectTab(tab, false);
+          });
+          tab.addEventListener("keydown", function (event) {
+            var next = null;
+            if (event.key === "ArrowRight") next = tabs[(index + 1) % tabs.length];
+            if (event.key === "ArrowLeft") next = tabs[(index - 1 + tabs.length) % tabs.length];
+            if (event.key === "Home") next = tabs[0];
+            if (event.key === "End") next = tabs[tabs.length - 1];
+            if (!next) return;
+            event.preventDefault();
+            selectTab(next, true);
+          });
+        });
+
+        /* Parallaxe douce sur les affiches */
+        var stage = $("#art-stage");
+        var canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+        if (stage && canHover && !reduceMotion.matches) {
+          var targetX = 0;
+          var targetY = 0;
+          var currentX = 0;
+          var currentY = 0;
+          var frame = null;
+
+          function animateStage() {
+            currentX += (targetX - currentX) * 0.08;
+            currentY += (targetY - currentY) * 0.08;
+            stage.style.setProperty("--px", currentX.toFixed(2) + "px");
+            stage.style.setProperty("--py", currentY.toFixed(2) + "px");
+            if (Math.abs(targetX - currentX) > 0.08 || Math.abs(targetY - currentY) > 0.08) {
+              frame = window.requestAnimationFrame(animateStage);
+            } else {
+              frame = null;
+            }
+          }
+
+          function startStage() {
+            if (!frame) frame = window.requestAnimationFrame(animateStage);
+          }
+
+          stage.addEventListener("pointermove", function (event) {
+            var rect = stage.getBoundingClientRect();
+            targetX = (event.clientX - rect.left) / rect.width - 0.5;
+            targetY = (event.clientY - rect.top) / rect.height - 0.5;
+            targetX *= 18;
+            targetY *= 18;
+            startStage();
+          });
+
+          stage.addEventListener("pointerleave", function () {
+            targetX = 0;
+            targetY = 0;
+            startStage();
+          });
+        }
+
+        /* QR décoratifs */
+        function drawQR(svg) {
+          var N = 21;
+          var cell = 4;
+          var reserved = [];
+          var x;
+          var y;
+          for (y = 0; y < N; y += 1) {
+            reserved[y] = [];
+            for (x = 0; x < N; x += 1) reserved[y][x] = false;
+          }
+
+          function reserve(px, py, width, height) {
+            for (var yy = py; yy < py + height; yy += 1) {
+              for (var xx = px; xx < px + width; xx += 1) reserved[yy][xx] = true;
+            }
+          }
+
+          reserve(0, 0, 7, 7);
+          reserve(N - 7, 0, 7, 7);
+          reserve(0, N - 7, 7, 7);
+          for (var i = 8; i < N - 8; i += 1) {
+            reserved[6][i] = true;
+            reserved[i][6] = true;
+          }
+
+          var seed = 20261107;
+          function random() {
+            seed = (seed * 1664525 + 1013904223) >>> 0;
+            return seed / 4294967296;
+          }
+
+          var fragment = document.createDocumentFragment();
+          function add(px, py, width, height, fill) {
+            var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", px);
+            rect.setAttribute("y", py);
+            rect.setAttribute("width", width);
+            rect.setAttribute("height", height);
+            rect.setAttribute("fill", fill);
+            fragment.appendChild(rect);
+          }
+
+          var ink = "#202a35";
+          var paper = "#fffdfa";
+          for (y = 0; y < N; y += 1) {
+            for (x = 0; x < N; x += 1) {
+              if (!reserved[y][x] && random() > 0.52) add(x * cell, y * cell, cell, cell, ink);
+            }
+          }
+          for (var t = 8; t < N - 8; t += 2) {
+            add(t * cell, 6 * cell, cell, cell, ink);
+            add(6 * cell, t * cell, cell, cell, ink);
+          }
+          function finder(px, py) {
+            add(px * cell, py * cell, 7 * cell, 7 * cell, ink);
+            add((px + 1) * cell, (py + 1) * cell, 5 * cell, 5 * cell, paper);
+            add((px + 2) * cell, (py + 2) * cell, 3 * cell, 3 * cell, ink);
+          }
+          finder(0, 0);
+          finder(N - 7, 0);
+          finder(0, N - 7);
+          svg.setAttribute("shape-rendering", "crispEdges");
+          svg.appendChild(fragment);
+        }
+
+        $$("[data-qr]").forEach(drawQR);
+
+        /* Notification d'aperçu */
+        var toast = $("#toast");
+        var toastText = $("#toast-text");
+        var toastTimer = null;
+
+        function showToast(message) {
+          if (!toast || !toastText) return;
+          toastText.textContent = message;
+          toast.classList.add("is-visible");
+          if (toastTimer) window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(function () {
+            toast.classList.remove("is-visible");
+          }, 4200);
+        }
+
+        $$("[data-demo]").forEach(function (element) {
+          element.addEventListener("click", function (event) {
+            if (element.tagName === "A") event.preventDefault();
+            showToast(element.getAttribute("data-demo") || "Aperçu de l'interface.");
+          });
+        });
+
+        var year = $("#year");
+        if (year) year.textContent = String(new Date().getFullYear());
+      })();
+    </script>
+  </body>
+</html>
+

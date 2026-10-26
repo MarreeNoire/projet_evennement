@@ -3562,4 +3562,13 @@
     transition: none;
   }
 }
+
+/* La barre d'onglets mobile est fixe : le pied de page lui réserve sa hauteur,
+   comme dans `editorial-shell.module.css`, pour que la dernière ligne reste
+   atteignable. */
+@media (max-width: 767px) {
+  .home .site-foot {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+}
     

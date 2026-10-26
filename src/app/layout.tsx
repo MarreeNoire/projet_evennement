@@ -2,8 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, Bricolage_Grotesque } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
-import { ServiceWorkerRegistration } from "@/components/providers/service-worker-registration";
-import { PWAInstallPrompt, PWAInstallBanner } from "@/components/pwa/pwa-install-prompt";
+import { ServiceWorkerCleanup } from "@/components/providers/service-worker-cleanup";
 import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
@@ -62,7 +61,6 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   formatDetection: { telephone: false, address: false, email: false },
-  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -96,9 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppProviders>
           <div id="contenu">{children}</div>
         </AppProviders>
-        <ServiceWorkerRegistration />
-        <PWAInstallPrompt />
-        <PWAInstallBanner />
+        <ServiceWorkerCleanup />
       </body>
     </html>
   );

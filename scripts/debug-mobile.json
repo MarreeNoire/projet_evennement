@@ -1,0 +1,57 @@
+{
+  "measures": {
+    "viewport": {
+      "w": 360,
+      "h": 800,
+      "dpr": 1
+    },
+    "htmlClass": "light",
+    "bodyPaddingInlineStart": "0px",
+    "header": {
+      "x": 0,
+      "y": 0,
+      "w": 350,
+      "h": 65,
+      "position": "sticky",
+      "zIndex": "40"
+    },
+    "headerInnerWidth": 350,
+    "rail": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "position": "fixed",
+      "zIndex": "40"
+    },
+    "heroStage": {
+      "x": 0,
+      "y": 65,
+      "w": 350,
+      "h": 420,
+      "position": "relative",
+      "zIndex": "auto"
+    },
+    "main": {
+      "x": 0,
+      "y": 65,
+      "w": 350,
+      "h": 981,
+      "position": "static",
+      "zIndex": "auto"
+    },
+    "scrollW": 350,
+    "innerW": 360,
+    "hasHorizontalOverflow": false,
+    "tabbar": {
+      "x": 0,
+      "y": 743,
+      "w": 350,
+      "h": 57,
+      "position": "fixed",
+      "zIndex": "40"
+    },
+    "buildId": null
+  },
+  "errors": []
+}

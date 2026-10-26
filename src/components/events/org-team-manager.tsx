@@ -12,11 +12,7 @@ import {
   X,
   Trash2,
   Edit2,
-  Sparkles,
-  Users,
-  AlertCircle,
   Loader2,
-  ArrowRight,
   Info,
 } from "lucide-react";
 
@@ -24,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Alert, EmptyState } from "@/components/ui/states";
+import { Alert } from "@/components/ui/states";
 import { Field, Select } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import {
@@ -34,7 +30,7 @@ import {
   removeTeamMemberAction,
   type SearchUserProfile,
 } from "@/lib/team/actions";
-import { ORG_ROLE_LABELS, type OrgRole } from "@/lib/constants";
+import { ORG_ROLE_LABELS } from "@/lib/constants";
 
 export interface TeamMember {
   id: string;

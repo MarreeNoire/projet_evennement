@@ -1,0 +1,84 @@
+console: A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <RedirectBoundary>
+      <RedirectErrorBoundary router={{...}}>
+        <InnerLayoutRouter url="/connexion..." tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+          <SegmentViewNode type="page" pagePath="connexion/...">
+            <SegmentTrieNode>
+            <LoginPage>
+              <AuthScreen>
+                <main className="auth-screen">
+                  <div>
+                  <div className="auth-scree...">
+                    <section className="auth-card" aria-labelledby="connexion-...">
+                      <header>
+                      <div>
+                      <Suspense fallback={<span>}>
+                        <LoginForm>
+                          <form onSubmit={function} noValidate={true} className="flex flex-...">
+                            <Field label="Adresse email" htmlFor="email" required={true} error={undefined}>
+                              <div className="flex flex-...">
+                                <Label>
+                                <Input id="email" type="email" autoComplete="email" placeholder="koffi@exam..." ...>
+                                  <input
+                                    ref={function ref}
+                                    type="email"
+                                    aria-invalid={undefined}
+                                    className="w-full rounded-md border border-border-strong bg-surface text-fg px-3 p..."
+                                    id="email"
+                                    autoComplete="email"
+                                    placeholder="koffi@example.ci"
+                                    aria-describedby={undefined}
+                                    name="email"
+                                    onChange={function onChange}
+                                    onBlur={function onChange}
+-                                   style={{caret-color:"transparent"}}
+                                  >
+                            <Field label="Mot de passe" htmlFor="password" required={true} error={undefined}>
+                              <div className="flex flex-...">
+                                <Label>
+                                <div className="relative">
+                                  <Input id="password" type="password" autoComplete="current-pa..." ...>
+                                    <input
+                                      ref={function ref}
+                                      type="password"
+                                      aria-invalid={undefined}
+                                      className="w-full rounded-md border border-border-strong bg-surface text-fg px-3..."
+                                      id="password"
+                                      autoComplete="current-password"
+                                      placeholder="••••••••"
+                                      aria-describedby={undefined}
+                                      name="password"
+                                      onChange={function onChange}
+                                      onBlur={function onChange}
+-                                     style={{caret-color:"transparent"}}
+                                    >
+                                  ...
+                            <div className="flex items...">
+                              <label className="flex curso...">
+                                <input
+                                  type="checkbox"
+                                  className="size-4 accent-[var(--color-primary-solid)]"
+                                  name="rememberMe"
+                                  onChange={function onChange}
+                                  onBlur={function onChange}
+                                  ref={function ref}
+-                                 style={{caret-color:"transparent"}}
+                                >
+                                ...
+                              ...
+                            ...
+                      ...
+          ...
+        ...
