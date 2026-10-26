@@ -38,7 +38,7 @@ export function EventHero({ event }: { event: PublishedEventView }) {
             label={`Photos de ${event.title}`}
             slideClassName="h-full w-full basis-full"
             sizes="100vw"
-            quality={72}
+            quality={90}
             preloadFirstImage
             className="size-full"
           />

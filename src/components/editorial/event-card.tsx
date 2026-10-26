@@ -103,7 +103,7 @@ export function EditorialEventCard({
               alt=""
               fill
               sizes="(min-width: 1080px) 33vw, (min-width: 620px) 50vw, 100vw"
-              quality={68}
+              quality={85}
               className={styles.cover}
             />
           ) : (

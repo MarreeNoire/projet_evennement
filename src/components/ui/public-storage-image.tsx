@@ -41,7 +41,7 @@ export function PublicStorageImage({
   width,
   height,
   fill = false,
-  quality = 75,
+  quality = 85,
   preload = false,
   loading = "lazy",
 }: PublicStorageImageProps) {

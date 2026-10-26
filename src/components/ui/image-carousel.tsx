@@ -31,7 +31,7 @@ export function ImageCarousel({
   label,
   slideClassName,
   sizes,
-  quality = 68,
+  quality = 85,
   preloadFirstImage = false,
   imageClassName,
   className,

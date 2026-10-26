@@ -71,7 +71,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
                 className="event-card-cover size-full object-cover"
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 fill
-                quality={68}
+                quality={85}
               />
             </ViewTransition>
           ) : (

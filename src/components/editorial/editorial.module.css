@@ -190,9 +190,9 @@
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(16, 22, 30, 0.58) 0%,
-    rgba(16, 22, 30, 0.08) 42%,
-    rgba(16, 22, 30, 0.74) 100%
+    rgba(16, 22, 30, 0.26) 0%,
+    rgba(16, 22, 30, 0.02) 42%,
+    rgba(16, 22, 30, 0.42) 100%
   );
 }
 

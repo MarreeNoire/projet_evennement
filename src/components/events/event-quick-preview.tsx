@@ -71,7 +71,7 @@ export function EventQuickPreview({
                 alt={`Couverture de ${event.title}`}
                 fill
                 sizes="(min-width: 768px) 55vw, 100vw"
-                quality={72}
+                quality={85}
                 className="size-full object-cover"
               />
             ) : (
