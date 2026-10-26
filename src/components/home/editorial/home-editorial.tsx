@@ -637,6 +637,7 @@ export function HomeEditorial({
   const featuredPrice = featured ? priceParts(featured) : null;
   const heroIndex = events.length ? activeHeroIndex % events.length : 0;
   const heroEvent = events[heroIndex] ?? null;
+  const nextHeroEvent = events.length > 1 ? events[(heroIndex + 1) % events.length] ?? null : null;
   const heroDate = heroEvent ? dateParts(heroEvent.startAt) : null;
   const heroPrice = heroEvent ? priceParts(heroEvent) : null;
   const currentYear = new Date().getFullYear();
@@ -727,10 +728,11 @@ export function HomeEditorial({
                   >
                     <AnimatePresence initial={false} mode="sync">
                       <motion.div key={heroEvent?.id ?? "empty-hero"} className={cx("hero-image-slide")} initial={{ opacity: 0, scale: 1.045 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.99 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}>
-                        {heroEvent?.coverUrl ? <PublicStorageImage src={heroEvent.coverUrl} alt="" fill sizes="(max-width: 700px) 100vw, 68vw" preload={heroIndex === 0} className={cx("hero-cover-image")} /> : null}
+                        {heroEvent?.coverUrl ? <PublicStorageImage src={heroEvent.coverUrl} alt="" fill sizes="(max-width: 700px) calc(100vw - 34px), (max-width: 980px) 60vw, 68vw" quality={90} preload={heroIndex === 0} loading="eager" className={cx("hero-cover-image")} /> : null}
                       </motion.div>
                     </AnimatePresence>
                   </motion.div>
+                  {isHeroVisible && nextHeroEvent?.coverUrl ? <div aria-hidden="true" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }}><PublicStorageImage src={nextHeroEvent.coverUrl} alt="" fill sizes="(max-width: 700px) calc(100vw - 34px), (max-width: 980px) 60vw, 68vw" quality={90} loading="eager" /></div> : null}
                   <motion.span className={cx("scene-number")} style={{ opacity: cueOpacity }} aria-hidden="true">
                     {heroDate?.day || "01"}
                   </motion.span>

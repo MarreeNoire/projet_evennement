@@ -4367,6 +4367,7 @@
   .home .hero-carousel-controls { top: 55px; right: 12px; min-height: 34px; gap: 0; padding: 2px; }
   .home .hero-carousel-controls button { width: 30px; height: 28px; }
   .home .hero-carousel-controls span { min-width: 46px; font-size: 9px; }
+  .home .feature-image .hero-cover-image { object-position: center 56%; }
   .home .feature-info { display: block; flex: 0 0 168px; }
   .home .feature-info-content { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 13px 7px; padding: 15px; }
 }

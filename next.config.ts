@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    qualities: [48, 55, 58, 65, 68, 72, 75, 76, 80],
+    qualities: [48, 55, 58, 65, 68, 72, 75, 76, 80, 90],
     remotePatterns: [
       ...(supabaseHost
         ? [

@@ -11,6 +11,7 @@ interface PublicStorageImageProps {
   fill?: boolean;
   quality?: number;
   preload?: boolean;
+  loading?: "eager" | "lazy";
 }
 
 function isPublicSupabaseImage(src: string): boolean {
@@ -42,6 +43,7 @@ export function PublicStorageImage({
   fill = false,
   quality = 75,
   preload = false,
+  loading = "lazy",
 }: PublicStorageImageProps) {
   const fillStyle: CSSProperties | undefined = fill
     ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
@@ -59,6 +61,7 @@ export function PublicStorageImage({
         fill={fill}
         quality={quality}
         preload={preload}
+        loading={preload ? undefined : loading}
       />
     );
   }
@@ -72,9 +75,9 @@ export function PublicStorageImage({
       className={className}
       width={fill ? undefined : width}
       height={fill ? undefined : height}
-      loading={preload ? "eager" : "lazy"}
+      loading={preload || loading === "eager" ? "eager" : "lazy"}
       decoding="async"
-      fetchPriority={preload ? "high" : "auto"}
+      fetchPriority={preload || loading === "eager" ? "high" : "auto"}
       style={fillStyle}
     />
   );
