@@ -752,7 +752,6 @@ export function HomeEditorial({
                         ? `${heroEvent.categoryLabel} · ${heroEvent.city}`.toUpperCase()
                         : "SORTIES · ABIDJAN"}
                     </span>
-                    <h2>Une sortie qui mérite le détour.</h2>
                   </div>
                   <motion.span className={cx("hero-scroll-cue")} style={{ opacity: cueOpacity }} aria-hidden="true">
                     <span>Fais défiler pour découvrir</span>

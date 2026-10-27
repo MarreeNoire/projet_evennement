@@ -17,6 +17,7 @@ export interface SearchUserProfile {
 /** Recherche d'utilisateurs inscrits sur l'application pour les inviter dans l'équipe */
 export async function searchAppUsersAction(
   query: string,
+  organizationId: string,
 ): Promise<{ ok: boolean; users?: SearchUserProfile[]; error?: string }> {
   const clean = query.trim().replace(/[%_]/g, "");
   if (!clean || clean.length < 2) {
@@ -33,14 +34,13 @@ export async function searchAppUsersAction(
       return { ok: false, error: "Vous devez être connecté." };
     }
 
-    const { data: profiles, error } = await supabase
-      .from("profiles")
-      .select("id, display_name, username, full_name, email, avatar_url")
-      .or(
-        `display_name.ilike.%${clean}%,username.ilike.%${clean}%,full_name.ilike.%${clean}%,email.ilike.%${clean}%`,
-      )
-      .neq("id", user.id) // Exclure l'utilisateur actuel
-      .limit(10);
+    if (!organizationId) return { ok: false, error: "Organisation non identifiée." };
+
+    const { data: profiles, error } = await supabase.rpc("search_team_invite_profiles", {
+      search_query: clean,
+      organization_id: organizationId,
+      result_limit: 10,
+    });
 
     if (error) {
       console.error("[searchAppUsersAction] Error:", error);
@@ -52,7 +52,7 @@ export async function searchAppUsersAction(
       displayName: p.display_name || p.full_name || "Utilisateur",
       username: p.username,
       fullName: p.full_name,
-      email: p.email,
+      email: null,
       avatarUrl: p.avatar_url,
     }));
 

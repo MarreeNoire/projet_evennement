@@ -89,6 +89,7 @@ export function OrgTeamManager({
   // Search in-app users state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchUserProfile[]>([]);
+  const [searchStatus, setSearchStatus] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedUser, setSelectedUser] = useState<SearchUserProfile | null>(null);
   const [selectedRole, setSelectedRole] = useState<"manager" | "checkin_agent" | "moderator">("manager");
@@ -110,21 +111,25 @@ export function OrgTeamManager({
     }
 
     setError(null);
+    setSearchStatus(null);
     setIsSearching(true);
     try {
-      const res = await searchAppUsersAction(searchQuery);
+      const res = await searchAppUsersAction(searchQuery, organizationId);
       if (!res.ok) {
         setError(res.error || "Erreur de recherche.");
         setSearchResults([]);
       } else {
         setSearchResults(res.users || []);
         if (res.users?.length === 0) {
-          setError("Aucun utilisateur trouvé avec ce nom, pseudo ou email sur l'application.");
+          setSearchStatus("Aucun utilisateur visible dans la recherche ne correspond à ce nom, pseudo ou email.");
+        } else {
+          setSearchStatus(`${res.users.length} utilisateur${res.users.length > 1 ? "s" : ""} trouvé${res.users.length > 1 ? "s" : ""}. Sélectionnez la bonne personne.`);
         }
       }
     } catch {
       setError("Erreur lors de la recherche.");
       setSearchResults([]);
+      setSearchStatus(null);
     } finally {
       setIsSearching(false);
     }
@@ -343,6 +348,7 @@ export function OrgTeamManager({
                       placeholder="Nom, pseudo (@username) ou email..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
+                      aria-label="Rechercher un utilisateur par nom, pseudo ou email"
                       className="w-full h-10 rounded-lg border border-border bg-surface pl-9 pr-3 text-sm focus:border-border-focus focus:outline-none"
                     />
                   </div>
@@ -353,6 +359,9 @@ export function OrgTeamManager({
                 </div>
                 <p className="text-2xs text-fg-subtle">
                   Tapez au moins 2 caractères du nom d&apos;utilisateur ou de son profil.
+                </p>
+                <p className="text-xs text-fg-muted" role="status" aria-live="polite">
+                  {isSearching ? "Recherche en cours…" : searchStatus}
                 </p>
               </form>
 
