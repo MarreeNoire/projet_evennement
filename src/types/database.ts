@@ -633,6 +633,16 @@ type ViewDefinition<Row> = {
 };
 
 export type DatabaseFunctions = {
+  search_team_invite_profiles: {
+    Args: { search_query: string; organization_id: string; result_limit?: number };
+    Returns: {
+      id: string;
+      display_name: string;
+      username: string | null;
+      full_name: string | null;
+      avatar_url: string | null;
+    }[];
+  };
   is_admin: { Args: { user_id?: string }; Returns: boolean };
   has_role: { Args: { required_role: UserRole; user_id?: string }; Returns: boolean };
   is_org_member: { Args: { org_id: string; user_id?: string }; Returns: boolean };

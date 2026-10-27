@@ -119,11 +119,12 @@ export function OrgTeamManager({
         setError(res.error || "Erreur de recherche.");
         setSearchResults([]);
       } else {
-        setSearchResults(res.users || []);
-        if (res.users?.length === 0) {
+        const users = res.users ?? [];
+        setSearchResults(users);
+        if (users.length === 0) {
           setSearchStatus("Aucun utilisateur visible dans la recherche ne correspond à ce nom, pseudo ou email.");
         } else {
-          setSearchStatus(`${res.users.length} utilisateur${res.users.length > 1 ? "s" : ""} trouvé${res.users.length > 1 ? "s" : ""}. Sélectionnez la bonne personne.`);
+          setSearchStatus(`${users.length} utilisateur${users.length > 1 ? "s" : ""} trouvé${users.length > 1 ? "s" : ""}. Sélectionnez la bonne personne.`);
         }
       }
     } catch {
