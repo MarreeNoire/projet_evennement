@@ -59,5 +59,12 @@ export default async function HomePage() {
     organizerVerified: event.organizer_verified,
   }));
 
-  return <HomeEditorial events={events} viewer={viewer} />;
+  /* Compteurs du hero : calculés sur la page chargée, jamais inventés. */
+  const stats = {
+    events: upcoming.total,
+    organizers: new Set(upcoming.events.map((event) => event.organizer_name)).size,
+    cities: new Set(upcoming.events.map((event) => event.city)).size,
+  };
+
+  return <HomeEditorial events={events} viewer={viewer} stats={stats} total={upcoming.total} />;
 }

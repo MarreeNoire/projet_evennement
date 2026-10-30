@@ -180,18 +180,18 @@
 
   /* ============ RADIUS --- */
   --radius-none: 0;
-  --radius-sm: 2px;
-  --radius-md: 2px;
-  --radius-lg: 2px;
-  --radius-xl: 2px;
-  --radius-2xl: 2px;
-  --radius-3xl: 2px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
   --radius-full: 9999px;
-  --radius-card: 2px;
-  --radius-button: 2px;
-  --radius-input: 2px;
+  --radius-card: 24px;
+  --radius-button: 9999px;
+  --radius-input: 12px;
   --radius-badge: 9999px;
-  --radius-sheet: 12px;
+  --radius-sheet: 28px;
 
   /* ============ SHADOWS --- */
   --shadow-none: none;
@@ -227,10 +227,16 @@
   --easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ============ TYPOGRAPHY --- */
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-heading: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-body: Arial, "Helvetica Neue", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-display: var(--font-archivo), "Archivo", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-archivo), "Archivo", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-body: var(--font-inter), "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* ============ MARQUE — palette néon --- */
+  --brand-lime: #a7f432;
+  --brand-mint: #3b8f7b;
+  --brand-cream: #eaf3e7;
+  --brand-void: #0a0e0c;
 
   /* ============ Z-INDEX --- */
   --z-hide: -1;
@@ -390,73 +396,85 @@
 
 .dark {
   color-scheme: dark;
-  --bg: #191a17;
-  --bg-subtle: #22231f;
-  --bg-muted: #30312b;
-  --bg-inverted: #f4f0e8;
-  --surface: #22231f;
-  --surface-raised: #2b2c26;
-  --surface-sunken: #151613;
-  --surface-overlay: #22231f;
-  --fg: #f4f0e8;
-  --fg-muted: #c7c1b6;
-  --fg-subtle: #9c988f;
-  --fg-inverted: #22231f;
-  --border: rgba(244, 240, 232, 0.14);
-  --border-strong: rgba(244, 240, 232, 0.32);
-  --border-focus: #ed7656;
-  --primary: #ed7656;
-  --primary-hover: #f08a6c;
-  --primary-active: #f5a18a;
-  --primary-solid: #ed7656;
-  --primary-solid-hover: #f08a6c;
-  --primary-solid-fg: #19100c;
-  --primary-subtle: rgba(189, 59, 37, 0.2);
-  --primary-subtle-fg: #f08a6c;
-  --accent: #8295aa;
-  --accent-solid: #f4f0e8;
-  --accent-solid-fg: #22231f;
-  --accent-subtle: rgba(82, 106, 84, 0.2);
-  --accent-subtle-fg: #c7c1b6;
-  --success: #91b293;
-  --success-solid: #91b293;
-  --success-subtle: rgba(82, 106, 84, 0.2);
-  --info: #8295aa;
-  --info-subtle: rgba(130, 149, 170, 0.16);
-  --warning: #edc55c;
-  --warning-subtle: rgba(237, 197, 92, 0.16);
-  --danger: #ff8f86;
+
+  /* Fond feutré, noir obsidian subtilement dilué d'un reflet forestier : doux, profond et non saturé. */
+  --bg: #0a0e0c;
+  --bg-subtle: #0f1512;
+  --bg-muted: #141c18;
+  --bg-inverted: #eaf3e7;
+  --surface: #111714;
+  --surface-raised: #161e19;
+  --surface-sunken: #060907;
+  --surface-overlay: #141c18;
+
+  --fg: #eaf3e7;
+  --fg-muted: #a4b5aa;
+  --fg-subtle: #738479;
+  --fg-inverted: #0a0e0c;
+
+  --border: rgba(167, 244, 50, 0.12);
+  --border-strong: rgba(167, 244, 50, 0.25);
+  --border-focus: #a7f432;
+
+  /* Le vert lime est l'accent unique : il porte l'action, jamais le décor. */
+  --primary: #a7f432;
+  --primary-hover: #b9ff4d;
+  --primary-active: #cdff7a;
+  --primary-solid: #a7f432;
+  --primary-solid-hover: #b9ff4d;
+  --primary-solid-fg: #0a0e0c;
+  --primary-subtle: rgba(167, 244, 50, 0.14);
+  --primary-subtle-fg: #cdff7a;
+
+  --accent: #3b8f7b;
+  --accent-solid: #3b8f7b;
+  --accent-solid-fg: #eaf3e7;
+  --accent-subtle: rgba(59, 143, 123, 0.22);
+  --accent-subtle-fg: #8fe0c7;
+
+  --success: #a7f432;
+  --success-solid: #7bcb2a;
+  --success-subtle: rgba(167, 244, 50, 0.14);
+  --info: #7fb2c9;
+  --info-subtle: rgba(127, 178, 201, 0.16);
+  --warning: #e8d26b;
+  --warning-subtle: rgba(232, 210, 107, 0.16);
+  --danger: #ff8a7a;
   --danger-solid: #b3261e;
   --danger-solid-hover: #8f201a;
-  --danger-subtle: rgba(179, 38, 30, 0.2);
-  --poster-1: #bd3b25;
-  --poster-1-fg: #fbf9f4;
-  --poster-2: #344d67;
-  --poster-2-fg: #fbf9f4;
-  --poster-3: #edc55c;
-  --poster-3-fg: #22231f;
-  --poster-4: #526a54;
-  --poster-4-fg: #f4f0e8;
-  --poster-5: #22231f;
-  --poster-5-fg: #fbf9f4;
-  --stamp-1: rgba(189, 59, 37, 0.2);
-  --stamp-2: rgba(130, 149, 170, 0.18);
-  --stamp-3: rgba(237, 197, 92, 0.18);
-  --editorial-paper: #191a17;
-  --editorial-paper-alt: #22231f;
-  --editorial-surface: #2b2c26;
-  --editorial-ink: #f4f0e8;
-  --editorial-ink-secondary: #d8d2c7;
-  --editorial-muted: #c7c1b6;
-  --editorial-line: rgba(244, 240, 232, 0.14);
-  --editorial-line-strong: rgba(244, 240, 232, 0.32);
-  --editorial-accent: #ed7656;
-  --editorial-accent-strong: #f08a6c;
-  --editorial-on-accent: #19100c;
-  --editorial-cobalt: #8295aa;
-  --editorial-gold: #edc55c;
-  --editorial-band: #151613;
-  --editorial-band-ink: #f4f0e8;
+  --danger-subtle: rgba(179, 38, 30, 0.22);
+
+  /* Couvertures générées : déclinaisons de vert, de lime et de menthe. */
+  --poster-1: #3b8f7b;
+  --poster-1-fg: #eaf3e7;
+  --poster-2: #141c18;
+  --poster-2-fg: #eaf3e7;
+  --poster-3: #a7f432;
+  --poster-3-fg: #0a0e0c;
+  --poster-4: #192720;
+  --poster-4-fg: #eaf3e7;
+  --poster-5: #060907;
+  --poster-5-fg: #eaf3e7;
+
+  --stamp-1: rgba(59, 143, 123, 0.22);
+  --stamp-2: rgba(167, 244, 50, 0.16);
+  --stamp-3: rgba(232, 210, 107, 0.16);
+
+  --editorial-paper: #0a0e0c;
+  --editorial-paper-alt: #0f1512;
+  --editorial-surface: #131b16;
+  --editorial-ink: #eaf3e7;
+  --editorial-ink-secondary: #c2d4c7;
+  --editorial-muted: #9fb2a5;
+  --editorial-line: rgba(167, 244, 50, 0.12);
+  --editorial-line-strong: rgba(167, 244, 50, 0.25);
+  --editorial-accent: #a7f432;
+  --editorial-accent-strong: #cdff7a;
+  --editorial-on-accent: #0a0e0c;
+  --editorial-cobalt: #3b8f7b;
+  --editorial-gold: #e8d26b;
+  --editorial-band: #060907;
+  --editorial-band-ink: #eaf3e7;
 }
 
 /* ============================================================================

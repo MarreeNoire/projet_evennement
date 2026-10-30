@@ -41,7 +41,7 @@
 
       :global(html.dark) .home {
         color-scheme: dark;
-        --head-bg: rgba(20, 26, 34, 0.82);
+        --head-bg: rgba(10, 14, 12, 0.82);
         --shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.85);
       }
 
@@ -378,6 +378,19 @@
         display: flex;
         align-items: center;
         gap: 14px;
+      }
+
+      /* L'en-tête reprend l'accent du hero : un seul CTA, en pastille lime. */
+      .home .site-head .head-actions .btn-outline {
+        border-color: rgba(167, 244, 50, 0.4);
+        border-radius: 999px;
+        background: rgba(167, 244, 50, 0.06);
+      }
+
+      .home .site-head .head-actions .btn-outline:hover {
+        border-color: var(--brand-lime);
+        background: var(--brand-lime);
+        color: var(--brand-void);
       }
 
       .home .head-login {
@@ -2653,13 +2666,23 @@
       .home .reveal {
         opacity: 0;
         transform: translateY(18px);
-        transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out);
+        transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
         transition-delay: var(--rd, 0ms);
       }
 
       .home .reveal.is-in {
         opacity: 1;
         transform: none;
+      }
+
+      /* Fallback : si JS n'a pas encore tourné (SSR, lent), les éléments
+         restent visibles. L'animation ne dégradant jamais l'expérience. */
+      @media (prefers-reduced-motion: reduce) {
+        .home .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+          transition: none !important;
+        }
       }
 
       /* ---------------------------------------------------------------

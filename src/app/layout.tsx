@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Archivo, Inter } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { PwaServiceWorker } from "@/components/providers/pwa-service-worker";
@@ -6,6 +7,22 @@ import { APP_NAME } from "@/lib/constants";
 import { env } from "@/lib/env";
 
 import "./globals.css";
+
+/* Grotesque serré pour les titres, Inter pour le texte : la paire qui porte
+   l'identité néon (grands titres denses, interface neutre). */
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl),
@@ -60,8 +77,8 @@ export const viewport: Viewport = {
   // (env(safe-area-inset-*) exploitées par la tabbar et les sheets).
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f0e8" },
-    { media: "(prefers-color-scheme: dark)", color: "#141a22" },
+    { media: "(prefers-color-scheme: light)", color: "#0a0e0c" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0e0c" },
   ],
   interactiveWidget: "resizes-content",
 };
@@ -74,7 +91,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className="light"
+      className={`${archivo.variable} ${inter.variable} dark`}
     >
       <head />
       <body className="min-h-dvh antialiased">

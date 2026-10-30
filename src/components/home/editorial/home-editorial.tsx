@@ -3,23 +3,18 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
   Check,
   CheckCircle2,
-  ChevronLeft,
   ChevronDown,
-  ChevronRight,
   LogOut,
   MapPin,
   MessageCircle,
   Moon,
-  Pause,
   Plus,
-  Play,
   QrCode,
   Search,
   Send,
@@ -34,6 +29,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { useTheme } from "@/components/providers/app-providers";
 import { PwaInstallPrompt } from "@/components/pwa/install-prompt";
 import type { HeaderUser } from "@/components/layout/header-types";
+import { NeonHero, type NeonHeroStats } from "@/components/home/hero/neon-hero";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -471,9 +467,13 @@ function AccountMenu({ viewer }: { viewer: HeaderUser }) {
 export function HomeEditorial({
   events,
   viewer,
+  stats,
+  total,
 }: {
   events: EditorialEvent[];
   viewer: HeaderUser | null;
+  stats: NeonHeroStats;
+  total: number;
 }) {
   const featured = events[0] ?? null;
   const mainNav = MAIN_NAV.map((item) => {
@@ -483,18 +483,6 @@ export function HomeEditorial({
     return item;
   });
   const rootRef = useRef<HTMLDivElement>(null);
-  const heroTrackRef = useRef<HTMLDivElement>(null);
-  const heroPinRef = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll();
-  const [heroScrollRange, setHeroScrollRange] = useState<[number, number]>([0, 1]);
-  const heroProgress = useTransform(scrollY, heroScrollRange, [0, 1], { clamp: true });
-  const backdropScale = useTransform(heroProgress, [0, 1], [1.02, 1.12]);
-  const backdropY = useTransform(heroProgress, [0, 1], [0, -8]);
-  const cueOpacity = useTransform(heroProgress, [0, 0.28], [1, 0]);
-  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
-  const [heroAutoplayPaused, setHeroAutoplayPaused] = useState(false);
-  const [isPageVisible, setIsPageVisible] = useState(true);
-  const [isHeroVisible, setIsHeroVisible] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState("tout");
   const [salonPhase, setSalonPhase] = useState<SalonPhase>("avant");
@@ -521,35 +509,6 @@ export function HomeEditorial({
   }, []);
 
   useEffect(() => {
-    const updateVisibility = () => setIsPageVisible(document.visibilityState === "visible");
-    updateVisibility();
-    document.addEventListener("visibilitychange", updateVisibility);
-    return () => document.removeEventListener("visibilitychange", updateVisibility);
-  }, []);
-
-  useEffect(() => {
-    const hero = heroPinRef.current;
-    if (!hero) return;
-    if (!("IntersectionObserver" in window)) {
-      setIsHeroVisible(true);
-      return;
-    }
-    const observer = new IntersectionObserver(([entry]) => setIsHeroVisible(entry?.isIntersecting ?? false), { threshold: 0.1 });
-    observer.observe(hero);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (events.length < 2 || heroAutoplayPaused || !isPageVisible || !isHeroVisible) return;
-
-    const timeout = window.setTimeout(() => {
-      setActiveHeroIndex((current) => (current + 1) % events.length);
-    }, 7600);
-
-    return () => window.clearTimeout(timeout);
-  }, [activeHeroIndex, events.length, heroAutoplayPaused, isPageVisible, isHeroVisible]);
-
-  useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     if (!("IntersectionObserver" in window)) return;
@@ -561,62 +520,42 @@ export function HomeEditorial({
     const revealInClass = styles["is-in"];
     if (!revealClass || !revealInClass) return;
 
-    targets.forEach((target) => {
-      target.classList.add(revealClass);
-      if (target.dataset.reveal === "card") {
-        const siblings = Array.from(target.parentElement?.children ?? []);
-        target.style.setProperty("--rd", `${siblings.indexOf(target) * 55}ms`);
-      }
+    /* On attend un frame pour être sûr que le layout est stabilisé, puis on
+       mesure quels éléments sont déjà dans le viewport (above-the-fold) :
+       ceux-là obtiennent immédiatement la classe is-in, sans transition. */
+    const raf = requestAnimationFrame(() => {
+      targets.forEach((target) => {
+        target.classList.add(revealClass);
+        if (target.dataset.reveal === "card") {
+          const siblings = Array.from(target.parentElement?.children ?? []);
+          target.style.setProperty("--rd", `${siblings.indexOf(target) * 55}ms`);
+        }
+        /* Révèle instantanément ce qui est visible sans attendre le scroll. */
+        const rect = target.getBoundingClientRect();
+        if (rect.top < window.innerHeight + 200) {
+          target.classList.add(revealInClass);
+        }
+      });
+
+      const remaining = targets.filter((t) => !t.classList.contains(revealInClass));
+      if (!remaining.length) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add(revealInClass);
+            observer.unobserve(entry.target);
+          });
+        },
+        { rootMargin: "0px 0px -5% 0px", threshold: 0.06 },
+      );
+
+      remaining.forEach((target) => observer.observe(target));
     });
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add(revealInClass);
-          observer.unobserve(entry.target);
-        });
-      },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
-    );
-
-    targets.forEach((target) => observer.observe(target));
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const track = heroTrackRef.current;
-    const pin = heroPinRef.current;
-    if (!track || !pin) return;
-
-    const updateScrollRange = () => {
-      const trackTop = track.getBoundingClientRect().top + window.scrollY;
-      const pinStyle = window.getComputedStyle(pin);
-      const stickyTop = pinStyle.position === "sticky" ? Number.parseFloat(pinStyle.top) || 0 : 0;
-      const travel = Math.max(0, track.offsetHeight - pin.offsetHeight);
-      const start = trackTop - stickyTop;
-      const end = start + Math.max(1, travel);
-
-      setHeroScrollRange((previous) =>
-        Math.abs(previous[0] - start) < 1 && Math.abs(previous[1] - end) < 1
-          ? previous
-          : [start, end],
-      );
-    };
-
-    updateScrollRange();
-    const observer = typeof ResizeObserver === "undefined"
-      ? null
-      : new ResizeObserver(updateScrollRange);
-    observer?.observe(track);
-    observer?.observe(pin);
-    const welcome = rootRef.current?.querySelector(`.${styles.welcome}`);
-    if (welcome) observer?.observe(welcome);
-    window.addEventListener("resize", updateScrollRange, { passive: true });
-
     return () => {
-      observer?.disconnect();
-      window.removeEventListener("resize", updateScrollRange);
+      cancelAnimationFrame(raf);
     };
   }, []);
 
@@ -644,17 +583,7 @@ export function HomeEditorial({
 
   const featuredDate = featured ? dateParts(featured.startAt) : null;
   const featuredPrice = featured ? priceParts(featured) : null;
-  const heroIndex = events.length ? activeHeroIndex % events.length : 0;
-  const heroEvent = events[heroIndex] ?? null;
-  const nextHeroEvent = events.length > 1 ? events[(heroIndex + 1) % events.length] ?? null : null;
-  const heroDate = heroEvent ? dateParts(heroEvent.startAt) : null;
-  const heroPrice = heroEvent ? priceParts(heroEvent) : null;
   const currentYear = new Date().getFullYear();
-
-  const moveHero = (direction: -1 | 1) => {
-    if (events.length < 2) return;
-    setActiveHeroIndex((current) => (current + direction + events.length) % events.length);
-  };
 
   return (
     <div ref={rootRef} className={cx("home")}>
@@ -689,7 +618,7 @@ export function HomeEditorial({
               href="/devenir-organisateur"
               className={cx("btn", "btn-outline", "btn-sm")}
             >
-              Publier un événemen
+              Publier un événement
             </Link>
             <ThemeButton />
           </div>
@@ -697,123 +626,8 @@ export function HomeEditorial({
       </header>
 
       <main id="accueil-contenu">
+        <NeonHero events={events} stats={stats} total={total} />
         <div className={cx("content")}>
-          <motion.section
-            className={cx("welcome")}
-            aria-labelledby="welcome-title"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.72, ease: [0.23, 1, 0.32, 1] }}
-          >
-            <div>
-              <p className={cx("city-date")}>
-                <span className={cx("city-dot")} aria-hidden="true" />
-                {heroDate
-                  ? `${heroDate.weekday} ${heroDate.day} ${heroDate.month} · Abidjan`
-                  : "Abidjan · Côte d’Ivoire"}
-              </p>
-              <h1 id="welcome-title" className={cx("welcome-title")}>
-                La ville se passe <span>dehors.</span>
-              </h1>
-            </div>
-            <p className={cx("welcome-note")}>
-              <strong>Ta prochaine sortie commence ici.</strong>
-              Découvre les événements à venir, puis retrouve les participants dans leur salon.
-            </p>
-          </motion.section>
-
-          <div ref={heroTrackRef} className={cx("hero-track")}>
-            <div ref={heroPinRef} className={cx("hero-pin")}>
-              <article className={cx("feature")} id="billets" aria-label="Événement à la une" aria-roledescription="carrousel">
-                <motion.div
-                  className={cx("feature-image")}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.82, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
-                >
-                  <motion.div
-                    className={cx("feature-image-backdrop")}
-                    style={{ scale: backdropScale, y: backdropY }}
-                  >
-                    <AnimatePresence initial={false} mode="sync">
-                      <motion.div key={heroEvent?.id ?? "empty-hero"} className={cx("hero-image-slide")} initial={{ opacity: 0, scale: 1.045 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.99 }} transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}>
-                        {heroEvent?.coverUrl ? <PublicStorageImage src={heroEvent.coverUrl} alt="" fill sizes="(max-width: 700px) calc(100vw - 34px), (max-width: 980px) 60vw, 68vw" quality={90} preload={heroIndex === 0} loading="eager" className={cx("hero-cover-image")} /> : null}
-                      </motion.div>
-                    </AnimatePresence>
-                  </motion.div>
-                  {isHeroVisible && nextHeroEvent?.coverUrl ? <div aria-hidden="true" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", opacity: 0, pointerEvents: "none" }}><PublicStorageImage src={nextHeroEvent.coverUrl} alt="" fill sizes="(max-width: 700px) calc(100vw - 34px), (max-width: 980px) 60vw, 68vw" quality={90} loading="eager" /></div> : null}
-                  <motion.span className={cx("scene-number")} style={{ opacity: cueOpacity }} aria-hidden="true">
-                    {heroDate?.day || "01"}
-                  </motion.span>
-                  <div className={cx("image-topline")}>
-                    <span className={cx("live-dot")} aria-hidden="true" />
-                    La sélection Event
-                  </div>
-                  {events.length > 1 ? <div className={cx("hero-carousel-controls")} aria-label="Navigation des événements">
-                    <button type="button" onClick={() => moveHero(-1)} aria-label="Événement précédent"><ChevronLeft className={cx("icon")} aria-hidden="true" /></button>
-                    <span aria-live="polite" aria-atomic="true">{String(heroIndex + 1).padStart(2, "0")} <i>/</i> {String(events.length).padStart(2, "0")}</span>
-                    <button type="button" onClick={() => setHeroAutoplayPaused((paused) => !paused)} aria-label={heroAutoplayPaused ? "Reprendre le défilement automatique" : "Mettre en pause le défilement automatique"}>{heroAutoplayPaused ? <Play className={cx("icon")} aria-hidden="true" /> : <Pause className={cx("icon")} aria-hidden="true" />}</button>
-                    <button type="button" onClick={() => moveHero(1)} aria-label="Événement suivant"><ChevronRight className={cx("icon")} aria-hidden="true" /></button>
-                  </div> : null}
-                  <div className={cx("image-caption")}>
-                    <span className={cx("genre")}>
-                      {heroEvent
-                        ? `${heroEvent.categoryLabel} · ${heroEvent.city}`.toUpperCase()
-                        : "SORTIES · ABIDJAN"}
-                    </span>
-                  </div>
-                  <motion.span className={cx("hero-scroll-cue")} style={{ opacity: cueOpacity }} aria-hidden="true">
-                    <span>Fais défiler pour découvrir</span>
-                    <i />
-                  </motion.span>
-                </motion.div>
-
-                <div className={cx("feature-info")}><AnimatePresence mode="wait" initial={false}><motion.div key={heroEvent?.id ?? "empty-hero-info"} className={cx("feature-info-content")} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}>
-                  <div className={cx("feature-date")}>
-                    <span className={cx("date-block")}>
-                      <b>{heroDate?.day || "À"}</b>
-                      <span>{heroDate?.month || "VEN"}</span>
-                    </span>
-                    <span className={cx("feature-location")}>
-                      <span>{heroDate?.time || "À venir"}</span>
-                      <span>
-                        <MapPin className={cx("icon")} aria-hidden="true" />
-                        <span className={cx("venue-name")}>{heroEvent?.venueName || heroEvent?.city || "Abidjan"}</span>
-                      </span>
-                    </span>
-                  </div>
-                  <div className={cx("feature-details")}>
-                    <p className={cx("eyebrow")}>Sélection du moment</p>
-                    <h3>{heroEvent?.title || "Les prochaines sorties"}</h3>
-                    <p>
-                      {heroEvent?.summary ||
-                        (heroEvent
-                          ? `${heroEvent.categoryLabel} à ${heroEvent.city}. Consulte les détails et réserve ta place.`
-                          : "Les événements publiés apparaîtront ici dès leur mise en ligne.")}
-                    </p>
-                  </div>
-                  <div className={cx("feature-foot")}>
-                    <span className={cx("price")}>
-                      {heroPrice?.label || "Programme"}
-                      <strong>{heroPrice?.value || "À découvrir"}</strong>
-                    </span>
-                    <Link
-                      className={cx("cta")}
-                      href={heroEvent ? `/evenements/${heroEvent.slug}` : ROUTES.explore}
-                    >
-                      Voir l’événement
-                      <ArrowUpRight className={cx("icon")} aria-hidden="true" />
-                    </Link>
-                  </div>
-                </motion.div></AnimatePresence></div>
-              </article>
-              <div className={cx("hero-progress")} aria-hidden="true">
-                <motion.span style={{ scaleX: heroProgress }} />
-              </div>
-            </div>
-          </div>
-        </div>
-
         <section className={cx("quick-access", "wrap")} aria-labelledby="quick-access-title">
           <div className={cx("quick-access-heading")}>
             <p className={cx("eyebrow")}><b>Accès direct</b></p>
@@ -1426,12 +1240,13 @@ export function HomeEditorial({
                 <ArrowRight className={cx("icon")} aria-hidden="true" />
               </Link>
               <Link href="/devenir-organisateur" className={cx("link-arrow")}>
-                Créer un événemen
+                Créer un événement
                 <ArrowUpRight className={cx("icon")} aria-hidden="true" />
               </Link>
             </div>
           </div>
         </section>
+        </div>
       </main>
 
       <footer className={cx("site-foot")}>
