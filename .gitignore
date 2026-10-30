@@ -1,9 +1,15 @@
-# Dépendances
+# =============================================================================
+#  Dépôt : secrets, état local et artefacts de build
+#  Règle : tout ce qui contient une clé, un mot de passe, un cookie de session
+#  ou une donnée personnelle d'utilisateur reste hors du dépôt.
+# =============================================================================
+
+# --- Dépendances -------------------------------------------------------------
 node_modules/
 .pnp
 .pnp.js
 
-# Build Next.js
+# --- Build Next.js -----------------------------------------------------------
 .next/
 out/
 build/
@@ -11,38 +17,93 @@ dist/
 .swc/
 .open-next/
 .netlify/
+.vercel/
 .wrangler/
+.turbo/
+.eslintcache
+next-env.d.ts
+*.tsbuildinfo
 
-# Environnement (JAMAIS committé)
+# --- Environnement (JAMAIS committé) -----------------------------------------
+# `.env.example` est le seul fichier d'environnement versionné.
 .env
-.env.local
-.env.*.local
+.env.*
 !.env.example
-.dev.vars*
+.dev.vars
+.dev.vars.*
 !.dev.vars.example
+supabase/.env
+supabase/functions/.env
 
-# Tests
+# --- Clés, certificats et identifiants ---------------------------------------
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.cer
+*.crt
+*.kdbx
+.npmrc
+!.npmrc.example
+.netrc
+_netrc
+.pgpass
+secrets/
+.secrets/
+credentials*.json
+*service-account*.json
+
+# --- État local Supabase / Cloudflare ----------------------------------------
+# Généré par `supabase link` et `wrangler dev` : propre à chaque machine.
+.supabase/
+supabase/.temp/
+supabase/.branches/
+.cloudflare/
+
+# --- Base de données : sauvegardes et exports --------------------------------
+# Les migrations `supabase/migrations/*.sql` restent versionnées.
+*.sql.gz
+*.dump
+*.bak
+dumps/
+backups/
+
+# --- Sessions et traces de test ----------------------------------------------
+# Un `storageState` Playwright contient les cookies de session : jamais commité.
+playwright/.auth/
+**/storageState.json
+**/*.har
+
+# --- Tests et couverture -----------------------------------------------------
 coverage/
 playwright-report/
 test-results/
 blob-report/
 .nyc_output/
 
-# Vercel / Supabase
-.vercel
-.supabase
-
-# Divers
-*.tsbuildinfo
-next-env.d.ts
-.DS_Store
-Thumbs.db
+# --- Journaux ----------------------------------------------------------------
 *.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+
+# --- Artefacts temporaires ---------------------------------------------------
+tmp-*
+.cache/
+
+# --- Système et éditeurs -----------------------------------------------------
+.DS_Store
+Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# --- Outils d'agent et dossiers de travail locaux ----------------------------
+.codex/
+exemple_application_mobile/
+exemple_motion_site/
