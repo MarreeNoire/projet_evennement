@@ -74,3 +74,24 @@ L'écart assumé avec la maquette est le verre. Les aplats opaques deviennent de
 - Survol des cartes : élévation de 6 px, reflet qui balaie l'affiche, contour qui prend la menthe. Retour à l'état initial dès que le pointeur sort.
 - Cibles tactiles autour de 44 px, appui immédiat, transitions de 160 à 380 ms.
 - `prefers-reduced-motion: reduce` neutralise toutes les animations et conserve les états finaux lisibles.
+
+### Accueil — direction éditoriale
+
+L'accueil reprend la référence ivoire et architecturale sans la copier : espace
+respirant, image d'événement réelle dans une arche, titre contrasté avec un mot
+en sérif italique Georgia, et une seule action principale. Cette sérif système
+est une exception propre au hero ; les autres titres conservent la police
+display du produit. Le titre reste fluide selon la largeur d'écran. Quand
+aucune couverture n'est disponible, une composition abstraite aux tons sable
+remplace la photo sans inventer d'événement.
+
+Le parcours commence par le hero, enchaîne directement sur les événements
+publiés, puis propose les raccourcis de compte. Les blocs de bénéfices répétés
+sont retirés : salons, billetterie et organisateurs gardent chacun leur section
+dédiée. Le nombre d'événements affiché dans le hero provient du total chargé
+côté serveur.
+
+L'entrée du hero est une animation de première impression, limitée à l'opacité
+et à la transformation, avec une variante sans déplacement sous
+`prefers-reduced-motion`. Aucun mouvement continu ne détourne l'attention des
+événements.

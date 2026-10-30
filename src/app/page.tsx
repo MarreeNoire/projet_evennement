@@ -1,7 +1,4 @@
-import {
-  HomeEditorial,
-  type EditorialEvent,
-} from "@/components/home/editorial/home-editorial";
+import { HomeEditorial, type EditorialEvent } from "@/components/home/editorial/home-editorial";
 import { loadHeaderUser } from "@/lib/auth/viewer";
 import { getCategoryLabel } from "@/lib/constants";
 import { searchPublishedEvents, type ExploreResult } from "@/lib/events/queries";
@@ -29,10 +26,7 @@ async function loadWithRetry<T>(load: () => Promise<T>, fallback: T): Promise<T>
 
 export default async function HomePage() {
   const [upcoming, viewer] = await Promise.all([
-    loadWithRetry(
-      () => searchPublishedEvents({ sort: "date_asc", pageSize: 48 }),
-      EMPTY_RESULT,
-    ),
+    loadWithRetry(() => searchPublishedEvents({ sort: "date_asc", pageSize: 48 }), EMPTY_RESULT),
     loadHeaderUser(),
   ]);
 
@@ -59,12 +53,5 @@ export default async function HomePage() {
     organizerVerified: event.organizer_verified,
   }));
 
-  /* Compteurs du hero : calculés sur la page chargée, jamais inventés. */
-  const stats = {
-    events: upcoming.total,
-    organizers: new Set(upcoming.events.map((event) => event.organizer_name)).size,
-    cities: new Set(upcoming.events.map((event) => event.city)).size,
-  };
-
-  return <HomeEditorial events={events} viewer={viewer} stats={stats} total={upcoming.total} />;
+  return <HomeEditorial events={events} viewer={viewer} total={upcoming.total} />;
 }

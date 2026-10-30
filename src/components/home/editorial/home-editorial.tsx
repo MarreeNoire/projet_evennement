@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   ChevronDown,
   LogOut,
-  MapPin,
   MessageCircle,
   Moon,
   Plus,
@@ -29,7 +28,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { useTheme } from "@/components/providers/app-providers";
 import { PwaInstallPrompt } from "@/components/pwa/install-prompt";
 import type { HeaderUser } from "@/components/layout/header-types";
-import { NeonHero, type NeonHeroStats } from "@/components/home/hero/neon-hero";
+import { HomeHero } from "@/components/home/hero/home-hero";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -404,13 +403,7 @@ function AccountMenu({ viewer }: { viewer: HeaderUser }) {
       >
         <span className={cx("account-avatar")} aria-hidden="true">
           {viewer.avatarUrl ? (
-            <PublicStorageImage
-              src={viewer.avatarUrl}
-              alt=""
-              width={32}
-              height={32}
-              sizes="32px"
-            />
+            <PublicStorageImage src={viewer.avatarUrl} alt="" width={32} height={32} sizes="32px" />
           ) : (
             <span>{getInitials(viewer.displayName)}</span>
           )}
@@ -467,12 +460,10 @@ function AccountMenu({ viewer }: { viewer: HeaderUser }) {
 export function HomeEditorial({
   events,
   viewer,
-  stats,
   total,
 }: {
   events: EditorialEvent[];
   viewer: HeaderUser | null;
-  stats: NeonHeroStats;
   total: number;
 }) {
   const featured = events[0] ?? null;
@@ -604,7 +595,11 @@ export function HomeEditorial({
           </nav>
 
           <div className={cx("head-actions")}>
-            <Link href={ROUTES.explore} className={cx("icon-btn", "search-btn")} aria-label="Rechercher un événement">
+            <Link
+              href={ROUTES.explore}
+              className={cx("icon-btn", "search-btn")}
+              aria-label="Rechercher un événement"
+            >
               <Search className={cx("icon")} aria-hidden="true" />
             </Link>
             {viewer ? (
@@ -614,10 +609,7 @@ export function HomeEditorial({
                 Connexion
               </Link>
             )}
-            <Link
-              href="/devenir-organisateur"
-              className={cx("btn", "btn-outline", "btn-sm")}
-            >
+            <Link href="/devenir-organisateur" className={cx("btn", "btn-outline", "btn-sm")}>
               Publier un événement
             </Link>
             <ThemeButton />
@@ -626,626 +618,610 @@ export function HomeEditorial({
       </header>
 
       <main id="accueil-contenu">
-        <NeonHero events={events} stats={stats} total={total} />
+        <HomeHero events={events} total={total} />
         <div className={cx("content")}>
-        <section className={cx("quick-access", "wrap")} aria-labelledby="quick-access-title">
-          <div className={cx("quick-access-heading")}>
-            <p className={cx("eyebrow")}><b>Accès direct</b></p>
-            <h2 id="quick-access-title">Où veux-tu aller ?</h2>
-          </div>
-          <nav className={cx("quick-access-links")} aria-label="Accès rapides">
-            <Link href={ROUTES.explore} className={cx("quick-link", "quick-link-primary")}>
-              <CalendarDays className={cx("icon")} aria-hidden="true" />
-              <span><strong>Trouver un événement</strong><small>Dates, lieux et catégories</small></span>
-              <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
-            </Link>
-            <Link href={privateHref(ROUTES.myTickets, viewer)} className={cx("quick-link")}>
-              <Ticket className={cx("icon")} aria-hidden="true" />
-              <span><strong>Mes billets</strong><small>{viewer ? "Retrouver mes réservations" : "Se connecter pour les retrouver"}</small></span>
-              <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
-            </Link>
-            <Link href={privateHref(ROUTES.mySalons, viewer)} className={cx("quick-link")}>
-              <MessageCircle className={cx("icon")} aria-hidden="true" />
-              <span><strong>Mes salons</strong><small>{viewer ? "Rejoindre les conversations" : "Se connecter pour participer"}</small></span>
-              <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
-            </Link>
-            <Link href={viewer?.isOrganizer ? ROUTES.orgDashboard : "/devenir-organisateur"} className={cx("quick-link")}>
-              <Users className={cx("icon")} aria-hidden="true" />
-              <span><strong>{viewer?.isOrganizer ? "Espace organisateur" : "Organiser un événement"}</strong><small>Créer et gérer une sortie</small></span>
-              <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
-            </Link>
-          </nav>
-          <PwaInstallPrompt />
-        </section>
+          <section
+            className={cx("section", "wrap")}
+            id="decouvrir"
+            aria-labelledby="decouvrir-title"
+          >
+            <div className={cx("section-head")} data-reveal>
+              <div>
+                <p className={cx("eyebrow")}>
+                  <b>01</b> Découvrir
+                </p>
+                <h2 id="decouvrir-title">Ce qui se prépare à Abidjan.</h2>
+              </div>
+              <div className={cx("head-side")}>
+                <p>
+                  Une sélection de sorties publiées par leurs organisateurs. Dates, lieux et tarifs
+                  viennent de leurs fiches.
+                </p>
+                <Link href={ROUTES.explore} className={cx("link-arrow")}>
+                  Tout le programme
+                  <ArrowRight className={cx("icon")} aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
 
-        <section className={cx("capabilities")} aria-label="Ce que permet Event">
-          <div className={cx("wrap", "caps")}>
-            <div className={cx("cap")} data-reveal>
-              <Ticket className={cx("icon")} aria-hidden="true" />
-              <div>
-                <strong>Billets avec QR code</strong>
-                <span>Un billet numérique vérifié à l&apos;entrée.</span>
-              </div>
-            </div>
-            <div className={cx("cap")} data-reveal>
-              <MessageCircle className={cx("icon")} aria-hidden="true" />
-              <div>
-                <strong>Un salon par événement</strong>
-                <span>Les échanges continuent avant et après.</span>
-              </div>
-            </div>
-            <div className={cx("cap")} data-reveal>
-              <MapPin className={cx("icon")} aria-hidden="true" />
-              <div>
-                <strong>Paiement en FCFA</strong>
-                <span>Mobile money ou carte, selon les options proposées.</span>
-              </div>
-            </div>
-            <div className={cx("cap")} data-reveal>
-              <ShieldCheck className={cx("icon")} aria-hidden="true" />
-              <div>
-                <strong>Espace organisateur</strong>
-                <span>Publication, participants et accès au même endroit.</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className={cx("section", "wrap")} id="decouvrir" aria-labelledby="decouvrir-title">
-          <div className={cx("section-head")} data-reveal>
-            <div>
-              <p className={cx("eyebrow")}>
-                <b>01</b> Découvrir
-              </p>
-              <h2 id="decouvrir-title">Ce qui se prépare à Abidjan.</h2>
-            </div>
-            <div className={cx("head-side")}>
-              <p>
-                Une sélection de sorties publiées par leurs organisateurs. Dates, lieux et tarifs
-                viennent de leurs fiches.
-              </p>
-              <Link href={ROUTES.explore} className={cx("link-arrow")}>
-                Tout le programme
-                <ArrowRight className={cx("icon")} aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-
-          {events.length > 0 ? (
-            <>
-              {categories.length > 1 ? (
-                <div className={cx("filters")}>
-                  <div
-                    className={cx("filter-list")}
-                    role="group"
-                    aria-label="Filtrer les événements par catégorie"
-                  >
-                    <button
-                      type="button"
-                      className={cx("filter")}
-                      aria-pressed={activeCategory === "tout"}
-                      onClick={() => setActiveCategory("tout")}
+            {events.length > 0 ? (
+              <>
+                {categories.length > 1 ? (
+                  <div className={cx("filters")}>
+                    <div
+                      className={cx("filter-list")}
+                      role="group"
+                      aria-label="Filtrer les événements par catégorie"
                     >
-                      Tou
-                    </button>
-                    {categories.map((category) => (
                       <button
-                        key={category.slug}
                         type="button"
                         className={cx("filter")}
-                        aria-pressed={activeCategory === category.slug}
-                        onClick={() => setActiveCategory(category.slug)}
+                        aria-pressed={activeCategory === "tout"}
+                        onClick={() => setActiveCategory("tout")}
                       >
-                        {category.label}
+                        Tou
+                      </button>
+                      {categories.map((category) => (
+                        <button
+                          key={category.slug}
+                          type="button"
+                          className={cx("filter")}
+                          aria-pressed={activeCategory === category.slug}
+                          onClick={() => setActiveCategory(category.slug)}
+                        >
+                          {category.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className={cx("filter-count")} aria-live="polite">
+                      {visibleCount} {visibleCount > 1 ? "sorties affichées" : "sortie affichée"}
+                    </p>
+                  </div>
+                ) : null}
+
+                <div className={cx("events")}>
+                  {events.map((event, index) => {
+                    const date = dateParts(event.startAt);
+                    const price = priceParts(event);
+                    const hidden = activeCategory !== "tout" && event.category !== activeCategory;
+
+                    return (
+                      <article
+                        key={event.id}
+                        className={cx("event-card")}
+                        data-reveal="card"
+                        hidden={hidden}
+                      >
+                        <Link href={`/evenements/${event.slug}`} className={cx("card-link")}>
+                          <div
+                            className={cx(
+                              "card-art",
+                              artVariant(event.category),
+                              event.coverUrl && "has-cover",
+                            )}
+                          >
+                            {event.coverUrl ? (
+                              <div className={cx("card-cover")}>
+                                <PublicStorageImage
+                                  src={event.coverUrl}
+                                  alt=""
+                                  fill
+                                  sizes="(max-width: 620px) 116px, (max-width: 1100px) 45vw, 300px"
+                                />
+                              </div>
+                            ) : (
+                              <div className={cx("art-fill")} aria-hidden="true" />
+                            )}
+                            <div className={cx("art-inner")}>
+                              <div className={cx("art-top")}>
+                                <span className={cx("art-tag")}>{event.categoryLabel}</span>
+                                <span className={cx("art-num")}>
+                                  {String(index + 1).padStart(2, "0")}
+                                </span>
+                              </div>
+                              {!event.coverUrl ? (
+                                <div className={cx("art-word")}>
+                                  {event.categoryLabel.split(" ")[0]}
+                                  <em>{event.title}</em>
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          <div className={cx("card-body")}>
+                            <div className={cx("card-date")}>
+                              <span className={cx("dow")}>{date.weekday}</span>
+                              <strong>{date.day}</strong>
+                              <span className={cx("month")}>{date.month}</span>
+                            </div>
+                            <div className={cx("card-main")}>
+                              <h3>{event.title}</h3>
+                              <p>{[event.venueName, event.city].filter(Boolean).join(" · ")}</p>
+                            </div>
+                            <div className={cx("card-side")}>
+                              <p className={cx("card-price")}>
+                                <span>{price.label}</span>
+                                {price.value}
+                              </p>
+                              <span className={cx("card-go")}>
+                                <ArrowUpRight className={cx("icon")} aria-hidden="true" />
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      </article>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className={cx("empty-state")} data-reveal>
+                <p className={cx("eyebrow")}>
+                  <b>01</b> Découvrir
+                </p>
+                <h3>Aucune sortie publiée pour le moment.</h3>
+                <p>
+                  Les prochains événements apparaîtront ici dès leur publication par un
+                  organisateur.
+                </p>
+                <Link href="/devenir-organisateur" className={cx("btn", "btn-primary")}>
+                  Publier un événement
+                  <ArrowRight className={cx("icon")} aria-hidden="true" />
+                </Link>
+              </div>
+            )}
+          </section>
+
+          <section className={cx("quick-access", "wrap")} aria-labelledby="quick-access-title">
+            <div className={cx("quick-access-heading")}>
+              <p className={cx("eyebrow")}>
+                <b>Accès direct</b>
+              </p>
+              <h2 id="quick-access-title">Déjà membre ?</h2>
+            </div>
+            <nav className={cx("quick-access-links")} aria-label="Accès rapides">
+              <Link href={privateHref(ROUTES.myTickets, viewer)} className={cx("quick-link")}>
+                <Ticket className={cx("icon")} aria-hidden="true" />
+                <span>
+                  <strong>Mes billets</strong>
+                  <small>
+                    {viewer ? "Retrouver mes réservations" : "Se connecter pour les retrouver"}
+                  </small>
+                </span>
+                <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
+              </Link>
+              <Link href={privateHref(ROUTES.mySalons, viewer)} className={cx("quick-link")}>
+                <MessageCircle className={cx("icon")} aria-hidden="true" />
+                <span>
+                  <strong>Mes salons</strong>
+                  <small>
+                    {viewer ? "Rejoindre les conversations" : "Se connecter pour participer"}
+                  </small>
+                </span>
+                <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
+              </Link>
+              <Link
+                href={viewer?.isOrganizer ? ROUTES.orgDashboard : "/devenir-organisateur"}
+                className={cx("quick-link")}
+              >
+                <Users className={cx("icon")} aria-hidden="true" />
+                <span>
+                  <strong>
+                    {viewer?.isOrganizer ? "Espace organisateur" : "Organiser un événement"}
+                  </strong>
+                  <small>Créer et gérer une sortie</small>
+                </span>
+                <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
+              </Link>
+            </nav>
+            <PwaInstallPrompt />
+          </section>
+
+          <section className={cx("salon-band")} id="salons" aria-labelledby="salon-title">
+            <div className={cx("wrap", "salon-grid")}>
+              <div className={cx("salon-copy")} data-reveal>
+                <p className={cx("eyebrow")}>
+                  <b>02</b> Les salons
+                </p>
+                <h2 id="salon-title">Le fil ne se coupe pas à la sortie.</h2>
+                <p className={cx("lead")}>
+                  Chaque événement a son salon. Les participants s&apos;y organisent avant la date,
+                  partagent ce qui se passe sur place et gardent le contact après la dernière
+                  chanson.
+                </p>
+                <ul className={cx("phase-list")}>
+                  <li className={cx("phase")}>
+                    <span>AVANT</span>
+                    <div>
+                      <strong>Se donner rendez-vous</strong>
+                      <p>Covoiturage, dernière question pratique, heure et point de rencontre.</p>
+                    </div>
+                  </li>
+                  <li className={cx("phase")}>
+                    <span>PENDANT</span>
+                    <div>
+                      <strong>Suivre le moment ensemble</strong>
+                      <p>Le programme en direct et les photos prises sur place.</p>
+                    </div>
+                  </li>
+                  <li className={cx("phase")}>
+                    <span>APRÈS</span>
+                    <div>
+                      <strong>Rester en lien</strong>
+                      <p>
+                        Retrouver les photos, prolonger la discussion et garder les contacts utiles.
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+                <Link
+                  href={featured ? `/evenements/${featured.slug}/salon` : ROUTES.explore}
+                  className={cx("link-arrow")}
+                >
+                  Voir un salon en contexte
+                  <ArrowRight className={cx("icon")} aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className={cx("salon-ui")} data-reveal>
+                <div className={cx("salon-head")}>
+                  <div>
+                    <p className={cx("salon-title")}>Salon · {featured?.title || "Aperçu"}</p>
+                    <p className={cx("salon-status")}>
+                      <span className={cx("live-dot")} aria-hidden="true" />
+                      Aperçu de l&apos;interface
+                    </p>
+                  </div>
+                  <div className={cx("salon-tabs")} role="tablist" aria-label="Moment du salon">
+                    {SALON_PHASES.map((phase, index) => (
+                      <button
+                        key={phase.id}
+                        ref={(element) => {
+                          tabRefs.current[index] = element;
+                        }}
+                        type="button"
+                        role="tab"
+                        id={`salon-tab-${phase.id}`}
+                        aria-selected={salonPhase === phase.id}
+                        aria-controls={`salon-panel-${phase.id}`}
+                        tabIndex={salonPhase === phase.id ? 0 : -1}
+                        className={cx("salon-tab")}
+                        onClick={() => selectSalonTab(phase.id, false)}
+                        onKeyDown={(event) => handleTabKeyDown(event, index)}
+                      >
+                        {phase.label}
                       </button>
                     ))}
                   </div>
-                  <p className={cx("filter-count")} aria-live="polite">
-                    {visibleCount} {visibleCount > 1 ? "sorties affichées" : "sortie affichée"}
-                  </p>
                 </div>
-              ) : null}
 
-              <div className={cx("events")}>
-                {events.map((event, index) => {
-                  const date = dateParts(event.startAt);
-                  const price = priceParts(event);
-                  const hidden =
-                    activeCategory !== "tout" && event.category !== activeCategory;
-
-                  return (
-                    <article
-                      key={event.id}
-                      className={cx("event-card")}
-                      data-reveal="card"
-                      hidden={hidden}
-                    >
-                      <Link href={`/evenements/${event.slug}`} className={cx("card-link")}>
-                        <div
-                          className={cx(
-                            "card-art",
-                            artVariant(event.category),
-                            event.coverUrl && "has-cover",
-                          )}
-                        >
-                          {event.coverUrl ? (
-                            <div className={cx("card-cover")}>
-                              <PublicStorageImage
-                                src={event.coverUrl}
-                                alt=""
-                                fill
-                                sizes="(max-width: 620px) 116px, (max-width: 1100px) 45vw, 300px"
-                              />
-                            </div>
-                          ) : (
-                            <div className={cx("art-fill")} aria-hidden="true" />
-                          )}
-                          <div className={cx("art-inner")}>
-                            <div className={cx("art-top")}>
-                              <span className={cx("art-tag")}>{event.categoryLabel}</span>
-                              <span className={cx("art-num")}>
-                                {String(index + 1).padStart(2, "0")}
-                              </span>
-                            </div>
-                            {!event.coverUrl ? (
-                              <div className={cx("art-word")}>
-                                {event.categoryLabel.split(" ")[0]}
-                                <em>{event.title}</em>
-                              </div>
-                            ) : null}
-                          </div>
+                {SALON_PHASES.map((phase) => (
+                  <div
+                    key={phase.id}
+                    className={cx("salon-panel")}
+                    role="tabpanel"
+                    id={`salon-panel-${phase.id}`}
+                    aria-labelledby={`salon-tab-${phase.id}`}
+                    tabIndex={0}
+                    hidden={salonPhase !== phase.id}
+                  >
+                    {phase.features.map(({ icon: Icon, title, text }) => (
+                      <div key={title} className={cx("salon-feature")}>
+                        <span className={cx("salon-feature-icon")} aria-hidden="true">
+                          <Icon className={cx("icon")} />
+                        </span>
+                        <div>
+                          <strong>{title}</strong>
+                          <p>{text}</p>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
 
-                        <div className={cx("card-body")}>
-                          <div className={cx("card-date")}>
-                            <span className={cx("dow")}>{date.weekday}</span>
-                            <strong>{date.day}</strong>
-                            <span className={cx("month")}>{date.month}</span>
-                          </div>
-                          <div className={cx("card-main")}>
-                            <h3>{event.title}</h3>
-                            <p>{[event.venueName, event.city].filter(Boolean).join(" · ")}</p>
-                          </div>
-                          <div className={cx("card-side")}>
-                            <p className={cx("card-price")}>
-                              <span>{price.label}</span>
-                              {price.value}
-                            </p>
-                            <span className={cx("card-go")}>
-                              <ArrowUpRight className={cx("icon")} aria-hidden="true" />
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    </article>
-                  );
-                })}
+                <div className={cx("composer")} aria-hidden="true">
+                  <span>Écrire dans le salon</span>
+                  <button type="button" tabIndex={-1}>
+                    <Send className={cx("icon")} />
+                  </button>
+                </div>
               </div>
-            </>
-          ) : (
-            <div className={cx("empty-state")} data-reveal>
-              <p className={cx("eyebrow")}>
-                <b>01</b> Découvrir
-              </p>
-              <h3>Aucune sortie publiée pour le moment.</h3>
-              <p>
-                Les prochains événements apparaîtront ici dès leur publication par un organisateur.
-              </p>
-              <Link href="/devenir-organisateur" className={cx("btn", "btn-primary")}>
-                Publier un événemen
-                <ArrowRight className={cx("icon")} aria-hidden="true" />
-              </Link>
             </div>
-          )}
-        </section>
+          </section>
 
-        <section className={cx("salon-band")} id="salons" aria-labelledby="salon-title">
-          <div className={cx("wrap", "salon-grid")}>
-            <div className={cx("salon-copy")} data-reveal>
+          <section
+            className={cx("section", "wrap", "ticket-section")}
+            id="billets"
+            aria-labelledby="billets-title"
+          >
+            <div className={cx("ticket-copy")} data-reveal>
               <p className={cx("eyebrow")}>
-                <b>02</b> Les salons
+                <b>03</b> Billetterie
               </p>
-              <h2 id="salon-title">Le fil ne se coupe pas à la sortie.</h2>
+              <h2 id="billets-title">Ta place, en trois gestes.</h2>
               <p className={cx("lead")}>
-                Chaque événement a son salon. Les participants s&apos;y organisent avant la date,
-                partagent ce qui se passe sur place et gardent le contact après la dernière
-                chanson.
+                Le parcours reste court et lisible : le prix, les conditions et les moyens de
+                paiement sont annoncés avant de valider la commande.
               </p>
-              <ul className={cx("phase-list")}>
-                <li className={cx("phase")}>
-                  <span>AVANT</span>
+              <ol className={cx("steps")}>
+                <li className={cx("step")}>
+                  <span className={cx("step-num")} aria-hidden="true">
+                    01
+                  </span>
                   <div>
-                    <strong>Se donner rendez-vous</strong>
-                    <p>Covoiturage, dernière question pratique, heure et point de rencontre.</p>
+                    <h3>Choisis ton événement</h3>
+                    <p>Date, lieu, tarif et conditions figurent sur la fiche publiée.</p>
                   </div>
                 </li>
-                <li className={cx("phase")}>
-                  <span>PENDANT</span>
+                <li className={cx("step")}>
+                  <span className={cx("step-num")} aria-hidden="true">
+                    02
+                  </span>
                   <div>
-                    <strong>Suivre le moment ensemble</strong>
-                    <p>Le programme en direct et les photos prises sur place.</p>
+                    <h3>Paie en FCFA</h3>
+                    <p>Mobile money ou carte, selon les options proposées pour cette sortie.</p>
                   </div>
                 </li>
-                <li className={cx("phase")}>
-                  <span>APRÈS</span>
+                <li className={cx("step")}>
+                  <span className={cx("step-num")} aria-hidden="true">
+                    03
+                  </span>
                   <div>
-                    <strong>Rester en lien</strong>
+                    <h3>Présente ton billet</h3>
                     <p>
-                      Retrouver les photos, prolonger la discussion et garder les contacts utiles.
+                      Le QR code est vérifié à l&apos;entrée. Ton billet reste accessible depuis ton
+                      compte.
                     </p>
                   </div>
                 </li>
-              </ul>
-              <Link
-                href={featured ? `/evenements/${featured.slug}/salon` : ROUTES.explore}
-                className={cx("link-arrow")}
-              >
-                Voir un salon en contexte
-                <ArrowRight className={cx("icon")} aria-hidden="true" />
-              </Link>
+              </ol>
+              <p className={cx("hero-note", "ticket-note")}>
+                <ShieldCheck className={cx("icon")} aria-hidden="true" />
+                <span>
+                  <strong>Un accès par personne.</strong> Le contrôle d&apos;accès évite les doubles
+                  entrées.
+                </span>
+              </p>
             </div>
 
-            <div className={cx("salon-ui")} data-reveal>
-              <div className={cx("salon-head")}>
-                <div>
-                  <p className={cx("salon-title")}>Salon · {featured?.title || "Aperçu"}</p>
-                  <p className={cx("salon-status")}>
-                    <span className={cx("live-dot")} aria-hidden="true" />
-                    Aperçu de l&apos;interface
-                  </p>
-                </div>
-                <div className={cx("salon-tabs")} role="tablist" aria-label="Moment du salon">
-                  {SALON_PHASES.map((phase, index) => (
-                    <button
-                      key={phase.id}
-                      ref={(element) => {
-                        tabRefs.current[index] = element;
-                      }}
-                      type="button"
-                      role="tab"
-                      id={`salon-tab-${phase.id}`}
-                      aria-selected={salonPhase === phase.id}
-                      aria-controls={`salon-panel-${phase.id}`}
-                      tabIndex={salonPhase === phase.id ? 0 : -1}
-                      className={cx("salon-tab")}
-                      onClick={() => selectSalonTab(phase.id, false)}
-                      onKeyDown={(event) => handleTabKeyDown(event, index)}
-                    >
-                      {phase.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {SALON_PHASES.map((phase) => (
-                <div
-                  key={phase.id}
-                  className={cx("salon-panel")}
-                  role="tabpanel"
-                  id={`salon-panel-${phase.id}`}
-                  aria-labelledby={`salon-tab-${phase.id}`}
-                  tabIndex={0}
-                  hidden={salonPhase !== phase.id}
-                >
-                  {phase.features.map(({ icon: Icon, title, text }) => (
-                    <div key={title} className={cx("salon-feature")}>
-                      <span className={cx("salon-feature-icon")} aria-hidden="true">
-                        <Icon className={cx("icon")} />
-                      </span>
-                      <div>
-                        <strong>{title}</strong>
-                        <p>{text}</p>
-                      </div>
+            <div className={cx("ticket-stage")} data-reveal>
+              <div className={cx("ticket-shadow")} aria-hidden="true" />
+              <article className={cx("ticket")} aria-label="Exemple de billet">
+                <div className={cx("ticket-main")}>
+                  <p className={cx("ticket-brand")}>event</p>
+                  <p className={cx("ticket-kicker")}>Exemple de billet · Admission générale</p>
+                  <h3 className={cx("ticket-title")}>
+                    {featured?.title || "Votre prochain événement"}
+                  </h3>
+                  <dl className={cx("ticket-dl")}>
+                    <div>
+                      <dt>Date</dt>
+                      <dd>
+                        {featuredDate ? `${featuredDate.longDate} ${featuredDate.year}` : "À venir"}
+                      </dd>
                     </div>
-                  ))}
-                </div>
-              ))}
-
-              <div className={cx("composer")} aria-hidden="true">
-                <span>Écrire dans le salon</span>
-                <button type="button" tabIndex={-1}>
-                  <Send className={cx("icon")} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          className={cx("section", "wrap", "ticket-section")}
-          id="billets"
-          aria-labelledby="billets-title"
-        >
-          <div className={cx("ticket-copy")} data-reveal>
-            <p className={cx("eyebrow")}>
-              <b>03</b> Billetterie
-            </p>
-            <h2 id="billets-title">Ta place, en trois gestes.</h2>
-            <p className={cx("lead")}>
-              Le parcours reste court et lisible : le prix, les conditions et les moyens de
-              paiement sont annoncés avant de valider la commande.
-            </p>
-            <ol className={cx("steps")}>
-              <li className={cx("step")}>
-                <span className={cx("step-num")} aria-hidden="true">
-                  01
-                </span>
-                <div>
-                  <h3>Choisis ton événement</h3>
-                  <p>Date, lieu, tarif et conditions figurent sur la fiche publiée.</p>
-                </div>
-              </li>
-              <li className={cx("step")}>
-                <span className={cx("step-num")} aria-hidden="true">
-                  02
-                </span>
-                <div>
-                  <h3>Paie en FCFA</h3>
-                  <p>Mobile money ou carte, selon les options proposées pour cette sortie.</p>
-                </div>
-              </li>
-              <li className={cx("step")}>
-                <span className={cx("step-num")} aria-hidden="true">
-                  03
-                </span>
-                <div>
-                  <h3>Présente ton billet</h3>
-                  <p>
-                    Le QR code est vérifié à l&apos;entrée. Ton billet reste accessible depuis ton
-                    compte.
-                  </p>
-                </div>
-              </li>
-            </ol>
-            <p className={cx("hero-note", "ticket-note")}>
-              <ShieldCheck className={cx("icon")} aria-hidden="true" />
-              <span>
-                <strong>Un accès par personne.</strong> Le contrôle d&apos;accès évite les doubles
-                entrées.
-              </span>
-            </p>
-          </div>
-
-          <div className={cx("ticket-stage")} data-reveal>
-            <div className={cx("ticket-shadow")} aria-hidden="true" />
-            <article className={cx("ticket")} aria-label="Exemple de billet">
-              <div className={cx("ticket-main")}>
-                <p className={cx("ticket-brand")}>event</p>
-                <p className={cx("ticket-kicker")}>Exemple de billet · Admission générale</p>
-                <h3 className={cx("ticket-title")}>
-                  {featured?.title || "Votre prochain événement"}
-                </h3>
-                <dl className={cx("ticket-dl")}>
-                  <div>
-                    <dt>Date</dt>
-                    <dd>
-                      {featuredDate
-                        ? `${featuredDate.longDate} ${featuredDate.year}`
-                        : "À venir"}
-                    </dd>
+                    <div>
+                      <dt>Heure</dt>
+                      <dd>{featuredDate?.time || "À confirmer"}</dd>
+                    </div>
+                    <div>
+                      <dt>Lieu</dt>
+                      <dd>{featured?.venueName || "À confirmer"}</dd>
+                    </div>
+                    <div>
+                      <dt>Ville</dt>
+                      <dd>{featured?.city || "Abidjan"}</dd>
+                    </div>
+                  </dl>
+                  <div className={cx("ticket-foot")}>
+                    <p className={cx("ticket-price")}>
+                      <small>Tarif</small>
+                      {featuredPrice ? featuredPrice.value : "—"}
+                    </p>
+                    <p className={cx("ticket-ref")}>
+                      Billet nominatif
+                      <br />1 personne
+                    </p>
                   </div>
+                </div>
+                <div className={cx("ticket-stub")}>
                   <div>
-                    <dt>Heure</dt>
-                    <dd>{featuredDate?.time || "À confirmer"}</dd>
+                    <div className={cx("ticket-qr")}>
+                      <QrArt seed={`ticket-${featured?.slug || "event"}`} />
+                    </div>
+                    <p className={cx("ticket-scan")}>
+                      Aperçu
+                      <br />
+                      non scannable
+                    </p>
                   </div>
-                  <div>
-                    <dt>Lieu</dt>
-                    <dd>{featured?.venueName || "À confirmer"}</dd>
-                  </div>
-                  <div>
-                    <dt>Ville</dt>
-                    <dd>{featured?.city || "Abidjan"}</dd>
-                  </div>
-                </dl>
-                <div className={cx("ticket-foot")}>
                   <p className={cx("ticket-price")}>
-                    <small>Tarif</small>
-                    {featuredPrice ? featuredPrice.value : "—"}
-                  </p>
-                  <p className={cx("ticket-ref")}>
-                    Billet nominatif
-                    <br />1 personne
-                  </p>
-                </div>
-              </div>
-              <div className={cx("ticket-stub")}>
-                <div>
-                  <div className={cx("ticket-qr")}>
-                    <QrArt seed={`ticket-${featured?.slug || "event"}`} />
-                  </div>
-                  <p className={cx("ticket-scan")}>
-                    Aperçu
-                    <br />
-                    non scannable
+                    {featured && featured.minPrice > 0 ? (
+                      <>
+                        {formatNumber(featured.minPrice)}
+                        <small>FCFA</small>
+                      </>
+                    ) : featured ? (
+                      "Gratuit"
+                    ) : (
+                      "—"
+                    )}
                   </p>
                 </div>
-                <p className={cx("ticket-price")}>
-                  {featured && featured.minPrice > 0 ? (
-                    <>
-                      {formatNumber(featured.minPrice)}
-                      <small>FCFA</small>
-                    </>
-                  ) : featured ? (
-                    "Gratuit"
-                  ) : (
-                    "—"
-                  )}
-                </p>
-              </div>
-              <span className={cx("ticket-stamp")} aria-hidden="true">
-                Even
-                <br />
-                Bille
-                <br />
-                {featuredDate?.year || currentYear}
-              </span>
-            </article>
+                <span className={cx("ticket-stamp")} aria-hidden="true">
+                  Even
+                  <br />
+                  Bille
+                  <br />
+                  {featuredDate?.year || currentYear}
+                </span>
+              </article>
 
-            <Link
-              href={featured ? `/evenements/${featured.slug}/billets` : ROUTES.explore}
-              className={cx("link-arrow", "ticket-link")}
-            >
-              {featured ? "Voir les billets de cet événement" : "Trouver un événement"}
-              <ArrowRight className={cx("icon")} aria-hidden="true" />
-            </Link>
-          </div>
-        </section>
-
-        <section className={cx("organizer")} id="organiser" aria-labelledby="organiser-title">
-          <div className={cx("wrap", "organizer-inner")}>
-            <div data-reveal>
-              <p className={cx("eyebrow")}>
-                <b>04</b> Organiser
-              </p>
-              <h2 id="organiser-title">Organise sans perdre le fil.</h2>
-              <p className={cx("lead")}>
-                Publie ton événement, suis les participants et contrôle les accès depuis le même
-                espace. Les informations affichées restent celles de ta fiche.
-              </p>
-              <ul className={cx("org-list")}>
-                <li className={cx("org-item")}>
-                  <CalendarDays className={cx("icon")} aria-hidden="true" />
-                  <div>
-                    <strong>Publication</strong>
-                    <span>Une fiche claire, une couverture, des tarifs et des conditions.</span>
-                  </div>
-                </li>
-                <li className={cx("org-item")}>
-                  <Ticket className={cx("icon")} aria-hidden="true" />
-                  <div>
-                    <strong>Billetterie</strong>
-                    <span>Les commandes et les billets émis, au même endroit.</span>
-                  </div>
-                </li>
-                <li className={cx("org-item")}>
-                  <QrCode className={cx("icon")} aria-hidden="true" />
-                  <div>
-                    <strong>Contrôle d&apos;accès</strong>
-                    <span>Scanne les billets à l&apos;entrée et suis les validations.</span>
-                  </div>
-                </li>
-                <li className={cx("org-item")}>
-                  <Users className={cx("icon")} aria-hidden="true" />
-                  <div>
-                    <strong>Équipe</strong>
-                    <span>Donne les bons accès aux personnes qui t&apos;accompagnent.</span>
-                  </div>
-                </li>
-              </ul>
-              <p className={cx("preview-note")}>
-                Aperçu de l&apos;interface · les titres repris sont ceux des événements publiés.
-              </p>
-              <Link href="/devenir-organisateur" className={cx("btn", "btn-light")}>
-                Devenir organisateur
+              <Link
+                href={featured ? `/evenements/${featured.slug}/billets` : ROUTES.explore}
+                className={cx("link-arrow", "ticket-link")}
+              >
+                {featured ? "Voir les billets de cet événement" : "Trouver un événement"}
                 <ArrowRight className={cx("icon")} aria-hidden="true" />
               </Link>
             </div>
+          </section>
 
-            <div className={cx("dash")} aria-hidden="true">
-              <div className={cx("dash-top")}>
-                <div className={cx("dash-brand")}>
-                  <span className={cx("brand-mark")}>e</span>
-                  <p>Espace organisateur · Aperçu</p>
-                </div>
-                <span className={cx("dash-avatar")}>e</span>
-              </div>
-              <div className={cx("dash-body")}>
-                <div className={cx("dash-nav")}>
-                  <span className={cx("is-active")}>
-                    <CalendarDays className={cx("icon")} />
-                    Événements
-                  </span>
-                  <span>
-                    <Users className={cx("icon")} />
-                    Participants
-                  </span>
-                  <span>
-                    <QrCode className={cx("icon")} />
-                    Contrôle d&apos;accès
-                  </span>
-                  <span>
-                    <ShieldCheck className={cx("icon")} />
-                    Équipe
-                  </span>
-                </div>
-                <div className={cx("dash-main")}>
-                  <div className={cx("dash-head")}>
-                    <h3>Mes événements</h3>
-                    <span className={cx("dash-publish")}>
-                      <Plus className={cx("icon")} />
-                      Publier
-                    </span>
-                  </div>
-
-                  {events.slice(0, 3).map((event) => {
-                    const date = dateParts(event.startAt);
-                    return (
-                      <div key={event.id} className={cx("dash-row")}>
-                        <div className={cx("dash-row-title")}>
-                          <strong>{event.title}</strong>
-                          <span>
-                            {date.weekday} {date.day} {date.month} ·{" "}
-                            {event.venueName || event.city}
-                          </span>
-                        </div>
-                        <span className={cx("status", "status-live")}>Publié</span>
-                        <ArrowRight className={cx("icon")} />
-                      </div>
-                    );
-                  })}
-
-                  {events.length === 0 ? (
-                    <div className={cx("dash-row")}>
-                      <div className={cx("dash-row-title")}>
-                        <strong>Aucun événement publié</strong>
-                        <span>Publie ta première sortie</span>
-                      </div>
-                      <span className={cx("status", "status-draft")}>—</span>
-                      <ArrowRight className={cx("icon")} />
+          <section className={cx("organizer")} id="organiser" aria-labelledby="organiser-title">
+            <div className={cx("wrap", "organizer-inner")}>
+              <div data-reveal>
+                <p className={cx("eyebrow")}>
+                  <b>04</b> Organiser
+                </p>
+                <h2 id="organiser-title">Organise sans perdre le fil.</h2>
+                <p className={cx("lead")}>
+                  Publie ton événement, suis les participants et contrôle les accès depuis le même
+                  espace. Les informations affichées restent celles de ta fiche.
+                </p>
+                <ul className={cx("org-list")}>
+                  <li className={cx("org-item")}>
+                    <CalendarDays className={cx("icon")} aria-hidden="true" />
+                    <div>
+                      <strong>Publication</strong>
+                      <span>Une fiche claire, une couverture, des tarifs et des conditions.</span>
                     </div>
-                  ) : null}
-
-                  <div className={cx("dash-toast")}>
-                    <span className={cx("check")}>
-                      <Check className={cx("icon")} />
-                    </span>
+                  </li>
+                  <li className={cx("org-item")}>
+                    <Ticket className={cx("icon")} aria-hidden="true" />
+                    <div>
+                      <strong>Billetterie</strong>
+                      <span>Les commandes et les billets émis, au même endroit.</span>
+                    </div>
+                  </li>
+                  <li className={cx("org-item")}>
+                    <QrCode className={cx("icon")} aria-hidden="true" />
                     <div>
                       <strong>Contrôle d&apos;accès</strong>
-                      <small>Billets vérifiés à l&apos;entrée</small>
+                      <span>Scanne les billets à l&apos;entrée et suis les validations.</span>
+                    </div>
+                  </li>
+                  <li className={cx("org-item")}>
+                    <Users className={cx("icon")} aria-hidden="true" />
+                    <div>
+                      <strong>Équipe</strong>
+                      <span>Donne les bons accès aux personnes qui t&apos;accompagnent.</span>
+                    </div>
+                  </li>
+                </ul>
+                <p className={cx("preview-note")}>
+                  Aperçu de l&apos;interface · les titres repris sont ceux des événements publiés.
+                </p>
+                <Link href="/devenir-organisateur" className={cx("btn", "btn-light")}>
+                  Devenir organisateur
+                  <ArrowRight className={cx("icon")} aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className={cx("dash")} aria-hidden="true">
+                <div className={cx("dash-top")}>
+                  <div className={cx("dash-brand")}>
+                    <span className={cx("brand-mark")}>e</span>
+                    <p>Espace organisateur · Aperçu</p>
+                  </div>
+                  <span className={cx("dash-avatar")}>e</span>
+                </div>
+                <div className={cx("dash-body")}>
+                  <div className={cx("dash-nav")}>
+                    <span className={cx("is-active")}>
+                      <CalendarDays className={cx("icon")} />
+                      Événements
+                    </span>
+                    <span>
+                      <Users className={cx("icon")} />
+                      Participants
+                    </span>
+                    <span>
+                      <QrCode className={cx("icon")} />
+                      Contrôle d&apos;accès
+                    </span>
+                    <span>
+                      <ShieldCheck className={cx("icon")} />
+                      Équipe
+                    </span>
+                  </div>
+                  <div className={cx("dash-main")}>
+                    <div className={cx("dash-head")}>
+                      <h3>Mes événements</h3>
+                      <span className={cx("dash-publish")}>
+                        <Plus className={cx("icon")} />
+                        Publier
+                      </span>
+                    </div>
+
+                    {events.slice(0, 3).map((event) => {
+                      const date = dateParts(event.startAt);
+                      return (
+                        <div key={event.id} className={cx("dash-row")}>
+                          <div className={cx("dash-row-title")}>
+                            <strong>{event.title}</strong>
+                            <span>
+                              {date.weekday} {date.day} {date.month} ·{" "}
+                              {event.venueName || event.city}
+                            </span>
+                          </div>
+                          <span className={cx("status", "status-live")}>Publié</span>
+                          <ArrowRight className={cx("icon")} />
+                        </div>
+                      );
+                    })}
+
+                    {events.length === 0 ? (
+                      <div className={cx("dash-row")}>
+                        <div className={cx("dash-row-title")}>
+                          <strong>Aucun événement publié</strong>
+                          <span>Publie ta première sortie</span>
+                        </div>
+                        <span className={cx("status", "status-draft")}>—</span>
+                        <ArrowRight className={cx("icon")} />
+                      </div>
+                    ) : null}
+
+                    <div className={cx("dash-toast")}>
+                      <span className={cx("check")}>
+                        <Check className={cx("icon")} />
+                      </span>
+                      <div>
+                        <strong>Contrôle d&apos;accès</strong>
+                        <small>Billets vérifiés à l&apos;entrée</small>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className={cx("closing")} id="rejoindre" aria-labelledby="rejoindre-title">
-          <div className={cx("wrap", "closing-inner")}>
-            <div data-reveal>
-              <p className={cx("eyebrow")}>
-                <b>05</b> Rejoindre
-              </p>
-              <h2 id="rejoindre-title">
-                Ta prochaine sortie a <em>déjà</em> son salon.
-              </h2>
-              <p>
-                Découvre les événements publiés, réserve ta place et retrouve les participants
-                avant, pendant et après la rencontre.
-              </p>
+          <section className={cx("closing")} id="rejoindre" aria-labelledby="rejoindre-title">
+            <div className={cx("wrap", "closing-inner")}>
+              <div data-reveal>
+                <p className={cx("eyebrow")}>
+                  <b>05</b> Rejoindre
+                </p>
+                <h2 id="rejoindre-title">
+                  Ta prochaine sortie a <em>déjà</em> son salon.
+                </h2>
+                <p>
+                  Découvre les événements publiés, réserve ta place et retrouve les participants
+                  avant, pendant et après la rencontre.
+                </p>
+              </div>
+              <div className={cx("closing-cta")} data-reveal>
+                <Link href={ROUTES.explore} className={cx("btn", "btn-primary")}>
+                  Découvrir les sorties
+                  <ArrowRight className={cx("icon")} aria-hidden="true" />
+                </Link>
+                <Link href="/devenir-organisateur" className={cx("link-arrow")}>
+                  Créer un événement
+                  <ArrowUpRight className={cx("icon")} aria-hidden="true" />
+                </Link>
+              </div>
             </div>
-            <div className={cx("closing-cta")} data-reveal>
-              <Link href={ROUTES.explore} className={cx("btn", "btn-primary")}>
-                Découvrir les sorties
-                <ArrowRight className={cx("icon")} aria-hidden="true" />
-              </Link>
-              <Link href="/devenir-organisateur" className={cx("link-arrow")}>
-                Créer un événement
-                <ArrowUpRight className={cx("icon")} aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        </section>
+          </section>
         </div>
       </main>
 
