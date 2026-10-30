@@ -3926,6 +3926,12 @@
 }
 
 .home .card-cover img {
+  /* La couverture remplit le cadre sans jamais déformer l'image : les
+     proportions sont conservées, le surplus est rogné. */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   transition: transform 750ms var(--ease-out), filter 750ms var(--ease-out);
 }
 
