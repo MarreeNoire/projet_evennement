@@ -538,7 +538,21 @@
   }
 
   .visual {
-    min-height: 500px;
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .slide {
+    position: relative;
+    inset: auto;
+    display: flex;
+    width: 100%;
+    flex: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
   }
 
   .arch {
@@ -548,8 +562,18 @@
   }
 
   .featureCard {
-    right: 2px;
-    bottom: 7%;
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: calc(100% - 24px);
+    max-width: 420px;
+  }
+
+  .carouselControls {
+    position: relative;
+    inset: auto;
+    align-self: center;
+    transform: none;
   }
 }
 
@@ -582,7 +606,7 @@
   }
 
   .visual {
-    min-height: 410px;
+    min-height: 0;
   }
 
   .arch {
@@ -591,9 +615,7 @@
   }
 
   .featureCard {
-    width: 84%;
     padding: 16px 48px 16px 16px;
-    bottom: 42%;
   }
 
   .proof {
