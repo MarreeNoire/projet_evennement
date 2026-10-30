@@ -1,23 +1,27 @@
 ---
-name: Event — Papier & verre
-description: Interface éditoriale et franche pour découvrir des sorties et rejoindre leur communauté en Côte d'Ivoire, posée sur du verre plutôt que des aplats opaques.
+name: Event — Verre liquide & bento
+description: Interface événementielle éditoriale, avec surfaces de verre liquide, compositions bento et volumes doux.
 colors:
-  ink: "#0B0B0C"
-  paper: "#F4F2EC"
-  mint: "#E0F9E4"
-  mint-deep: "#1E5A37"
-  paper-deep: "#E4E0D6"
-  line: "#B9B5AA"
-  muted-ink: "#55524B"
+  ink: "#22231F"
+  paper: "#F4F0E8"
+  vermilion: "#BD3B25"
+  cobalt: "#344D67"
+  gold: "#EDC55C"
+  line: "#D8D2C7"
+  muted-ink: "#73736C"
+  dark-background: "#0A0E0C"
+  dark-surface: "#111714"
+  dark-ink: "#EAF3E7"
+  dark-primary: "#A7F432"
+  dark-accent: "#3B8F7B"
 typography:
   display:
-    fontFamily: "Anton, Arial Narrow, Impact, sans-serif"
-    fontWeight: 400
-    letterSpacing: "0.004em"
+    fontFamily: "Archivo, Arial, sans-serif"
+    fontWeight: 700
+    letterSpacing: "-0.05em"
     lineHeight: 0.92
-    case: uppercase
   body:
-    fontFamily: "Bricolage Grotesque, system-ui, sans-serif"
+    fontFamily: "Inter, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.6
@@ -31,38 +35,45 @@ spacing:
   3xl: "80px"
 components:
   hero:
-    style: "scène encre avec vidéo voilée, halo de menthe, bandeau défilant et panneaux de verre"
-    structure: "navigation de verre · bandeau · titre Anton · actions · composition centrée"
+    style: "titre géant, halo 3D doux et couverture réelle dans un cadre de verre"
+    structure: "navigation flottante · titre éditorial · action principale · événement en vedette"
   event-card:
-    style: "billet de verre : affiche, pastille de date en menthe, filet perforé, prix composté"
+    style: "carte bento arrondie : affiche, date et tarif dans une surface vitrée"
   navigation:
-    style: "chrome de verre translucide, flou réel, liseré clair, cibles tactiles de 44 px"
+    style: "chrome flottant translucide, flou réel et cibles tactiles de 44 px"
+  surfaces:
+    style: "verre dépoli avec repli opaque, liseré clair et ombre diffuse"
 ---
 
 ## Direction artistique
 
-La maquette `accueil/Application de billetterie et salons4.html` fixe le vocabulaire : encre `#0B0B0C`, papier `#F4F2EC`, gris chaud `#55524B`, titres Anton en capitales, texte Bricolage Grotesque, filets francs et blocs éditoriaux. L'accent vient de `exemple_couleur` : un vert menthe très clair, `#E0F9E4`, mesuré sur l'image de référence. `#1E5A37` est une dérivation du même vert, assombrie pour porter le texte sur le papier clair.
+La référence visuelle apporte quatre idées : verre liquide, grilles bento, typographie géante et volumes 3D doux. Event les adapte à sa palette : encre `#22231F`, papier `#F4F0E8`, vermillon `#BD3B25`, cobalt `#344D67` et or `#EDC55C`. Les titres Archivo et le texte Inter restent cohérents avec les polices chargées par l'application.
 
-L'écart assumé avec la maquette est le verre. Les aplats opaques deviennent des surfaces translucides : fond à 7 à 12 % sur l'encre, 60 à 78 % sur le papier, flou de 18 à 22 px, saturation à 1,4, liseré clair en haut et ombre douce. Le verre n'est jamais décoratif : il sert à garder le contenu lisible au-dessus d'une vidéo, d'une affiche ou d'une trame.
+Le thème sombre conserve sa palette existante, plus forestière : fond `#0A0E0C`,
+surfaces `#111714`, texte `#EAF3E7`, vert principal `#A7F432` et accent
+`#3B8F7B`. Seul le thème initial passe au papier ; le choix déjà enregistré
+reste prioritaire.
+
+Les surfaces translucides gardent assez d'opacité pour assurer le contraste : flou de 18 à 22 px, liseré clair et ombre douce. Les volumes doux viennent de dégradés CSS et des couvertures fournies par les organisateurs ; aucune photo d'événement générée n'est ajoutée.
 
 ### Principes
 
-- L'encre porte les grandes surfaces ; le papier porte la lecture longue ; la menthe reste un accent d'action et de repère, jamais un fond de page.
-- Un seul aplat de menthe par vue : bouton principal, pastille de date ou état actif. Le reste est encre, papier ou verre.
-- Les contours sont fins (1 px sur le verre, 2 px sur les actions) et les ombres sont douces. Les ombres dures de type affiche ne servent qu'aux boutons principaux, au survol.
-- Les titres sont courts et en capitales Anton. Les données, lieux, horaires et tarifs restent en Bricolage Grotesque, jamais en display.
+- Le papier porte la lecture longue ; l'encre structure les titres ; le vermillon et le cobalt signalent les actions et repères.
+- Les surfaces bento regroupent des contenus liés, sans ajouter de chiffres ou d'informations fictives.
+- Les contours sont fins (1 px sur le verre, 2 px sur les actions) et les ombres sont douces.
+- Les titres sont courts et expressifs. Les données, lieux, horaires et tarifs restent en Inter, jamais en display.
 - Aucune donnée inventée : les compteurs, la prochaine sortie et la jauge viennent des événements réellement publiés. Une base vide affiche un état vide explicite.
 
 ### Verre et replis
 
 - `backdrop-filter` est toujours doublé d'un repli opaque pour les navigateurs qui ne le prennent pas en charge.
 - `prefers-reduced-transparency: reduce` remplace le verre par une surface pleine et coupe le flou.
-- Le texte ne doit jamais reposer sur une zone de verre sans voile derrière : sur la scène d'accueil, un dégradé d'encre garantit le contraste du titre et des actions.
+- Le texte ne repose pas sur une zone vitrée sans voile : les cartes photo utilisent un dégradé d'encre, tandis que le titre reste sur le papier.
 
 ### Parcours
 
-1. L'accueil pose la promesse et le bandeau, puis laisse la place aux sorties réelles dans les cartes-billets.
-2. La sélection « À l'affiche » reprend les vrais événements dans les cartes-billets.
+1. L'accueil pose la promesse et laisse la place aux sorties réelles dans les cartes-billets.
+2. La sélection « À l'affiche » reprend les vrais événements dans les cartes bento.
 3. L'exploration garde les mêmes cartes, les mêmes filtres et les mêmes états.
 4. Les salons, billets et écrans organisateur héritent des mêmes jetons de couleur et de la même typographie.
 5. Les écrans denses (organisateur, administration) gardent la hiérarchie serrée, sans verre superflu.
@@ -71,7 +82,7 @@ L'écart assumé avec la maquette est le verre. Les aplats opaques deviennent de
 
 - Entrée du hero : montée de 14 px sur 620 ms, décalée de 40 à 420 ms selon l'ordre de lecture.
 - Bandeau : défilement linéaire continu, mis en pause au survol.
-- Survol des cartes : élévation de 6 px, reflet qui balaie l'affiche, contour qui prend la menthe. Retour à l'état initial dès que le pointeur sort.
+- Survol des cartes : élévation de 4 px, reflet discret sur l'affiche et contour qui prend l'accent. Retour à l'état initial dès que le pointeur sort.
 - Cibles tactiles autour de 44 px, appui immédiat, transitions de 160 à 380 ms.
 - `prefers-reduced-motion: reduce` neutralise toutes les animations et conserve les états finaux lisibles.
 

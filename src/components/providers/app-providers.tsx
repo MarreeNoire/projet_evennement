@@ -31,14 +31,13 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 const THEME_CHANGE_EVENT = "event:theme-change";
-/* Le thème sombre néon est l'identité par défaut : un visiteur qui n'a jamais
-   choisi de thème voit l'application telle qu'elle est dessinée. */
-let fallbackTheme: Theme = "dark";
+/* Le thème papier est le point d'entrée ; le choix déjà enregistré reste prioritaire. */
+let fallbackTheme: Theme = "light";
 
 function getStoredTheme(): Theme {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.THEME) as Theme | null;
-    return saved && ["light", "dark", "system"].includes(saved) ? saved : "dark";
+    return saved && ["light", "dark", "system"].includes(saved) ? saved : "light";
   } catch {
     return fallbackTheme;
   }
@@ -66,8 +65,12 @@ function getSystemTheme(): "light" | "dark" {
 export const useTheme = () => useContext(ThemeContext);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const theme = useSyncExternalStore<Theme>(subscribeToTheme, getStoredTheme, () => "dark");
-  const systemTheme = useSyncExternalStore<"light" | "dark">(subscribeToSystemTheme, getSystemTheme, () => "dark");
+  const theme = useSyncExternalStore<Theme>(subscribeToTheme, getStoredTheme, () => "light");
+  const systemTheme = useSyncExternalStore<"light" | "dark">(
+    subscribeToSystemTheme,
+    getSystemTheme,
+    () => "light",
+  );
   const resolvedTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {

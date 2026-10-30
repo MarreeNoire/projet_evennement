@@ -4472,3 +4472,292 @@
   .home .price strong { font-size: 14px; }
   .home .cta { min-height: 32px; padding-inline: 8px; }
 }
+
+/* Verre liquide et grille bento, adaptés à la palette Event. */
+.home {
+  --glass-surface: rgba(255, 255, 255, 0.66);
+  --glass-surface-raised: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.88);
+  --glass-shadow: 0 24px 60px -38px rgba(34, 35, 31, 0.32);
+  background:
+    radial-gradient(ellipse at 86% 7%, rgba(130, 149, 170, 0.16), transparent 28%),
+    radial-gradient(ellipse at 8% 38%, rgba(210, 80, 54, 0.07), transparent 30%), var(--paper);
+}
+
+:global(html.dark) .home {
+  --glass-surface: rgba(19, 27, 22, 0.74);
+  --glass-surface-raised: rgba(31, 42, 34, 0.9);
+  --glass-border: rgba(234, 243, 231, 0.36);
+  --glass-shadow: 0 24px 60px -38px rgba(0, 0, 0, 0.72);
+}
+
+.home .site-head {
+  border-bottom-color: transparent;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.home .site-head.is-scrolled {
+  border-bottom-color: transparent;
+}
+
+.home .head-inner {
+  min-height: 64px;
+  margin-block: 10px;
+  padding-inline: clamp(14px, 2vw, 22px);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass-surface);
+  box-shadow: 0 12px 35px -28px rgba(34, 35, 31, 0.6);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  backdrop-filter: blur(20px) saturate(145%);
+}
+
+.home .main-nav {
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.home .main-nav a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 13px;
+  border-radius: 999px;
+}
+
+.home .main-nav a::after {
+  display: none;
+}
+
+.home .main-nav a:hover {
+  background: var(--paper-2);
+}
+
+.home .site-head .head-actions .btn-outline {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.home .site-head .head-actions .btn-outline:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.home .content {
+  padding-top: clamp(42px, 6vw, 74px);
+}
+
+.home .quick-access {
+  gap: 18px;
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  background: var(--glass-surface);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+
+.home .quick-access-links {
+  gap: 10px;
+}
+
+.home .quick-link {
+  min-height: 82px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--glass-surface-raised) 72%, transparent);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms var(--ease-out);
+}
+
+.home .quick-link:hover,
+.home .quick-link:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 46%, var(--line));
+  background: var(--glass-surface-raised);
+  transform: translateY(-2px);
+}
+
+.home .events {
+  gap: 18px;
+}
+
+.home .event-card {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 25px;
+  background: var(--glass-surface);
+  box-shadow: 0 18px 42px -34px rgba(34, 35, 31, 0.45);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms var(--ease-out);
+}
+
+.home .event-card:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.home .card-art {
+  aspect-ratio: 1 / 1.05;
+  border: 0;
+  border-radius: 18px;
+}
+
+.home .event-card:first-child .card-art {
+  aspect-ratio: 1.35 / 1;
+}
+
+.home .art-tag {
+  padding: 7px 10px;
+  border-color: rgba(255, 255, 255, 0.68);
+  border-radius: 999px;
+  background: rgba(20, 24, 27, 0.24);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.home .card-body {
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 3px 2px;
+  border-top: 0;
+}
+
+.home .card-date {
+  min-width: 46px;
+  padding: 8px 7px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--paper-2));
+}
+
+.home .card-date strong {
+  font-size: 21px;
+}
+
+.home .card-main h3 {
+  font-size: clamp(16px, 1.5vw, 20px);
+}
+
+.home .card-price {
+  font-size: 11px;
+}
+
+.home .card-go {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  opacity: 1;
+  transform: none;
+}
+
+.home .salon-band {
+  border-block: 0;
+  background:
+    radial-gradient(ellipse at 78% 45%, rgba(130, 149, 170, 0.15), transparent 35%),
+    color-mix(in srgb, var(--paper-2) 76%, transparent);
+}
+
+.home .salon-ui {
+  border-color: var(--glass-border);
+  border-radius: 26px;
+  background: var(--glass-surface);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+}
+
+.home .salon-tabs {
+  border-radius: 999px;
+}
+
+.home .salon-tab {
+  min-height: 36px;
+  border-radius: 999px;
+}
+
+.home .composer {
+  border-radius: 999px;
+}
+
+.home .composer button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .home .event-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--glass-border));
+    box-shadow: 0 26px 52px -36px rgba(34, 35, 31, 0.5);
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 1100px) {
+  .home .event-card:first-child {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .home .head-inner {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .home .head-inner {
+    margin-block: 7px;
+    padding-inline: 14px;
+  }
+
+  .home .quick-access-links {
+    gap: 8px;
+    border: 0;
+  }
+
+  .home .quick-access-links .quick-link,
+  .home .quick-access-links .quick-link:nth-child(even),
+  .home .quick-access-links .quick-link:nth-child(n + 3) {
+    min-height: 80px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+  }
+
+  .home .events {
+    gap: 14px;
+    padding-bottom: 12px;
+  }
+
+  .home .event-card {
+    flex-basis: min(80vw, 340px);
+  }
+
+  .home .event-card:first-child .card-art {
+    aspect-ratio: 1.2 / 1;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .home .head-inner,
+  .home .quick-access,
+  .home .quick-link,
+  .home .salon-ui {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

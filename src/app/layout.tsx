@@ -77,7 +77,7 @@ export const viewport: Viewport = {
   // (env(safe-area-inset-*) exploitées par la tabbar et les sheets).
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0a0e0c" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f0e8" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0e0c" },
   ],
   interactiveWidget: "resizes-content",
@@ -91,9 +91,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`${archivo.variable} ${inter.variable} dark`}
+      className={`${archivo.variable} ${inter.variable} light`}
     >
-      <head />
+      <head>
+        {process.env.NODE_ENV === "development" && (
+          <script async src="https://mcp.figma.com/mcp/html-to-design/capture.js" />
+        )}
+      </head>
       <body className="min-h-dvh antialiased">
         <a href="#contenu" className="skip-link">
           Aller au contenu principal
