@@ -91,7 +91,10 @@ sont retirés : salons, billetterie et organisateurs gardent chacun leur section
 dédiée. Le nombre d'événements affiché dans le hero provient du total chargé
 côté serveur.
 
-L'entrée du hero est une animation de première impression, limitée à l'opacité
-et à la transformation, avec une variante sans déplacement sous
-`prefers-reduced-motion`. Aucun mouvement continu ne détourne l'attention des
-événements.
+L'entrée du hero est limitée à l'opacité et à la transformation, avec une
+variante sans déplacement sous `prefers-reduced-motion`. La zone « À l'affiche »
+fait défiler les événements chargés toutes les huit secondes. Les commandes
+précédent/suivant et pause/reprise restent visibles ; le défilement s'arrête au
+survol, à la prise de focus, lorsque la zone sort de l'écran ou si la réduction
+des animations est demandée. La sélection manuelle reste disponible dans tous
+les cas.

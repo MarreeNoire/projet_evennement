@@ -1,8 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Pause,
+  Play,
+} from "lucide-react";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { APP_NAME, ROUTES } from "@/lib/constants";
@@ -66,9 +76,31 @@ function priceLabel(event: HomeHeroEvent) {
 
 export function HomeHero({ events, total }: HomeHeroProps) {
   const reduceMotion = useReducedMotion();
-  const featured = events[0] ?? null;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [rotationPaused, setRotationPaused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const visualRef = useRef<HTMLDivElement>(null);
+  const isVisualInView = useInView(visualRef, { amount: 0.25 });
+  const featured = events[activeIndex] ?? null;
   const featuredDate = featured ? safeDate(featured.startAt) : null;
   const eventCount = new Intl.NumberFormat("fr-FR").format(total);
+
+  useEffect(() => {
+    if (reduceMotion || rotationPaused || isHovered || !isVisualInView || events.length < 2) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % events.length);
+    }, 8000);
+
+    return () => window.clearInterval(intervalId);
+  }, [events.length, isHovered, isVisualInView, reduceMotion, rotationPaused]);
+
+  function showEvent(direction: number) {
+    setRotationPaused(true);
+    setActiveIndex((current) => (current + direction + events.length) % events.length);
+  }
 
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
@@ -118,6 +150,7 @@ export function HomeHero({ events, total }: HomeHeroProps) {
 
         <motion.div
           className={styles.visual}
+          ref={visualRef}
           initial={reduceMotion ? false : { opacity: 0, transform: "translateY(18px) scale(0.98)" }}
           animate={{ opacity: 1, transform: "translateY(0) scale(1)" }}
           transition={{
@@ -125,64 +158,131 @@ export function HomeHero({ events, total }: HomeHeroProps) {
             delay: 0.12,
             ease: [0.23, 1, 0.32, 1] as const,
           }}
+          role="region"
+          aria-label="Événements à la une"
+          aria-roledescription="carrousel"
+          onFocusCapture={() => setRotationPaused(true)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
         >
-          <div className={styles.arch}>
-            {featured?.coverUrl ? (
-              <PublicStorageImage
-                src={featured.coverUrl}
-                alt=""
-                fill
-                sizes="(max-width: 760px) 84vw, (max-width: 1100px) 48vw, 42vw"
-                quality={84}
-                preload
-              />
-            ) : (
-              <div className={styles.archFallback} aria-hidden="true">
-                <span>{featured?.categoryLabel ?? APP_NAME}</span>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={featured?.id ?? "empty"}
+              className={styles.slide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: reduceMotion ? 0.14 : 0.22,
+                ease: [0.23, 1, 0.32, 1] as const,
+              }}
+              role="group"
+              aria-roledescription="diapositive"
+              aria-label={
+                events.length > 0
+                  ? `${activeIndex + 1} sur ${events.length}`
+                  : "Aucune sortie à la une"
+              }
+              aria-live={rotationPaused ? "polite" : "off"}
+            >
+              <div className={styles.arch}>
+                {featured?.coverUrl ? (
+                  <PublicStorageImage
+                    src={featured.coverUrl}
+                    alt=""
+                    fill
+                    sizes="(max-width: 760px) 84vw, (max-width: 1100px) 48vw, 42vw"
+                    quality={84}
+                    preload={activeIndex === 0}
+                  />
+                ) : (
+                  <div className={styles.archFallback} aria-hidden="true">
+                    <span>{featured?.categoryLabel ?? APP_NAME}</span>
+                  </div>
+                )}
+                <div className={styles.imageVeil} aria-hidden="true" />
+                <p className={styles.imageLabel}>
+                  <span>ABIDJAN</span>
+                  <span>·</span>
+                  <span>CÔTE D&apos;IVOIRE</span>
+                </p>
               </div>
-            )}
-            <div className={styles.imageVeil} aria-hidden="true" />
-            <p className={styles.imageLabel}>
-              <span>ABIDJAN</span>
-              <span>·</span>
-              <span>CÔTE D&apos;IVOIRE</span>
-            </p>
-          </div>
 
-          <Link
-            href={featured ? `/evenements/${featured.slug}` : ROUTES.explore}
-            className={styles.featureCard}
-            aria-label={
-              featured ? `Découvrir l'événement ${featured.title}` : "Explorer les événements"
-            }
-          >
-            <span className={styles.featureKicker}>À l&apos;affiche</span>
-            <span className={styles.featureTitle}>
-              {featured?.title ?? "Les prochaines sorties"}
-            </span>
-            <span className={styles.featureMeta}>
-              {featured ? (
-                <>
-                  <span>
-                    <CalendarDays aria-hidden="true" />
-                    {featuredDate
-                      ? `${DATE.format(featuredDate)} · ${TIME.format(featuredDate)}`
-                      : "Date à confirmer"}
-                  </span>
-                  <span>
-                    <MapPin aria-hidden="true" />
-                    {featured.venueName || featured.city}
-                  </span>
-                  <strong>{priceLabel(featured)}</strong>
-                </>
-              ) : (
-                <span>Les événements publiés apparaîtront ici.</span>
+              <Link
+                href={featured ? `/evenements/${featured.slug}` : ROUTES.explore}
+                className={styles.featureCard}
+                aria-label={
+                  featured ? `Découvrir l'événement ${featured.title}` : "Explorer les événements"
+                }
+              >
+                <span className={styles.featureKicker}>À l&apos;affiche</span>
+                <span className={styles.featureTitle}>
+                  {featured?.title ?? "Les prochaines sorties"}
+                </span>
+                <span className={styles.featureMeta}>
+                  {featured ? (
+                    <>
+                      <span>
+                        <CalendarDays aria-hidden="true" />
+                        {featuredDate
+                          ? `${DATE.format(featuredDate)} · ${TIME.format(featuredDate)}`
+                          : "Date à confirmer"}
+                      </span>
+                      <span>
+                        <MapPin aria-hidden="true" />
+                        {featured.venueName || featured.city}
+                      </span>
+                      <strong>{priceLabel(featured)}</strong>
+                    </>
+                  ) : (
+                    <span>Les événements publiés apparaîtront ici.</span>
+                  )}
+                </span>
+                <span className={styles.featureArrow} aria-hidden="true">
+                  <ArrowUpRight />
+                </span>
+              </Link>
+            </motion.div>
+          </AnimatePresence>
+
+          {events.length > 1 && (
+            <div className={styles.carouselControls}>
+              <button
+                type="button"
+                className={styles.carouselButton}
+                aria-label="Événement précédent"
+                onClick={() => showEvent(-1)}
+              >
+                <ChevronLeft aria-hidden="true" />
+              </button>
+              {!reduceMotion && (
+                <button
+                  type="button"
+                  className={styles.carouselButton}
+                  aria-label={
+                    rotationPaused
+                      ? "Reprendre le défilement automatique"
+                      : "Mettre en pause le défilement automatique"
+                  }
+                  onClick={() => setRotationPaused((paused) => !paused)}
+                >
+                  {rotationPaused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+                </button>
               )}
-            </span>
-            <span className={styles.featureArrow} aria-hidden="true">
-              <ArrowUpRight />
-            </span>
-          </Link>
+              <button
+                type="button"
+                className={styles.carouselButton}
+                aria-label="Événement suivant"
+                onClick={() => showEvent(1)}
+              >
+                <ChevronRight aria-hidden="true" />
+              </button>
+              <span className={styles.carouselCount} aria-hidden="true">
+                {String(activeIndex + 1).padStart(2, "0")} /{" "}
+                {String(events.length).padStart(2, "0")}
+              </span>
+            </div>
+          )}
         </motion.div>
       </div>
     </section>
