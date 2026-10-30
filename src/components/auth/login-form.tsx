@@ -67,7 +67,16 @@ export function LoginForm() {
       }
 
       const redirect = searchParams.get("redirect");
-      router.push(redirect && redirect.startsWith("/") ? redirect : ROUTES.home);
+      /* Seuls les chemins internes sont acceptés : `//exemple.com` et
+         `/\exemple.com` sont des redirections externes déguisées. */
+      const target =
+        redirect &&
+        redirect.startsWith("/") &&
+        !redirect.startsWith("//") &&
+        !redirect.startsWith("/\\")
+          ? redirect
+          : ROUTES.home;
+      router.push(target);
       router.refresh();
     });
   });

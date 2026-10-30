@@ -3875,6 +3875,14 @@
   gap: 9px;
   padding-inline: 12px;
   background: transparent;
+  /* Sur mobile : pas de délai de double-tap ni de surbrillance système,
+     le retour visuel est géré par :hover / :focus-visible / :active. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.home .quick-link:active {
+  background: var(--paper-2);
 }
 
 .home .quick-link-primary {

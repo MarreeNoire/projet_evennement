@@ -109,6 +109,15 @@ function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+/**
+ * Lien vers une page privée : si le visiteur n'est pas connecté, on passe par
+ * la connexion en mémorisant la destination, pour l'y ramener après succès.
+ */
+function privateHref(destination: string, viewer: HeaderUser | null) {
+  if (viewer) return destination;
+  return `${ROUTES.login}?redirect=${encodeURIComponent(destination)}`;
+}
+
 function dateParts(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -469,7 +478,7 @@ export function HomeEditorial({
   const featured = events[0] ?? null;
   const mainNav = MAIN_NAV.map((item) => {
     if (item.href === ROUTES.myTickets || item.href === ROUTES.mySalons) {
-      return { ...item, href: viewer ? item.href : `${ROUTES.login}?redirect=${item.href}` };
+      return { ...item, href: privateHref(item.href, viewer) };
     }
     return item;
   });
@@ -816,12 +825,12 @@ export function HomeEditorial({
               <span><strong>Trouver un événement</strong><small>Dates, lieux et catégories</small></span>
               <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
             </Link>
-            <Link href={viewer ? ROUTES.myTickets : ROUTES.login} className={cx("quick-link")}>
+            <Link href={privateHref(ROUTES.myTickets, viewer)} className={cx("quick-link")}>
               <Ticket className={cx("icon")} aria-hidden="true" />
               <span><strong>Mes billets</strong><small>{viewer ? "Retrouver mes réservations" : "Se connecter pour les retrouver"}</small></span>
               <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
             </Link>
-            <Link href={viewer ? ROUTES.mySalons : ROUTES.login} className={cx("quick-link")}>
+            <Link href={privateHref(ROUTES.mySalons, viewer)} className={cx("quick-link")}>
               <MessageCircle className={cx("icon")} aria-hidden="true" />
               <span><strong>Mes salons</strong><small>{viewer ? "Rejoindre les conversations" : "Se connecter pour participer"}</small></span>
               <ArrowRight className={cx("icon", "quick-arrow")} aria-hidden="true" />
