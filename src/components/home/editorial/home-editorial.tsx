@@ -460,11 +460,13 @@ function AccountMenu({ viewer }: { viewer: HeaderUser }) {
 export function HomeEditorial({
   events,
   viewer,
-  total,
+  eventCount,
+  eventsUnavailable,
 }: {
   events: EditorialEvent[];
   viewer: HeaderUser | null;
-  total: number;
+  eventCount: number;
+  eventsUnavailable: boolean;
 }) {
   const featured = events[0] ?? null;
   const mainNav = MAIN_NAV.map((item) => {
@@ -618,7 +620,11 @@ export function HomeEditorial({
       </header>
 
       <main id="accueil-contenu">
-        <HomeHero events={events} total={total} />
+        <HomeHero
+          events={events}
+          eventCount={eventsUnavailable ? null : eventCount}
+          eventsUnavailable={eventsUnavailable}
+        />
         <div className={cx("content")}>
           <section
             className={cx("section", "wrap")}
@@ -659,7 +665,7 @@ export function HomeEditorial({
                         aria-pressed={activeCategory === "tout"}
                         onClick={() => setActiveCategory("tout")}
                       >
-                        Tou
+                        Tout
                       </button>
                       {categories.map((category) => (
                         <button
@@ -754,6 +760,17 @@ export function HomeEditorial({
                   })}
                 </div>
               </>
+            ) : eventsUnavailable ? (
+              <div className={cx("empty-state")} role="alert" data-reveal>
+                <h3>Agenda temporairement indisponible.</h3>
+                <p>
+                  Les événements n&apos;ont pas pu être chargés. Actualise la page pour réessayer.
+                </p>
+                <a href={ROUTES.home} className={cx("btn", "btn-primary")}>
+                  Réessayer
+                  <ArrowRight className={cx("icon")} aria-hidden="true" />
+                </a>
+              </div>
             ) : (
               <div className={cx("empty-state")} data-reveal>
                 <p className={cx("eyebrow")}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 import { useTheme } from "@/components/providers/app-providers";
 
@@ -25,11 +25,21 @@ const OPTIONS = [
   { value: "system", label: "Système", Icon: Monitor },
 ] as const;
 
+function subscribeToMount() {
+  return () => {};
+}
+
+function getClientMounted() {
+  return true;
+}
+
+function getServerMounted() {
+  return false;
+}
+
 export function ThemeToggle({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(subscribeToMount, getClientMounted, getServerMounted);
 
   return (
     <div

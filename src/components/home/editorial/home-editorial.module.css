@@ -250,6 +250,7 @@
         display: inline-flex;
         align-items: center;
         gap: 9px;
+        min-height: 44px;
         padding: 12px 0;
         font-size: 13.5px;
         font-weight: 600;
@@ -304,6 +305,7 @@
         align-items: baseline;
         gap: 10px;
         width: max-content;
+        min-height: 44px;
       }
 
       .home .brand-mark {
@@ -394,6 +396,9 @@
       }
 
       .home .head-login {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
         padding: 8px 0;
         font-size: 13px;
         font-weight: 500;
@@ -415,6 +420,7 @@
 
       .home .account-btn {
         display: inline-flex;
+        min-height: 44px;
         align-items: center;
         gap: 9px;
         padding: 5px 7px 5px 5px;
@@ -514,6 +520,7 @@
       .home .account-links a,
       .home .account-signout {
         display: flex;
+        min-height: 44px;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
@@ -582,7 +589,7 @@
       }
 
       .home .btn-sm {
-        min-height: 42px;
+        min-height: 44px;
         padding: 0 16px;
         font-size: 13px;
       }
@@ -590,8 +597,8 @@
       .home .icon-btn {
         display: grid;
         place-items: center;
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         border: 1px solid var(--line);
         border-radius: 3px;
         color: var(--ink-2);
@@ -1679,7 +1686,8 @@
       }
 
       .home .salon-tab {
-        padding: 5px 9px;
+        min-height: 44px;
+        padding: 5px 12px;
         border-radius: 2px;
         color: var(--muted);
         font-size: 10px;
@@ -2566,7 +2574,9 @@
       }
 
       .home .foot-col a {
-        display: block;
+        display: flex;
+        min-height: 44px;
+        align-items: center;
         width: max-content;
         max-width: 100%;
         padding: 4px 0;
@@ -2598,6 +2608,9 @@
       }
 
       .home .foot-bottom a {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
         color: var(--band-ink);
         text-decoration: underline;
         text-underline-offset: 3px;
@@ -4523,7 +4536,7 @@
 }
 
 .home .main-nav a {
-  min-height: 40px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   padding-inline: 13px;
@@ -4684,7 +4697,7 @@
 }
 
 .home .salon-tab {
-  min-height: 36px;
+  min-height: 44px;
   border-radius: 999px;
 }
 

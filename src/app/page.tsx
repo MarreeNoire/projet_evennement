@@ -1,38 +1,31 @@
 import { HomeEditorial, type EditorialEvent } from "@/components/home/editorial/home-editorial";
 import { loadHeaderUser } from "@/lib/auth/viewer";
 import { getCategoryLabel } from "@/lib/constants";
-import { searchPublishedEvents, type ExploreResult } from "@/lib/events/queries";
-
-const EMPTY_RESULT: ExploreResult = {
-  events: [],
-  total: 0,
-  page: 1,
-  pageSize: 48,
-  totalPages: 1,
-};
+import { isSupabaseConfigured } from "@/lib/env";
+import { searchPublishedEvents } from "@/lib/events/queries";
 
 /** Une reprise pour absorber un incident réseau transitoire au premier rendu. */
-async function loadWithRetry<T>(load: () => Promise<T>, fallback: T): Promise<T> {
+async function loadWithRetry<T>(load: () => Promise<T>): Promise<T | null> {
   try {
     return await load();
   } catch {
     try {
       return await load();
     } catch {
-      return fallback;
+      return null;
     }
   }
 }
 
 export default async function HomePage() {
   const [upcoming, viewer] = await Promise.all([
-    loadWithRetry(() => searchPublishedEvents({ sort: "date_asc", pageSize: 48 }), EMPTY_RESULT),
+    loadWithRetry(() => searchPublishedEvents({ sort: "date_asc", pageSize: 48 })),
     loadHeaderUser(),
   ]);
 
   /* Même règle de visibilité que l'ancienne page d'accueil : les sorties de
      Bassam ne sont pas mises en avant sur l'accueil. */
-  const visibleEvents = upcoming.events.filter(
+  const visibleEvents = (upcoming?.events ?? []).filter(
     (event) => !event.city.toLocaleLowerCase("fr").includes("bassam"),
   );
 
@@ -53,5 +46,12 @@ export default async function HomePage() {
     organizerVerified: event.organizer_verified,
   }));
 
-  return <HomeEditorial events={events} viewer={viewer} total={upcoming.total} />;
+  return (
+    <HomeEditorial
+      events={events}
+      viewer={viewer}
+      eventCount={events.length}
+      eventsUnavailable={!isSupabaseConfigured || upcoming === null}
+    />
+  );
 }

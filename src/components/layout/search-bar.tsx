@@ -45,17 +45,13 @@ export function SearchBar({ className }: { className?: string }) {
   useEffect(() => {
     const term = query.trim();
 
-    if (term.length < 2) {
-      setSuggestions([]);
-      setOpen(false);
-      setActiveIndex(-1);
-      return;
-    }
+    if (term.length < 2) return;
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    let controller: AbortController | null = null;
     debounceRef.current = setTimeout(async () => {
       if (abortRef.current) abortRef.current.abort();
-      const controller = new AbortController();
+      controller = new AbortController();
       abortRef.current = controller;
 
       setLoading(true);
@@ -66,6 +62,7 @@ export function SearchBar({ className }: { className?: string }) {
         );
         if (!res.ok) return;
         const data = (await res.json()) as SearchSuggestion[];
+        if (controller.signal.aborted) return;
         setSuggestions(data);
         setOpen(data.length > 0);
         setActiveIndex(-1);
@@ -78,6 +75,7 @@ export function SearchBar({ className }: { className?: string }) {
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      controller?.abort();
     };
   }, [query]);
 
@@ -163,7 +161,17 @@ export function SearchBar({ className }: { className?: string }) {
           aria-autocomplete="list"
           aria-activedescendant={activeOptionId}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setQuery(value);
+            if (value.trim().length < 2) {
+              abortRef.current?.abort();
+              setSuggestions([]);
+              setOpen(false);
+              setActiveIndex(-1);
+              setLoading(false);
+            }
+          }}
           onKeyDown={handleKeyDown}
           onFocus={() => {
             if (suggestions.length > 0) setOpen(true);

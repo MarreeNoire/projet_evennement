@@ -302,12 +302,12 @@ export function CreateEventForm() {
       <Card>
         <CardHeader>
           <CardTitle>Informations Générales</CardTitle>
-          <CardDescription>Titre, catégorie et description de l'événement.</CardDescription>
+          <CardDescription>Titre, catégorie et description de l&apos;événement.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
             <label htmlFor="title" className="text-xs font-semibold text-fg">
-              Titre de l'événement *
+              Titre de l&apos;événement *
             </label>
             <input
               id="title"
@@ -501,7 +501,7 @@ export function CreateEventForm() {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-fg">Niveau d'accès</label>
+                  <label className="text-xs font-medium text-fg">Niveau d&apos;accès</label>
                   <select
                     value={ticket.accessLevel}
                     onChange={(e) =>
@@ -553,7 +553,7 @@ export function CreateEventForm() {
           disabled={Boolean(success || recoveryHref)}
         >
           <Save className="mr-2 size-4" />
-          Publier l'événement et sa billetterie
+          Publier l&apos;événement et sa billetterie
         </Button>
       </div>
     </form>

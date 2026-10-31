@@ -47,9 +47,9 @@ export default async function AdminUtilisateurDetailPage({
     admin.from("profile_contacts").select("phone").eq("user_id", id).maybeSingle(),
   ]);
   // Le statut doit tenir compte de l’expiration réelle au moment de cette requête serveur.
-  const isBanned = Boolean(
-    authUser.user?.banned_until && Date.parse(authUser.user.banned_until) > Date.now(),
-  ); // eslint-disable-line react-hooks/purity
+  const bannedUntil = authUser.user?.banned_until;
+  // eslint-disable-next-line react-hooks/purity -- Evaluate the ban at request time on the server.
+  const isBanned = Boolean(bannedUntil && Date.parse(bannedUntil) > Date.now());
 
   const [roleResult, ordersResult, ownedOrgs, memberships] = await Promise.all([
     supabase

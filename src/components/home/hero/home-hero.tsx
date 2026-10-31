@@ -15,7 +15,7 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/rea
 import { useEffect, useRef, useState } from "react";
 
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
-import { APP_NAME, ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/constants";
 
 import styles from "./home-hero.module.css";
 
@@ -25,7 +25,6 @@ export type HomeHeroEvent = {
   slug: string;
   summary: string | null;
   coverUrl: string | null;
-  categoryLabel: string;
   venueName: string | null;
   city: string;
   startAt: string;
@@ -34,7 +33,8 @@ export type HomeHeroEvent = {
 
 type HomeHeroProps = {
   events: HomeHeroEvent[];
-  total: number;
+  eventCount: number | null;
+  eventsUnavailable: boolean;
 };
 
 const DATE = new Intl.DateTimeFormat("fr-FR", {
@@ -74,7 +74,7 @@ function priceLabel(event: HomeHeroEvent) {
   return `Dès ${new Intl.NumberFormat("fr-FR").format(event.minPrice)} FCFA`;
 }
 
-export function HomeHero({ events, total }: HomeHeroProps) {
+export function HomeHero({ events, eventCount, eventsUnavailable }: HomeHeroProps) {
   const reduceMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
   const [rotationPaused, setRotationPaused] = useState(false);
@@ -83,7 +83,8 @@ export function HomeHero({ events, total }: HomeHeroProps) {
   const isVisualInView = useInView(visualRef, { amount: 0.25 });
   const featured = events[activeIndex] ?? null;
   const featuredDate = featured ? safeDate(featured.startAt) : null;
-  const eventCount = new Intl.NumberFormat("fr-FR").format(total);
+  const formattedEventCount =
+    eventCount === null ? "—" : new Intl.NumberFormat("fr-FR").format(eventCount);
 
   useEffect(() => {
     if (reduceMotion || rotationPaused || isHovered || !isVisualInView || events.length < 2) {
@@ -142,8 +143,8 @@ export function HomeHero({ events, total }: HomeHeroProps) {
               <span />
             </div>
             <div>
-              <dt>{total > 0 ? eventCount : "Bientôt"}</dt>
-              <dd>{total > 0 ? "événements à découvrir" : "de nouvelles sorties"}</dd>
+              <dt>{formattedEventCount}</dt>
+              <dd>{eventsUnavailable ? "agenda indisponible" : "sorties affichées"}</dd>
             </div>
           </motion.dl>
         </motion.div>
@@ -196,13 +197,11 @@ export function HomeHero({ events, total }: HomeHeroProps) {
                     preload={activeIndex === 0}
                   />
                 ) : (
-                  <div className={styles.archFallback} aria-hidden="true">
-                    <span>{featured?.categoryLabel ?? APP_NAME}</span>
-                  </div>
+                  <div className={styles.archFallback} aria-hidden="true" />
                 )}
                 <div className={styles.imageVeil} aria-hidden="true" />
                 <p className={styles.imageLabel}>
-                  <span>ABIDJAN</span>
+                  <span>{featured?.city || "ABIDJAN"}</span>
                   <span>·</span>
                   <span>CÔTE D&apos;IVOIRE</span>
                 </p>
@@ -217,7 +216,8 @@ export function HomeHero({ events, total }: HomeHeroProps) {
               >
                 <span className={styles.featureKicker}>À l&apos;affiche</span>
                 <span className={styles.featureTitle}>
-                  {featured?.title ?? "Les prochaines sorties"}
+                  {featured?.title ??
+                    (eventsUnavailable ? "Sorties indisponibles" : "Les prochaines sorties")}
                 </span>
                 <span className={styles.featureMeta}>
                   {featured ? (
@@ -235,7 +235,11 @@ export function HomeHero({ events, total }: HomeHeroProps) {
                       <strong>{priceLabel(featured)}</strong>
                     </>
                   ) : (
-                    <span>Les événements publiés apparaîtront ici.</span>
+                    <span>
+                      {eventsUnavailable
+                        ? "Les événements n'ont pas pu être chargés."
+                        : "Les événements publiés apparaîtront ici."}
+                    </span>
                   )}
                 </span>
                 <span className={styles.featureArrow} aria-hidden="true">
