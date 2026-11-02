@@ -1,7 +1,6 @@
-import { HomeEditorial, type EditorialEvent } from "@/components/home/editorial/home-editorial";
+import { HomeGlass, type EditorialEvent } from "@/components/home/home-glass";
 import { loadHeaderUser } from "@/lib/auth/viewer";
 import { getCategoryLabel } from "@/lib/constants";
-import { isSupabaseConfigured } from "@/lib/env";
 import { searchPublishedEvents } from "@/lib/events/queries";
 
 /** Une reprise pour absorber un incident réseau transitoire au premier rendu. */
@@ -46,12 +45,11 @@ export default async function HomePage() {
     organizerVerified: event.organizer_verified,
   }));
 
-  return (
-    <HomeEditorial
-      events={events}
-      viewer={viewer}
-      eventCount={events.length}
-      eventsUnavailable={!isSupabaseConfigured || upcoming === null}
-    />
-  );
+  const stats = {
+    events: upcoming?.total ?? 0,
+    organizers: new Set((upcoming?.events ?? []).map((event) => event.organizer_name)).size,
+    cities: new Set((upcoming?.events ?? []).map((event) => event.city)).size,
+  };
+
+  return <HomeGlass events={events} viewer={viewer} stats={stats} total={upcoming?.total ?? 0} />;
 }
