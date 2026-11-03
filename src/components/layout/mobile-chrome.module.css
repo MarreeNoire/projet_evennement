@@ -141,28 +141,28 @@
    `editorial-shell.module.css`. */
 .sheetScope {
   --surface: #fbf9f4;
-  --bg: #f4f0e8;
-  --bg-muted: color-mix(in srgb, #22231f 8%, #f4f0e8);
-  --fg: #22231f;
-  --fg-muted: #73736c;
-  --fg-subtle: color-mix(in srgb, #73736c 76%, #f4f0e8);
-  --border: rgba(34, 35, 31, 0.14);
-  --border-strong: rgba(34, 35, 31, 0.3);
-  --primary: #bd3b25;
-  --danger: color-mix(in srgb, #b3261e 88%, #22231f);
+  --bg: #eee9df;
+  --bg-muted: color-mix(in srgb, #241f18 8%, #eee9df);
+  --fg: #241f18;
+  --fg-muted: #71695e;
+  --fg-subtle: color-mix(in srgb, #71695e 76%, #eee9df);
+  --border: rgba(53, 45, 34, 0.14);
+  --border-strong: rgba(53, 45, 34, 0.26);
+  --primary: #817761;
+  --danger: color-mix(in srgb, #a34d40 88%, #241f18);
 }
 
 :global(html.dark) .sheetScope {
-  --surface: #2b2c26;
-  --bg: #191a17;
-  --bg-muted: color-mix(in srgb, #f4f0e8 8%, #191a17);
-  --fg: #f4f0e8;
-  --fg-muted: #c7c1b6;
-  --fg-subtle: color-mix(in srgb, #c7c1b6 76%, #191a17);
-  --border: rgba(244, 240, 232, 0.14);
-  --border-strong: rgba(244, 240, 232, 0.32);
-  --primary: #ed7656;
-  --danger: color-mix(in srgb, #b3261e 88%, #f4f0e8);
+  --surface: #28251f;
+  --bg: #171612;
+  --bg-muted: color-mix(in srgb, #eee9df 8%, #171612);
+  --fg: #eee9df;
+  --fg-muted: #b9b1a4;
+  --fg-subtle: color-mix(in srgb, #b9b1a4 76%, #171612);
+  --border: rgba(238, 233, 223, 0.13);
+  --border-strong: rgba(238, 233, 223, 0.25);
+  --primary: #b6a78e;
+  --danger: color-mix(in srgb, #db9687 88%, #eee9df);
 }
 
 .sheetBody {

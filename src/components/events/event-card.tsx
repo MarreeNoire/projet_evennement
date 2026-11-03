@@ -9,6 +9,7 @@ import { CURRENCY_LABEL, getCategoryLabel } from "@/lib/constants";
 import { formatDate, formatNumber } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
 import { EventQuickPreview } from "./event-quick-preview";
+import { EventCarousel } from "./event-carousel";
 
 /* =============================================================================
    Carte d'événement
@@ -84,7 +85,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
             className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[rgba(11,11,12,0.62)] to-transparent"
           />
 
-          <span className="absolute top-3 left-3 inline-flex items-center rounded-sm border border-white/30 bg-black/70 px-2 py-1 text-[0.62rem] font-bold tracking-[0.12em] text-white uppercase">
+          <span className="absolute top-3 left-3 inline-flex items-center rounded-full border border-white/35 bg-[#241f18]/65 px-3 py-1.5 text-[0.65rem] font-semibold tracking-[0.035em] text-white shadow-sm backdrop-blur-sm">
             {getCategoryLabel(event.category)}
           </span>
 
@@ -209,21 +210,19 @@ function EventPoster({ event }: { event: PublishedEventView }) {
 
 export function EventGrid({ events }: { events: PublishedEventView[] }) {
   return (
-    <div
-      className="event-grid no-scrollbar focus-visible:outline-primary flex max-w-full min-w-0 snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth pb-2 md:grid md:snap-none md:grid-cols-2 md:gap-x-6 md:gap-y-8 md:overflow-visible md:pb-0 md:focus-visible:outline-none lg:grid-cols-3"
-      role="region"
-      aria-label="Résultats des événements à faire défiler"
-      tabIndex={0}
+    <EventCarousel
+      label="Événements à parcourir horizontalement"
+      trackClassName="event-grid flex max-w-full snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain scroll-smooth px-1 pb-4 focus-visible:outline-border-focus focus-visible:outline-2 focus-visible:outline-offset-2"
     >
       {events.map((event) => (
         <div
           key={event.id}
-          className="event-card-reveal w-[78vw] min-w-[16rem] shrink-0 snap-start md:w-auto md:min-w-0"
+          className="event-card-reveal w-[82vw] min-w-[16rem] shrink-0 snap-start sm:w-[46vw] lg:w-[32vw] lg:max-w-[25rem]"
         >
           <EventCard event={event} />
         </div>
       ))}
-    </div>
+    </EventCarousel>
   );
 }
 

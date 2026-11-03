@@ -11,13 +11,32 @@
    -------------------------------------------------------------------------- */
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 34px 24px;
+  display: flex;
+  min-width: 0;
+  gap: 24px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  padding: 0 4px 14px;
+}
+
+.grid::-webkit-scrollbar {
+  height: 7px;
+}
+
+.grid::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--line-strong);
+  background-clip: padding-box;
 }
 
 .card {
+  flex: 0 0 clamp(18rem, 32vw, 25rem);
   min-width: 0;
+  scroll-snap-align: start;
 }
 
 .cardLink {
@@ -61,29 +80,29 @@
 }
 
 .artJazz {
-  background: #bd3b25;
+  background: #817761;
   color: #fbf9f4;
 }
 
 .artJazz .artFill {
-  background-image: radial-gradient(circle at 112% 12%, #edc55c 0 31%, transparent 31.4%),
+  background-image: radial-gradient(circle at 112% 12%, #b5a68c 0 31%, transparent 31.4%),
     repeating-linear-gradient(0deg, transparent 0 30px, rgba(255, 246, 234, 0.16) 30px 31px);
 }
 
 .artMarche {
-  background: #344d67;
+  background: #777d69;
   color: #fbf9f4;
 }
 
 .artMarche .artFill {
-  background-image: radial-gradient(circle at 18% 88%, #bd3b25 0 24%, transparent 24.4%),
+  background-image: radial-gradient(circle at 18% 88%, #817761 0 24%, transparent 24.4%),
     repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 246, 234, 0.14) 34px 35px),
     repeating-linear-gradient(0deg, transparent 0 34px, rgba(255, 246, 234, 0.07) 34px 35px);
 }
 
 .artAtelier {
-  background: #edc55c;
-  color: #22231f;
+  background: #d8cdbb;
+  color: #241f18;
 }
 
 .artAtelier .artFill {
@@ -97,7 +116,7 @@
 }
 
 .artRencontre {
-  background: #22231f;
+  background: #342d24;
   color: #fbf9f4;
 }
 
@@ -1487,8 +1506,11 @@
 
 @media (max-width: 620px) {
   .grid {
-    grid-template-columns: 1fr;
     gap: 30px;
+  }
+
+  .card {
+    flex-basis: min(82vw, 330px);
   }
 
   .planGrid {

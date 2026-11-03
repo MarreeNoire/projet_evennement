@@ -5,6 +5,7 @@ import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { CURRENCY_LABEL, getCategoryLabel } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils";
 import type { PublishedEventView } from "@/types/database";
+import { EventCarousel } from "@/components/events/event-carousel";
 
 import styles from "./editorial.module.css";
 
@@ -154,10 +155,10 @@ export function EditorialEventCard({
 
 export function EditorialEventGrid({ events }: { events: PublishedEventView[] }) {
   return (
-    <div className={styles.grid}>
+    <EventCarousel label="Événements à explorer" trackClassName={styles.grid}>
       {events.map((event, index) => (
         <EditorialEventCard key={event.id} event={event} index={index} />
       ))}
-    </div>
+    </EventCarousel>
   );
 }
