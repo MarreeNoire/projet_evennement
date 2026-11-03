@@ -107,3 +107,21 @@ Thumbs.db
 .codex/
 exemple_application_mobile/
 exemple_motion_site/
+
+# --- Captures et artefacts de vérification -----------------------------------
+# Les captures de référence versionnées vivent dans `scripts/captures/`.
+/scripts/*.png
+/.next-hero-preview/
+/.next-build-check/
+
+# --- Matériel de travail local (non livré) -----------------------------------
+# Références d'animation, moodboards, brouillons de génération vidéo.
+/animation_hero/
+/generateur_video/
+/new_design/
+
+# --- Médias d'essai à la racine de public/ -----------------------------------
+/public/hero-journey.mp4
+/public/hero-parcours-animatic.mp4
+/public/hero-awa-reference.png
+
