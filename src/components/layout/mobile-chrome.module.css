@@ -140,29 +140,29 @@
    vermillon, y compris en thème sombre. Valeurs alignées sur
    `editorial-shell.module.css`. */
 .sheetScope {
-  --surface: #fbf9f4;
-  --bg: #eee9df;
-  --bg-muted: color-mix(in srgb, #241f18 8%, #eee9df);
-  --fg: #241f18;
-  --fg-muted: #71695e;
-  --fg-subtle: color-mix(in srgb, #71695e 76%, #eee9df);
-  --border: rgba(53, 45, 34, 0.14);
-  --border-strong: rgba(53, 45, 34, 0.26);
-  --primary: #817761;
-  --danger: color-mix(in srgb, #a34d40 88%, #241f18);
+  --surface: #10121a;
+  --bg: #090a0f;
+  --bg-muted: color-mix(in srgb, #f8f9fa 8%, #090a0f);
+  --fg: #f8f9fa;
+  --fg-muted: #a7acb8;
+  --fg-subtle: color-mix(in srgb, #a7acb8 76%, #090a0f);
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --primary: #ffb703;
+  --danger: color-mix(in srgb, #ff6b6b 88%, #090a0f);
 }
 
 :global(html.dark) .sheetScope {
-  --surface: #28251f;
-  --bg: #171612;
-  --bg-muted: color-mix(in srgb, #eee9df 8%, #171612);
-  --fg: #eee9df;
-  --fg-muted: #b9b1a4;
-  --fg-subtle: color-mix(in srgb, #b9b1a4 76%, #171612);
-  --border: rgba(238, 233, 223, 0.13);
-  --border-strong: rgba(238, 233, 223, 0.25);
-  --primary: #b6a78e;
-  --danger: color-mix(in srgb, #db9687 88%, #eee9df);
+  --surface: #0d0f16;
+  --bg: #05060a;
+  --bg-muted: color-mix(in srgb, #f8f9fa 8%, #05060a);
+  --fg: #f8f9fa;
+  --fg-muted: #a7acb8;
+  --fg-subtle: color-mix(in srgb, #a7acb8 76%, #05060a);
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --primary: #ffb703;
+  --danger: color-mix(in srgb, #ff6b6b 88%, #05060a);
 }
 
 .sheetBody {

@@ -48,10 +48,10 @@
   position: relative;
   aspect-ratio: 4 / 5;
   overflow: hidden;
-  border: 1px solid rgba(23, 30, 40, 0.18);
-  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
   isolation: isolate;
-  color: #fbf9f4;
+  color: #f8f9fa;
 }
 
 .art::after {
@@ -80,29 +80,29 @@
 }
 
 .artJazz {
-  background: #817761;
-  color: #fbf9f4;
+  background: #1d58ff;
+  color: #ffffff;
 }
 
 .artJazz .artFill {
-  background-image: radial-gradient(circle at 112% 12%, #b5a68c 0 31%, transparent 31.4%),
-    repeating-linear-gradient(0deg, transparent 0 30px, rgba(255, 246, 234, 0.16) 30px 31px);
+  background-image: radial-gradient(circle at 112% 12%, #7fb0ff 0 31%, transparent 31.4%),
+    repeating-linear-gradient(0deg, transparent 0 30px, rgba(255, 255, 255, 0.18) 30px 31px);
 }
 
 .artMarche {
-  background: #777d69;
-  color: #fbf9f4;
+  background: #e63988;
+  color: #ffffff;
 }
 
 .artMarche .artFill {
-  background-image: radial-gradient(circle at 18% 88%, #817761 0 24%, transparent 24.4%),
-    repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 246, 234, 0.14) 34px 35px),
-    repeating-linear-gradient(0deg, transparent 0 34px, rgba(255, 246, 234, 0.07) 34px 35px);
+  background-image: radial-gradient(circle at 18% 88%, #ff8ac0 0 24%, transparent 24.4%),
+    repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 255, 255, 0.16) 34px 35px),
+    repeating-linear-gradient(0deg, transparent 0 34px, rgba(255, 255, 255, 0.08) 34px 35px);
 }
 
 .artAtelier {
-  background: #d8cdbb;
-  color: #241f18;
+  background: #ffb703;
+  color: #090a0f;
 }
 
 .artAtelier .artFill {
@@ -116,21 +116,21 @@
 }
 
 .artRencontre {
-  background: #342d24;
-  color: #fbf9f4;
+  background: #161925;
+  color: #f8f9fa;
 }
 
 .artRencontre .artFill {
   background-image: radial-gradient(
       circle at 88% 96%,
       transparent 0 26%,
-      rgba(184, 63, 34, 0.9) 26.2% 29%,
+      rgba(230, 57, 136, 0.9) 26.2% 29%,
       transparent 29.2%
     ),
     radial-gradient(
       circle at 88% 96%,
       transparent 0 36%,
-      rgba(213, 166, 56, 0.55) 36.2% 37%,
+      rgba(255, 183, 3, 0.55) 36.2% 37%,
       transparent 37.2%
     );
 }
@@ -198,7 +198,7 @@
 }
 
 .artHasCover {
-  color: #fbf9f4;
+  color: #f8f9fa;
 }
 
 .artHasCover::before {

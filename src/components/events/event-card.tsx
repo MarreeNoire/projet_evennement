@@ -85,7 +85,7 @@ export function EventCard({ event }: { event: PublishedEventView }) {
             className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[rgba(11,11,12,0.62)] to-transparent"
           />
 
-          <span className="absolute top-3 left-3 inline-flex items-center rounded-full border border-white/35 bg-[#241f18]/65 px-3 py-1.5 text-[0.65rem] font-semibold tracking-[0.035em] text-white shadow-sm backdrop-blur-sm">
+          <span className="absolute top-3 left-3 inline-flex items-center rounded-full border border-white/35 bg-[#090a0f]/65 px-3 py-1.5 text-[0.65rem] font-semibold tracking-[0.035em] text-white shadow-sm backdrop-blur-sm">
             {getCategoryLabel(event.category)}
           </span>
 

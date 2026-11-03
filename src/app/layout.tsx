@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { PwaServiceWorker } from "@/components/providers/pwa-service-worker";
@@ -8,24 +8,8 @@ import { env } from "@/lib/env";
 
 import "./globals.css";
 
-/* Une serif éditoriale pour les moments de découverte, Inter pour les outils.
-   Cormorant est chargée en police variable : une seule URL par style, ce qui
-   évite le bug Turbopack « next/font/google queries have exactly one entry »
-   déclenché par un tableau de graisses combiné à deux styles. */
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
+/* Plus Jakarta Sans porte toute l'interface, comme l'accueil : titres affirmés
+   et texte courant dans une seule famille variable. */
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-plus-jakarta",
@@ -85,8 +69,8 @@ export const viewport: Viewport = {
   // (env(safe-area-inset-*) exploitées par la tabbar et les sheets).
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#eee9df" },
-    { media: "(prefers-color-scheme: dark)", color: "#171612" },
+    { media: "(prefers-color-scheme: light)", color: "#090a0f" },
+    { media: "(prefers-color-scheme: dark)", color: "#090a0f" },
   ],
   interactiveWidget: "resizes-content",
 };
@@ -99,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`${cormorant.variable} ${inter.variable} ${plusJakarta.variable} light`}
+      className={`${plusJakarta.variable} light`}
     >
       <head>
         {process.env.NODE_ENV === "development" && (
