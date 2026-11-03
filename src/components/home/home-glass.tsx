@@ -1,21 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
-  ChevronDown,
   Headphones,
   MapPin,
-  Play,
   Search,
   ShieldCheck,
   Sparkles,
   Star,
-  Ticket,
   X,
   Zap,
 } from "lucide-react";
@@ -24,6 +20,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import type { HeaderUser } from "@/components/layout/header-types";
 import { PwaInstallPrompt } from "@/components/pwa/install-prompt";
 import { EventCarousel } from "@/components/events/event-carousel";
+import { HomeCarousel } from "@/components/home/home-carousel";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils";
@@ -112,183 +109,8 @@ function EventArtwork({
 }
 
 /* ─────────────────────────────────────────
-   Custom cursor
-───────────────────────────────────────── */
-function CinematicCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
-  const pos = useRef({ x: 0, y: 0 });
-  const smooth = useRef({ x: 0, y: 0 });
-  const rafRef = useRef<number>(0);
-
-  useEffect(() => {
-    const cursor = cursorRef.current;
-    const dot = dotRef.current;
-    if (!cursor || !dot) return;
-
-    const onMove = (e: PointerEvent) => {
-      pos.current = { x: e.clientX, y: e.clientY };
-    };
-
-    const animate = () => {
-      smooth.current.x += (pos.current.x - smooth.current.x) * 0.14;
-      smooth.current.y += (pos.current.y - smooth.current.y) * 0.14;
-      cursor.style.transform = `translate(${smooth.current.x - 20}px, ${smooth.current.y - 20}px)`;
-      dot.style.transform = `translate(${pos.current.x - 4}px, ${pos.current.y - 4}px)`;
-      rafRef.current = requestAnimationFrame(animate);
-    };
-
-    const onEnterHero = (e: Event) => {
-      const target = e.currentTarget as HTMLElement;
-      if (styles.cursorHero) cursor.classList.add(styles.cursorHero);
-      const label = labelRef.current;
-      if (label) {
-        const price = target.dataset.price;
-        label.textContent = price ? `${price}` : "Voir →";
-      }
-    };
-
-    const onLeaveHero = () => {
-      if (styles.cursorHero) cursor.classList.remove(styles.cursorHero);
-    };
-
-    window.addEventListener("pointermove", onMove, { passive: true });
-    rafRef.current = requestAnimationFrame(animate);
-
-    const heroImages = document.querySelectorAll("[data-cursor-hero]");
-    heroImages.forEach((el) => {
-      el.addEventListener("mouseenter", onEnterHero);
-      el.addEventListener("mouseleave", onLeaveHero);
-    });
-
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(rafRef.current);
-      heroImages.forEach((el) => {
-        el.removeEventListener("mouseenter", onEnterHero);
-        el.removeEventListener("mouseleave", onLeaveHero);
-      });
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={cursorRef} className={styles.cursor} aria-hidden="true">
-        <span ref={labelRef} className={styles.cursorLabel} />
-      </div>
-      <div ref={dotRef} className={styles.cursorDot} aria-hidden="true" />
-    </>
-  );
-}
-
-/* ─────────────────────────────────────────
-   Parallax hero backdrop
-───────────────────────────────────────── */
-function HeroBackdrop({
-  events,
-  activeIndex,
-}: {
-  events: EditorialEvent[];
-  activeIndex: number;
-}) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-    const isMobile = window.matchMedia("(max-width: 760px)").matches;
-    if (isMobile) return;
-
-    const onMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 18;
-      const y = (e.clientY / window.innerHeight - 0.5) * 10;
-      wrapper.style.transform = `scale(1.06) translate3d(${x}px, ${y}px, 0)`;
-    };
-
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
-
-  return (
-    <div className={styles.heroBackdropContainer} aria-hidden="true">
-      <div ref={wrapperRef} className={styles.heroBackdropInner}>
-        {events.slice(0, 4).map((event, i) =>
-          event.coverUrl ? (
-            <div
-              key={event.id}
-              className={`${styles.heroSlide} ${i === activeIndex ? styles.heroSlideActive : ""} ${i === (activeIndex + 1) % Math.max(events.filter(e => e.coverUrl).length, 1) ? styles.heroSlideNext : ""}`}
-            >
-              <PublicStorageImage
-                src={event.coverUrl}
-                alt=""
-                className={styles.heroBackdropImage}
-                sizes="100vw"
-                fill
-                preload={i === 0}
-              />
-            </div>
-          ) : null,
-        )}
-      </div>
-      {/* Gradient overlays */}
-      <div className={styles.heroOverlayLeft} />
-      <div className={styles.heroOverlayBottom} />
-      <div className={styles.heroOverlayTop} />
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────
    Dominant-color extraction → CTA glow
 ───────────────────────────────────────── */
-function useDominantColor(coverUrl: string | null | undefined): string {
-  const [color, setColor] = useState<string>("rgb(230, 57, 136)");
-
-  useEffect(() => {
-    if (!coverUrl) return;
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = 16;
-        canvas.height = 16;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-        ctx.drawImage(img, 0, 0, 16, 16);
-        const data = ctx.getImageData(0, 0, 16, 16).data;
-        let r = 0, g = 0, b = 0, count = 0;
-        for (let i = 0; i < data.length; i += 4) {
-          const brightness = (data[i]! + data[i + 1]! + data[i + 2]!) / 3;
-          if (brightness > 40 && brightness < 220) {
-            r += data[i]!;
-            g += data[i + 1]!;
-            b += data[i + 2]!;
-            count++;
-          }
-        }
-        if (count > 0) {
-          r = Math.round(r / count);
-          g = Math.round(g / count);
-          b = Math.round(b / count);
-          // boost saturation
-          const max = Math.max(r, g, b);
-          const scale = Math.min(255 / max, 1.8);
-          r = Math.min(255, Math.round(r * scale));
-          g = Math.min(255, Math.round(g * scale));
-          b = Math.min(255, Math.round(b * scale));
-          setColor(`rgb(${r},${g},${b})`);
-        }
-      } catch {
-        // silently fail
-      }
-    };
-    img.src = coverUrl;
-  }, [coverUrl]);
-
-  return color;
-}
 
 /* ─────────────────────────────────────────
    Event card (catalog)
@@ -399,25 +221,13 @@ function EventCard({
 /* ─────────────────────────────────────────
    Main component
 ───────────────────────────────────────── */
-export function HomeGlass({ events, viewer, stats, total }: HomeGlassProps) {
-  const [featuredIndex, setFeaturedIndex] = useState(0);
+export function HomeGlass({ events, viewer }: HomeGlassProps) {
   const [bookingEvent, setBookingEvent] = useState<EditorialEvent | null>(null);
   const [quantity, setQuantity] = useState(1);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const featuredEvents = useMemo(
-    () =>
-      events
-        .filter((event) => event.coverUrl)
-        .concat(events.filter((event) => !event.coverUrl)),
-    [events],
-  );
-  const featured = featuredEvents[featuredIndex] ?? events[0] ?? null;
-
-  const cities = useMemo(
-    () => [...new Set(events.map((event) => event.city).filter(Boolean))].sort(),
-    [events],
-  );
+  /* Événement mis en avant dans la section de clôture : la première affiche disponible. */
+  const featured = events.find((event) => event.coverUrl) ?? null;
 
   const now = new Date();
   const weekendStart = new Date(now);
@@ -432,7 +242,6 @@ export function HomeGlass({ events, viewer, stats, total }: HomeGlassProps) {
     return date >= weekendStart && date < weekendEnd;
   });
 
-  const dominantColor = useDominantColor(featured?.coverUrl);
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -440,36 +249,13 @@ export function HomeGlass({ events, viewer, stats, total }: HomeGlassProps) {
     if (!bookingEvent && dialog.open) dialog.close();
   }, [bookingEvent]);
 
-  // Auto-advance hero every 6s
-  useEffect(() => {
-    if (featuredEvents.length < 2) return;
-    const timer = setInterval(() => {
-      setFeaturedIndex((i) => (i + 1) % featuredEvents.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [featuredEvents.length]);
-
   function openBooking(event: EditorialEvent) {
     setQuantity(1);
     setBookingEvent(event);
   }
 
-  function shiftFeature(direction: -1 | 1) {
-    if (featuredEvents.length < 2) return;
-    setFeaturedIndex(
-      (index) => (index + direction + featuredEvents.length) % featuredEvents.length,
-    );
-  }
-
-  const ctaStyle = {
-    "--cta-glow": dominantColor,
-    "--cta-glow-rgb": dominantColor,
-  } as React.CSSProperties;
-
   return (
     <div className={styles.page}>
-      <CinematicCursor />
-
       {/* ── HEADER ── */}
       <header className={styles.header} id="haut">
         <Link
@@ -517,202 +303,7 @@ export function HomeGlass({ events, viewer, stats, total }: HomeGlassProps) {
         {/* ════════════════════════════════════════
             HERO — cinematic fullscreen
         ════════════════════════════════════════ */}
-        <section className={styles.hero} aria-labelledby="hero-title">
-          <HeroBackdrop
-            events={featuredEvents.filter((e) => e.coverUrl)}
-            activeIndex={featuredIndex % Math.max(featuredEvents.filter((e) => e.coverUrl).length, 1)}
-          />
-
-          {/* Noise grain overlay */}
-          <div className={styles.heroGrain} aria-hidden="true" />
-
-          {/* Center content zone */}
-          <div className={styles.heroCenter}>
-            {/* Search bar — above title */}
-            <form
-              action={ROUTES.explore}
-              className={styles.heroSearch}
-              role="search"
-              aria-label="Rechercher un événement"
-            >
-              <Search className={styles.heroSearchIcon} aria-hidden="true" />
-              <label className={styles.srOnly} htmlFor="hero-q">
-                Rechercher
-              </label>
-              <input
-                id="hero-q"
-                name="q"
-                placeholder="Concert, festival, sport…"
-                autoComplete="off"
-              />
-              <label className={styles.srOnly} htmlFor="hero-city">
-                Ville
-              </label>
-              <div className={styles.heroSearchDivider} aria-hidden="true" />
-              <MapPin className={styles.heroSearchCityIcon} aria-hidden="true" />
-              <select id="hero-city" name="ville" defaultValue="">
-                <option value="">Toutes les villes</option>
-                {cities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-              <button type="submit" className={styles.heroSearchBtn} aria-label="Explorer">
-                <Zap aria-hidden="true" />
-              </button>
-            </form>
-
-            {/* Main title */}
-            <div className={styles.heroCopy}>
-              <p className={styles.heroEyebrow} aria-hidden="true">
-                <span className={styles.heroDot} />
-                Billetterie en ligne premium
-              </p>
-              <h1 id="hero-title" className={styles.heroTitle}>
-                Vivez les
-                <br />
-                <em>meilleurs</em>
-                <br />
-                <span className={styles.heroTitleAccent}>événements.</span>
-              </h1>
-              <p className={styles.heroLead}>
-                Concerts, festivals, spectacles, sports… Réservez vos billets en quelques clics et vivez des expériences inoubliables.
-              </p>
-
-              <div className={styles.heroActions}>
-                {/* CTA primary */}
-                <Link
-                  href={ROUTES.explore}
-                  className={styles.ctaButton}
-                  style={ctaStyle}
-                >
-                  <Sparkles aria-hidden="true" />
-                  Réserver maintenant
-                </Link>
-                {/* CTA secondary */}
-                <a href="#a-la-une" className={styles.ctaSecondary}>
-                  <Play aria-hidden="true" /> Voir les événements
-                </a>
-              </div>
-
-              {/* Social proof */}
-              <div className={styles.socialProof}>
-                <div className={styles.avatarStack}>
-                  <i>E</i>
-                  <i>+</i>
-                  <i>✦</i>
-                </div>
-                <span>
-                  <b>{formatNumber(total || stats.events)}</b> événements · {stats.cities} villes
-                </span>
-              </div>
-
-            </div>
-          </div>
-
-          {/* Featured card — right side */}
-          {featured ? (
-            <aside className={styles.featuredPanel} aria-label="Événement à la une">
-              <div
-                className={styles.featuredPoster}
-                data-cursor-hero
-                data-price={eventPrice(featured)}
-              >
-                <Link href={eventHref(featured)} className={styles.featuredImageLink} aria-label={`Découvrir ${featured.title}`}>
-                  <EventArtwork
-                    event={featured}
-                    className={styles.featuredImage}
-                    sizes="(max-width: 760px) 78vw, 380px"
-                  />
-                </Link>
-                <div className={styles.ticket3d} aria-hidden="true">
-                  <div className={styles.ticket3dMain}>
-                    <span className={styles.ticketLive}><i /> LIVE</span>
-                    <h3>{featured.title}</h3>
-                    <strong>{featured.categoryLabel}</strong>
-                    <p><CalendarDays aria-hidden="true" /> {DATE.format(new Date(featured.startAt))}</p>
-                    <p><MapPin aria-hidden="true" /> {[featured.venueName, featured.city].filter(Boolean).join(" · ")}</p>
-                    <span className={styles.ticketEventBrand}>EVENT</span>
-                  </div>
-                  <div className={styles.ticket3dStub}>
-                    <span className={styles.ticketVip}>VIP <small>PASS</small></span>
-                    <span className={styles.barcode} />
-                    <span className={styles.ticketStubMark}><Ticket aria-hidden="true" /></span>
-                  </div>
-                </div>
-                <div className={styles.ticketPedestal} aria-hidden="true"><span /><i /></div>
-                <span className={styles.featuredTag}>
-                  <span />À LA UNE
-                </span>
-                <div className={styles.featuredPosterFoot}>
-                  <span>{featured.categoryLabel}</span>
-                  <span>{DATE.format(new Date(featured.startAt))}</span>
-                </div>
-              </div>
-              <div className={styles.featuredInfo}>
-                <div>
-                  <p>LE MOMENT À NE PAS MANQUER</p>
-                  <h2>
-                    <Link href={eventHref(featured)}>{featured.title}</Link>
-                  </h2>
-                  <span>
-                    <MapPin aria-hidden="true" />{" "}
-                    {[featured.venueName, featured.city].filter(Boolean).join(" · ")}
-                  </span>
-                </div>
-                <div className={styles.featuredBottom}>
-                  <strong>{eventPrice(featured)}</strong>
-                  <button
-                    type="button"
-                    style={ctaStyle}
-                    className={styles.featuredReserveBtn}
-                    onClick={() => openBooking(featured)}
-                  >
-                    Réserver <ArrowRight aria-hidden="true" />
-                  </button>
-                </div>
-              </div>
-              {featuredEvents.length > 1 ? (
-                <div className={styles.featureControls}>
-                  <button
-                    type="button"
-                    onClick={() => shiftFeature(-1)}
-                    aria-label="Événement précédent"
-                  >
-                    <ArrowLeft aria-hidden="true" />
-                  </button>
-                  <span>
-                    {String(featuredIndex + 1).padStart(2, "0")}{" "}
-                    <i>/</i>{" "}
-                    {String(featuredEvents.length).padStart(2, "0")}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => shiftFeature(1)}
-                    aria-label="Événement suivant"
-                  >
-                    <ArrowRight aria-hidden="true" />
-                  </button>
-                </div>
-              ) : null}
-            </aside>
-          ) : (
-            <div className={styles.emptyFeature}>
-              <Ticket aria-hidden="true" />
-              <span>Les prochains événements arrivent bientôt.</span>
-              <Link href={ROUTES.explore}>
-                Explorer l'agenda <ArrowRight aria-hidden="true" />
-              </Link>
-            </div>
-          )}
-
-          {/* Scroll hint */}
-          <a href="#a-la-une" className={styles.scrollHint}>
-            <ChevronDown aria-hidden="true" />
-            <span>Défiler</span>
-          </a>
-        </section>
+        <HomeCarousel events={events} />
 
         {/* ════════════════════════════════════════
             CATALOG — dark background

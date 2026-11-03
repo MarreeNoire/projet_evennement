@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Cormorant_Garamond, Inter, Plus_Jakarta_Sans } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { PwaServiceWorker } from "@/components/providers/pwa-service-worker";
@@ -8,12 +8,14 @@ import { env } from "@/lib/env";
 
 import "./globals.css";
 
-/* Grotesque serré pour les titres, Inter pour le texte : la paire qui porte
-   l'identité néon (grands titres denses, interface neutre). */
-const archivo = Archivo({
+/* Une serif éditoriale pour les moments de découverte, Inter pour les outils.
+   Cormorant est chargée en police variable : une seule URL par style, ce qui
+   évite le bug Turbopack « next/font/google queries have exactly one entry »
+   déclenché par un tableau de graisses combiné à deux styles. */
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-archivo",
+  style: ["normal", "italic"],
+  variable: "--font-cormorant",
   display: "swap",
 });
 
@@ -83,8 +85,8 @@ export const viewport: Viewport = {
   // (env(safe-area-inset-*) exploitées par la tabbar et les sheets).
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f0e8" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0e0c" },
+    { media: "(prefers-color-scheme: light)", color: "#eee9df" },
+    { media: "(prefers-color-scheme: dark)", color: "#171612" },
   ],
   interactiveWidget: "resizes-content",
 };
@@ -97,7 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`${archivo.variable} ${inter.variable} ${plusJakarta.variable} light`}
+      className={`${cormorant.variable} ${inter.variable} ${plusJakarta.variable} light`}
     >
       <head>
         {process.env.NODE_ENV === "development" && (

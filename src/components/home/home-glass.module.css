@@ -9,54 +9,6 @@
      - Albâtre Froid: #F8F9FA
    ================================================================ */
 
-/* ── CUSTOM CURSOR ── */
-.cursor {
-  position: fixed;
-  top: 0; left: 0;
-  z-index: 9999;
-  width: 40px; height: 40px;
-  border: 1.5px solid rgba(255, 183, 3, 0.7);
-  border-radius: 50%;
-  pointer-events: none;
-  will-change: transform;
-  transition: width 250ms cubic-bezier(.2,.8,.2,1),
-              height 250ms cubic-bezier(.2,.8,.2,1),
-              border-color 250ms ease,
-              background 250ms ease;
-  backdrop-filter: blur(2px);
-}
-.cursor.cursorHero {
-  width: 80px; height: 80px;
-  border-color: #E63988;
-  background: rgba(230, 57, 136, 0.12);
-  backdrop-filter: blur(6px);
-}
-.cursorLabel {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: #FFB703;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .04em;
-  opacity: 0;
-  transition: opacity 200ms ease;
-  pointer-events: none;
-}
-.cursor.cursorHero .cursorLabel { opacity: 1; color: #E63988; }
-.cursorDot {
-  position: fixed;
-  top: 0; left: 0;
-  z-index: 9999;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #E63988;
-  box-shadow: 0 0 10px rgba(230, 57, 136, 0.6);
-  pointer-events: none;
-  will-change: transform;
-}
-
 /* ── PAGE SHELL ── */
 .page {
   position: relative;
@@ -68,11 +20,10 @@
   color: #F8F9FA;
   font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", Inter, sans-serif;
   -webkit-font-smoothing: antialiased;
-  cursor: none;
 }
 .page * { box-sizing: border-box; }
 .page a { color: inherit; text-decoration: none; }
-.page button, .page input, .page select { font: inherit; color: inherit; cursor: none; }
+.page button, .page input, .page select { font: inherit; color: inherit; }
 .page :focus-visible { outline: 2px solid #FFB703; outline-offset: 3px; }
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
 
@@ -358,7 +309,6 @@
   font-size: 12px;
   font-weight: 500;
   appearance: none;
-  cursor: none;
 }
 .heroSearchBtn {
   display: grid;
@@ -1306,9 +1256,6 @@
 
 @media (max-width: 760px) {
   .page { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
-  .cursor, .cursorDot { display: none; }
-  .page { cursor: auto; }
-  .page button, .page a, .page input, .page select { cursor: auto; }
   .header {
     width: calc(100% - 22px);
     min-height: 60px;
@@ -1440,7 +1387,7 @@
 .nav a[aria-current="page"]::after { position:absolute; right:0; bottom:-10px; left:0; height:2px; background:#ff6a00; content:""; }
 .quickSearch button,.heroSearchBtn { background:#ff5a00; color:#170a04; }
 .organizerButton { border-color:#ff7415; background:#ff5a00; color:#160903; }
-.hero { height:calc(100svh - 68px); min-height:650px; max-height:930px; }
+.hero { height:calc(100svh - 68px); min-height:650px; max-height:930px; grid-template-columns:minmax(0,1fr); justify-items:center; }
 .heroTitle { max-width:700px; font-size:clamp(56px,7.4vw,102px); line-height:.88; letter-spacing:-.075em; text-transform:uppercase; }
 .heroTitle em { background:linear-gradient(95deg,#ff9a00,#ff4a00 70%); -webkit-background-clip:text; background-clip:text; }
 .heroTitleAccent { color:#f8f4ee; }
@@ -1456,7 +1403,7 @@
 .avatarStack i { background:linear-gradient(145deg,#ffb12c,#ff4a00); }
 .avatarStack i:nth-child(2) { background:linear-gradient(145deg,#ff7830,#ffd166); color:#200b03; }
 .avatarStack i:nth-child(3) { background:linear-gradient(145deg,#ff5a00,#ffb12c); }
-.featuredPanel { width:min(100%,540px); padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; transform:none; }
+.featuredPanel { width:min(100%,720px); justify-self:center; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; transform:none; }
 .featuredPanel:hover { transform:none; }
 .featuredPoster { aspect-ratio:1.35; overflow:visible; border-radius:18px; background:#1b0d06; }
 .featuredImageLink { position:absolute; inset:0; display:block; overflow:hidden; border:1px solid rgba(255,255,255,.18); border-radius:18px; background:#1b0d06; }
@@ -1500,8 +1447,8 @@
 .catalogBg { background:#080605; }
 .catalogBg::before { position:absolute; inset:0; background:radial-gradient(ellipse at 0 22%,rgba(255,76,0,.16),transparent 32%),radial-gradient(ellipse at 100% 58%,rgba(255,94,0,.12),transparent 30%),radial-gradient(ellipse at 8% 100%,rgba(255,105,0,.2),transparent 34%); content:""; pointer-events:none; }
 .section { position:relative; z-index:1; width:min(1440px,calc(100% - 84px)); }
-.popularLayout { display:grid; grid-template-columns:minmax(230px,.66fr) minmax(0,1.9fr); align-items:center; gap:25px; }
-.popularIntro { max-width:340px; }
+.popularLayout { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; gap:18px; }
+.popularIntro { max-width:none; margin-top:8px; text-align:left; }
 .popularIntro .sectionEyebrow { color:#ff7a00; letter-spacing:.08em; }
 .popularIntro h2 { margin:0; color:#fff5eb; font-size:clamp(37px,4.5vw,61px); font-style:italic; font-weight:850; letter-spacing:-.065em; line-height:.97; }
 .popularIntro h2 em { display:block; color:#ff5a00; font-style:italic; }
@@ -1565,7 +1512,7 @@
 .modalContinue { background:linear-gradient(100deg,#ff4a00,#ff8a00); color:#1b0902; box-shadow:0 8px 24px rgba(255,77,0,.33); }
 .modalContinue:hover { box-shadow:0 12px 30px rgba(255,77,0,.5); }
 @media (max-width:1100px) {
-  .popularLayout { grid-template-columns:minmax(190px,.6fr) minmax(0,1.7fr); gap:16px; }
+  .popularLayout { grid-template-columns:minmax(0,1fr); gap:16px; }
   .featuredGrid .eventCard { flex-basis:190px; width:190px; }
   .whySection { width:calc(100% - 56px); grid-template-columns:1fr; gap:25px; }
   .whyCopy { max-width:530px; }
@@ -1615,4 +1562,33 @@
   .ticketVip { min-width:45px; min-height:35px; font-size:11px; }
   .barcode { width:27px; height:39px; }
   .eventDate,.eventPlace { font-size:8px; }
+}
+
+/* Le visuel de l'événement vedette devient le fond plein cadre de la hero. */
+.hero { display:block; overflow:hidden; }
+.featuredPanel { position:absolute; z-index:0; inset:0; width:100%; height:100%; max-width:none; margin:0; }
+.featuredPoster { position:absolute; inset:0; width:100%; height:100%; aspect-ratio:auto; overflow:visible; border-radius:0; }
+.featuredImageLink { border:0; border-radius:0; }
+.featuredImageLink::after { background:linear-gradient(90deg,rgba(7,5,4,.62),rgba(7,5,4,.2) 52%,rgba(7,5,4,.24)),linear-gradient(0deg,rgba(7,5,4,.5),transparent 48%); }
+.featuredImage { object-position:center 42%; }
+.featuredPanel:hover .featuredImage { transform:none; }
+.featuredPoster::before { right:18%; left:18%; bottom:-12px; }
+.ticket3d { top:43%; left:50%; width:min(70vw,860px); min-height:clamp(190px,18vw,250px); grid-template-columns:minmax(0,1fr) 100px; transform:translate(-50%,-50%) perspective(1100px) rotateY(-8deg) rotateX(3deg) rotateZ(-5deg); }
+.featuredPanel:hover .ticket3d { transform:translate(-50%,-52%) perspective(1100px) rotateY(-6deg) rotateX(2deg) rotateZ(-4deg); }
+.ticketPedestal { right:18%; left:18%; }
+.featuredInfo { position:absolute; bottom:clamp(30px,6vh,72px); left:clamp(24px,7vw,100px); width:min(360px,42vw); margin:0; padding:0; flex-direction:column; align-items:flex-start; }
+.featuredBottom { display:flex; align-items:center; justify-items:start; gap:14px; }
+.featureControls { top:auto; right:clamp(20px,5vw,70px); bottom:clamp(28px,5vh,62px); z-index:5; }
+.featuredPosterFoot { display:none; }
+
+@media (max-width:760px) {
+  .ticket3d { top:40%; width:calc(100% - 32px); min-height:160px; grid-template-columns:minmax(0,1fr) 62px; transform:translate(-50%,-50%) perspective(900px) rotateY(-5deg) rotateX(3deg) rotateZ(-5deg); }
+  .featuredPanel:hover .ticket3d { transform:translate(-50%,-52%) perspective(900px) rotateY(-3deg) rotateX(2deg) rotateZ(-3deg); }
+  .ticket3dMain { gap:5px; padding:14px 15px; }
+  .ticket3dMain h3 { font-size:clamp(17px,5vw,24px); }
+  .ticket3dStub { padding:8px 6px; }
+  .barcode { width:33px; height:44px; }
+  .ticketPedestal { right:8%; left:8%; bottom:-20px; height:44px; }
+  .featuredInfo { bottom:24px; left:18px; width:min(70%,320px); }
+  .featureControls { right:16px; bottom:24px; }
 }
