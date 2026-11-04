@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 /* =============================================================================
    Carte
    --------------------------------------------------------------------------
-   Surface éditoriale partagée : papier plein, filet fin et accent vermillon.
+   Surface partagée : nuit profonde, dégradés bleu Majorelle / fuchsia et filet
+   fin, dans le langage visuel de l'accueil.
    ========================================================================== */
 
 export function Card({
@@ -15,9 +16,8 @@ export function Card({
     <div
       data-scroll-reveal
       className={cn(
-        "border-border bg-surface rounded-sm border transition-colors duration-160 ease-[var(--ease-out-soft)]",
-        interactive &&
-          "hover:border-primary/55 hover:bg-bg-subtle focus-within:border-border-focus",
+        "cinema-card border-border rounded-lg border",
+        interactive && "cinema-card--interactive focus-within:border-border-focus",
         className,
       )}
       {...props}

@@ -10,18 +10,18 @@ import { cn } from "@/lib/utils";
    ========================================================================== */
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-sm border font-semibold tracking-[0.08em] uppercase whitespace-nowrap",
+  "inline-flex items-center gap-1 rounded-full border font-semibold tracking-[0.08em] uppercase whitespace-nowrap",
   {
     variants: {
       variant: {
         neutral: "border-border bg-bg-muted text-fg-muted",
-        primary: "border-transparent bg-primary-subtle text-primary-subtle-fg",
-        success: "border-transparent bg-success-subtle text-success",
-        warning: "border-transparent bg-warning-subtle text-warning",
-        danger: "border-transparent bg-danger-subtle text-danger",
-        info: "border-transparent bg-info-subtle text-info",
+        primary: "border-primary/35 bg-primary-subtle text-primary-subtle-fg",
+        success: "border-success/30 bg-success-subtle text-success",
+        warning: "border-warning/35 bg-warning-subtle text-warning",
+        danger: "border-danger/30 bg-danger-subtle text-danger",
+        info: "border-info/35 bg-info-subtle text-info",
         // Réservé aux niveaux d'accès VIP / VVIP
-        accent: "border-transparent bg-accent-subtle text-accent-subtle-fg",
+        accent: "border-accent/40 bg-accent-subtle text-accent-subtle-fg",
         outline: "border-border-strong bg-transparent text-fg",
         // Sur photo de couverture
         overlay: "border-white/20 bg-black/75 text-white",
@@ -66,7 +66,7 @@ export function AccessLevelBadge({ level, className }: { level: string; classNam
     return (
       <span
         className={cn(
-          "bg-accent-solid text-2xs text-accent-solid-fg inline-flex items-center rounded-sm px-2 py-0.5 font-bold tracking-[0.08em] uppercase",
+          "bg-[linear-gradient(135deg,#e63988,#1d58ff)] text-2xs inline-flex items-center rounded-full px-2 py-0.5 font-bold tracking-[0.08em] text-white uppercase shadow-[0_0_18px_-4px_rgba(230,57,136,0.8)]",
           className,
         )}
       >

@@ -144,7 +144,7 @@ export function BottomSheet({
         tabIndex={-1}
         data-state={closeDrag > 0 ? "dragging" : "open"}
         className={cn(
-          "bg-surface border-border pointer-events-auto absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto overscroll-contain",
+          "bg-surface border-border cinema-sheet pointer-events-auto absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto overscroll-contain",
           isMenu
             ? "rounded-t-[26px] border-t shadow-[0_-24px_60px_rgba(10,8,18,0.4)]"
             : "rounded-t-2xl border-t shadow-[0_-24px_60px_rgba(10,8,18,0.4)]",

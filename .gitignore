@@ -120,6 +120,12 @@ exemple_motion_site/
 /generateur_video/
 /new_design/
 
+# Brouillons Remotion (promo-video) : rendus et plans générés restent locaux.
+/promo-video/public/
+/promo-video/src/AgnesHeroFilm.tsx
+/promo-video/src/AgnesStory.ts
+/promo-video/src/HeroJourney.tsx
+
 # --- Médias d'essai à la racine de public/ -----------------------------------
 /public/hero-journey.mp4
 /public/hero-parcours-animatic.mp4

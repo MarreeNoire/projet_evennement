@@ -393,6 +393,29 @@
   --editorial-band: #06070b;
   --editorial-band-ink: #f8f9fa;
 
+  /* --- Accents cinéma : surfaces teintées, dégradés et lueurs --- */
+  --tint-blue: rgba(29, 88, 255, 0.22);
+  --tint-fuchsia: rgba(230, 57, 136, 0.2);
+  --tint-gold: rgba(255, 183, 3, 0.18);
+  --tint-orange: rgba(255, 106, 0, 0.2);
+
+  --glow-blue: 0 0 44px -10px rgba(29, 88, 255, 0.65);
+  --glow-fuchsia: 0 0 44px -10px rgba(230, 57, 136, 0.6);
+  --glow-gold: 0 0 44px -10px rgba(255, 183, 3, 0.55);
+  --glow-orange: 0 0 44px -10px rgba(255, 106, 0, 0.6);
+
+  --gradient-brand: linear-gradient(135deg, #1d58ff, #e63988 55%, #ffb703);
+  --gradient-warm: linear-gradient(135deg, #ffb703, #ff6a00);
+  --gradient-cool: linear-gradient(135deg, #1d58ff, #e63988);
+  --gradient-aurora: linear-gradient(120deg, #1d58ff, #e63988 45%, #ff6a00 78%, #ffb703);
+
+  /* Ambiance multi-colore posée derrière toutes les pages. */
+  --ambient:
+    radial-gradient(1100px 720px at 4% -10%, rgba(29, 88, 255, 0.34), transparent 62%),
+    radial-gradient(900px 640px at 100% 0%, rgba(230, 57, 136, 0.28), transparent 62%),
+    radial-gradient(1200px 820px at 50% 115%, rgba(255, 106, 0, 0.3), transparent 66%),
+    radial-gradient(700px 520px at 78% 70%, rgba(255, 183, 3, 0.18), transparent 68%);
+
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -478,6 +501,17 @@
   --editorial-gold: #ffb703;
   --editorial-band: #030408;
   --editorial-band-ink: #f8f9fa;
+
+  --tint-blue: rgba(29, 88, 255, 0.26);
+  --tint-fuchsia: rgba(230, 57, 136, 0.24);
+  --tint-gold: rgba(255, 183, 3, 0.2);
+  --tint-orange: rgba(255, 106, 0, 0.24);
+
+  --ambient:
+    radial-gradient(1100px 720px at 4% -10%, rgba(29, 88, 255, 0.38), transparent 62%),
+    radial-gradient(900px 640px at 100% 0%, rgba(230, 57, 136, 0.32), transparent 62%),
+    radial-gradient(1200px 820px at 50% 115%, rgba(255, 106, 0, 0.34), transparent 66%),
+    radial-gradient(700px 520px at 78% 70%, rgba(255, 183, 3, 0.2), transparent 68%);
 }
 
 /* ============================================================================
@@ -651,7 +685,10 @@
     font-size: 1rem;
     line-height: 1.5;
     color: var(--fg);
-    background: var(--bg);
+    background-color: var(--bg);
+    background-image: var(--ambient);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -703,6 +740,94 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* ============================================================================
+   SURFACES CINÉMA — la palette de l'accueil appliquée aux composants partagés
+   --------------------------------------------------------------------------
+   Les jetons restent la source unique ; ces classes ne font que composer des
+   dégradés (bleu Majorelle, fuchsia, safran, orange) sur les surfaces.
+   ========================================================================== */
+
+.cinema-card {
+  position: relative;
+  background-image:
+    radial-gradient(140% 130% at 0% 0%, var(--tint-blue), transparent 62%),
+    radial-gradient(140% 130% at 100% 100%, var(--tint-fuchsia), transparent 66%),
+    linear-gradient(180deg, var(--surface-raised), var(--surface));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 20px 44px -34px rgba(0, 0, 0, 0.9);
+}
+
+.cinema-card--interactive {
+  transition:
+    border-color 0.2s var(--ease-out-soft),
+    box-shadow 0.2s var(--ease-out-soft),
+    transform 0.2s var(--ease-out-soft);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cinema-card--interactive:hover {
+    border-color: rgba(255, 183, 3, 0.42);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 0 1px rgba(255, 183, 3, 0.14),
+      0 26px 56px -30px rgba(230, 57, 136, 0.45);
+    transform: translateY(-2px);
+  }
+}
+
+/* Titre en dégradé aurora, réservé aux moments forts. */
+.cinema-heading {
+  background-image: var(--gradient-aurora);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Filet lumineux sous l'en-tête applicatif. */
+.site-header {
+  background-image:
+    linear-gradient(180deg, rgba(29, 88, 255, 0.1), transparent 72%),
+    linear-gradient(90deg, rgba(230, 57, 136, 0.07), transparent 58%);
+}
+
+.site-header::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, #1d58ff 18%, #e63988 50%, #ffb703 82%, transparent);
+  opacity: 0.6;
+}
+
+/* Rail latéral : dégradés bleu / fuchsia sur la surface sombre. */
+.cinema-rail {
+  background-image:
+    radial-gradient(120% 55% at 0% 0%, rgba(29, 88, 255, 0.18), transparent 62%),
+    radial-gradient(120% 55% at 0% 100%, rgba(230, 57, 136, 0.14), transparent 62%),
+    radial-gradient(90% 40% at 100% 50%, rgba(255, 183, 3, 0.07), transparent 70%);
+}
+
+/* Feuille mobile / modale : même matière teintée que les cartes. */
+.cinema-sheet {
+  background-image:
+    radial-gradient(120% 80% at 0% 0%, rgba(29, 88, 255, 0.16), transparent 60%),
+    radial-gradient(120% 80% at 100% 0%, rgba(230, 57, 136, 0.12), transparent 60%);
+}
+
+/* Halo doux réutilisable (badges mis en avant, pastilles d'état). */
+.cinema-halo-gold {
+  box-shadow: var(--glow-gold);
+}
+.cinema-halo-fuchsia {
+  box-shadow: var(--glow-fuchsia);
+}
+.cinema-halo-blue {
+  box-shadow: var(--glow-blue);
 }
 
 /* skip-link - regular CSS since @utility doesn't support pseudo-classes */
@@ -1001,8 +1126,14 @@
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--fg) 9%, transparent);
   border-radius: 1rem;
-  background: var(--surface);
-  box-shadow: 0 8px 24px -20px color-mix(in srgb, var(--fg) 45%, transparent);
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(140% 120% at 0% 0%, var(--tint-blue), transparent 60%),
+    radial-gradient(140% 120% at 100% 100%, var(--tint-fuchsia), transparent 64%),
+    linear-gradient(180deg, var(--surface-raised), var(--surface));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 8px 24px -20px rgba(0, 0, 0, 0.85);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
@@ -1024,8 +1155,10 @@
 
 .event-card:hover,
 .event-card:focus-within {
-  border-color: color-mix(in srgb, var(--primary) 44%, var(--border));
-  box-shadow: 0 18px 32px -22px color-mix(in srgb, var(--fg) 38%, transparent);
+  border-color: rgba(255, 183, 3, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(255, 183, 3, 0.16),
+    0 22px 44px -26px rgba(230, 57, 136, 0.55);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1083,12 +1216,12 @@
   align-items: center;
   justify-content: center;
   min-width: 3.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.64);
+  border: 1px solid rgba(255, 183, 3, 0.55);
   border-radius: 0.7rem;
-  background: var(--surface);
+  background-image: linear-gradient(145deg, #ffb703, #ff8a00);
   padding: 0.42rem 0.58rem 0.36rem;
-  color: var(--fg);
-  box-shadow: 0 5px 18px rgba(25, 20, 14, 0.16);
+  color: #090a0f;
+  box-shadow: 0 8px 22px -10px rgba(255, 106, 0, 0.9);
 }
 
 .event-card-date-day {
@@ -1100,7 +1233,7 @@
 
 .event-card-date-month {
   margin-top: 0.15rem;
-  color: var(--fg-muted);
+  color: rgba(9, 10, 15, 0.72);
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1129,18 +1262,21 @@
   min-height: 2.25rem;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid color-mix(in srgb, var(--primary) 75%, transparent);
+  border: 1px solid rgba(255, 183, 3, 0.45);
   border-radius: 999px;
-  background: var(--primary-solid);
+  background-color: var(--primary-solid);
+  background-image: linear-gradient(135deg, #ffb703, #ff6a00);
   padding-inline: 1rem;
   color: var(--primary-solid-fg);
   font-size: 0.78rem;
   font-weight: 700;
-  transition: background-color 160ms ease, transform 160ms ease;
+  box-shadow: 0 8px 20px -10px rgba(255, 106, 0, 0.9);
+  transition: filter 160ms ease, transform 160ms ease;
 }
 
 .event-card-cta:hover {
-  background: var(--primary-solid-hover);
+  background-color: var(--primary-solid-hover);
+  filter: brightness(1.08);
 }
 
 .event-card-cta:active {

@@ -153,9 +153,9 @@
 }
 
 .artTag {
-  padding: 4px 7px 3px;
+  padding: 4px 9px 3px;
   border: 1px solid currentColor;
-  border-radius: 2px;
+  border-radius: 999px;
   font-size: 7.5px;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -362,8 +362,14 @@
   gap: 18px;
   padding: 20px 22px 18px;
   border: 1px solid var(--line-strong);
-  border-radius: 3px;
-  background: var(--surface);
+  border-radius: 18px;
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(130% 150% at 0% 0%, var(--tint-blue, rgba(29, 88, 255, 0.2)), transparent 58%),
+    radial-gradient(120% 150% at 100% 100%, var(--tint-fuchsia, rgba(230, 57, 136, 0.16)), transparent 62%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 40px -32px rgba(0, 0, 0, 0.9);
 }
 
 .filterRow {
@@ -383,7 +389,7 @@
   min-height: 32px;
   padding: 5px 12px;
   border: 1px solid var(--line-strong);
-  border-radius: 2px;
+  border-radius: 999px;
   background: transparent;
   color: var(--ink-2);
   font-size: 11.5px;
@@ -396,14 +402,17 @@
 }
 
 .chip:hover {
-  border-color: var(--ink-2);
+  border-color: rgba(255, 183, 3, 0.45);
+  background: rgba(255, 183, 3, 0.08);
   color: var(--ink);
 }
 
 .chip[aria-pressed="true"] {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--paper);
+  border-color: rgba(255, 183, 3, 0.5);
+  background-color: var(--accent);
+  background-image: linear-gradient(135deg, #ffb703, #ff6a00);
+  color: #090a0f;
+  font-weight: 700;
 }
 
 .chipSet {
@@ -1007,14 +1016,18 @@
   gap: 10px;
   padding: 22px;
   border: 1px solid var(--line);
-  border-radius: 3px;
-  background: var(--surface);
-  transition: border-color 0.18s ease, transform 0.24s var(--ease-out);
+  border-radius: 18px;
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(140% 120% at 0% 0%, var(--tint-blue, rgba(29, 88, 255, 0.2)), transparent 60%),
+    radial-gradient(130% 120% at 100% 100%, var(--tint-fuchsia, rgba(230, 57, 136, 0.18)), transparent 64%);
+  transition: border-color 0.18s ease, box-shadow 0.24s ease, transform 0.24s var(--ease-out);
 }
 
 .helpCard:hover {
-  border-color: var(--line-strong);
+  border-color: rgba(255, 183, 3, 0.45);
   transform: translateY(-2px);
+  box-shadow: 0 22px 44px -30px rgba(230, 57, 136, 0.6);
 }
 
 .helpCard h2 {
@@ -1112,8 +1125,14 @@
   gap: 16px;
   padding: clamp(20px, 2.6vw, 28px);
   border: 1px solid var(--line-strong);
-  border-radius: 3px;
-  background: var(--surface);
+  border-radius: 22px;
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(140% 110% at 0% 0%, var(--tint-blue, rgba(29, 88, 255, 0.2)), transparent 60%),
+    radial-gradient(130% 110% at 100% 100%, var(--tint-gold, rgba(255, 183, 3, 0.16)), transparent 64%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 24px 50px -34px rgba(0, 0, 0, 0.9);
 }
 
 .organizerPanel > h2 {
@@ -1356,8 +1375,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 26px 0;
-  border-block: 1px solid var(--line);
+  padding: 26px 28px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(120% 150% at 0% 0%, var(--tint-blue, rgba(29, 88, 255, 0.2)), transparent 58%),
+    radial-gradient(120% 150% at 100% 100%, var(--tint-orange, rgba(255, 106, 0, 0.2)), transparent 60%);
 }
 
 .ctaBand h2 {

@@ -16,12 +16,12 @@ export const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 whitespace-nowrap",
     "font-semibold",
-    "rounded-sm border border-transparent",
-    "transition-[background-color,border-color,color] duration-160",
+    "rounded-full border border-transparent",
+    "transition-[background-color,border-color,color,box-shadow,transform] duration-160",
     "ease-[var(--ease-out-soft)]",
     "select-none",
     // Feedback immédiat au clic
-    "active:scale-[0.97]  ",
+    "active:scale-[0.97]",
     // Accessibilité : jamais de contenu masqué par l'état désactivé
     "disabled:pointer-events-none disabled:opacity-50",
     "aria-busy:cursor-progress",
@@ -30,18 +30,21 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Action principale : contraste 5.55:1 dans les deux thèmes
-        primary: "bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover",
-        // Action secondaire
-        secondary: "border-border-strong bg-surface text-fg hover:border-primary/50 hover:bg-bg-subtle",
+        // Action principale : dégradé safran → orange de l'accueil.
+        primary:
+          "bg-[linear-gradient(135deg,#ffb703,#ff6a00)] text-[#090a0f] shadow-[0_10px_28px_-12px_rgba(255,106,0,0.85)] hover:brightness-110",
+        // Action secondaire : surface vitrée teintée bleu Majorelle.
+        secondary:
+          "border-border-strong bg-surface text-fg hover:border-info/60 hover:bg-info-subtle hover:shadow-[var(--glow-blue)]",
         // Action discrète
-        ghost: "text-fg hover:bg-bg-muted",
+        ghost: "text-fg hover:bg-bg-muted hover:text-primary",
         // Lien textuel
         link: "text-primary underline underline-offset-4 decoration-1 hover:decoration-2 px-0",
         // Action destructive (annulation, suppression)
         danger: "bg-danger-solid text-white hover:bg-danger-solid-hover",
         // Accent chaud : réservé aux mises en avant (VIP, CTA promotionnel)
-        accent: "bg-accent-solid text-accent-solid-fg hover:brightness-95",
+        accent:
+          "bg-[linear-gradient(135deg,#e63988,#1d58ff)] text-white shadow-[0_10px_28px_-12px_rgba(230,57,136,0.9)] hover:brightness-110",
         // Sur photo de couverture
         overlay: "border-white/30 bg-black/85 text-white hover:bg-black",
       },
