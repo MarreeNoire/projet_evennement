@@ -152,7 +152,7 @@
   width: 22px;
   height: 2px;
   border-radius: 999px;
-  background-image: linear-gradient(90deg, #1d58ff, #e63988 55%, #ffb703);
+  background-image: linear-gradient(90deg, #ff4a00, #ff8a00 55%, #ffb27a);
 }
 
 .statement {
@@ -171,7 +171,7 @@
 
 .statement em {
   font-style: italic;
-  background-image: var(--gradient-warm, linear-gradient(135deg, #ffb703, #ff6a00));
+  background-image: var(--gradient-warm, linear-gradient(135deg, #ff6a00, #ffb27a));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -216,14 +216,14 @@
   border-radius: 22px;
   background-color: var(--surface);
   background-image:
-    radial-gradient(130% 100% at 0% 0%, rgba(29, 88, 255, 0.16), transparent 60%),
-    radial-gradient(120% 100% at 100% 100%, rgba(230, 57, 136, 0.14), transparent 62%),
+    radial-gradient(130% 100% at 0% 0%, rgba(255, 74, 0, 0.16), transparent 60%),
+    radial-gradient(120% 100% at 100% 100%, rgba(255, 106, 0, 0.14), transparent 62%),
     linear-gradient(180deg, color-mix(in srgb, var(--surface) 88%, #ffffff 4%), var(--surface));
   padding: clamp(24px, 3vw, 36px);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 30px 70px -40px rgba(0, 0, 0, 0.9),
-    0 0 60px -30px rgba(230, 57, 136, 0.5);
+    0 0 60px -30px rgba(255, 106, 0, 0.5);
   animation: card-in 0.5s var(--ease-out) both;
 }
 
@@ -231,7 +231,7 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
     0 30px 70px -40px rgba(0, 0, 0, 0.95),
-    0 0 60px -30px rgba(230, 57, 136, 0.45);
+    0 0 60px -30px rgba(255, 106, 0, 0.45);
 }
 
 .card::before {
@@ -239,7 +239,7 @@
   position: absolute;
   inset: 0 0 auto;
   height: 3px;
-  background-image: linear-gradient(90deg, #1d58ff, #e63988 50%, #ffb703);
+  background-image: linear-gradient(90deg, #ff4a00, #ff8a00 50%, #ffb27a);
 }
 
 .cardHeader {
@@ -292,7 +292,7 @@
   width: 22px;
   height: 2px;
   border-radius: 999px;
-  background-image: linear-gradient(90deg, #1d58ff, #e63988 55%, #ffb703);
+  background-image: linear-gradient(90deg, #ff4a00, #ff8a00 55%, #ffb27a);
 }
 
 .title {
@@ -408,7 +408,7 @@
   margin-top: 4px;
   border-radius: 999px;
   background-color: var(--accent);
-  background-image: linear-gradient(135deg, #ffb703, #ff6a00);
+  background-image: linear-gradient(135deg, #ff6a00, #ffb27a);
   color: var(--on-accent);
   font-size: 14px;
   font-weight: 700;
@@ -419,7 +419,7 @@
 
 .card :global(form button[type="submit"]:hover) {
   background-color: var(--accent-deep);
-  background-image: linear-gradient(135deg, #ffb703, #ff6a00);
+  background-image: linear-gradient(135deg, #ff6a00, #ffb27a);
   filter: brightness(1.08);
   transform: translateY(-1px);
   box-shadow: 0 16px 32px -14px rgba(255, 106, 0, 1);

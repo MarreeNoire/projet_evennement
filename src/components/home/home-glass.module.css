@@ -3,9 +3,9 @@
    Theme: Majorelle, Safran & Fuchsia Bougainvillier
    Dark base: #090A0F · Plus Jakarta Sans
    Accents:
-     - Or Safran Électrique: #FFB703
-     - Bleu Majorelle / Klein: #1D58FF
-     - Fuchsia Bougainvillier: #E63988 (points pulsants, dégradé de titre, lueurs)
+     - Braise: #FF4A00 → #FF8A00 (dégradés, lueurs, pastilles)
+     - Crème chaude: #FFF5EB (texte)
+     - Charbon: #080605 (fond)
      - Albâtre Froid: #F8F9FA
    ================================================================ */
 
@@ -16,7 +16,7 @@
   min-height: 100dvh;
   overflow: clip;
   isolation: isolate;
-  background: #090A0F;
+  background: #080605;
   color: #F8F9FA;
   font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", Inter, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -24,7 +24,7 @@
 .page * { box-sizing: border-box; }
 .page a { color: inherit; text-decoration: none; }
 .page button, .page input, .page select { font: inherit; color: inherit; }
-.page :focus-visible { outline: 2px solid #FFB703; outline-offset: 3px; }
+.page :focus-visible { outline: 2px solid #FF8A00; outline-offset: 3px; }
 .srOnly { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
 
 /* ── HEADER ── */
@@ -64,12 +64,12 @@
   width: 32px; height: 32px;
   place-items: center;
   border-radius: 9px;
-  background: linear-gradient(135deg, #1D58FF, #E63988 55%, #FFB703);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, #FF4A00, #FF8A00 55%, #FFB27A);
+  color: #1C0A02;
   font-size: 18px;
   font-weight: 900;
   font-style: italic;
-  box-shadow: 0 4px 16px rgba(230, 57, 136, 0.4);
+  box-shadow: 0 4px 16px rgba(255, 106, 0, 0.4);
 }
 
 .nav {
@@ -85,7 +85,7 @@
   letter-spacing: .02em;
   transition: color 140ms ease;
 }
-.nav a:hover { color: #FFB703; }
+.nav a:hover { color: #FF8A00; }
 
 .quickSearch {
   display: flex;
@@ -113,14 +113,14 @@
   flex: none;
   place-items: center;
   border-radius: 50%;
-  background: #1D58FF;
-  color: #FFFFFF;
+  background: #FF4A00;
+  color: #1C0A02;
   transition: transform 140ms ease, background 140ms ease;
 }
 .quickSearch button:hover {
   transform: scale(1.08);
-  background: #FFB703;
-  color: #090A0F;
+  background: #FF8A00;
+  color: #1C0A02;
 }
 .quickSearch button svg { width: 14px; height: 14px; }
 
@@ -140,19 +140,19 @@
   align-items: center;
   gap: 6px;
   padding: 0 14px;
-  border: 1px solid #FFB703;
+  border: 1px solid #FF6A00;
   border-radius: 999px;
-  background: rgba(255, 183, 3, 0.08);
-  color: #FFB703;
+  background: rgba(255, 106, 0, 0.08);
+  color: #FF6A00;
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
   transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 .organizerButton:hover {
-  background: #FFB703;
-  color: #090A0F;
-  box-shadow: 0 0 20px rgba(255, 183, 3, 0.45);
+  background: #FF8A00;
+  color: #1C0A02;
+  box-shadow: 0 0 20px rgba(255, 110, 0, 0.45);
 }
 .organizerButton svg { width: 13px; height: 13px; }
 
@@ -270,8 +270,8 @@
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 .heroSearch:focus-within {
-  border-color: rgba(255, 183, 3, 0.5);
-  box-shadow: 0 0 0 3px rgba(255,183,3,.15), 0 8px 28px rgba(0,0,0,.5);
+  border-color: rgba(255, 138, 0, 0.5);
+  box-shadow: 0 0 0 3px rgba(255,138,0,.15), 0 8px 28px rgba(0,0,0,.5);
 }
 .heroSearchIcon {
   width: 15px; height: 15px;
@@ -316,15 +316,15 @@
   flex: none;
   place-items: center;
   border-radius: 50%;
-  background: #1D58FF;
-  color: #FFFFFF;
+  background: #FF4A00;
+  color: #1C0A02;
   transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, color 140ms ease;
 }
 .heroSearchBtn:hover {
   transform: scale(1.08);
-  background: #FFB703;
-  color: #090A0F;
-  box-shadow: 0 0 18px rgba(255,183,3,.45);
+  background: #FF8A00;
+  color: #1C0A02;
+  box-shadow: 0 0 18px rgba(255,138,0,.45);
 }
 .heroSearchBtn svg { width: 16px; height: 16px; }
 
@@ -347,17 +347,17 @@
   text-transform: uppercase;
 }
 
-/* Micro-détail: Point pulsant Fuchsia Bougainvillier (#E63988) */
+/* Micro-détail: Point pulsant braise (#FF8A00) */
 .heroDot {
   width: 7px; height: 7px;
   border-radius: 50%;
-  background: #E63988;
-  box-shadow: 0 0 14px rgba(230, 57, 136, 0.85);
+  background: #FF6A00;
+  box-shadow: 0 0 14px rgba(255, 106, 0, 0.85);
   animation: pulse-dot-fuchsia 2s ease-in-out infinite;
 }
 @keyframes pulse-dot-fuchsia {
-  0%, 100% { box-shadow: 0 0 8px rgba(230, 57, 136, 0.6); }
-  50% { box-shadow: 0 0 22px rgba(230, 57, 136, 1); }
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 106, 0, 0.6); }
+  50% { box-shadow: 0 0 22px rgba(255, 106, 0, 1); }
 }
 
 .heroTitle {
@@ -370,11 +370,11 @@
   color: #F8F9FA;
 }
 
-/* Dégradé de titre intégrant Fuchsia Bougainvillier (#E63988) */
+/* Dégradé de titre en braise */
 .heroTitle em {
   font-style: normal;
   color: transparent;
-  background: linear-gradient(95deg, #FFB703 0%, #E63988 52%, #1D58FF 100%);
+  background: linear-gradient(95deg, #FF9A00 0%, #FF8A00 52%, #FF4A00 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -422,12 +422,12 @@
 }
 .ctaButton:hover {
   background: rgba(255,255,255,.14);
-  border-color: var(--cta-glow, #E63988);
-  box-shadow: 0 0 30px color-mix(in srgb, var(--cta-glow, #E63988) 45%, transparent),
+  border-color: var(--cta-glow, #FF8A00);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--cta-glow, #FF8A00) 45%, transparent),
               0 12px 35px rgba(0,0,0,.35);
   transform: translateY(-3px);
 }
-.ctaButton svg { width: 16px; height: 16px; color: #FFB703; }
+.ctaButton svg { width: 16px; height: 16px; color: #FF9A00; }
 
 .ctaSecondary {
   display: inline-flex;
@@ -469,14 +469,14 @@
   place-items: center;
   border: 2px solid #090A0F;
   border-radius: 50%;
-  background: linear-gradient(145deg, #FFB703, #E63988);
+  background: linear-gradient(145deg, #FF9A00, #FF8A00);
   color: #090A0F;
   font-size: 9px;
   font-style: normal;
   font-weight: 800;
 }
-.avatarStack i:nth-child(2) { background: linear-gradient(145deg, #E63988, #1D58FF); color: #FFF; }
-.avatarStack i:nth-child(3) { background: linear-gradient(145deg, #1D58FF, #FFB703); color: #FFF; }
+.avatarStack i:nth-child(2) { background: linear-gradient(145deg, #FF8A00, #FF4A00); color: #FFF; }
+.avatarStack i:nth-child(3) { background: linear-gradient(145deg, #FF4A00, #FF9A00); color: #FFF; }
 
 /* Category pills */
 .categoryPills {
@@ -497,9 +497,9 @@
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 .categoryPills a:hover {
-  background: rgba(230, 57, 136, 0.15);
-  border-color: rgba(230, 57, 136, 0.45);
-  color: #FFB703;
+  background: rgba(255, 106, 0, 0.15);
+  border-color: rgba(255, 106, 0, 0.45);
+  color: #FF6A00;
   transform: translateY(-2px);
 }
 
@@ -573,12 +573,12 @@
   letter-spacing: .09em;
 }
 
-/* Micro-détail: Point pulsant Fuchsia Bougainvillier (#E63988) */
+/* Micro-détail: Point pulsant braise (#FF8A00) */
 .featuredTag > span {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #E63988;
-  box-shadow: 0 0 12px rgba(230, 57, 136, 0.9);
+  background: #FF6A00;
+  box-shadow: 0 0 12px rgba(255, 106, 0, 0.9);
   animation: pulse-dot-fuchsia 2s ease-in-out infinite;
 }
 .featuredPosterFoot {
@@ -632,7 +632,7 @@
 .featuredInfo > div:first-child > span svg {
   width: 12px; height: 12px;
   flex: none;
-  color: #FFB703;
+  color: #FF6A00;
 }
 
 .featuredBottom {
@@ -663,8 +663,8 @@
 }
 .featuredReserveBtn:hover {
   background: rgba(255,255,255,.15);
-  border-color: var(--cta-glow, #E63988);
-  box-shadow: 0 0 20px color-mix(in srgb, var(--cta-glow, #E63988) 40%, transparent);
+  border-color: var(--cta-glow, #FF8A00);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--cta-glow, #FF8A00) 40%, transparent);
   transform: translateY(-1px);
 }
 .featuredReserveBtn svg { width: 13px; height: 13px; }
@@ -693,7 +693,7 @@
 }
 .featureControls button:hover {
   background: rgba(255,255,255,.14);
-  color: #FFB703;
+  color: #FF6A00;
 }
 .featureControls button svg { width: 14px; height: 14px; }
 .featureControls > span {
@@ -719,12 +719,12 @@
   text-align: center;
   backdrop-filter: blur(18px);
 }
-.emptyFeature > svg { width: 28px; height: 28px; color: #1D58FF; }
+.emptyFeature > svg { width: 28px; height: 28px; color: #FF4A00; }
 .emptyFeature a {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #FFB703;
+  color: #FF6A00;
   font-size: 12px;
   font-weight: 800;
 }
@@ -756,7 +756,7 @@
    CATALOG — dark background
 ════════════════════════════════════════ */
 .catalogBg {
-  background: #090A0F;
+  background: #080605;
   position: relative;
 }
 
@@ -781,7 +781,7 @@
   letter-spacing: .18em;
   text-transform: uppercase;
 }
-.sectionEyebrow span { margin-left: 6px; color: #E63988; }
+.sectionEyebrow span { margin-left: 6px; color: #FF8A00; }
 .sectionHead h2 {
   margin: 0;
   color: #F8F9FA;
@@ -793,7 +793,7 @@
 .sectionHead h2 em {
   font-style: normal;
   color: transparent;
-  background: linear-gradient(90deg, #FFB703, #E63988);
+  background: linear-gradient(90deg, #FF9A00, #FF8A00);
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -813,9 +813,9 @@
   transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
 }
 .sectionLink:hover {
-  border-color: rgba(255, 183, 3, 0.5);
-  color: #FFB703;
-  background: rgba(255, 183, 3, 0.08);
+  border-color: rgba(255, 138, 0, 0.5);
+  color: #FF6A00;
+  background: rgba(255, 106, 0, 0.08);
 }
 .sectionLink svg { width: 14px; height: 14px; }
 
@@ -841,8 +841,8 @@
   transform: translateY(28px);
 }
 .eventCard:hover {
-  border-color: rgba(230, 57, 136, 0.4);
-  box-shadow: 0 12px 32px rgba(230, 57, 136, 0.12);
+  border-color: rgba(255, 106, 0, 0.4);
+  box-shadow: 0 12px 32px rgba(255, 106, 0, 0.12);
 }
 .eventCard.cardVisible {
   animation: card-enter 500ms cubic-bezier(.2,.8,.2,1) both;
@@ -884,8 +884,8 @@
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 .eventCard:hover .posterArrow {
-  background: #E63988;
-  border-color: #E63988;
+  background: #FF6A00;
+  border-color: #FF8A00;
   color: #FFFFFF;
 }
 .posterArrow svg { width: 15px; height: 15px; }
@@ -900,7 +900,7 @@
   font-size: 12px;
   font-weight: 800;
 }
-.artFallback svg { width: 24px; height: 24px; color: #1D58FF; }
+.artFallback svg { width: 24px; height: 24px; color: #FF4A00; }
 
 .eventDetails {
   display: flex;
@@ -921,7 +921,7 @@
   white-space: nowrap;
 }
 .eventHeading h3 a { transition: color 140ms ease; }
-.eventHeading h3 a:hover { color: #FFB703; }
+.eventHeading h3 a:hover { color: #FF9A00; }
 .eventDate, .eventPlace {
   display: flex;
   align-items: center;
@@ -936,7 +936,7 @@
 .eventDate svg, .eventPlace svg {
   width: 13px; height: 13px;
   flex: none;
-  color: #FFB703;
+  color: #FF6A00;
 }
 .cardFoot {
   display: flex;
@@ -957,9 +957,9 @@
   align-items: center;
   gap: 6px;
   padding: 0 12px;
-  border: 1px solid rgba(230, 57, 136, 0.35);
+  border: 1px solid rgba(255, 106, 0, 0.35);
   border-radius: 999px;
-  background: rgba(230, 57, 136, 0.08);
+  background: rgba(255, 106, 0, 0.08);
   color: rgba(248,249,250,.85);
   font-size: 10px;
   font-weight: 850;
@@ -968,10 +968,10 @@
 .reserveButton svg { width: 13px; height: 13px; }
 .reserveButton:hover {
   transform: translateY(-1px);
-  background: #E63988;
-  border-color: #E63988;
+  background: #FF6A00;
+  border-color: #FF8A00;
   color: #FFFFFF;
-  box-shadow: 0 4px 14px rgba(230, 57, 136, 0.4);
+  box-shadow: 0 4px 14px rgba(255, 106, 0, 0.4);
 }
 
 /* No events state */
@@ -987,19 +987,19 @@
   text-align: center;
   backdrop-filter: blur(18px);
 }
-.weekendEmpty > svg { width: 24px; height: 24px; color: #1D58FF; }
+.weekendEmpty > svg { width: 24px; height: 24px; color: #FF4A00; }
 .weekendEmpty p { margin: 0; color: rgba(248,249,250,.45); font-size: 13px; }
 .weekendEmpty a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   margin-top: 5px;
-  color: #FFB703;
+  color: #FF6A00;
   font-size: 11px;
   font-weight: 800;
 }
 .weekendEmpty a svg { width: 14px; height: 14px; }
-.noEvents > svg { color: #E63988; }
+.noEvents > svg { color: #FF8A00; }
 .noEvents h3 { margin: 4px 0 0; font-size: 20px; color: #F8F9FA; }
 .noEvents p { margin: 0; color: rgba(248,249,250,.45); font-size: 13px; }
 
@@ -1007,8 +1007,8 @@
 .weekendSection {
   border-block: 1px solid rgba(255,255,255,.06);
   background: linear-gradient(135deg,
-    rgba(29, 88, 255, 0.05) 0%,
-    rgba(230, 57, 136, 0.04) 50%,
+    rgba(255, 74, 0, 0.05) 0%,
+    rgba(255, 106, 0, 0.04) 50%,
     rgba(9, 10, 15, 0) 100%
   );
 }
@@ -1030,7 +1030,7 @@
   padding: 10px 4px 28px;
   scroll-snap-type: x mandatory;
   scrollbar-width: thin;
-  scrollbar-color: rgba(230, 57, 136, 0.35) transparent;
+  scrollbar-color: rgba(255, 106, 0, 0.35) transparent;
 }
 .weekendTrack > * { min-width: 0; scroll-snap-align: start; }
 .weekendItem .eventCard { height: 100%; }
@@ -1056,10 +1056,10 @@
 .trustStrip > div > svg {
   width: 20px; height: 20px;
   flex: none;
-  color: #FFB703;
+  color: #FF6A00;
 }
-.trustStrip > div:nth-child(2) > svg { color: #E63988; }
-.trustStrip > div:nth-child(3) > svg { color: #1D58FF; }
+.trustStrip > div:nth-child(2) > svg { color: #FF8A00; }
+.trustStrip > div:nth-child(3) > svg { color: #FF4A00; }
 .trustStrip strong, .trustStrip small { display: block; }
 .trustStrip strong { color: #F8F9FA; font-size: 11px; font-weight: 850; }
 .trustStrip small { margin-top: 3px; color: rgba(248,249,250,.4); font-size: 10px; }
@@ -1068,7 +1068,7 @@
   align-items: center;
   justify-self: end;
   gap: 7px;
-  color: #FFB703;
+  color: #FF6A00;
   font-size: 11px;
   font-weight: 850;
   transition: opacity 140ms ease;
@@ -1096,7 +1096,7 @@
   font-size: 10px;
   font-weight: 700;
 }
-.footer nav a:hover { color: #FFB703; }
+.footer nav a:hover { color: #FF9A00; }
 .footer small { color: rgba(248,249,250,.3); font-size: 10px; white-space: nowrap; }
 
 /* ── BOOKING DIALOG ── */
@@ -1178,7 +1178,7 @@
   color: rgba(248,249,250,.5);
   font-size: 12px;
 }
-.modalMeta svg { width: 14px; height: 14px; flex: none; color: #FFB703; }
+.modalMeta svg { width: 14px; height: 14px; flex: none; color: #FF9A00; }
 .quantityLabel { margin-top: 22px; color: rgba(248,249,250,.55); font-size: 11px; font-weight: 800; }
 .quantityControl {
   display: flex;
@@ -1229,16 +1229,16 @@
   justify-content: center;
   gap: 9px;
   border-radius: 999px;
-  background: linear-gradient(105deg, #FFB703, #E63988 55%, #1D58FF);
+  background: linear-gradient(105deg, #FF9A00, #FF8A00 55%, #FF4A00);
   color: #FFFFFF;
   font-size: 13px;
   font-weight: 850;
-  box-shadow: 0 8px 24px rgba(230, 57, 136, 0.3);
+  box-shadow: 0 8px 24px rgba(255, 106, 0, 0.3);
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 .modalContinue:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(230, 57, 136, 0.45);
+  box-shadow: 0 12px 30px rgba(255, 106, 0, 0.45);
 }
 .modalContinue svg { width: 15px; height: 15px; }
 

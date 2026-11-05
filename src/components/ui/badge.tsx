@@ -66,7 +66,7 @@ export function AccessLevelBadge({ level, className }: { level: string; classNam
     return (
       <span
         className={cn(
-          "bg-[linear-gradient(135deg,#e63988,#1d58ff)] text-2xs inline-flex items-center rounded-full px-2 py-0.5 font-bold tracking-[0.08em] text-white uppercase shadow-[0_0_18px_-4px_rgba(230,57,136,0.8)]",
+          "bg-[linear-gradient(135deg,#ff6a00,#ff8a00)] text-2xs inline-flex items-center rounded-full px-2 py-0.5 font-bold tracking-[0.08em] text-[#1c0a02] uppercase shadow-[0_0_18px_-4px_rgba(255,106,0,0.8)]",
           className,
         )}
       >

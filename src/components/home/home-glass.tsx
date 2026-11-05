@@ -356,7 +356,7 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
                   </p>
                 </div>
                 <Link href={ROUTES.explore} className={styles.sectionLink}>
-                  Voir l'agenda <ArrowUpRight aria-hidden="true" />
+                  Voir l’agenda <ArrowUpRight aria-hidden="true" />
                 </Link>
               </div>
               {weekendEvents.length ? (
@@ -511,7 +511,7 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
                 </strong>
               </div>
               <p className={styles.estimateNote}>
-                Le montant définitif dépend du type de billet choisi à l'étape suivante.
+                Le montant définitif dépend du type de billet choisi à l’étape suivante.
               </p>
               <Link
                 href={eventBookingHref(bookingEvent, quantity)}
