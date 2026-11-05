@@ -20,7 +20,8 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import type { HeaderUser } from "@/components/layout/header-types";
 import { PwaInstallPrompt } from "@/components/pwa/install-prompt";
 import { EventCarousel } from "@/components/events/event-carousel";
-import { HomeCarousel } from "@/components/home/home-carousel";
+import { FeaturesMarquee } from "@/components/home/features-marquee";
+import { HeroCover } from "@/components/home/hero-cover";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils";
@@ -303,7 +304,7 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
         {/* ════════════════════════════════════════
             HERO — cinematic fullscreen
         ════════════════════════════════════════ */}
-        <HomeCarousel events={events} />
+        <HeroCover events={events} />
 
         {/* ════════════════════════════════════════
             CATALOG — dark background
@@ -333,6 +334,9 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
               )}
             </div>
           </section>
+
+          {/* FIL DES SORTIES — marquees verticales à défilement opposé */}
+          {events.length ? <FeaturesMarquee events={events} /> : null}
 
           {/* CE WEEK-END — carousel */}
           <section className={styles.weekendSection} aria-labelledby="weekend-title">

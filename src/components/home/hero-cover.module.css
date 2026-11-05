@@ -1,0 +1,674 @@
+/* ================================================================
+   HERO — affiche plein cadre et grand titre
+   Palette « Référence Event » (identique au reste de l'accueil) :
+   fond #080605 · orange #ff4a00 → #ff8a00 · crème #fff5eb · encre #170903
+   ================================================================ */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: calc(100svh - 68px);
+  max-height: 980px;
+  overflow: hidden;
+  padding: clamp(26px, 5vh, 56px) max(28px, calc((100% - 1340px) / 2)) 0;
+  background:
+    radial-gradient(ellipse at 0 22%, rgba(255, 76, 0, 0.16), transparent 34%),
+    radial-gradient(ellipse at 100% 58%, rgba(255, 94, 0, 0.12), transparent 32%),
+    #080605;
+  color: #f8f4ee;
+}
+
+/* ------------------------------- Affiches -------------------------------- */
+
+.stack {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.slideImage,
+.backdropImage {
+  object-fit: cover;
+  object-position: center 32%;
+  filter: saturate(1.06) contrast(1.04);
+}
+
+/* Affiche sortante : reste nette sous la nouvelle pendant la dissolve. */
+.slideOutgoing {
+  z-index: 0;
+  opacity: 1;
+}
+
+/* Affiche entrante : dissolution en demi-teintes.
+   Deux masques combinés en intersection : un maillage de points (dont l'écart
+   se resserre jusqu'à disparaître sous le pixel) et un disque qui s'ouvre
+   depuis le centre. La photo se résout donc du centre vers les bords. */
+.slideActive {
+  z-index: 1;
+  opacity: 1;
+  -webkit-mask-image:
+    radial-gradient(circle at 50% 50%, #000 0 58%, transparent 62%),
+    radial-gradient(circle at 50% 50%, #000 0 44%, transparent 46%);
+  mask-image:
+    radial-gradient(circle at 50% 50%, #000 0 58%, transparent 62%),
+    radial-gradient(circle at 50% 50%, #000 0 44%, transparent 46%);
+  -webkit-mask-repeat: no-repeat, repeat;
+  mask-repeat: no-repeat, repeat;
+  -webkit-mask-position: center, 0 0;
+  mask-position: center, 0 0;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  animation: hero-halftone 1150ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
+}
+
+@keyframes hero-halftone {
+  0% {
+    -webkit-mask-size: 0% 0%, 26px 26px;
+    mask-size: 0% 0%, 26px 26px;
+    transform: scale(1.05);
+  }
+  60% {
+    -webkit-mask-size: 150% 150%, 9px 9px;
+    mask-size: 150% 150%, 9px 9px;
+  }
+  100% {
+    -webkit-mask-size: 240% 240%, 1px 1px;
+    mask-size: 240% 240%, 1px 1px;
+    transform: scale(1);
+  }
+}
+
+.backdropFallback {
+  background:
+    radial-gradient(circle at 76% 18%, rgba(255, 122, 0, 0.5), transparent 52%),
+    radial-gradient(circle at 18% 82%, rgba(255, 60, 0, 0.32), transparent 48%),
+    linear-gradient(150deg, #2a1207, #0b0705);
+}
+
+/* Voile de lisibilité : le texte ne repose jamais directement sur la photo. */
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 6, 5, 0.86) 0%,
+      rgba(8, 6, 5, 0.38) 30%,
+      rgba(8, 6, 5, 0.58) 62%,
+      #080605 100%
+    ),
+    linear-gradient(90deg, rgba(8, 6, 5, 0.92) 0%, rgba(8, 6, 5, 0.5) 58%, rgba(8, 6, 5, 0.1) 100%);
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 200px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* -------------------------------- Contenu -------------------------------- */
+
+.inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: clamp(26px, 4.5vh, 48px);
+  padding-bottom: clamp(44px, 7vh, 72px);
+}
+
+.copy {
+  display: flex;
+  min-width: 0;
+  max-width: 60rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: max-content;
+  margin: 0;
+  padding: 8px 13px;
+  border: 1px solid rgba(255, 111, 0, 0.7);
+  border-radius: 999px;
+  background: linear-gradient(100deg, rgba(255, 76, 0, 0.82), rgba(255, 125, 0, 0.64));
+  color: #fff5e9;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow: 0 0 20px rgba(255, 80, 0, 0.3);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffd166;
+  box-shadow: 0 0 13px rgba(255, 146, 0, 0.85);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(255, 146, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 146, 0, 1);
+  }
+}
+
+.headline {
+  margin: 0;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.32);
+  color: #f8f4ee;
+  font-size: clamp(42px, 7vw, 100px);
+  font-weight: 850;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  text-transform: uppercase;
+  text-wrap: balance;
+  /* Les lettres du titre sont des inline-block : `letter-spacing` s'applique
+     déjà à l'intérieur de chaque lettre, aucune chasse à compenser. */
+  --swap-tracking: 0px;
+}
+
+/* --- Titre animé : bascule 3D des lettres -------------------------------- */
+
+.title {
+  display: inline;
+}
+
+.titleFront {
+  color: #f8f4ee;
+}
+
+.titleBack {
+  color: transparent;
+  background-image: linear-gradient(135deg, #ffb703, #ff6a00);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.titleAccentFront {
+  color: transparent;
+  background-image: linear-gradient(95deg, #ff9a00, #ff4a00 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.titleAccentBack {
+  color: #f8f4ee;
+  background-image: none;
+}
+
+.lead {
+  max-width: 44ch;
+  margin: 0;
+  color: rgba(255, 245, 232, 0.82);
+  font-size: clamp(13px, 1.15vw, 15px);
+  line-height: 1.65;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------------------------- Événement à la une -------------------------- */
+
+.featured {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  animation: hero-caption 520ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
+  max-width: 46rem;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(12, 8, 6, 0.46);
+  color: rgba(255, 245, 232, 0.78);
+  font-size: 11.5px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+@keyframes hero-caption {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.featuredTag {
+  color: #ff8a00;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.featuredLink {
+  overflow: hidden;
+  max-width: 24rem;
+  color: #fff5eb;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.featuredLink:hover {
+  color: #ffb454;
+}
+
+.featuredMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.featuredMeta svg {
+  width: 12px;
+  height: 12px;
+  color: #ff8a00;
+}
+
+.sep {
+  color: rgba(255, 245, 232, 0.35);
+}
+
+/* ------------------------- Rotation des affiches -------------------------- */
+
+.rotation {
+  position: absolute;
+  z-index: 3;
+  top: clamp(20px, 4vh, 44px);
+  right: max(28px, calc((100% - 1340px) / 2));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(12, 8, 6, 0.42);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.rotationButton {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  color: rgba(255, 245, 232, 0.85);
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.rotationButton:hover {
+  background: rgba(255, 122, 0, 0.18);
+  color: #ffb454;
+}
+
+.rotationButton[aria-pressed="true"] {
+  color: #ff8a00;
+}
+
+.rotationButton svg {
+  width: 14px;
+  height: 14px;
+}
+
+.rotationCount {
+  padding: 0 6px;
+  color: rgba(255, 245, 232, 0.72);
+  font-size: 9.5px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------- Actions -------------------------------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 2px;
+}
+
+.cta {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 24px;
+  border: 1px solid #ff7a00;
+  border-radius: 999px;
+  background: linear-gradient(100deg, #ff4a00, #ff8a00);
+  color: #170903;
+  font-size: 13px;
+  font-weight: 850;
+  box-shadow: 0 8px 26px rgba(255, 80, 0, 0.26);
+  transition:
+    background 220ms ease,
+    box-shadow 220ms ease,
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 220ms ease;
+}
+
+.cta:hover {
+  border-color: #ffb454;
+  background: linear-gradient(100deg, #ff6814, #ffa21c);
+  box-shadow:
+    0 0 32px rgba(255, 90, 0, 0.55),
+    0 12px 34px rgba(0, 0, 0, 0.4);
+  transform: translateY(-3px);
+}
+
+.cta svg {
+  width: 16px;
+  height: 16px;
+  color: #230c02;
+}
+
+.ctaSecondary {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  padding: 0 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff2e4;
+  font-size: 12px;
+  font-weight: 800;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.ctaSecondary:hover {
+  border-color: rgba(255, 122, 0, 0.65);
+  background: rgba(255, 122, 0, 0.1);
+  color: #ff8a00;
+  transform: translateY(-2px);
+}
+
+/* ---------------------------- Prochaines dates ---------------------------- */
+
+.upcoming {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  list-style: none;
+}
+
+.upcoming > li {
+  min-width: 0;
+}
+
+.upcoming > li + li {
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.upcomingLink {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px 4px 0;
+  transition: color 160ms ease;
+}
+
+.upcoming > li + li .upcomingLink {
+  padding-left: 18px;
+}
+
+.upcomingLink:hover {
+  color: #ffb454;
+}
+
+.upcomingDate {
+  display: grid;
+  min-width: 38px;
+  flex: none;
+  place-items: center;
+  line-height: 1;
+}
+
+.upcomingDate strong {
+  color: #fff5eb;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.upcomingDate > span {
+  margin-top: 3px;
+  color: #ff8a00;
+  font-size: 8.5px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.upcomingBody {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.upcomingTitle {
+  overflow: hidden;
+  color: #fff5eb;
+  font-size: 12.5px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upcomingMeta {
+  overflow: hidden;
+  color: rgba(255, 245, 232, 0.55);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upcomingArrow {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  margin-left: auto;
+  opacity: 0.5;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.upcomingLink:hover .upcomingArrow {
+  opacity: 1;
+  transform: translate(1px, -1px);
+}
+
+/* ------------------------------- Défiler --------------------------------- */
+
+.scrollHint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: rgba(255, 245, 232, 0.72);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+
+.scrollHint svg {
+  width: 16px;
+  height: 16px;
+  color: #ff8a00;
+}
+
+/* ------------------------------ Adaptations ------------------------------ */
+
+@media (max-width: 1100px) {
+  .headline {
+    font-size: clamp(40px, 6.6vw, 78px);
+  }
+}
+
+@media (max-width: 980px) {
+  .upcoming {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .upcoming > li + li {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 0;
+  }
+
+  .upcoming > li + li .upcomingLink {
+    padding-left: 0;
+  }
+
+  .upcoming > li:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero {
+    min-height: calc(100svh - 60px);
+    padding-bottom: 0;
+  }
+
+  .copy {
+    gap: 14px;
+  }
+
+  .headline {
+    font-size: clamp(36px, 10.5vw, 62px);
+  }
+
+  .featured {
+    border-radius: 16px;
+  }
+
+  .featuredLink {
+    max-width: 100%;
+  }
+
+  .cta,
+  .ctaSecondary {
+    min-height: 46px;
+  }
+
+  .ctaSecondary {
+    display: none;
+  }
+
+  .scrollHint {
+    display: none;
+  }
+
+  .inner {
+    padding-bottom: 40px;
+  }
+
+  .rotation {
+    top: 14px;
+    right: 16px;
+  }
+
+  /* Sur mobile, la dissolve en demi-teintes est peinte sur toute la largeur :
+     on la remplace par un fondu-zoom, plus sûr pour les petits GPU. */
+  .slideActive {
+    -webkit-mask-image: none;
+    mask-image: none;
+    animation: hero-fade 640ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
+  }
+}
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .lead {
+    font-size: 12.5px;
+  }
+
+  .upcomingMeta {
+    display: none;
+  }
+}
+
+/* --------------------------- Mouvement réduit ---------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+  }
+
+  .cta:hover,
+  .ctaSecondary:hover {
+    transform: none;
+  }
+
+  /* Aucune dissolve : l'affiche change d'un coup, sans masque ni zoom. */
+  .slideActive {
+    animation: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+    transform: none;
+  }
+
+  .featured {
+    animation: none;
+  }
+}

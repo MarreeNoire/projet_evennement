@@ -1,0 +1,116 @@
+/* ============================================================================
+   LetterSwap — bascule 3D des lettres au survol
+   --------------------------------------------------------------------------
+   Reprise libre du « 3D Letter Swap » de React Bits : chaque lettre possède
+   deux faces (avant / arrière) et pivote sur l'axe X, avec un décalage en
+   cascade. Tout est en CSS : aucune animation JS, donc aucun coût côté
+   client et un rendu identique en SSR.
+
+   Variables lues par le composant :
+     --swap-duration  durée d'une bascule (défaut 0.6s)
+     --swap-tracking  chasse appliquée à chaque lettre (compense letter-spacing)
+   ========================================================================== */
+
+.root {
+  --swap-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  display: inline;
+}
+
+.line {
+  display: inline;
+}
+
+.word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Espace entre deux mots : un vrai nœud texte, donc la coupure de ligne et
+   le `text-wrap: balance` du titre continuent de fonctionner. */
+.space {
+  white-space: pre;
+}
+
+.char {
+  display: inline-block;
+  margin-inline-end: var(--swap-tracking, 0px);
+  perspective: 700px;
+  transform-style: preserve-3d;
+  animation: char-in 0.55s var(--swap-ease) both;
+  animation-delay: calc(var(--delay, 0s) * 0.7 + 80ms);
+}
+
+.flipper {
+  position: relative;
+  display: inline-block;
+  transform-style: preserve-3d;
+  transition: transform var(--swap-duration, 0.6s) var(--swap-ease) var(--delay, 0s);
+}
+
+.face {
+  display: inline-block;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.back {
+  position: absolute;
+  inset: 0;
+  transform: rotateX(180deg);
+}
+
+/* --- Bascule au survol (et au clavier) ----------------------------------- */
+
+@media (hover: hover) {
+  .root:hover .flipper {
+    transform: rotateX(-180deg);
+  }
+
+  .root[data-flip="bottom"]:hover .flipper {
+    transform: rotateX(180deg);
+  }
+}
+
+.root:focus-visible .flipper {
+  transform: rotateX(-180deg);
+}
+
+.root[data-flip="bottom"]:focus-visible .flipper {
+  transform: rotateX(180deg);
+}
+
+.root[data-flip="bottom"] .back {
+  transform: rotateX(-180deg);
+}
+
+/* --- Entrée en scène ------------------------------------------------------ */
+
+@keyframes char-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.32em) rotateX(-38deg);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* --- Accessibilité ------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .char {
+    animation: none;
+  }
+
+  .flipper {
+    transition: none;
+  }
+
+  .root:hover .flipper,
+  .root:focus-visible .flipper {
+    transform: none;
+  }
+}
