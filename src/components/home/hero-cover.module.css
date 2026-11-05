@@ -46,44 +46,46 @@
 .slideOutgoing {
   z-index: 0;
   opacity: 1;
+  animation: hero-drift-out 1100ms cubic-bezier(0.33, 0.1, 0.2, 1) both;
 }
 
 /* Affiche entrante : dissolution en demi-teintes.
-   Deux masques combinés en intersection : un maillage de points (dont l'écart
-   se resserre jusqu'à disparaître sous le pixel) et un disque qui s'ouvre
-   depuis le centre. La photo se résout donc du centre vers les bords. */
+   Un seul masque, un maillage de points présent sur TOUTE la surface dès la
+   première image : le maillage se resserre jusqu'à passer sous le pixel et la
+   photo se résout d'un coup, sans jamais laisser de zone vide. */
 .slideActive {
   z-index: 1;
   opacity: 1;
-  -webkit-mask-image:
-    radial-gradient(circle at 50% 50%, #000 0 58%, transparent 62%),
-    radial-gradient(circle at 50% 50%, #000 0 44%, transparent 46%);
-  mask-image:
-    radial-gradient(circle at 50% 50%, #000 0 58%, transparent 62%),
-    radial-gradient(circle at 50% 50%, #000 0 44%, transparent 46%);
-  -webkit-mask-repeat: no-repeat, repeat;
-  mask-repeat: no-repeat, repeat;
-  -webkit-mask-position: center, 0 0;
-  mask-position: center, 0 0;
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-  animation: hero-halftone 1150ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0 44%, transparent 46%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 0 44%, transparent 46%);
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  -webkit-mask-size: 1px 1px;
+  mask-size: 1px 1px;
+  animation: hero-halftone 980ms cubic-bezier(0.33, 0.1, 0.2, 1) both;
 }
 
 @keyframes hero-halftone {
-  0% {
-    -webkit-mask-size: 0% 0%, 26px 26px;
-    mask-size: 0% 0%, 26px 26px;
-    transform: scale(1.05);
+  from {
+    -webkit-mask-size: 22px 22px;
+    mask-size: 22px 22px;
+    transform: scale(1.04);
   }
-  60% {
-    -webkit-mask-size: 150% 150%, 9px 9px;
-    mask-size: 150% 150%, 9px 9px;
-  }
-  100% {
-    -webkit-mask-size: 240% 240%, 1px 1px;
-    mask-size: 240% 240%, 1px 1px;
+  to {
+    -webkit-mask-size: 1px 1px;
+    mask-size: 1px 1px;
     transform: scale(1);
+  }
+}
+
+/* L'affiche sortante recule très légèrement pendant la révélation : les deux
+   images bougent ensemble au lieu de paraître figées l'une sous l'autre. */
+@keyframes hero-drift-out {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.03);
   }
 }
 
@@ -666,6 +668,10 @@
     -webkit-mask-image: none;
     mask-image: none;
     transform: none;
+  }
+
+  .slideOutgoing {
+    animation: none;
   }
 
   .featured {

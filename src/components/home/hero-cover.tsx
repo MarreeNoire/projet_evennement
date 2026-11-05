@@ -61,7 +61,9 @@ const SHORT_DATE = new Intl.DateTimeFormat("fr-FR", {
 
 const MAX_SLIDES = 5;
 const ROTATION_MS = 7000;
-const TRANSITION_MS = 1200;
+/* L'affiche sortante survit à la révélation (980 ms) avec une marge : aucun
+   intervalle où le fond pourrait apparaître sans image. */
+const TRANSITION_MS = 1400;
 
 function priceLabel(event: Pick<HeroCoverEvent, "minPrice" | "maxPrice">) {
   if (event.minPrice <= 0 && event.maxPrice <= 0) return "Gratuit";
@@ -86,6 +88,7 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
   const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [tabHidden, setTabHidden] = useState(false);
   const cleanupRef = useRef<number | null>(null);
 
   const count = slides.length;
@@ -101,6 +104,16 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
     update();
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
+  }, []);
+
+  /* Onglet masqué : la rotation s'arrête, aucun changement d'affiche ne peut
+     se retrouver figé au retour. */
+  useEffect(() => {
+    const update = () => setTabHidden(document.visibilityState === "hidden");
+
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
   }, []);
 
   const goTo = useCallback(
@@ -124,11 +137,11 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
   );
 
   useEffect(() => {
-    if (count < 2 || paused || hovered || reduceMotion) return;
+    if (count < 2 || paused || hovered || reduceMotion || tabHidden) return;
 
     const id = window.setInterval(() => goTo(safeIndex + 1), ROTATION_MS);
     return () => window.clearInterval(id);
-  }, [count, paused, hovered, reduceMotion, safeIndex, goTo]);
+  }, [count, paused, hovered, reduceMotion, tabHidden, safeIndex, goTo]);
 
   const nextSlide = count > 1 ? slides[(safeIndex + 1) % count] : null;
 
