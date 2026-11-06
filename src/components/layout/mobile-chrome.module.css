@@ -23,8 +23,8 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
   background-color: var(--bg);
   background-image:
-    linear-gradient(180deg, rgba(255, 74, 0, 0.12), transparent 60%),
-    linear-gradient(90deg, rgba(255, 106, 0, 0.08), transparent 45%, rgba(255, 138, 0, 0.08));
+    linear-gradient(180deg, rgba(199, 133, 47, 0.12), transparent 60%),
+    linear-gradient(90deg, rgba(216, 154, 63, 0.08), transparent 45%, rgba(230, 171, 85, 0.08));
   border-top: 1px solid var(--border);
   touch-action: manipulation;
   -webkit-user-select: none;
@@ -39,7 +39,7 @@
   top: -1px;
   height: 1px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, #ff4a00 18%, #ff8a00 50%, #ffb27a 82%, transparent);
+  background: linear-gradient(90deg, transparent, #c7852f 18%, #e6ab55 50%, #e9c9a0 82%, transparent);
   opacity: 0.55;
 }
 
@@ -155,29 +155,30 @@
    vermillon, y compris en thème sombre. Valeurs alignées sur
    `editorial-shell.module.css`. */
 .sheetScope {
-  --surface: #241811;
-  --bg: #1a120c;
-  --bg-muted: color-mix(in srgb, #fff5eb 8%, #1a120c);
-  --fg: #fff5eb;
-  --fg-muted: #d9c8b8;
-  --fg-subtle: color-mix(in srgb, #a08d7c 76%, #1a120c);
-  --border: rgba(255, 242, 226, 0.12);
-  --border-strong: rgba(255, 242, 226, 0.24);
-  --primary: #ff6a00;
-  --danger: color-mix(in srgb, #ff7a6b 88%, #1a120c);
+  --surface: #fbf5ea;
+  --bg: #f3ead9;
+  --bg-muted: color-mix(in srgb, #241a1e 8%, #f3ead9);
+  --fg: #241a1e;
+  --fg-muted: #5c4a44;
+  --fg-subtle: color-mix(in srgb, #6f5c53 82%, #f3ead9);
+  --border: rgba(36, 26, 30, 0.14);
+  --border-strong: rgba(36, 26, 30, 0.28);
+  --primary: #8f5716;
+  --danger: color-mix(in srgb, #a8402f 88%, #f3ead9);
+
 }
 
 :global(html.dark) .sheetScope {
   --surface: #0f0c0a;
-  --bg: #120c08;
-  --bg-muted: color-mix(in srgb, #fff5eb 8%, #120c08);
-  --fg: #fff5eb;
-  --fg-muted: #d9c8b8;
-  --fg-subtle: color-mix(in srgb, #a08d7c 76%, #120c08);
-  --border: rgba(255, 242, 226, 0.12);
-  --border-strong: rgba(255, 242, 226, 0.24);
-  --primary: #ff6a00;
-  --danger: color-mix(in srgb, #ff7a6b 88%, #120c08);
+  --bg: #100b0d;
+  --bg-muted: color-mix(in srgb, #f6ece3 8%, #100b0d);
+  --fg: #f6ece3;
+  --fg-muted: #d3c1b4;
+  --fg-subtle: color-mix(in srgb, #9c8878 76%, #100b0d);
+  --border: rgba(246, 236, 227, 0.12);
+  --border-strong: rgba(246, 236, 227, 0.24);
+  --primary: #d89a3f;
+  --danger: color-mix(in srgb, #d4705c 88%, #100b0d);
 }
 
 .sheetBody {

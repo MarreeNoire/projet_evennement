@@ -1,4 +1,4 @@
-const SHELL_CACHE = "event-pwa-shell-v3";
+const SHELL_CACHE = "event-pwa-shell-v5";
 const SHELL_ASSETS = [
   "/offline.html",
   "/manifest.webmanifest",

@@ -32,7 +32,7 @@ export const buttonVariants = cva(
       variant: {
         // Action principale : dégradé safran → orange de l'accueil.
         primary:
-          "bg-[linear-gradient(135deg,#ff4a00,#ff8a00)] text-[#090a0f] shadow-[0_10px_28px_-12px_rgba(255,106,0,0.85)] hover:brightness-110",
+          "bg-[linear-gradient(135deg,#c7852f,#e6ab55)] text-[#090a0f] shadow-[0_10px_28px_-12px_rgba(255,106,0,0.85)] hover:brightness-110",
         // Action secondaire : surface vitrée teintée bleu Majorelle.
         secondary:
           "border-border-strong bg-surface text-fg hover:border-info/60 hover:bg-info-subtle hover:shadow-[var(--glow-blue)]",
@@ -44,7 +44,7 @@ export const buttonVariants = cva(
         danger: "bg-danger-solid text-white hover:bg-danger-solid-hover",
         // Accent chaud : réservé aux mises en avant (VIP, CTA promotionnel)
         accent:
-          "bg-[linear-gradient(135deg,#ff6a00,#ffb27a)] text-[#1c0a02] shadow-[0_10px_28px_-12px_rgba(255,106,0,0.9)] hover:brightness-110",
+          "bg-[linear-gradient(135deg,#d89a3f,#e9c9a0)] text-[#1b1310] shadow-[0_10px_28px_-12px_rgba(255,106,0,0.9)] hover:brightness-110",
         // Sur photo de couverture
         overlay: "border-white/30 bg-black/85 text-white hover:bg-black",
       },

@@ -6,14 +6,10 @@ import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
-  Headphones,
   MapPin,
   Search,
-  ShieldCheck,
   Sparkles,
-  Star,
   X,
-  Zap,
 } from "lucide-react";
 
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -230,19 +226,6 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
   /* Événement mis en avant dans la section de clôture : la première affiche disponible. */
   const featured = events.find((event) => event.coverUrl) ?? null;
 
-  const now = new Date();
-  const weekendStart = new Date(now);
-  weekendStart.setDate(
-    now.getDate() + (now.getDay() === 0 ? -1 : (6 - now.getDay() + 7) % 7),
-  );
-  weekendStart.setHours(0, 0, 0, 0);
-  const weekendEnd = new Date(weekendStart);
-  weekendEnd.setDate(weekendStart.getDate() + 2);
-  const weekendEvents = events.filter((event) => {
-    const date = new Date(event.startAt);
-    return date >= weekendStart && date < weekendEnd;
-  });
-
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -270,7 +253,6 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
         <nav className={styles.nav} aria-label="Navigation principale">
           <Link href="#haut" aria-current="page">Accueil</Link>
           <Link href={ROUTES.explore}>Événements</Link>
-          <Link href="#pourquoi">À propos</Link>
           <Link href="/aide">FAQ</Link>
           <Link href="/contact">Contact</Link>
         </nav>
@@ -338,66 +320,7 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
           {/* FIL DES SORTIES — marquees verticales à défilement opposé */}
           {events.length ? <FeaturesMarquee events={events} /> : null}
 
-          {/* CE WEEK-END — carousel */}
-          <section className={styles.weekendSection} aria-labelledby="weekend-title">
-            <div className={`${styles.section} ${styles.weekendInner}`}>
-              <div className={styles.sectionHead}>
-                <div>
-                  <p className={styles.sectionEyebrow}>
-                    VOS PROCHAINES SORTIES <span>↗</span>
-                  </p>
-                  <h2 id="weekend-title">
-                    Ce week-end, <em>on sort.</em>
-                  </h2>
-                  <p className={styles.sectionIntro}>
-                    {weekendEvents.length
-                      ? "Des événements programmés ce week-end."
-                      : "Les prochaines dates à noter dans votre agenda."}
-                  </p>
-                </div>
-                <Link href={ROUTES.explore} className={styles.sectionLink}>
-                  Voir l’agenda <ArrowUpRight aria-hidden="true" />
-                </Link>
-              </div>
-              {weekendEvents.length ? (
-                <EventCarousel
-                  label="Événements du week-end"
-                  trackClassName={styles.weekendTrack}
-                >
-                  {weekendEvents.map((event) => (
-                    <div key={event.id} className={styles.weekendItem}>
-                      <EventCard event={event} onReserve={openBooking} />
-                    </div>
-                  ))}
-                </EventCarousel>
-              ) : (
-                <div className={styles.weekendEmpty}>
-                  <CalendarDays aria-hidden="true" />
-                  <p>Pas encore de sortie annoncée pour ce week-end.</p>
-                  <Link href={ROUTES.explore}>
-                    Voir les prochaines dates <ArrowRight aria-hidden="true" />
-                  </Link>
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section id="pourquoi" className={styles.whySection} aria-labelledby="why-title">
-            <div className={styles.benefitGrid}>
-              <article><Zap aria-hidden="true" /><strong>Réservation simple</strong><span>Votre place en quelques gestes.</span></article>
-              <article><ShieldCheck aria-hidden="true" /><strong>Paiement sécurisé</strong><span>Mobile money ou carte bancaire.</span></article>
-              <article><Headphones aria-hidden="true" /><strong>Votre événement, en lien</strong><span>Un salon pour échanger avant et après.</span></article>
-              <article><Star aria-hidden="true" /><strong>Billets vérifiés</strong><span>Un QR code unique à présenter à l’entrée.</span></article>
-            </div>
-            <div className={styles.whyCopy}>
-              <p>POURQUOI CHOISIR EVENT ?</p>
-              <h2 id="why-title">Une billetterie <em>sans limites.</em></h2>
-              <span>Plus qu’un billet, une porte ouverte sur les événements qui vous rassemblent.</span>
-              <Link href="/aide">En savoir plus <ArrowRight aria-hidden="true" /></Link>
-            </div>
-          </section>
-
-          <section className={styles.closingSection} aria-labelledby="closing-title">
+                    <section className={styles.closingSection} aria-labelledby="closing-title">
             {featured?.coverUrl ? <div className={styles.closingPhoto}><PublicStorageImage src={featured.coverUrl} alt={`Ambiance de ${featured.title}`} sizes="(max-width: 760px) 100vw, 42vw" fill /></div> : null}
             <div className={styles.closingQuote}><span>“</span><p>Votre prochain grand souvenir commence par une place.</p><small>À vous de vivre l’instant.</small></div>
             <div className={styles.closingCopy}>

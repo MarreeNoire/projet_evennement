@@ -34,7 +34,7 @@
 
 .eyebrow {
   margin: 0 0 9px;
-  color: #ff7a00;
+  color: #8f5716;
   font-size: 10px;
   font-weight: 850;
   letter-spacing: 0.08em;
@@ -43,7 +43,7 @@
 
 .title {
   margin: 0;
-  color: #fff5eb;
+  color: #241a1e;
   font-size: clamp(34px, 4.2vw, 56px);
   font-style: italic;
   font-weight: 850;
@@ -53,14 +53,14 @@
 
 .title em {
   display: block;
-  color: #ff5a00;
+  color: #a4661c;
   font-style: italic;
 }
 
 .intro {
   max-width: 44ch;
   margin: 14px 0 0;
-  color: rgba(255, 238, 222, 0.65);
+  color: rgba(36, 26, 30, 0.68);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -90,31 +90,31 @@
 }
 
 .control {
-  border: 1px solid rgba(255, 193, 138, 0.4);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 243, 231, 0.75);
+  border: 1px solid rgba(36, 26, 30, 0.16);
+  background: rgba(36, 26, 30, 0.03);
+  color: #5c4a44;
 }
 
 .control:hover {
-  border-color: rgba(255, 122, 0, 0.65);
-  background: rgba(255, 122, 0, 0.1);
-  color: #ff8a00;
+  border-color: rgba(199, 133, 47, 0.55);
+  background: rgba(199, 133, 47, 0.12);
+  color: #8f5716;
 }
 
 .control[aria-pressed="true"] {
-  border-color: rgba(255, 122, 0, 0.65);
-  color: #ffb454;
+  border-color: rgba(199, 133, 47, 0.65);
+  color: #8f5716;
 }
 
 .allLink {
-  border: 1px solid rgba(255, 193, 138, 0.55);
-  color: #fff3e7;
+  border: 1px solid rgba(199, 133, 47, 0.45);
+  color: #8f5716;
 }
 
 .allLink:hover {
-  border-color: rgba(255, 122, 0, 0.65);
-  background: rgba(255, 122, 0, 0.08);
-  color: #ff8a00;
+  border-color: rgba(199, 133, 47, 0.55);
+  background: rgba(199, 133, 47, 0.1);
+  color: #8f5716;
 }
 
 .control svg,
@@ -151,7 +151,7 @@
 .column::after {
   position: absolute;
   inset: 0;
-  border: 1px solid rgba(255, 133, 52, 0.14);
+  border: 1px solid rgba(216, 154, 63, 0.14);
   border-radius: inherit;
   content: "";
   pointer-events: none;
@@ -200,7 +200,7 @@
 .card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 133, 52, 0.42);
+  border: 1px solid rgba(216, 154, 63, 0.42);
   border-radius: 16px;
   background: #100a07;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
@@ -210,10 +210,10 @@
 }
 
 .card:hover {
-  border-color: #ff8a00;
+  border-color: #e6ab55;
   box-shadow:
     0 16px 36px rgba(0, 0, 0, 0.6),
-    0 0 20px rgba(255, 88, 0, 0.2);
+    0 0 20px rgba(199, 133, 47, 0.2);
 }
 
 .cardLink {
@@ -259,7 +259,7 @@
   align-content: center;
   justify-items: center;
   background:
-    radial-gradient(circle at 78% 14%, rgba(255, 122, 0, 0.45), transparent 58%),
+    radial-gradient(circle at 78% 14%, rgba(199, 133, 47, 0.45), transparent 58%),
     linear-gradient(150deg, #2a1207, #120a07);
   color: rgba(255, 240, 225, 0.72);
   font-size: 9px;
@@ -277,7 +277,7 @@
   width: 43px;
   min-height: 46px;
   place-content: center;
-  border: 1px solid rgba(255, 190, 126, 0.6);
+  border: 1px solid rgba(233, 201, 160, 0.6);
   border-radius: 9px;
   background: rgba(17, 10, 7, 0.82);
   color: #fff2e4;
@@ -295,7 +295,7 @@
 
 .date small {
   margin-top: 3px;
-  color: #ff8a00;
+  color: #e6ab55;
   font-size: 8.5px;
   font-weight: 800;
   text-transform: uppercase;
@@ -345,7 +345,7 @@
   gap: 6px;
   overflow: hidden;
   margin: 0;
-  color: rgba(255, 242, 226, 0.6);
+  color: rgba(246, 236, 227, 0.6);
   font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -355,7 +355,7 @@
   width: 12px;
   height: 12px;
   flex: none;
-  color: #ff7a00;
+  color: #c7852f;
 }
 
 .foot {
@@ -387,8 +387,8 @@
 }
 
 .card:hover .go {
-  border-color: #ff5a00;
-  background: #ff5a00;
+  border-color: #c7852f;
+  background: #c7852f;
 }
 
 .go svg {

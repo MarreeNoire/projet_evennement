@@ -31,7 +31,7 @@
   --band: var(--editorial-band);
   --band-ink: var(--editorial-band-ink);
   --band-muted: #a7acb8;
-  --head-bg: rgba(9, 10, 15, 0.9);
+  --head-bg: rgba(243, 234, 217, 0.94);
   --shadow: 0 20px 48px -36px rgba(0, 0, 0, 0.72);
   --sans: Arial, "Helvetica Neue", sans-serif;
   --display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
@@ -252,7 +252,7 @@
   width: 22px;
   height: 2px;
   border-radius: 999px;
-  background-image: linear-gradient(90deg, #ff4a00, #ff8a00 55%, #ffb27a);
+  background-image: linear-gradient(90deg, #c7852f, #e6ab55 55%, #e9c9a0);
 }
 
 .editorial .eyebrow--plain::before {
@@ -308,17 +308,17 @@
 }
 
 .editorial .btn-primary {
-  background-image: var(--gradient-warm, linear-gradient(135deg, #ff6a00, #ffb27a));
+  background-image: var(--gradient-warm, linear-gradient(135deg, #d89a3f, #e9c9a0));
   background-color: var(--accent);
   color: var(--on-accent);
-  box-shadow: 0 10px 28px -14px rgba(255, 106, 0, 0.85);
+  box-shadow: 0 10px 28px -14px rgba(216, 154, 63, 0.85);
 }
 
 .editorial .btn-primary:hover {
-  background-image: var(--gradient-warm, linear-gradient(135deg, #ff6a00, #ffb27a));
+  background-image: var(--gradient-warm, linear-gradient(135deg, #d89a3f, #e9c9a0));
   background-color: var(--accent-deep);
   filter: brightness(1.08);
-  box-shadow: 0 14px 32px -12px rgba(255, 106, 0, 0.95);
+  box-shadow: 0 14px 32px -12px rgba(216, 154, 63, 0.95);
 }
 
 .editorial .btn-outline {
@@ -327,10 +327,10 @@
 }
 
 .editorial .btn-outline:hover {
-  border-color: rgba(255, 74, 0, 0.55);
-  background: rgba(255, 74, 0, 0.14);
+  border-color: rgba(199, 133, 47, 0.55);
+  background: rgba(199, 133, 47, 0.14);
   color: var(--ink);
-  box-shadow: var(--glow-blue, 0 0 44px -10px rgba(255, 74, 0, 0.65));
+  box-shadow: var(--glow-blue, 0 0 44px -10px rgba(199, 133, 47, 0.65));
 }
 
 .editorial .btn-sm {
@@ -395,7 +395,7 @@
   bottom: -1px;
   height: 1px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, #ff4a00 18%, #ff8a00 50%, #ffb27a 82%, transparent);
+  background: linear-gradient(90deg, transparent, #c7852f 18%, #e6ab55 50%, #e9c9a0 82%, transparent);
   opacity: 0.55;
 }
 
@@ -423,7 +423,7 @@
   place-items: center;
   width: 27px;
   height: 27px;
-  background-image: var(--gradient-brand, linear-gradient(135deg, #ff4a00, #ff8a00 55%, #ffb27a));
+  background-image: var(--gradient-brand, linear-gradient(135deg, #c7852f, #e6ab55 55%, #e9c9a0));
   color: #ffffff;
   border-radius: 8px;
   font-family: var(--display);
@@ -431,7 +431,7 @@
   font-style: italic;
   line-height: 1;
   transform: translateY(2px);
-  box-shadow: 0 6px 18px -8px rgba(255, 106, 0, 0.8);
+  box-shadow: 0 6px 18px -8px rgba(216, 154, 63, 0.8);
 }
 
 .editorial .brand-word {
@@ -721,9 +721,9 @@
   padding-top: 56px;
   background-color: var(--band);
   background-image:
-    radial-gradient(900px 340px at 10% 0%, rgba(255, 74, 0, 0.24), transparent 68%),
-    radial-gradient(720px 320px at 88% 0%, rgba(255, 106, 0, 0.2), transparent 68%),
-    radial-gradient(600px 260px at 50% 100%, rgba(255, 106, 0, 0.12), transparent 70%);
+    radial-gradient(900px 340px at 10% 0%, rgba(199, 133, 47, 0.24), transparent 68%),
+    radial-gradient(720px 320px at 88% 0%, rgba(216, 154, 63, 0.2), transparent 68%),
+    radial-gradient(600px 260px at 50% 100%, rgba(216, 154, 63, 0.12), transparent 70%);
   color: var(--band-ink);
 }
 
@@ -733,7 +733,7 @@
   inset-inline: 0;
   top: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #ff4a00 20%, #ff8a00 50%, #ffb27a 80%, transparent);
+  background: linear-gradient(90deg, transparent, #c7852f 20%, #e6ab55 50%, #e9c9a0 80%, transparent);
   opacity: 0.7;
 }
 
@@ -766,7 +766,7 @@
 }
 
 .editorial .foot-brand .brand-mark {
-  background-image: var(--gradient-brand, linear-gradient(135deg, #ff4a00, #ff8a00 55%, #ffb27a));
+  background-image: var(--gradient-brand, linear-gradient(135deg, #c7852f, #e6ab55 55%, #e9c9a0));
   color: #ffffff;
 }
 
@@ -881,7 +881,7 @@
 .editorial .page-title em {
   font-style: italic;
   font-weight: 400;
-  background-image: var(--gradient-aurora, linear-gradient(120deg, #ff4a00, #ff8a00 45%, #ff6a00 78%, #ffb27a));
+  background-image: var(--gradient-aurora, linear-gradient(120deg, #c7852f, #e6ab55 45%, #d89a3f 78%, #e9c9a0));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -945,7 +945,7 @@
 .editorial .section-title em {
   font-style: italic;
   font-weight: 400;
-  background-image: var(--gradient-warm, linear-gradient(135deg, #ff6a00, #ffb27a));
+  background-image: var(--gradient-warm, linear-gradient(135deg, #d89a3f, #e9c9a0));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -957,8 +957,8 @@
   border-radius: 18px;
   background-color: var(--surface);
   background-image:
-    radial-gradient(140% 120% at 0% 0%, var(--tint-blue, rgba(255, 74, 0, 0.2)), transparent 60%),
-    radial-gradient(130% 120% at 100% 100%, var(--tint-fuchsia, rgba(255, 106, 0, 0.18)), transparent 64%);
+    radial-gradient(140% 120% at 0% 0%, var(--tint-blue, rgba(199, 133, 47, 0.2)), transparent 60%),
+    radial-gradient(130% 120% at 100% 100%, var(--tint-fuchsia, rgba(216, 154, 63, 0.18)), transparent 64%);
 }
 
 .editorial .prose {

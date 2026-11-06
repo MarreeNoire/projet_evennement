@@ -71,8 +71,8 @@ export const viewport: Viewport = {
   // (env(safe-area-inset-*) exploitées par la tabbar et les sheets).
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#1a120c" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a120c" },
+    { media: "(prefers-color-scheme: light)", color: "#f3ead9" },
+    { media: "(prefers-color-scheme: dark)", color: "#f3ead9" },
   ],
   interactiveWidget: "resizes-content",
 };

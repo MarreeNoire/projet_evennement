@@ -1,7 +1,7 @@
 /* ================================================================
    HERO — affiche plein cadre et grand titre
    Palette « Référence Event » (identique au reste de l'accueil) :
-   fond #1a120c · orange #ff4a00 → #ff8a00 · crème #fff5eb · encre #170903
+   fond #171114 · orange #c7852f → #e6ab55 · crème #f6ece3 · encre #1b1310
    ================================================================ */
 
 .hero {
@@ -15,10 +15,10 @@
   overflow: hidden;
   padding: clamp(26px, 5vh, 56px) max(28px, calc((100% - 1340px) / 2)) 0;
   background:
-    radial-gradient(ellipse at 0 22%, rgba(255, 76, 0, 0.16), transparent 34%),
-    radial-gradient(ellipse at 100% 58%, rgba(255, 94, 0, 0.12), transparent 32%),
-    #1a120c;
-  color: #f8f4ee;
+    radial-gradient(ellipse at 0 22%, rgba(199, 133, 47, 0.16), transparent 34%),
+    radial-gradient(ellipse at 100% 58%, rgba(216, 154, 63, 0.12), transparent 32%),
+    #171114;
+  color: #f4ebe2;
 }
 
 /* ------------------------------- Affiches -------------------------------- */
@@ -108,7 +108,7 @@
       rgba(26, 18, 12, 0.86) 0%,
       rgba(26, 18, 12, 0.38) 30%,
       rgba(26, 18, 12, 0.58) 62%,
-      #1a120c 100%
+      #171114 100%
     ),
     linear-gradient(90deg, rgba(26, 18, 12, 0.92) 0%, rgba(26, 18, 12, 0.5) 58%, rgba(26, 18, 12, 0.1) 100%);
 }
@@ -153,7 +153,7 @@
   padding: 8px 13px;
   border: 1px solid rgba(255, 111, 0, 0.7);
   border-radius: 999px;
-  background: linear-gradient(100deg, rgba(255, 76, 0, 0.82), rgba(255, 125, 0, 0.64));
+  background: linear-gradient(100deg, rgba(199, 133, 47, 0.82), rgba(230, 171, 85, 0.64));
   color: #fff5e9;
   font-size: 10px;
   font-weight: 800;
@@ -183,7 +183,7 @@
 .headline {
   margin: 0;
   text-shadow: 0 2px 28px rgba(0, 0, 0, 0.32);
-  color: #f8f4ee;
+  color: #f4ebe2;
   font-size: clamp(42px, 7vw, 100px);
   font-weight: 850;
   letter-spacing: -0.05em;
@@ -202,25 +202,25 @@
 }
 
 .titleFront {
-  color: #f8f4ee;
+  color: #f4ebe2;
 }
 
 .titleBack {
   color: transparent;
-  background-image: linear-gradient(135deg, #ff4a00, #ff8a00);
+  background-image: linear-gradient(135deg, #c7852f, #e6ab55);
   -webkit-background-clip: text;
   background-clip: text;
 }
 
 .titleAccentFront {
   color: transparent;
-  background-image: linear-gradient(95deg, #ff9a00, #ff4a00 70%);
+  background-image: linear-gradient(95deg, #5f9c86, #c7852f 70%);
   -webkit-background-clip: text;
   background-clip: text;
 }
 
 .titleAccentBack {
-  color: #f8f4ee;
+  color: #f4ebe2;
   background-image: none;
 }
 
@@ -264,7 +264,7 @@
 }
 
 .featuredTag {
-  color: #ff8a00;
+  color: #e6ab55;
   font-size: 9px;
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -274,7 +274,7 @@
 .featuredLink {
   overflow: hidden;
   max-width: 24rem;
-  color: #fff5eb;
+  color: #f6ece3;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -295,7 +295,7 @@
 .featuredMeta svg {
   width: 12px;
   height: 12px;
-  color: #ff8a00;
+  color: #e6ab55;
 }
 
 .sep {
@@ -338,7 +338,7 @@
 }
 
 .rotationButton[aria-pressed="true"] {
-  color: #ff8a00;
+  color: #e6ab55;
 }
 
 .rotationButton svg {
@@ -373,8 +373,8 @@
   padding: 0 24px;
   border: 1px solid #ff7a00;
   border-radius: 999px;
-  background: linear-gradient(100deg, #ff4a00, #ff8a00);
-  color: #170903;
+  background: linear-gradient(100deg, #c7852f, #e6ab55);
+  color: #1b1310;
   font-size: 13px;
   font-weight: 850;
   box-shadow: 0 8px 26px rgba(255, 80, 0, 0.26);
@@ -421,7 +421,7 @@
 .ctaSecondary:hover {
   border-color: rgba(255, 122, 0, 0.65);
   background: rgba(255, 122, 0, 0.1);
-  color: #ff8a00;
+  color: #e6ab55;
   transform: translateY(-2px);
 }
 
@@ -470,14 +470,14 @@
 }
 
 .upcomingDate strong {
-  color: #fff5eb;
+  color: #f6ece3;
   font-size: 17px;
   font-weight: 900;
 }
 
 .upcomingDate > span {
   margin-top: 3px;
-  color: #ff8a00;
+  color: #e6ab55;
   font-size: 8.5px;
   font-weight: 850;
   letter-spacing: 0.06em;
@@ -493,7 +493,7 @@
 
 .upcomingTitle {
   overflow: hidden;
-  color: #fff5eb;
+  color: #f6ece3;
   font-size: 12.5px;
   font-weight: 800;
   text-overflow: ellipsis;
@@ -546,7 +546,7 @@
 .scrollHint svg {
   width: 16px;
   height: 16px;
-  color: #ff8a00;
+  color: #e6ab55;
 }
 
 /* ------------------------------ Adaptations ------------------------------ */
