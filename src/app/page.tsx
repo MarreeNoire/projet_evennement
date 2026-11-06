@@ -2,6 +2,8 @@ import { HomeGlass, type EditorialEvent } from "@/components/home/home-glass";
 import { loadHeaderUser } from "@/lib/auth/viewer";
 import { getCategoryLabel } from "@/lib/constants";
 import { searchPublishedEvents } from "@/lib/events/queries";
+import type { PublishedEventView } from "@/types/database";
+import { EditorialShell } from "@/components/layout/editorial/editorial-shell";
 
 /** Une reprise pour absorber un incident réseau transitoire au premier rendu. */
 async function loadWithRetry<T>(load: () => Promise<T>): Promise<T | null> {
@@ -18,7 +20,7 @@ async function loadWithRetry<T>(load: () => Promise<T>): Promise<T | null> {
 
 export default async function HomePage() {
   const [upcoming, viewer] = await Promise.all([
-    loadWithRetry(() => searchPublishedEvents({ sort: "date_asc", pageSize: 48 })),
+    loadWithRetry(() => searchPublishedEvents({ sort: "date_asc", pageSize: 48, includeFirstTicketType: true })),
     loadHeaderUser(),
   ]);
 
@@ -43,6 +45,7 @@ export default async function HomePage() {
     maxPrice: event.max_price,
     organizerName: event.organizer_name,
     organizerVerified: event.organizer_verified,
+    firstTicketType: (event as PublishedEventView & { firstTicketType?: PublishedEventView['firstTicketType'] }).firstTicketType ?? null,
   }));
 
   const stats = {
@@ -51,5 +54,9 @@ export default async function HomePage() {
     cities: new Set((upcoming?.events ?? []).map((event) => event.city)).size,
   };
 
-  return <HomeGlass events={events} viewer={viewer} stats={stats} total={upcoming?.total ?? 0} />;
+  return (
+    <EditorialShell>
+      <HomeGlass events={events} viewer={viewer} stats={stats} total={upcoming?.total ?? 0} />
+    </EditorialShell>
+  );
 }

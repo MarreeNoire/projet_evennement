@@ -530,6 +530,14 @@ export type PublishedEventView = {
   organizer_slug: string;
   organizer_logo_url: string | null;
   organizer_verified: boolean;
+  firstTicketType?: {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    sold_count: number;
+    access_level: string;
+  } | null;
 };
 
 /** Statistiques agrÃ©gÃ©es d'un Ã©vÃ©nement (tableau de bord organisateur). */

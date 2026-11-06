@@ -24,6 +24,8 @@ export interface ExploreFilters {
   sort?: "date_asc" | "date_desc" | "price_asc" | "price_desc";
   page?: number;
   pageSize?: number;
+  /** Inclure le premier type de billet actif pour chaque événement. */
+  includeFirstTicketType?: boolean;
 }
 
 export interface ExploreResult {
@@ -89,10 +91,37 @@ export async function searchPublishedEvents(filters: ExploreFilters = {}): Promi
   if (error) throw new Error(`Recherche des événements impossible : ${error.message}`);
 
   const total = count ?? 0;
-  const events = (data ?? []).map((event) => ({
+  let events = (data ?? []).map((event) => ({
     ...event,
     gallery: Array.isArray(event.gallery) ? event.gallery : [],
   })) as PublishedEventView[];
+
+  // Optionnel : récupérer le premier ticket type actif pour chaque événement
+  if (filters.includeFirstTicketType && events.length > 0) {
+    const eventIds = events.map((e) => e.id);
+    const { data: ticketTypes } = await supabase
+      .from("ticket_types")
+      .select("id, event_id, name, price, quantity, sold_count, access_level, is_active, position")
+      .in("event_id", eventIds)
+      .eq("is_active", true)
+      .order("position", { ascending: true });
+
+    if (ticketTypes && ticketTypes.length > 0) {
+      // Garder seulement le premier ticket type par événement (le premier par position)
+      const firstTicketByEvent = new Map<string, typeof ticketTypes[0]>();
+      for (const ticket of ticketTypes) {
+        if (!firstTicketByEvent.has(ticket.event_id)) {
+          firstTicketByEvent.set(ticket.event_id, ticket);
+        }
+      }
+
+      // Ajouter le premier ticket type à chaque événement
+      events = events.map((event) => ({
+        ...event,
+        firstTicketType: firstTicketByEvent.get(event.id) ?? null,
+      })) as (PublishedEventView & { firstTicketType: { id: string; name: string; price: number; quantity: number; sold_count: number; access_level: string } | null })[];
+    }
+  }
 
   return {
     events,

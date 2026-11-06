@@ -46,6 +46,14 @@ export type HeroCoverEvent = {
   startAt: string;
   minPrice: number;
   maxPrice: number;
+  firstTicketType?: {
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    sold_count: number;
+    access_level: string;
+  } | null;
 };
 
 const DAY = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", timeZone: "Africa/Abidjan" });
@@ -188,7 +196,11 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
 
             <div className={styles.actions}>
               <Link
-                href={featured ? `/evenements/${featured.slug}/billets` : ROUTES.explore}
+                href={featured?.firstTicketType
+                  ? `/evenements/${featured.slug}/billets?type=${featured.firstTicketType.id}`
+                  : featured
+                    ? `/evenements/${featured.slug}/billets`
+                    : ROUTES.explore}
                 className={styles.cta}
               >
                 {featured ? "Voir les billets" : "Explorer l'agenda"}

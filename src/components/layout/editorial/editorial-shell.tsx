@@ -1,9 +1,8 @@
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { loadHeaderUser } from "@/lib/auth/viewer";
-
 import { EditorialFooter } from "./editorial-footer";
 import { EditorialHeader } from "./editorial-header";
 import { EDITORIAL_NAV, type EditorialNavItem } from "./editorial-nav";
+import { BottomNavStandalone } from "./bottom-nav-standalone";
+import { loadHeaderUser } from "@/lib/auth/viewer";
 import styles from "./editorial-shell.module.css";
 
 /* =============================================================================
@@ -35,9 +34,7 @@ export async function EditorialShell({
       <EditorialHeader viewer={viewer} nav={nav ?? EDITORIAL_NAV} />
       <main className={styles.main}>{children}</main>
       <EditorialFooter viewer={viewer} />
-      {/* Barre d'onglets mobile : le pied de page lui réserve déjà sa hauteur
-          sous 768 px (voir `editorial-shell.module.css`). */}
-      <BottomNav user={viewer} />
+      <BottomNavStandalone user={viewer} />
     </div>
   );
 }
