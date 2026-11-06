@@ -47,8 +47,8 @@
   --color-ink-muted: #a08d7c;
 
   /* --- Paper (fond principal) --- */
-  --color-paper: #080605;
-  --color-paper-deep: #0d0a08;
+  --color-paper: #1a120c;
+  --color-paper-deep: #20160f;
 
   /* --- Neutres papier et encre --- */
   --color-void-50: #f4f0e8;
@@ -79,7 +79,7 @@
   --color-info-dark: #3b82f6;
 
   /* ============ SÉMANTIQUES — LIGHT ============ */
-  --semantic-bg: #080605;
+  --semantic-bg: #1a120c;
   --semantic-bg-subtle: #22231f;
   --semantic-bg-muted: #30312b;
   --semantic-bg-inverted: #f4f0e8;
@@ -103,7 +103,7 @@
   --semantic-primary-subtle: rgba(189, 59, 37, 0.2);
 
   /* ============ SÉMANTIQUES — DARK (identique pour cohérence) ============ */
-  --semantic-dark-bg: #050403;
+  --semantic-dark-bg: #150e09;
   --semantic-dark-bg-subtle: #22231f;
   --semantic-dark-bg-muted: #30312b;
   --semantic-dark-bg-inverted: #f4f0e8;
@@ -313,23 +313,23 @@
    ========================================================================== */
 
 /* ============ SÉMANTIQUES — THÈME PAR DÉFAUT (CINÉMA) ============
-   Palette de l'accueil : charbon #080605, braise #FF4A00 → #FF8A00, crème
+   Palette de l'accueil : charbon #1a120c, braise #FF4A00 → #FF8A00, crème
    chaude #FFF5EB. Une seule famille d'accents sur tout le site. */
 .light {
   color-scheme: dark;
   --brand-lime: #ff8a00;
   --brand-mint: #ff4a00;
   --brand-cream: #fff5eb;
-  --brand-void: #080605;
+  --brand-void: #1a120c;
 
-  --bg: #080605;
-  --bg-subtle: #0d0a08;
-  --bg-muted: #16110d;
+  --bg: #1a120c;
+  --bg-subtle: #20160f;
+  --bg-muted: #2b1e15;
   --bg-inverted: #fff5eb;
-  --surface: #120f0c;
-  --surface-raised: #1a1512;
-  --surface-sunken: #050403;
-  --surface-overlay: #14100d;
+  --surface: #241811;
+  --surface-raised: #302116;
+  --surface-sunken: #150e09;
+  --surface-overlay: #1f160f;
 
   --fg: #fff5eb;
   --fg-muted: #d9c8b8;
@@ -375,16 +375,16 @@
   --poster-3-fg: #fff5eb;
   --poster-4: #2a1a12;
   --poster-4-fg: #fff5eb;
-  --poster-5: #14100d;
+  --poster-5: #1f160f;
   --poster-5-fg: #fff5eb;
 
   --stamp-1: rgba(255, 106, 0, 0.16);
   --stamp-2: rgba(255, 138, 0, 0.16);
   --stamp-3: rgba(255, 74, 0, 0.16);
 
-  --editorial-paper: #080605;
-  --editorial-paper-alt: #0d0a08;
-  --editorial-surface: #120f0c;
+  --editorial-paper: #1a120c;
+  --editorial-paper-alt: #20160f;
+  --editorial-surface: #241811;
   --editorial-ink: #fff5eb;
   --editorial-ink-secondary: #d9c8b8;
   --editorial-muted: #a08d7c;
@@ -395,7 +395,7 @@
   --editorial-on-accent: #1c0a02;
   --editorial-cobalt: #ff9a00;
   --editorial-gold: #ffb27a;
-  --editorial-band: #050403;
+  --editorial-band: #150e09;
   --editorial-band-ink: #fff5eb;
 
   /* --- Accents braise : surfaces teintées, dégradés et lueurs --- */
@@ -429,9 +429,9 @@
   --brand-lime: #ff6a00;
   --brand-mint: #ff4a00;
   --brand-cream: #fff5eb;
-  --brand-void: #050403;
+  --brand-void: #150e09;
 
-  --bg: #050403;
+  --bg: #120c08;
   --bg-subtle: #0a0806;
   --bg-muted: #120e0b;
   --bg-inverted: #fff5eb;
@@ -491,7 +491,7 @@
   --stamp-2: rgba(255, 138, 0, 0.16);
   --stamp-3: rgba(255, 74, 0, 0.16);
 
-  --editorial-paper: #050403;
+  --editorial-paper: #150e09;
   --editorial-paper-alt: #0a0806;
   --editorial-surface: #0f0c0a;
   --editorial-ink: #fff5eb;

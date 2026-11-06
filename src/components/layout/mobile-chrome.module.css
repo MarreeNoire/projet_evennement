@@ -155,29 +155,29 @@
    vermillon, y compris en thème sombre. Valeurs alignées sur
    `editorial-shell.module.css`. */
 .sheetScope {
-  --surface: #120f0c;
-  --bg: #080605;
-  --bg-muted: color-mix(in srgb, #fff5eb 8%, #080605);
+  --surface: #241811;
+  --bg: #1a120c;
+  --bg-muted: color-mix(in srgb, #fff5eb 8%, #1a120c);
   --fg: #fff5eb;
   --fg-muted: #d9c8b8;
-  --fg-subtle: color-mix(in srgb, #a08d7c 76%, #080605);
+  --fg-subtle: color-mix(in srgb, #a08d7c 76%, #1a120c);
   --border: rgba(255, 242, 226, 0.12);
   --border-strong: rgba(255, 242, 226, 0.24);
   --primary: #ff6a00;
-  --danger: color-mix(in srgb, #ff7a6b 88%, #080605);
+  --danger: color-mix(in srgb, #ff7a6b 88%, #1a120c);
 }
 
 :global(html.dark) .sheetScope {
   --surface: #0f0c0a;
-  --bg: #050403;
-  --bg-muted: color-mix(in srgb, #fff5eb 8%, #050403);
+  --bg: #120c08;
+  --bg-muted: color-mix(in srgb, #fff5eb 8%, #120c08);
   --fg: #fff5eb;
   --fg-muted: #d9c8b8;
-  --fg-subtle: color-mix(in srgb, #a08d7c 76%, #050403);
+  --fg-subtle: color-mix(in srgb, #a08d7c 76%, #120c08);
   --border: rgba(255, 242, 226, 0.12);
   --border-strong: rgba(255, 242, 226, 0.24);
   --primary: #ff6a00;
-  --danger: color-mix(in srgb, #ff7a6b 88%, #050403);
+  --danger: color-mix(in srgb, #ff7a6b 88%, #120c08);
 }
 
 .sheetBody {

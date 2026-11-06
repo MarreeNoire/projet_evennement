@@ -1,7 +1,7 @@
 /* ================================================================
    HERO — affiche plein cadre et grand titre
    Palette « Référence Event » (identique au reste de l'accueil) :
-   fond #080605 · orange #ff4a00 → #ff8a00 · crème #fff5eb · encre #170903
+   fond #1a120c · orange #ff4a00 → #ff8a00 · crème #fff5eb · encre #170903
    ================================================================ */
 
 .hero {
@@ -17,7 +17,7 @@
   background:
     radial-gradient(ellipse at 0 22%, rgba(255, 76, 0, 0.16), transparent 34%),
     radial-gradient(ellipse at 100% 58%, rgba(255, 94, 0, 0.12), transparent 32%),
-    #080605;
+    #1a120c;
   color: #f8f4ee;
 }
 
@@ -105,12 +105,12 @@
   background:
     linear-gradient(
       180deg,
-      rgba(8, 6, 5, 0.86) 0%,
-      rgba(8, 6, 5, 0.38) 30%,
-      rgba(8, 6, 5, 0.58) 62%,
-      #080605 100%
+      rgba(26, 18, 12, 0.86) 0%,
+      rgba(26, 18, 12, 0.38) 30%,
+      rgba(26, 18, 12, 0.58) 62%,
+      #1a120c 100%
     ),
-    linear-gradient(90deg, rgba(8, 6, 5, 0.92) 0%, rgba(8, 6, 5, 0.5) 58%, rgba(8, 6, 5, 0.1) 100%);
+    linear-gradient(90deg, rgba(26, 18, 12, 0.92) 0%, rgba(26, 18, 12, 0.5) 58%, rgba(26, 18, 12, 0.1) 100%);
 }
 
 .grain {

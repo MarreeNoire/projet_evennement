@@ -5,7 +5,7 @@
    Accents:
      - Braise: #FF4A00 → #FF8A00 (dégradés, lueurs, pastilles)
      - Crème chaude: #FFF5EB (texte)
-     - Charbon: #080605 (fond)
+     - Charbon: #1a120c (fond)
      - Albâtre Froid: #F8F9FA
    ================================================================ */
 
@@ -16,7 +16,7 @@
   min-height: 100dvh;
   overflow: clip;
   isolation: isolate;
-  background: #080605;
+  background: #1a120c;
   color: #F8F9FA;
   font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", Inter, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -756,7 +756,7 @@
    CATALOG — dark background
 ════════════════════════════════════════ */
 .catalogBg {
-  background: #080605;
+  background: #1a120c;
   position: relative;
 }
 
@@ -1380,7 +1380,7 @@
 }
 
 /* Référence Event : scène de concert ambrée, billet en relief et catalogue compact. */
-.page { background:#080605; color:#f8f4ee; }
+.page { background:#1a120c; color:#f8f4ee; }
 .header { background:rgba(8,6,5,.78); border-color:rgba(255,255,255,.09); box-shadow:0 14px 35px rgba(0,0,0,.45); }
 .brandMark { background:linear-gradient(135deg,#ff3d00,#ff8a00); color:#170a04; box-shadow:0 4px 18px rgba(255,90,0,.4); }
 .nav a[aria-current="page"],.nav a:hover { color:#fff; }
@@ -1444,7 +1444,7 @@
 .featureControls button:hover { background:#ff6900; color:#1b0902; }
 .featureControls > span { color:rgba(255,240,225,.8); }
 .featureControls i { color:#ff8a00; }
-.catalogBg { background:#080605; }
+.catalogBg { background:#1a120c; }
 .catalogBg::before { position:absolute; inset:0; background:radial-gradient(ellipse at 0 22%,rgba(255,76,0,.16),transparent 32%),radial-gradient(ellipse at 100% 58%,rgba(255,94,0,.12),transparent 30%),radial-gradient(ellipse at 8% 100%,rgba(255,105,0,.2),transparent 34%); content:""; pointer-events:none; }
 .section { position:relative; z-index:1; width:min(1440px,calc(100% - 84px)); }
 .popularLayout { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; gap:18px; }
