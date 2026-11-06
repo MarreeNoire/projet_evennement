@@ -462,3 +462,10 @@
     display: none;
   }
 }
+
+/* --- Version installée (PWA) : fil des sorties retiré de l'accueil -------- */
+@media (display-mode: standalone) {
+  .section {
+    display: none;
+  }
+}

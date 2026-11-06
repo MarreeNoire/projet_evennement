@@ -328,8 +328,8 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
             </div>
           </section>
 
-          {/* FIL DES SORTIES — marquees verticales à défilement opposé */}
-          {events.length ? <FeaturesMarquee events={events} /> : null}
+          {/* FIL DES SORTIES — marquees verticales à défilement opposé (absent de la PWA) */}
+          {isPwa ? null : events.length ? <FeaturesMarquee events={events} /> : null}
 
           <section className={styles.closingSection} aria-labelledby="closing-title">
             {featured?.coverUrl ? (
