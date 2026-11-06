@@ -1592,3 +1592,15 @@
   .featuredInfo { bottom:24px; left:18px; width:min(70%,320px); }
   .featureControls { right:16px; bottom:24px; }
 }
+
+/* --- Version installée (PWA) : accueil sans navbar ------------------------ */
+@media (display-mode: standalone) {
+  .header {
+    display: none;
+  }
+
+  /* Le contenu remonte sous la barre d'état : on réserve l'encoche. */
+  .page {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}

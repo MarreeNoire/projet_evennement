@@ -1,16 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  CalendarDays,
-  MapPin,
-  Search,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { ArrowRight, ArrowUpRight, CalendarDays, MapPin, Search, Sparkles, X } from "lucide-react";
 
 import { BottomNav } from "@/components/layout/bottom-nav";
 import type { HeaderUser } from "@/components/layout/header-types";
@@ -20,6 +12,11 @@ import { FeaturesMarquee } from "@/components/home/features-marquee";
 import { HeroCover } from "@/components/home/hero-cover";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { APP_NAME, ROUTES } from "@/lib/constants";
+import {
+  isStandaloneDisplay,
+  serverStandaloneSnapshot,
+  subscribeToStandalone,
+} from "@/lib/pwa/standalone";
 import { formatNumber } from "@/lib/utils";
 
 import styles from "./home-glass.module.css";
@@ -180,7 +177,10 @@ function EventCard({
           className={styles.posterImage}
           sizes="(max-width: 700px) 86vw, (max-width: 1100px) 42vw, 31vw"
         />
-        <span className={styles.dateBadge} aria-hidden="true"><strong>{DATE_DAY.format(new Date(event.startAt))}</strong><small>{DATE_MONTH.format(new Date(event.startAt)).replace(".", "")}</small></span>
+        <span className={styles.dateBadge} aria-hidden="true">
+          <strong>{DATE_DAY.format(new Date(event.startAt))}</strong>
+          <small>{DATE_MONTH.format(new Date(event.startAt)).replace(".", "")}</small>
+        </span>
         <span className={styles.categoryBadge}>{event.categoryLabel}</span>
         <span className={styles.posterArrow}>
           <ArrowUpRight aria-hidden="true" />
@@ -192,8 +192,7 @@ function EventCard({
             <Link href={eventHref(event)}>{event.title}</Link>
           </h3>
           <p className={styles.eventDate}>
-            <CalendarDays aria-hidden="true" />{" "}
-            {DATE.format(new Date(event.startAt))}
+            <CalendarDays aria-hidden="true" /> {DATE.format(new Date(event.startAt))}
           </p>
           <p className={styles.eventPlace}>
             <MapPin aria-hidden="true" />{" "}
@@ -202,11 +201,7 @@ function EventCard({
         </div>
         <div className={styles.cardFoot}>
           <strong>{eventPrice(event)}</strong>
-          <button
-            type="button"
-            className={styles.reserveButton}
-            onClick={() => onReserve(event)}
-          >
+          <button type="button" className={styles.reserveButton} onClick={() => onReserve(event)}>
             Réserver <ArrowRight aria-hidden="true" />
           </button>
         </div>
@@ -222,6 +217,15 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
   const [bookingEvent, setBookingEvent] = useState<EditorialEvent | null>(null);
   const [quantity, setQuantity] = useState(1);
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  /* Version installée (PWA) : l'accueil s'ouvre directement sur le contenu,
+     sans hero ni navbar. La version web n'est pas concernée. Le rendu serveur
+     renvoie `false`, le CSS masque déjà les blocs avant l'hydratation. */
+  const isPwa = useSyncExternalStore(
+    subscribeToStandalone,
+    isStandaloneDisplay,
+    serverStandaloneSnapshot,
+  );
 
   /* Événement mis en avant dans la section de clôture : la première affiche disponible. */
   const featured = events.find((event) => event.coverUrl) ?? null;
@@ -240,53 +244,53 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
 
   return (
     <div className={styles.page}>
-      {/* ── HEADER ── */}
-      <header className={styles.header} id="haut">
-        <Link
-          href={ROUTES.home}
-          className={styles.brand}
-          aria-label={`${APP_NAME} — Accueil`}
-        >
-          <span className={styles.brandMark}>E</span>
-          <span>Event</span>
-        </Link>
-        <nav className={styles.nav} aria-label="Navigation principale">
-          <Link href="#haut" aria-current="page">Accueil</Link>
-          <Link href={ROUTES.explore}>Événements</Link>
-          <Link href="/aide">FAQ</Link>
-          <Link href="/contact">Contact</Link>
-        </nav>
-        <form action={ROUTES.explore} className={styles.quickSearch} role="search">
-          <Search aria-hidden="true" />
-          <label className={styles.srOnly} htmlFor="quick-search">
-            Rechercher un événement
-          </label>
-          <input id="quick-search" name="q" placeholder="Rechercher…" />
-          <button type="submit" aria-label="Lancer la recherche">
-            <ArrowRight aria-hidden="true" />
-          </button>
-        </form>
-        <div className={styles.accountActions}>
-          {viewer ? (
-            <Link href={ROUTES.myTickets} className={styles.loginButton}>
-              Mes billets
-            </Link>
-          ) : (
-            <Link href={ROUTES.login} className={styles.loginButton}>
-              Connexion
-            </Link>
-          )}
-          <Link href="/devenir-organisateur" className={styles.organizerButton}>
-            Organiser <ArrowUpRight aria-hidden="true" />
+      {/* ── HEADER (absent de la version installée) ── */}
+      {isPwa ? null : (
+        <header className={styles.header} id="haut">
+          <Link href={ROUTES.home} className={styles.brand} aria-label={`${APP_NAME} — Accueil`}>
+            <span className={styles.brandMark}>E</span>
+            <span>Event</span>
           </Link>
-        </div>
-      </header>
+          <nav className={styles.nav} aria-label="Navigation principale">
+            <Link href="#haut" aria-current="page">
+              Accueil
+            </Link>
+            <Link href={ROUTES.explore}>Événements</Link>
+            <Link href="/aide">FAQ</Link>
+            <Link href="/contact">Contact</Link>
+          </nav>
+          <form action={ROUTES.explore} className={styles.quickSearch} role="search">
+            <Search aria-hidden="true" />
+            <label className={styles.srOnly} htmlFor="quick-search">
+              Rechercher un événement
+            </label>
+            <input id="quick-search" name="q" placeholder="Rechercher…" />
+            <button type="submit" aria-label="Lancer la recherche">
+              <ArrowRight aria-hidden="true" />
+            </button>
+          </form>
+          <div className={styles.accountActions}>
+            {viewer ? (
+              <Link href={ROUTES.myTickets} className={styles.loginButton}>
+                Mes billets
+              </Link>
+            ) : (
+              <Link href={ROUTES.login} className={styles.loginButton}>
+                Connexion
+              </Link>
+            )}
+            <Link href="/devenir-organisateur" className={styles.organizerButton}>
+              Organiser <ArrowUpRight aria-hidden="true" />
+            </Link>
+          </div>
+        </header>
+      )}
 
       <main>
         {/* ════════════════════════════════════════
-            HERO — cinematic fullscreen
+            HERO — cinematic fullscreen (absent de la PWA)
         ════════════════════════════════════════ */}
-        <HeroCover events={events} />
+        {isPwa ? null : <HeroCover events={events} />}
 
         {/* ════════════════════════════════════════
             CATALOG — dark background
@@ -297,9 +301,16 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
             <div className={styles.popularLayout}>
               <div className={styles.popularIntro}>
                 <p className={styles.sectionEyebrow}>ÉVÉNEMENTS POPULAIRES</p>
-                <h2 id="featured-title">Nos événements <em>incontournables.</em></h2>
-                <p>Des soirées uniques, des artistes en vue et les rendez-vous qui font vibrer la ville.</p>
-                <Link href={ROUTES.explore} className={styles.popularLink}>Voir tous les événements <ArrowRight aria-hidden="true" /></Link>
+                <h2 id="featured-title">
+                  Nos événements <em>incontournables.</em>
+                </h2>
+                <p>
+                  Des soirées uniques, des artistes en vue et les rendez-vous qui font vibrer la
+                  ville.
+                </p>
+                <Link href={ROUTES.explore} className={styles.popularLink}>
+                  Voir tous les événements <ArrowRight aria-hidden="true" />
+                </Link>
               </div>
               {events.length ? (
                 <EventCarousel label="Événements populaires" trackClassName={styles.featuredGrid}>
@@ -320,14 +331,31 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
           {/* FIL DES SORTIES — marquees verticales à défilement opposé */}
           {events.length ? <FeaturesMarquee events={events} /> : null}
 
-                    <section className={styles.closingSection} aria-labelledby="closing-title">
-            {featured?.coverUrl ? <div className={styles.closingPhoto}><PublicStorageImage src={featured.coverUrl} alt={`Ambiance de ${featured.title}`} sizes="(max-width: 760px) 100vw, 42vw" fill /></div> : null}
-            <div className={styles.closingQuote}><span>“</span><p>Votre prochain grand souvenir commence par une place.</p><small>À vous de vivre l’instant.</small></div>
+          <section className={styles.closingSection} aria-labelledby="closing-title">
+            {featured?.coverUrl ? (
+              <div className={styles.closingPhoto}>
+                <PublicStorageImage
+                  src={featured.coverUrl}
+                  alt={`Ambiance de ${featured.title}`}
+                  sizes="(max-width: 760px) 100vw, 42vw"
+                  fill
+                />
+              </div>
+            ) : null}
+            <div className={styles.closingQuote}>
+              <span>“</span>
+              <p>Votre prochain grand souvenir commence par une place.</p>
+              <small>À vous de vivre l’instant.</small>
+            </div>
             <div className={styles.closingCopy}>
               <p>PRÊT À VIVRE L’EXPÉRIENCE ?</p>
-              <h2 id="closing-title">Réservez <em>maintenant.</em></h2>
+              <h2 id="closing-title">
+                Réservez <em>maintenant.</em>
+              </h2>
               <span>Ne manquez plus les événements qui font vibrer votre ville.</span>
-              <Link href={ROUTES.explore}>Acheter mes billets <ArrowRight aria-hidden="true" /></Link>
+              <Link href={ROUTES.explore}>
+                Acheter mes billets <ArrowRight aria-hidden="true" />
+              </Link>
             </div>
           </section>
         </div>
@@ -377,14 +405,8 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
             </div>
             <div className={styles.modalContent}>
               <div className={styles.modalTop}>
-                <span className={styles.categoryBadge}>
-                  {bookingEvent.categoryLabel}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setBookingEvent(null)}
-                  aria-label="Fermer"
-                >
+                <span className={styles.categoryBadge}>{bookingEvent.categoryLabel}</span>
+                <button type="button" onClick={() => setBookingEvent(null)} aria-label="Fermer">
                   <X aria-hidden="true" />
                 </button>
               </div>
@@ -422,9 +444,7 @@ export function HomeGlass({ events, viewer }: HomeGlassProps) {
                 </button>
               </div>
               <div className={styles.modalTotal}>
-                <span>
-                  {bookingEvent.minPrice > 0 ? "À partir de" : "Tarif"}
-                </span>
+                <span>{bookingEvent.minPrice > 0 ? "À partir de" : "Tarif"}</span>
                 <strong>
                   {bookingEvent.minPrice > 0
                     ? `${formatNumber(bookingEvent.minPrice * quantity)} FCFA`

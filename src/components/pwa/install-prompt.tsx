@@ -3,20 +3,15 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { ArrowDownToLine, X } from "lucide-react";
 
+import {
+  isStandaloneDisplay,
+  serverStandaloneSnapshot,
+  subscribeToStandalone,
+} from "@/lib/pwa/standalone";
+
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
-}
-
-function subscribeToDisplayMode(onChange: () => void) {
-  const media = window.matchMedia("(display-mode: standalone)");
-  media.addEventListener("change", onChange);
-  return () => media.removeEventListener("change", onChange);
-}
-
-function isStandaloneDisplay() {
-  const iosStandalone = (navigator as Navigator & { standalone?: boolean }).standalone;
-  return window.matchMedia("(display-mode: standalone)").matches || iosStandalone === true;
 }
 
 function subscribeToPointer(onChange: () => void) {
@@ -32,7 +27,9 @@ function hasCoarsePointer() {
 export function PwaInstallPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [installedFromEvent, setInstalledFromEvent] = useState(false);
-  const isInstalled = useSyncExternalStore(subscribeToDisplayMode, isStandaloneDisplay, () => false) || installedFromEvent;
+  const isInstalled =
+    useSyncExternalStore(subscribeToStandalone, isStandaloneDisplay, serverStandaloneSnapshot) ||
+    installedFromEvent;
   const isTouchDevice = useSyncExternalStore(subscribeToPointer, hasCoarsePointer, () => false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -85,7 +82,8 @@ export function PwaInstallPrompt() {
         <span>Ajoute l’application à ton écran d’accueil.</span>
         {showInstructions ? (
           <span className="pwa-install-instructions">
-            Dans le menu de ton navigateur, choisis « Installer » ou « Ajouter à l’écran d’accueil ».
+            Dans le menu de ton navigateur, choisis « Installer » ou « Ajouter à l’écran d’accueil
+            ».
           </span>
         ) : null}
       </div>
