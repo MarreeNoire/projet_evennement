@@ -1455,26 +1455,29 @@
 .popularIntro > p:not(.sectionEyebrow) { max-width:34ch; margin:15px 0 20px; color:rgba(36,26,30,.68); font-size:12px; line-height:1.6; }
 .popularLink { display:inline-flex; min-height:40px; align-items:center; gap:8px; padding:0 14px; border:1px solid rgba(199,133,47,.45); border-radius:999px; color:#8f5716; font-size:10px; font-weight:800; }
 .popularLink svg { width:14px; height:14px; color:#e6ab55; }
-.featuredGrid { display:grid; grid-auto-columns:minmax(180px,1fr); grid-auto-flow:column; grid-template-columns:none; gap:15px; overflow-x:auto; padding:10px 5px 23px; scroll-snap-type:x mandatory; scrollbar-width:thin; scrollbar-color:rgba(199,133,47,.65) transparent; }
+.featuredGrid { --card-w:176px; display:grid; grid-auto-columns:var(--card-w); grid-auto-flow:column; grid-template-columns:none; gap:14px; overflow-x:auto; padding:8px 4px 18px; scroll-snap-type:x mandatory; scrollbar-width:thin; scrollbar-color:rgba(199,133,47,.65) transparent; }
 .featuredGrid > * { min-width:0; scroll-snap-align:start; }
-.featuredGrid .eventCard { flex:0 0 205px; width:205px; }
-.eventCard { position:relative; aspect-ratio:.74; overflow:hidden; border:1px solid rgba(216,154,63,.55); border-radius:14px; background:#100a07; box-shadow:0 12px 34px rgba(0,0,0,.58),0 0 15px rgba(199, 133, 47,.12); text-align:left; }
+.featuredGrid .eventCard { flex:0 0 var(--card-w); width:var(--card-w); }
+.eventCard { position:relative; aspect-ratio:.82; overflow:hidden; border:1px solid rgba(216,154,63,.55); border-radius:13px; background:#100a07; box-shadow:0 10px 28px rgba(0,0,0,.52),0 0 12px rgba(199, 133, 47,.1); text-align:left; }
 .eventCard:hover { border-color:#e6ab55; box-shadow:0 16px 38px rgba(0,0,0,.65),0 0 23px rgba(199,133,47,.25); }
 .poster { position:absolute; inset:0; aspect-ratio:auto; margin:0; overflow:hidden; border-radius:inherit; background:#1a0c06; }
 .poster::after { position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,7,6,.08) 0%,rgba(10,7,6,.03) 35%,rgba(10,7,6,.93) 100%); content:""; }
 .posterImage { filter:saturate(1.08) contrast(1.04); }
-.dateBadge { position:absolute; z-index:2; top:10px; left:10px; display:grid; width:45px; min-height:49px; place-content:center; border:1px solid rgba(233,201,160,.6); border-radius:9px; background:rgba(17,10,7,.8); color:#f8f1e5; text-align:center; box-shadow:0 5px 17px rgba(0,0,0,.35); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
-.dateBadge strong { font-size:18px; font-weight:900; line-height:1; }
-.dateBadge small { margin-top:3px; color:#e6ab55; font-size:9px; font-weight:800; }
-.poster .categoryBadge { top:10px; right:10px; left:auto; padding:5px 8px; border-color:rgba(255,246,235,.3); background:rgba(12,8,6,.7); color:#f8f1e5; font-size:8px; }
-.posterArrow { top:auto; right:10px; bottom:114px; width:28px; height:28px; border-color:rgba(255,246,235,.32); background:rgba(12,8,6,.64); color:#f8f1e5; }
-.eventDetails { position:absolute; z-index:2; right:0; bottom:0; left:0; min-height:0; gap:12px; padding:64px 13px 13px; background:transparent; }
-.eventHeading h3 { display:-webkit-box; max-height:39px; margin:0 0 7px; overflow:hidden; color:#fff6ec; font-size:15px; font-weight:850; line-height:1.15; letter-spacing:-.03em; text-overflow:ellipsis; white-space:normal; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.dateBadge { position:absolute; z-index:2; top:9px; left:9px; display:grid; width:40px; min-height:44px; place-content:center; border:1px solid rgba(233,201,160,.6); border-radius:8px; background:rgba(17,10,7,.8); color:#f8f1e5; text-align:center; box-shadow:0 5px 17px rgba(0,0,0,.35); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+.dateBadge strong { font-size:16px; font-weight:900; line-height:1; }
+.dateBadge small { margin-top:2px; color:#e6ab55; font-size:8px; font-weight:800; }
+.poster .categoryBadge { top:9px; right:9px; left:auto; padding:4px 7px; border-color:rgba(255,246,235,.3); background:rgba(12,8,6,.7); color:#f8f1e5; font-size:7px; }
+.posterArrow { top:58px; right:9px; bottom:auto; width:26px; height:26px; border-color:rgba(255,246,235,.32); background:rgba(12,8,6,.64); color:#f8f1e5; }
+.eventDetails { position:absolute; z-index:2; right:0; bottom:0; left:0; min-height:0; gap:10px; padding:56px 12px 12px; background:transparent; }
+.eventHeading h3 { display:-webkit-box; max-height:36px; margin:0 0 6px; overflow:hidden; color:#fff6ec; font-size:14px; font-weight:850; line-height:1.15; letter-spacing:-.03em; text-overflow:ellipsis; white-space:normal; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
 .eventDate,.eventPlace { color:rgba(255,242,226,.76); font-size:9px; }
 .eventDate svg,.eventPlace svg { color:#c7852f; }
-.cardFoot { gap:5px; padding-top:8px; border-color:rgba(255,246,235,.18); }
-.cardFoot > strong { color:#f8f1e5; font-size:9px; }
-.reserveButton { min-height:30px; padding-inline:9px; border:0; background:linear-gradient(100deg,#c7852f,#e6ab55); color:#1b1310; font-size:9px; box-shadow:0 4px 14px rgba(199, 133, 47,.3); }
+.cardFoot { gap:5px; padding-top:7px; border-color:rgba(255,246,235,.18); }
+.cardFoot > strong { min-width:0; overflow:hidden; color:#f8f1e5; font-size:9px; white-space:nowrap; text-overflow:ellipsis; }
+.reserveButton { min-height:30px; flex:none; gap:3px; padding-inline:6px; border:0; background:linear-gradient(100deg,#c7852f,#e6ab55); color:#1b1310; box-shadow:0 4px 14px rgba(199, 133, 47,.3); }
+/* `.page button { font: inherit }` gagne sur `.reserveButton` : on remonte d'un cran. */
+.cardFoot .reserveButton { font-size:9px; }
+.reserveButton svg { width:11px; height:11px; }
 .reserveButton:hover { background:linear-gradient(100deg,#d89a3f,#e6ab55); color:#1b1310; }
 .weekendSection { background:linear-gradient(90deg,rgba(199,133,47,.1),transparent 36%,rgba(199,133,47,.05)); border-color:rgba(36, 26, 30,.08); }
 .weekendTrack { scrollbar-color:rgba(199,133,47,.65) transparent; }
@@ -1513,7 +1516,7 @@
 .modalContinue:hover { box-shadow:0 12px 30px rgba(199,133,47,.5); }
 @media (max-width:1100px) {
   .popularLayout { grid-template-columns:minmax(0,1fr); gap:16px; }
-  .featuredGrid .eventCard { flex-basis:190px; width:190px; }
+  .featuredGrid { --card-w:168px; }
   .whySection { width:calc(100% - 56px); grid-template-columns:1fr; gap:25px; }
   .whyCopy { max-width:530px; }
   .closingSection { width:calc(100% - 56px); }
@@ -1542,11 +1545,10 @@
   .popularIntro { max-width:500px; }
   .popularIntro h2 { max-width:12ch; font-size:clamp(38px,10vw,55px); }
   .popularIntro > p:not(.sectionEyebrow) { margin-block:10px 13px; }
-  .featuredGrid { grid-auto-columns: minmax(190px,70vw); gap:12px; padding-top:7px; }
-  .featuredGrid .eventCard { flex-basis:min(70vw,270px); width:min(70vw,270px); }
-  .eventCard { aspect-ratio:.78; }
-  .eventDetails { padding:57px 12px 12px; }
-  .eventHeading h3 { font-size:14px; }
+  .featuredGrid { --card-w:min(58vw,210px); gap:11px; padding-top:6px; }
+  .eventCard { aspect-ratio:.84; }
+  .eventDetails { padding:52px 11px 11px; }
+  .eventHeading h3 { font-size:13px; }
   .whySection { width:calc(100% - 36px); margin-block:4px 55px; }
   .benefitGrid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
   .benefitGrid article { min-height:122px; }
@@ -1557,6 +1559,7 @@
 }
 @media (max-width:420px) {
   .heroTitle { font-size:clamp(40px,11vw,54px); }
+  .featuredGrid { --card-w:min(62vw,190px); }
   .ticket3d { min-height:145px; grid-template-columns:minmax(0,1fr) 56px; }
   .ticket3dMain { padding:11px 12px; }
   .ticketVip { min-width:45px; min-height:35px; font-size:11px; }
