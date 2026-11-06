@@ -115,6 +115,8 @@ exemple_motion_site/
 # --- Captures et artefacts de vérification -----------------------------------
 # Les captures de référence versionnées vivent dans `scripts/captures/`.
 /scripts/*.png
+/scripts/*.tmp.mjs
+/*.png
 /.next-hero-preview/
 /.next-build-check/
 
