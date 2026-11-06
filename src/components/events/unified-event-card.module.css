@@ -1,0 +1,373 @@
+/* ============================================================================
+   Unified Event Card — CSS Module
+   ============================================================================ */
+
+.eventCard {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card, 14px);
+  overflow: hidden;
+  transition:
+    box-shadow var(--duration-base, 180ms) var(--easing-spring),
+    transform var(--duration-base, 180ms) var(--easing-spring);
+  will-change: transform, box-shadow;
+  isolation: isolate;
+}
+
+.eventCard:hover {
+  box-shadow: var(--shadow-elevated, 0 8px 24px rgba(0, 0, 0, 0.12));
+  transform: translateY(-2px);
+}
+
+.eventCard:active {
+  transform: scale(0.985);
+  box-shadow: var(--shadow-card);
+}
+
+/* Poster fallback */
+.eventPoster {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 1.25rem;
+  overflow: hidden;
+}
+
+.eventPoster::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -32px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 18px solid var(--poster-text);
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+/* Media section */
+.eventCardMedia {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.eventCardCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.eventCard:hover .eventCardMedia .eventCardCover {
+  transform: scale(1.03);
+}
+
+.eventCardMediaGradient {
+  position: absolute;
+  inset-x: 0;
+  bottom: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(11, 11, 12, 0.62), transparent);
+  pointer-events: none;
+}
+
+/* Category badge */
+.categoryBadge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(23, 17, 20, 0.65);
+  backdrop-filter: blur(8px);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.035em;
+  color: white;
+  text-transform: uppercase;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+/* Date badge */
+.eventDate {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.375rem 0.5rem;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-radius: 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.eventDateDay {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.eventDateMonth {
+  margin-top: 0.15rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.eventCardTear {
+  position: relative;
+  height: 0;
+  margin: 0 1.1rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.eventCardTear::before,
+.eventCardTear::after {
+  content: "";
+  position: absolute;
+  top: calc(-1px - 0.5rem);
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.eventCardTear::before {
+  left: calc(-1.1rem - 0.5rem);
+}
+
+.eventCardTear::after {
+  right: calc(-1.1rem - 0.5rem);
+}
+
+/* Details section */
+.eventDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.eventCardTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.04;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.eventCardTitle a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.eventCardTitle a:hover {
+  color: var(--accent);
+}
+
+.eventDate {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.eventPlace {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+/* Gallery thumbnails */
+.galleryThumbs {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.galleryThumb {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 0.375rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cardFoot {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.eventCardPrice {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.organizerInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  max-width: 14rem;
+}
+
+.organizerInfo span:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Action row */
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.eventCardCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0 1.25rem;
+  border: 1px solid rgba(11, 11, 12, 0.24);
+  border-radius: 0.55rem;
+  background: var(--primary-solid);
+  color: var(--primary-solid-fg);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s var(--ease-spring),
+    box-shadow 0.18s ease;
+}
+
+.eventCardCta:hover {
+  background: var(--primary-solid-hover);
+  transform: translate(-2px, -2px);
+  box-shadow: 3px 3px 0 rgba(11, 11, 12, 0.55);
+}
+
+.eventCardCta:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
+
+/* EventPoster fallback */
+.eventPoster {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  padding: 1.25rem;
+  overflow: hidden;
+  background: var(--poster-bg);
+  color: var(--poster-text);
+}
+
+.eventPoster::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -32px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 18px solid var(--poster-text);
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.eventPoster > div:first-of-type {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.eventPoster > div:last-of-type {
+  position: relative;
+  max-width: 85%;
+}
+
+.eventPoster strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.eventPoster span:last-of-type {
+  display: block;
+  margin-top: 0.75rem;
+  line-height: 1.2;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .eventCard {
+    min-width: 16rem;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .eventCard,
+  .eventCard .eventCardCover,
+  .eventCard:hover .eventCardMedia .eventCardCover {
+    transition: none;
+    transform: none;
+  }
+}
