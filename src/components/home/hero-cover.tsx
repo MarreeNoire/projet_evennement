@@ -22,15 +22,13 @@ import { formatNumber } from "@/lib/utils";
 import styles from "./hero-cover.module.css";
 
 /* =============================================================================
-   Hero « plein cadre »
+   Hero « affiche cadrée »
    ---------------------------------------------------------------------------
-   Adaptation du bloc Hero 16 : une affiche occupe tout le cadre, un très grand
-   titre, un CTA scindé et la prochaine date.
-
-   Le fond tourne sur les prochaines affiches publiées. Chaque passage révèle la
-   nouvelle photo par une dissolution en demi-teintes : un maillage de points qui
-   grossit depuis le centre de l'écran jusqu'à résoudre l'image — un écho au
-   grain déjà présent sur l'accueil, plutôt qu'un simple fondu.
+   L'affiche n'est plus un fond sous un voile : elle est présentée comme une
+   affiche, dans un cadre au format portrait, image entière (aucun recadrage) et
+   sans filtre de lisibilité. Le texte du hero repose à côté, sur le papier.
+   Sur mobile, le cadre passe sous le titre : les informations imprimées sur
+   l'affiche restent lisibles dans la PWA.
 
    Rotation maîtrisée : pause au survol et à la prise de focus, pause explicite,
    navigation manuelle, et aucune rotation automatique sous
@@ -62,7 +60,7 @@ const SHORT_DATE = new Intl.DateTimeFormat("fr-FR", {
 const MAX_SLIDES = 5;
 const ROTATION_MS = 7000;
 /* L'affiche sortante survit à la révélation (980 ms) avec une marge : aucun
-   intervalle où le fond pourrait apparaître sans image. */
+   intervalle où le cadre pourrait apparaître vide. */
 const TRANSITION_MS = 1400;
 
 function priceLabel(event: Pick<HeroCoverEvent, "minPrice" | "maxPrice">) {
@@ -76,8 +74,7 @@ function shortDate(value: string) {
 }
 
 export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
-  /* Les affiches du fond suivent l'ordre de l'agenda : la prochaine date
-     d'abord. Les sorties sans couverture restent dans la bande du bas. */
+  /* Les affiches suivent l'ordre de l'agenda : la prochaine date d'abord. */
   const slides = useMemo(
     () => events.filter((event) => event.coverUrl).slice(0, MAX_SLIDES),
     [events],
@@ -94,7 +91,7 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
   const count = slides.length;
   const safeIndex = count > 0 ? index % count : 0;
   const featured = slides[safeIndex] ?? events[0] ?? null;
-  /* Bande du bas : stable, indépendante de l'affiche affichée en fond. */
+  /* Bande du bas : stable, indépendante de l'affiche affichée. */
   const upcoming = events.slice(1, 4);
 
   useEffect(() => {
@@ -154,156 +151,160 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
       onFocusCapture={() => setHovered(true)}
       onBlurCapture={() => setHovered(false)}
     >
-      <div className={styles.stack} aria-hidden="true">
-        {count === 0 ? <div className={styles.backdropFallback} /> : null}
-
-        {slides.map((slide, slideIndex) => {
-          const isActive = slideIndex === safeIndex;
-          const isOutgoing = slideIndex === outgoing;
-          if (!isActive && !isOutgoing) return null;
-
-          return (
-            <div
-              key={slide.id}
-              className={`${styles.slide} ${isActive ? styles.slideActive : ""} ${
-                isOutgoing ? styles.slideOutgoing : ""
-              }`.trim()}
-            >
-              <PublicStorageImage
-                src={slide.coverUrl!}
-                alt=""
-                fill
-                sizes="100vw"
-                quality={85}
-                preload={slideIndex === 0}
-                className={styles.backdropImage}
-              />
-            </div>
-          );
-        })}
-
-        {/* L'affiche suivante est chargée à l'avance, invisible. */}
-        {nextSlide ? (
-          <div key={`next-${nextSlide.id}`} className={styles.slide}>
-            <PublicStorageImage
-              src={nextSlide.coverUrl!}
-              alt=""
-              fill
-              sizes="100vw"
-              quality={85}
-              loading="eager"
-              className={styles.backdropImage}
-            />
-          </div>
-        ) : null}
-      </div>
-
-      <div className={styles.veil} aria-hidden="true" />
-      <div className={styles.grain} aria-hidden="true" />
-
-      {count > 1 ? (
-        <div className={styles.rotation} role="group" aria-label="Affiche en arrière-plan">
-          <button
-            type="button"
-            className={styles.rotationButton}
-            aria-label="Affiche précédente"
-            onClick={() => goTo(safeIndex - 1)}
-          >
-            <ChevronLeft aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            className={styles.rotationButton}
-            aria-label={paused ? "Reprendre le défilement des affiches" : "Mettre en pause les affiches"}
-            aria-pressed={paused}
-            onClick={() => setPaused((value) => !value)}
-          >
-            {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-          </button>
-          <span className={styles.rotationCount} aria-live="off">
-            {String(safeIndex + 1).padStart(2, "0")}
-            <span aria-hidden="true"> / </span>
-            {String(count).padStart(2, "0")}
-          </span>
-          <button
-            type="button"
-            className={styles.rotationButton}
-            aria-label="Affiche suivante"
-            onClick={() => goTo(safeIndex + 1)}
-          >
-            <ChevronRight aria-hidden="true" />
-          </button>
-        </div>
-      ) : null}
-
       <div className={styles.inner}>
-        <div className={styles.copy}>
-          <p className={styles.eyebrow}>
-            <span className={styles.dot} aria-hidden="true" />
-            Billetterie et communauté
-          </p>
+        <div className={styles.top}>
+          <div className={styles.leadColumn}>
+            <div className={styles.copy}>
+              <p className={styles.eyebrow}>
+                <span className={styles.dot} aria-hidden="true" />
+                Billetterie et communauté
+              </p>
 
-          <h1 id="hero-title" className={styles.headline}>
-            <LetterSwap
-              segments={[
-                { text: "Vos prochaines sorties, " },
-                {
-                  text: "en un tour.",
-                  frontFaceClassName: styles.titleAccentFront,
-                  backFaceClassName: styles.titleAccentBack,
-                },
-              ]}
-              className={styles.title}
-              frontFaceClassName={styles.titleFront}
-              backFaceClassName={styles.titleBack}
-              staggerInterval={0.026}
-              staggerOrigin="first"
-              flipDirection="top"
-              duration={0.62}
-            />
-          </h1>
+              <h1 id="hero-title" className={styles.headline}>
+                <LetterSwap
+                  segments={[
+                    { text: "Vos prochaines sorties, " },
+                    {
+                      text: "en un tour.",
+                      frontFaceClassName: styles.titleAccentFront,
+                      backFaceClassName: styles.titleAccentBack,
+                    },
+                  ]}
+                  className={styles.title}
+                  frontFaceClassName={styles.titleFront}
+                  backFaceClassName={styles.titleBack}
+                  staggerInterval={0.026}
+                  staggerOrigin="first"
+                  flipDirection="top"
+                  duration={0.62}
+                />
+              </h1>
 
-          <p className={styles.lead}>
-            Réservez votre place, retrouvez votre communauté, et laissez la ville vous surprendre.
-          </p>
-
-          {featured ? (
-            <div key={featured.id} className={styles.featured}>
-              <span className={styles.featuredTag}>À l&apos;affiche</span>
-              <Link href={`/evenements/${featured.slug}`} className={styles.featuredLink}>
-                {featured.title}
-              </Link>
-              <span className={styles.sep} aria-hidden="true">
-                ·
-              </span>
-              <span className={styles.featuredMeta}>
-                <CalendarDays aria-hidden="true" />
-                {shortDate(featured.startAt)}
-              </span>
-              <span className={styles.sep} aria-hidden="true">
-                ·
-              </span>
-              <span className={styles.featuredMeta}>
-                <MapPin aria-hidden="true" />
-                {featured.venueName ?? featured.city}
-              </span>
+              <p className={styles.lead}>
+                Réservez votre place, retrouvez votre communauté, et laissez la ville vous
+                surprendre.
+              </p>
             </div>
-          ) : null}
 
-          <div className={styles.actions}>
-            <Link
-              href={featured ? `/evenements/${featured.slug}/billets` : ROUTES.explore}
-              className={styles.cta}
-            >
-              {featured ? "Voir les billets" : "Explorer l'agenda"}
-              <ArrowRight aria-hidden="true" />
-            </Link>
-            {featured ? (
-              <Link href={ROUTES.explore} className={styles.ctaSecondary}>
-                Explorer l&apos;agenda
+            <div className={styles.actions}>
+              <Link
+                href={featured ? `/evenements/${featured.slug}/billets` : ROUTES.explore}
+                className={styles.cta}
+              >
+                {featured ? "Voir les billets" : "Explorer l'agenda"}
+                <ArrowRight aria-hidden="true" />
               </Link>
-            ) : null}
+              {featured ? (
+                <Link href={ROUTES.explore} className={styles.ctaSecondary}>
+                  Explorer l&apos;agenda
+                </Link>
+              ) : null}
+            </div>
           </div>
+
+          <figure className={styles.posterCard}>
+            <div className={styles.poster}>
+              <div className={styles.stack} aria-hidden="true">
+                {count === 0 ? <div className={styles.backdropFallback} /> : null}
+
+                {slides.map((slide, slideIndex) => {
+                  const isActive = slideIndex === safeIndex;
+                  const isOutgoing = slideIndex === outgoing;
+                  if (!isActive && !isOutgoing) return null;
+
+                  return (
+                    <div
+                      key={slide.id}
+                      className={`${styles.slide} ${isActive ? styles.slideActive : ""} ${
+                        isOutgoing ? styles.slideOutgoing : ""
+                      }`.trim()}
+                    >
+                      <PublicStorageImage
+                        src={slide.coverUrl!}
+                        alt=""
+                        fill
+                        sizes="(max-width: 760px) 92vw, 420px"
+                        quality={85}
+                        preload={slideIndex === 0}
+                        className={styles.posterImage}
+                      />
+                    </div>
+                  );
+                })}
+
+                {/* L'affiche suivante est chargée à l'avance, invisible. */}
+                {nextSlide ? (
+                  <div key={`next-${nextSlide.id}`} className={styles.slide}>
+                    <PublicStorageImage
+                      src={nextSlide.coverUrl!}
+                      alt=""
+                      fill
+                      sizes="(max-width: 760px) 92vw, 420px"
+                      quality={85}
+                      loading="eager"
+                      className={styles.posterImage}
+                    />
+                  </div>
+                ) : null}
+              </div>
+
+              <div className={styles.grain} aria-hidden="true" />
+            </div>
+
+            {featured ? (
+              <figcaption className={styles.caption}>
+                <span className={styles.captionTag}>À l&apos;affiche</span>
+                <Link href={`/evenements/${featured.slug}`} className={styles.captionLink}>
+                  {featured.title}
+                </Link>
+                <span className={styles.captionMeta}>
+                  <CalendarDays aria-hidden="true" />
+                  {shortDate(featured.startAt)}
+                </span>
+                <span className={styles.captionMeta}>
+                  <MapPin aria-hidden="true" />
+                  {featured.venueName ?? featured.city}
+                </span>
+              </figcaption>
+            ) : null}
+
+            {count > 1 ? (
+              <div className={styles.rotation} role="group" aria-label="Affiches à la une">
+                <button
+                  type="button"
+                  className={styles.rotationButton}
+                  aria-label="Affiche précédente"
+                  onClick={() => goTo(safeIndex - 1)}
+                >
+                  <ChevronLeft aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={styles.rotationButton}
+                  aria-label={
+                    paused ? "Reprendre le défilement des affiches" : "Mettre en pause les affiches"
+                  }
+                  aria-pressed={paused}
+                  onClick={() => setPaused((value) => !value)}
+                >
+                  {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+                </button>
+                <span className={styles.rotationCount} aria-live="off">
+                  {String(safeIndex + 1).padStart(2, "0")}
+                  <span aria-hidden="true"> / </span>
+                  {String(count).padStart(2, "0")}
+                </span>
+                <button
+                  type="button"
+                  className={styles.rotationButton}
+                  aria-label="Affiche suivante"
+                  onClick={() => goTo(safeIndex + 1)}
+                >
+                  <ChevronRight aria-hidden="true" />
+                </button>
+              </div>
+            ) : null}
+          </figure>
         </div>
 
         {upcoming.length ? (
