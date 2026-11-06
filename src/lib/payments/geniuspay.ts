@@ -43,11 +43,19 @@ export class GeniusPayProvider implements PaymentProvider {
   private readonly baseUrl = env.payment.geniuspay.baseUrl;
 
   constructor() {
-    if (!this.apiKey || !this.apiSecret || !this.webhookSecret) {
+    if (!this.apiKey || !this.apiSecret) {
       throw new PaymentError(
         "NOT_CONFIGURED",
-        "GeniusPay n'est pas configuré : renseigne GENIUSPAY_API_KEY, " +
-          "GENIUSPAY_API_SECRET et GENIUSPAY_WEBHOOK_SECRET, puis définis PAYMENT_PROVIDER=geniuspay.",
+        "GeniusPay n'est pas configuré : renseigne GENIUSPAY_API_KEY et " +
+          "GENIUSPAY_API_SECRET, puis définis PAYMENT_PROVIDER=geniuspay.",
+      );
+    }
+    // webhookSecret is required only in live mode; sandbox allows empty for local testing
+    if (this.environment === "live" && !this.webhookSecret) {
+      throw new PaymentError(
+        "NOT_CONFIGURED",
+        "GeniusPay live mode requires GENIUSPAY_WEBHOOK_SECRET. " +
+          "Configure it or use sandbox mode (pk_sandbox_ / sk_sandbox_) for testing.",
       );
     }
     if (!isGeniusPayCredentialPairValid() || !this.environment) {

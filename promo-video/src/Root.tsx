@@ -1,6 +1,8 @@
 import { Composition, Folder } from "remotion";
 
 import { Promo } from "./Promo";
+import { HeroJourneyFilm } from "./HeroJourney";
+import { AGNES_HERO_DURATION, AgnesHeroFilm } from "./AgnesHeroFilm";
 import { TOTAL_DURATION } from "./theme";
 
 /* Trois déclinaisons de la même publicité : 9:16 pour les stories et Reels,
@@ -8,6 +10,8 @@ import { TOTAL_DURATION } from "./theme";
 
 export const RemotionRoot = () => (
   <Folder name="Event">
+    <Composition id="AgnesHeroFilm" component={AgnesHeroFilm} durationInFrames={AGNES_HERO_DURATION} fps={24} width={1280} height={720} />
+    <Composition id="HeroJourney" component={HeroJourneyFilm} durationInFrames={630} fps={30} width={1280} height={720} />
     <Composition
       id="EventPubVerticale"
       component={Promo}

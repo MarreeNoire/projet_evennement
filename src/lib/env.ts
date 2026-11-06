@@ -204,7 +204,9 @@ export const isPaymentsLive =
   (env.payment.provider === "geniuspay" &&
     Boolean(env.payment.geniuspay.apiKey) &&
     Boolean(env.payment.geniuspay.apiSecret) &&
-    Boolean(env.payment.geniuspay.webhookSecret) &&
+    (env.payment.geniuspay.environment === "live"
+      ? Boolean(env.payment.geniuspay.webhookSecret)
+      : true) &&
     isGeniusPayCredentialPairValid());
 
 export const isEmailLive = env.email.provider === "resend" && Boolean(env.email.resend.apiKey);
@@ -231,7 +233,9 @@ export function getMissingEnv(): string[] {
   if (env.payment.provider === "geniuspay") {
     if (!env.payment.geniuspay.apiKey) missing.push("GENIUSPAY_API_KEY");
     if (!env.payment.geniuspay.apiSecret) missing.push("GENIUSPAY_API_SECRET");
-    if (!env.payment.geniuspay.webhookSecret) missing.push("GENIUSPAY_WEBHOOK_SECRET");
+    if (env.payment.geniuspay.environment === "live" && !env.payment.geniuspay.webhookSecret) {
+      missing.push("GENIUSPAY_WEBHOOK_SECRET");
+    }
     if (env.payment.geniuspay.apiKey && !env.payment.geniuspay.environment) {
       missing.push("GENIUSPAY_API_KEY (préfixe pk_sandbox_ ou pk_live_ attendu)");
     } else if (env.payment.geniuspay.apiSecret && !isGeniusPayCredentialPairValid()) {

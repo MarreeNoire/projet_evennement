@@ -1107,18 +1107,16 @@
   margin: auto;
   overflow: auto;
   padding: 0;
-  border: 1px solid rgba(36, 26, 30,.1);
+  border: 1px solid rgba(199, 133, 47, .34);
   border-radius: 24px;
-  background: rgba(14, 16, 26, 0.94);
+  background: #fbf5ea;
   color: #241a1e;
-  box-shadow: 0 30px 80px rgba(0,0,0,.75);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 0 30px 80px rgba(36, 26, 30, .38), 0 0 0 1px rgba(255, 252, 246, .6) inset;
 }
 .dialog::backdrop {
-  background: rgba(5, 6, 10, 0.75);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(36, 26, 30, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .bookingModal {
   display: grid;
@@ -1129,7 +1127,7 @@
   position: relative;
   min-height: 100%;
   overflow: hidden;
-  background: #141724;
+  background: #e8dbc6;
 }
 .modalImageInner {
   position: absolute; inset: 0;
@@ -1150,17 +1148,22 @@
 .modalTop .categoryBadge {
   position: static;
   padding: 6px 11px;
+  border-color: rgba(199, 133, 47, .38);
+  background: rgba(199, 133, 47, .14);
+  color: #8f5716;
 }
+.modalContent .sectionEyebrow { color: #8f5716; }
 .modalTop > button {
   display: grid;
   width: 38px; height: 38px;
   place-items: center;
-  border: 1px solid rgba(36, 26, 30,.1);
+  border: 1px solid rgba(36, 26, 30, .14);
   border-radius: 50%;
-  background: rgba(36, 26, 30,.05);
+  background: rgba(36, 26, 30, .05);
+  color: #241a1e;
   transition: background 140ms ease;
 }
-.modalTop > button:hover { background: rgba(36, 26, 30,.1); }
+.modalTop > button:hover { background: rgba(36, 26, 30, .12); }
 .modalTop > button svg { width: 16px; height: 16px; }
 .modalContent h2 {
   margin: 0 0 16px;
@@ -1348,7 +1351,7 @@
   .footer nav { order: 3; gap: 10px; font-size: 9px; }
   .footer small { order: 4; font-size: 9px; }
   .bookingModal { grid-template-columns: minmax(0, 1fr); }
-  .modalImage { min-height: 180px; max-height: 30dvh; }
+  .modalImage { min-height: 150px; max-height: 22dvh; }
   .modalContent { padding: 18px; }
   .modalTop { margin-bottom: 12px; }
   .modalContent h2 { margin-bottom: 10px; font-size: 24px; }
