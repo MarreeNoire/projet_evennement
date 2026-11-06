@@ -1,13 +1,14 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 
-import { EventHero, EventPracticalInfo } from "@/components/events/event-hero";
+import { UnifiedEventHero } from "@/components/events/unified-event-hero";
 import { EventProgram, EventSpeakers } from "@/components/events/event-program";
 import { SalonTeaser, TicketPicker } from "@/components/events/event-ticketing";
 import { EditorialShell } from "@/components/layout/editorial/editorial-shell";
 import { getPublishedEventBySlug } from "@/lib/events/queries";
+import { getCategoryLabel } from "@/lib/constants";
 
 import styles from "@/components/editorial/editorial.module.css";
 import shell from "@/components/layout/editorial/editorial-shell.module.css";
@@ -35,6 +36,26 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
 
   const { event, description, ticketTypes, sessions, speakers } = data;
 
+  const heroEvent = {
+    id: event.id,
+    slug: event.slug,
+    title: event.title,
+    coverUrl: event.cover_url,
+    categoryLabel: getCategoryLabel(event.category),
+    city: event.city,
+    venueName: event.venue_name,
+    startAt: event.start_at,
+    minPrice: event.min_price,
+    maxPrice: event.max_price,
+    firstTicketType: event.firstTicketType,
+    summary: event.summary,
+    endAt: event.end_at,
+    gallery: event.gallery,
+    organizerName: event.organizer_name,
+    organizerVerified: event.organizer_verified,
+    organizerLogoUrl: event.organizer_logo_url,
+  };
+
   return (
     <EditorialShell>
       <div className={shell.wrap}>
@@ -45,12 +66,15 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         </nav>
 
         <div style={{ marginTop: 22 }}>
-          <EventHero event={event} />
+          <UnifiedEventHero
+            mode="single"
+            event={heroEvent}
+            showPracticalInfo={true}
+          />
         </div>
 
         <div className={styles.eventLayout} style={{ marginTop: 34, paddingBottom: 40 }}>
           <div>
-            <EventPracticalInfo event={event} />
 
             <details className={styles.details}>
               <summary className={styles.detailsSummary}>
