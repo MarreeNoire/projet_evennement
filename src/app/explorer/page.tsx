@@ -85,7 +85,12 @@ export default async function ExplorePage({
 
   return (
     <EditorialShell>
-      <div className={`${shell.wrap} ${shell.page}`} style={{ display: "grid", gap: 32 }}>
+      {/* `minmax(0, 1fr)` : sans lui la piste implicite prend la largeur du
+          contenu (la carte de filtres) et toute la page déborde à droite. */}
+      <div
+        className={`${shell.wrap} ${shell.page}`}
+        style={{ display: "grid", gap: 32, gridTemplateColumns: "minmax(0, 1fr)" }}
+      >
         <header className={`${shell["page-head"]} ${shell["page-head--split"]}`}>
           <div>
             <p className={shell.eyebrow}>Agenda</p>

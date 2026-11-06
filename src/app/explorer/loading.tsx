@@ -21,7 +21,7 @@ export default function ExploreLoading() {
         className={`${shell.wrap} ${shell.page}`}
         aria-busy="true"
         aria-label="Chargement des événements"
-        style={{ display: "grid", gap: 32 }}
+        style={{ display: "grid", gap: 32, gridTemplateColumns: "minmax(0, 1fr)" }}
       >
         <div style={{ paddingTop: 18, borderTop: "1px solid var(--line)" }}>
           <div className={content.skeleton} style={{ height: 11, width: 70 }} />

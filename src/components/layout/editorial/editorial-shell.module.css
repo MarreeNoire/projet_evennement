@@ -1053,6 +1053,12 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
+  min-width: 0;
+}
+
+.editorial .field > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .editorial .field-label {
@@ -1067,6 +1073,10 @@
 .editorial .select,
 .editorial .textarea {
   width: 100%;
+  /* Un <select> dont le contenu est long ne doit pas élargir son conteneur,
+     il doit tronquer proprement à la largeur disponible. */
+  min-width: 0;
+  max-width: 100%;
   min-height: 46px;
   padding: 10px 12px;
   border: 1px solid var(--line-strong);
