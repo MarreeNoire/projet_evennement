@@ -28,7 +28,9 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: APP_NAME,
-    statusBarStyle: "default",
+    // Barre d'état sombre : l'application est en charbon, une barre blanche
+    // jurait en mode installé (iOS n'hérite pas du theme-color du manifest).
+    statusBarStyle: "black",
   },
   icons: {
     icon: [

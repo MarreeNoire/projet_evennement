@@ -11,6 +11,10 @@ node_modules/
 
 # --- Build Next.js -----------------------------------------------------------
 .next/
+# Builds isolés (NEXT_BUILD_DIST_DIR) : s'ils ne sont pas ignorés, Tailwind les
+# scanne et relit ses propres sélecteurs échappés, ce qui casse le CSS produit.
+.next-prod/
+.next-build-check/
 out/
 build/
 dist/
