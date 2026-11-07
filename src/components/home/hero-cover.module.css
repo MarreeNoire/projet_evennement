@@ -1,173 +1,66 @@
-/* ================================================================
-   HERO — affiche cadrée et grand titre
-   L'affiche est posée comme une affiche : cadre portrait, image entière,
-   aucun voile. Le texte repose à côté, sur le papier sable.
-   Encre #241a1e · safran #c7852f / #e6ab55 · vert-de-gris #2f6d5c
-   ================================================================ */
+/* =============================================================================
+   Hero de l'accueil
+   ---------------------------------------------------------------------------
+   Le hero ne définit plus sa typographie ni sa palette : il emprunte les
+   primitives du shell éditorial (`page-head`, `page-title`, `page-lead`, `btn`)
+   et ne garde ici que la mise en page de l'affiche et du fil des prochaines
+   sorties. Les affiches restent montrées entières (aucun recadrage).
+   ========================================================================== */
 
 .hero {
-  position: relative;
-  isolation: isolate;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: calc(100svh - 68px);
-  overflow: hidden;
-  padding: clamp(28px, 5vh, 56px) max(28px, calc((100% - 1340px) / 2)) clamp(34px, 5vh, 64px);
-  background:
-    radial-gradient(ellipse at 4% 8%, rgba(199, 133, 47, 0.14), transparent 46%),
-    radial-gradient(ellipse at 98% 86%, rgba(47, 109, 92, 0.09), transparent 42%);
-  color: #241a1e;
+  gap: clamp(26px, 4vw, 44px);
+  padding-block: clamp(24px, 3.2vw, 38px) clamp(12px, 1.8vw, 22px);
 }
 
-/* -------------------------------- Contenu -------------------------------- */
-
-.inner {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  gap: clamp(26px, 4.4vh, 46px);
-}
-
-.top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 24vw);
-  align-items: center;
-  column-gap: clamp(30px, 5vw, 78px);
-}
-
-.leadColumn {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: clamp(22px, 3.4vh, 34px);
-}
-
-.copy {
+.head-main {
   display: flex;
   min-width: 0;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
+  gap: 14px;
+}
+
+.head-aside {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-self: end;
+  gap: 18px;
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-.eyebrow {
-  display: flex;
-  width: max-content;
-  max-width: 100%;
-  align-items: center;
-  gap: 9px;
-  margin: 0;
-  padding: 8px 13px;
-  border: 1px solid rgba(143, 87, 22, 0.42);
-  border-radius: 999px;
-  background: linear-gradient(100deg, rgba(199, 133, 47, 0.9), rgba(230, 171, 85, 0.7));
-  color: #1b1310;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  box-shadow: 0 4px 16px rgba(199, 133, 47, 0.24);
+/* --- Affiche + prochaines sorties ---------------------------------------- */
+
+.showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(24px, 4vw, 56px);
 }
 
-.dot {
-  width: 7px;
-  height: 7px;
-  flex: none;
-  border-radius: 50%;
-  background: #241a1e;
-  animation: pulse-dot 2.6s ease-in-out infinite;
-}
-
-@keyframes pulse-dot {
-  0%,
-  100% {
-    box-shadow: 0 0 0 rgba(36, 26, 30, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 10px rgba(36, 26, 30, 0.55);
-  }
-}
-
-.headline {
-  margin: 0;
-  color: #241a1e;
-  font-size: clamp(40px, 5.6vw, 84px);
-  font-weight: 850;
-  letter-spacing: -0.05em;
-  line-height: 0.9;
-  text-transform: uppercase;
-  text-wrap: balance;
-  /* Les lettres du titre sont des inline-block : `letter-spacing` s'applique
-     déjà à l'intérieur de chaque lettre, aucune chasse à compenser. */
-  --swap-tracking: 0px;
-}
-
-/* --- Titre animé : bascule 3D des lettres -------------------------------- */
-
-.title {
-  display: inline;
-}
-
-.titleFront {
-  color: #241a1e;
-}
-
-.titleBack {
-  color: transparent;
-  background-image: linear-gradient(135deg, #c7852f, #a4661c);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-.titleAccentFront {
-  color: transparent;
-  background-image: linear-gradient(95deg, #2f6d5c, #a4661c 74%);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-.titleAccentBack {
-  color: #241a1e;
-  background-image: none;
-}
-
-.lead {
-  max-width: 44ch;
-  margin: 0;
-  color: rgba(36, 26, 30, 0.72);
-  font-size: clamp(13px, 1.15vw, 15px);
-  line-height: 1.65;
-}
-
-/* ------------------------------- L'affiche ------------------------------- */
-
-.posterCard {
+.poster-card {
   display: flex;
   min-width: 0;
   flex-direction: column;
+  gap: 14px;
   margin: 0;
 }
 
 .poster {
   position: relative;
-  width: 100%;
-  aspect-ratio: 5 / 7;
   overflow: hidden;
-  border: 1px solid rgba(36, 26, 30, 0.18);
-  border-radius: 16px;
-  background: #e8dbc6;
-  box-shadow:
-    0 20px 44px rgba(36, 26, 30, 0.18),
-    0 2px 0 rgba(255, 252, 246, 0.55) inset;
+  aspect-ratio: 5 / 7;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: var(--surface);
 }
 
 .stack {
@@ -179,525 +72,235 @@
   position: absolute;
   inset: 0;
   opacity: 0;
+  transition: opacity 700ms var(--ease-spring, ease);
 }
 
-/* L'affiche est montrée en entier : aucune information imprimée n'est rognée. */
-.posterImage {
+.slide-active {
+  opacity: 1;
+}
+
+.slide-outgoing {
+  opacity: 0;
+}
+
+.poster-image {
   object-fit: contain;
-  object-position: center;
-  filter: saturate(1.03) contrast(1.02);
 }
 
-/* Affiche sortante : reste nette sous la nouvelle pendant la dissolve. */
-.slideOutgoing {
-  z-index: 0;
-  opacity: 1;
-  animation: hero-drift-out 1100ms cubic-bezier(0.33, 0.1, 0.2, 1) both;
-}
-
-/* Affiche entrante : dissolution en demi-teintes.
-   Un seul masque, un maillage de points présent sur TOUTE la surface dès la
-   première image : le maillage se resserre jusqu'à passer sous le pixel et la
-   photo se résout d'un coup, sans jamais laisser de zone vide. */
-.slideActive {
-  z-index: 1;
-  opacity: 1;
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0 44%, transparent 46%);
-  mask-image: radial-gradient(circle at 50% 50%, #000 0 44%, transparent 46%);
-  -webkit-mask-repeat: repeat;
-  mask-repeat: repeat;
-  -webkit-mask-size: 1px 1px;
-  mask-size: 1px 1px;
-  animation: hero-halftone 980ms cubic-bezier(0.33, 0.1, 0.2, 1) both;
-}
-
-@keyframes hero-halftone {
-  from {
-    -webkit-mask-size: 22px 22px;
-    mask-size: 22px 22px;
-    transform: scale(1.03);
-  }
-  to {
-    -webkit-mask-size: 1px 1px;
-    mask-size: 1px 1px;
-    transform: scale(1);
-  }
-}
-
-/* L'affiche sortante recule très légèrement pendant la révélation. */
-@keyframes hero-drift-out {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.02);
-  }
-}
-
-.backdropFallback {
+.backdrop-fallback {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 76% 18%, rgba(199, 133, 47, 0.55), transparent 54%),
-    radial-gradient(circle at 18% 82%, rgba(47, 109, 92, 0.4), transparent 50%),
-    linear-gradient(150deg, #f0e4cf, #dcc9ab);
+  background-image:
+    radial-gradient(120% 90% at 20% 15%, var(--tint-blue), transparent 60%),
+    radial-gradient(110% 90% at 90% 90%, var(--tint-gold), transparent 62%);
+  background-color: var(--surface);
 }
-
-.grain {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-  background-size: 200px;
-  opacity: 0.55;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-}
-
-/* ---------------------------- Légende de l'affiche ------------------------ */
 
 .caption {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 9px;
-  margin-top: 12px;
-  font-size: 11.5px;
-  animation: hero-caption 520ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
+  align-items: baseline;
+  gap: 5px 12px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
-@keyframes hero-caption {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.captionTag {
-  color: #8f5716;
-  font-size: 9px;
-  font-weight: 850;
-  letter-spacing: 0.12em;
+.caption-tag {
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.captionLink {
-  overflow: hidden;
-  max-width: 100%;
-  color: #241a1e;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: color 160ms ease;
+.caption-link {
+  font-family: var(--display);
+  font-size: 16px;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  transition: color 0.18s ease;
 }
 
-.captionLink:hover {
-  color: #8f5716;
+.caption-link:hover {
+  color: var(--primary);
 }
 
-.captionMeta {
+.caption-meta {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: rgba(36, 26, 30, 0.66);
-  white-space: nowrap;
 }
 
-.captionMeta svg {
-  width: 12px;
-  height: 12px;
-  color: #c7852f;
+.caption-meta svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0.7;
 }
-
-/* ------------------------- Rotation des affiches -------------------------- */
 
 .rotation {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  margin-top: 10px;
-  padding: 4px 6px;
-  border: 1px solid rgba(36, 26, 30, 0.14);
-  border-radius: 999px;
-  background: rgba(255, 252, 246, 0.78);
+  gap: 8px;
 }
 
-.rotationButton {
+.rotation-button {
   display: grid;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: #463833;
-  cursor: pointer;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  color: var(--ink);
   transition:
-    background 160ms ease,
-    color 160ms ease;
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
 }
 
-.rotationButton:hover {
-  background: rgba(199, 133, 47, 0.16);
-  color: #8f5716;
+.rotation-button:hover {
+  border-color: var(--primary);
+  background-color: var(--primary-subtle);
+  color: var(--primary);
 }
 
-.rotationButton[aria-pressed="true"] {
-  color: #8f5716;
+.rotation-button svg {
+  width: 15px;
+  height: 15px;
 }
 
-.rotationButton svg {
-  width: 14px;
-  height: 14px;
-}
-
-.rotationCount {
-  padding: 0 6px;
-  color: rgba(36, 26, 30, 0.66);
-  font-size: 9.5px;
-  font-weight: 850;
-  letter-spacing: 0.08em;
+.rotation-count {
+  margin-inline: 4px;
+  color: var(--muted);
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
 }
 
-/* --------------------------------- Actions -------------------------------- */
+/* --- Fil des prochaines sorties ----------------------------------------- */
 
-.cta {
-  display: inline-flex;
-  min-height: 50px;
-  align-items: center;
-  gap: 9px;
-  padding: 0 24px;
-  border: 1px solid #c7852f;
-  border-radius: 999px;
-  background: linear-gradient(100deg, #c7852f, #e6ab55);
-  color: #1b1310;
-  font-size: 13px;
-  font-weight: 850;
-  box-shadow: 0 8px 24px rgba(199, 133, 47, 0.28);
-  transition:
-    background 220ms ease,
-    box-shadow 220ms ease,
-    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    border-color 220ms ease;
+.upcoming-wrap {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
 }
-
-.cta:hover {
-  border-color: #a4661c;
-  background: linear-gradient(100deg, #d89a3f, #e6ab55);
-  box-shadow:
-    0 0 26px rgba(199, 133, 47, 0.4),
-    0 12px 28px rgba(36, 26, 30, 0.22);
-  transform: translateY(-3px);
-}
-
-.cta svg {
-  width: 16px;
-  height: 16px;
-  color: #1b1310;
-}
-
-.ctaSecondary {
-  display: inline-flex;
-  min-height: 50px;
-  align-items: center;
-  padding: 0 20px;
-  border: 1px solid rgba(36, 26, 30, 0.22);
-  border-radius: 999px;
-  background: rgba(255, 252, 246, 0.6);
-  color: #241a1e;
-  font-size: 12px;
-  font-weight: 800;
-  transition:
-    border-color 160ms ease,
-    color 160ms ease,
-    background 160ms ease,
-    transform 160ms ease;
-}
-
-.ctaSecondary:hover {
-  border-color: rgba(143, 87, 22, 0.5);
-  background: rgba(199, 133, 47, 0.12);
-  color: #8f5716;
-  transform: translateY(-2px);
-}
-
-/* ---------------------------- Prochaines dates ---------------------------- */
 
 .upcoming {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
-  border-top: 1px solid rgba(36, 26, 30, 0.14);
   list-style: none;
 }
 
-.upcoming > li {
-  min-width: 0;
+.upcoming li {
+  border-top: 1px solid var(--line);
 }
 
-.upcoming > li + li {
-  border-left: 1px solid rgba(36, 26, 30, 0.1);
+.upcoming li:last-child {
+  border-bottom: 1px solid var(--line);
 }
 
-.upcomingLink {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px 4px 0;
-  transition: color 160ms ease;
-}
-
-.upcoming > li + li .upcomingLink {
-  padding-left: 18px;
-}
-
-.upcomingLink:hover {
-  color: #8f5716;
-}
-
-.upcomingDate {
+.upcoming-link {
   display: grid;
-  min-width: 38px;
-  flex: none;
-  place-items: center;
-  line-height: 1;
+  grid-template-columns: 48px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: clamp(12px, 1.6vw, 20px);
+  padding: 14px 2px;
 }
 
-.upcomingDate strong {
-  color: #241a1e;
-  font-size: 17px;
-  font-weight: 900;
-}
-
-.upcomingDate > span {
-  margin-top: 3px;
-  color: #8f5716;
-  font-size: 8.5px;
-  font-weight: 850;
-  letter-spacing: 0.06em;
+.upcoming-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  line-height: 1.1;
   text-transform: uppercase;
 }
 
-.upcomingBody {
+.upcoming-date strong {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.upcoming-body {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 3px;
 }
 
-.upcomingTitle {
+.upcoming-title {
   overflow: hidden;
-  color: #241a1e;
-  font-size: 12.5px;
-  font-weight: 800;
+  font-family: var(--display);
+  font-size: clamp(16px, 1.6vw, 19px);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--ink);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.upcomingMeta {
+.upcoming-meta {
   overflow: hidden;
-  color: rgba(36, 26, 30, 0.6);
-  font-size: 10px;
+  color: var(--muted);
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.upcomingArrow {
-  width: 14px;
-  height: 14px;
-  flex: none;
-  margin-left: auto;
-  color: #241a1e;
-  opacity: 0.4;
+.upcoming-arrow {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
   transition:
-    opacity 160ms ease,
-    transform 160ms ease;
+    transform 0.2s var(--ease-spring, ease),
+    color 0.2s ease;
 }
 
-.upcomingLink:hover .upcomingArrow {
-  opacity: 1;
-  transform: translate(1px, -1px);
+.upcoming-link:hover .upcoming-title {
+  color: var(--primary);
 }
 
-/* ------------------------------- Défiler --------------------------------- */
-
-.scrollHint {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  color: rgba(36, 26, 30, 0.55);
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  transform: translateX(-50%);
+.upcoming-link:hover .upcoming-arrow {
+  transform: translate(2px, -2px);
+  color: var(--primary);
 }
 
-.scrollHint svg {
-  width: 16px;
-  height: 16px;
-  color: #8f5716;
-}
-
-/* ------------------------------ Adaptations ------------------------------ */
-
-@media (max-width: 1180px) {
-  .top {
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 28vw);
-  }
-
-  .headline {
-    font-size: clamp(38px, 5.4vw, 74px);
-  }
-}
-
-@media (max-width: 980px) {
-  .upcoming {
+@media (max-width: 900px) {
+  .showcase {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .upcoming > li + li {
-    border-top: 1px solid rgba(36, 26, 30, 0.1);
-    border-left: 0;
-  }
-
-  .upcoming > li + li .upcomingLink {
-    padding-left: 0;
-  }
-
-  .upcoming > li:nth-child(3) {
-    display: none;
+  .poster-card {
+    width: 100%;
+    max-width: 24rem;
   }
 }
 
-@media (max-width: 760px) {
-  .hero {
-    min-height: 0;
-    padding: 26px 18px 34px;
+@media (max-width: 767px) {
+  .head-aside {
+    justify-self: start;
   }
 
-  .top {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-  }
-
-  /* Le titre puis l'affiche puis les actions : l'affiche reste au-dessus de la
-     ligne de flottaison, complètement lisible. */
-  .leadColumn {
-    display: contents;
-  }
-
-  .copy {
-    order: 1;
-  }
-
-  .posterCard {
-    order: 2;
-  }
-
-  .actions {
-    order: 3;
-  }
-
-  .copy {
-    gap: 13px;
-  }
-
-  .headline {
-    font-size: clamp(36px, 10.5vw, 58px);
-  }
-
-  .poster {
-    max-height: 62svh;
-  }
-
-  .caption {
-    font-size: 11px;
-  }
-
-  .cta,
-  .ctaSecondary {
-    min-height: 46px;
-  }
-
-  .ctaSecondary {
-    display: none;
-  }
-
-  .scrollHint {
-    display: none;
-  }
-
-  /* Sur mobile, la dissolve en demi-teintes est peinte sur toute la largeur :
-     on la remplace par un fondu-zoom, plus sûr pour les petits GPU. */
-  .slideActive {
-    -webkit-mask-image: none;
-    mask-image: none;
-    animation: hero-fade 640ms cubic-bezier(0.22, 0.8, 0.24, 1) both;
+  .actions :global(.btn) {
+    flex: 1 1 auto;
   }
 }
-
-@keyframes hero-fade {
-  from {
-    opacity: 0;
-    transform: scale(1.03);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@media (max-width: 480px) {
-  .lead {
-    font-size: 12.5px;
-  }
-
-  .upcomingMeta {
-    display: none;
-  }
-}
-
-/* --------------------------- Mouvement réduit ---------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .dot {
-    animation: none;
-  }
-
-  .cta:hover,
-  .ctaSecondary:hover {
-    transform: none;
-  }
-
-  /* Aucune dissolve : l'affiche change d'un coup, sans masque ni zoom. */
-  .slideActive {
-    animation: none;
-    -webkit-mask-image: none;
-    mask-image: none;
-    transform: none;
-  }
-
-  .slideOutgoing {
-    animation: none;
-  }
-
-  .caption {
-    animation: none;
+  .slide,
+  .upcoming-arrow,
+  .caption-link {
+    transition: none;
   }
 }
 

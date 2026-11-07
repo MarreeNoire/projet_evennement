@@ -6,7 +6,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   MapPin,
@@ -14,25 +13,28 @@ import {
   Play,
 } from "lucide-react";
 
-import { LetterSwap } from "@/components/ui/letter-swap";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
 import { ROUTES } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils";
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
 
 import styles from "./hero-cover.module.css";
 
 /* =============================================================================
    Hero « affiche cadrée »
    ---------------------------------------------------------------------------
+   Le titre, le surtitre et le chapô utilisent les primitives éditoriales du
+   site (`page-head`, `page-title`, `page-lead`) : l'accueil parle la même langue
+   que l'agenda et les fiches événement.
+
    L'affiche n'est plus un fond sous un voile : elle est présentée comme une
-   affiche, dans un cadre au format portrait, image entière (aucun recadrage) et
-   sans filtre de lisibilité. Le texte du hero repose à côté, sur le papier.
-   Sur mobile, le cadre passe sous le titre : les informations imprimées sur
-   l'affiche restent lisibles dans la PWA.
+   affiche, dans un cadre portrait, image entière (aucun recadrage) et sans
+   filtre. Le fil des prochaines sorties reprend la colonne de date des cartes
+   éditoriales.
 
    Rotation maîtrisée : pause au survol et à la prise de focus, pause explicite,
    navigation manuelle, et aucune rotation automatique sous
-   `prefers-reduced-motion` (le changement reste alors instantané).
+   `prefers-reduced-motion`.
    ========================================================================== */
 
 export type HeroCoverEvent = {
@@ -56,20 +58,18 @@ export type HeroCoverEvent = {
   } | null;
 };
 
-const DAY = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", timeZone: "Africa/Abidjan" });
-const MONTH = new Intl.DateTimeFormat("fr-FR", { month: "short", timeZone: "Africa/Abidjan" });
-const SHORT_DATE = new Intl.DateTimeFormat("fr-FR", {
+const WEEKDAY = new Intl.DateTimeFormat("fr-FR", {
   weekday: "short",
-  day: "numeric",
-  month: "short",
   timeZone: "Africa/Abidjan",
 });
+const DAY = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", timeZone: "Africa/Abidjan" });
+const MONTH = new Intl.DateTimeFormat("fr-FR", { month: "short", timeZone: "Africa/Abidjan" });
 
 const MAX_SLIDES = 5;
 const ROTATION_MS = 7000;
-/* L'affiche sortante survit à la révélation (980 ms) avec une marge : aucun
-   intervalle où le cadre pourrait apparaître vide. */
-const TRANSITION_MS = 1400;
+/* L'affiche sortante survit au fondu (700 ms) avec une marge : aucun intervalle
+   où le cadre pourrait apparaître vide. */
+const TRANSITION_MS = 1100;
 
 function priceLabel(event: Pick<HeroCoverEvent, "minPrice" | "maxPrice">) {
   if (event.minPrice <= 0 && event.maxPrice <= 0) return "Gratuit";
@@ -77,8 +77,13 @@ function priceLabel(event: Pick<HeroCoverEvent, "minPrice" | "maxPrice">) {
   return `Dès ${formatNumber(event.minPrice)} FCFA`;
 }
 
+function weekday(value: string) {
+  return WEEKDAY.format(new Date(value)).replace(/\./g, "");
+}
+
 function shortDate(value: string) {
-  return SHORT_DATE.format(new Date(value)).replace(/\./g, "");
+  const date = new Date(value);
+  return `${DAY.format(date)} ${MONTH.format(date).replace(/\./g, "")}`;
 }
 
 export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
@@ -99,8 +104,8 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
   const count = slides.length;
   const safeIndex = count > 0 ? index % count : 0;
   const featured = slides[safeIndex] ?? events[0] ?? null;
-  /* Bande du bas : stable, indépendante de l'affiche affichée. */
-  const upcoming = events.slice(1, 4);
+  /* Fil stable, indépendant de l'affiche affichée. */
+  const upcoming = events.slice(0, 3);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -159,193 +164,171 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
       onFocusCapture={() => setHovered(true)}
       onBlurCapture={() => setHovered(false)}
     >
-      <div className={styles.inner}>
-        <div className={styles.top}>
-          <div className={styles.leadColumn}>
-            <div className={styles.copy}>
-              <p className={styles.eyebrow}>
-                <span className={styles.dot} aria-hidden="true" />
-                Billetterie et communauté
-              </p>
+      <header className={`${shell["page-head"]} ${shell["page-head--split"]}`}>
+        <div className={styles["head-main"]}>
+          <p className={shell.eyebrow}>Billetterie et communauté</p>
+          <h1 id="hero-title" className={shell["page-title"]}>
+            Vos prochaines sorties, <em>en un tour.</em>
+          </h1>
+        </div>
 
-              <h1 id="hero-title" className={styles.headline}>
-                <LetterSwap
-                  segments={[
-                    { text: "Vos prochaines sorties, " },
-                    {
-                      text: "en un tour.",
-                      frontFaceClassName: styles.titleAccentFront,
-                      backFaceClassName: styles.titleAccentBack,
-                    },
-                  ]}
-                  className={styles.title}
-                  frontFaceClassName={styles.titleFront}
-                  backFaceClassName={styles.titleBack}
-                  staggerInterval={0.026}
-                  staggerOrigin="first"
-                  flipDirection="top"
-                  duration={0.62}
-                />
-              </h1>
-
-              <p className={styles.lead}>
-                Réservez votre place, retrouvez votre communauté, et laissez la ville vous
-                surprendre.
-              </p>
-            </div>
-
-            <div className={styles.actions}>
-              <Link
-                href={featured?.firstTicketType
+        <div className={styles["head-aside"]}>
+          <p className={shell["page-lead"]}>
+            Réservez votre place, retrouvez votre communauté, et laissez la ville vous surprendre.
+          </p>
+          <div className={styles.actions}>
+            <Link
+              href={
+                featured?.firstTicketType
                   ? `/evenements/${featured.slug}/billets?type=${featured.firstTicketType.id}`
                   : featured
                     ? `/evenements/${featured.slug}/billets`
-                    : ROUTES.explore}
-                className={styles.cta}
-              >
-                {featured ? "Voir les billets" : "Explorer l'agenda"}
-                <ArrowRight aria-hidden="true" />
+                    : ROUTES.explore
+              }
+              className={`${shell.btn} ${shell["btn-primary"]}`}
+            >
+              {featured ? "Voir les billets" : "Explorer l'agenda"}
+              <ArrowRight className={shell.icon} aria-hidden="true" />
+            </Link>
+            {featured ? (
+              <Link href={ROUTES.explore} className={`${shell.btn} ${shell["btn-outline"]}`}>
+                Explorer l&apos;agenda
               </Link>
-              {featured ? (
-                <Link href={ROUTES.explore} className={styles.ctaSecondary}>
-                  Explorer l&apos;agenda
-                </Link>
+            ) : null}
+          </div>
+        </div>
+      </header>
+
+      <div className={styles.showcase}>
+        <figure className={styles["poster-card"]}>
+          <div className={styles.poster}>
+            <div className={styles.stack} aria-hidden="true">
+              {count === 0 ? <div className={styles["backdrop-fallback"]} /> : null}
+
+              {slides.map((slide, slideIndex) => {
+                const isActive = slideIndex === safeIndex;
+                const isOutgoing = slideIndex === outgoing;
+                if (!isActive && !isOutgoing) return null;
+
+                return (
+                  <div
+                    key={slide.id}
+                    className={`${styles.slide} ${isActive ? styles["slide-active"] : ""} ${
+                      isOutgoing ? styles["slide-outgoing"] : ""
+                    }`.trim()}
+                  >
+                    <PublicStorageImage
+                      src={slide.coverUrl!}
+                      alt=""
+                      fill
+                      sizes="(max-width: 900px) 88vw, 340px"
+                      quality={85}
+                      preload={slideIndex === 0}
+                      className={styles["poster-image"]}
+                    />
+                  </div>
+                );
+              })}
+
+              {/* L'affiche suivante est chargée à l'avance, invisible. */}
+              {nextSlide ? (
+                <div key={`next-${nextSlide.id}`} className={styles.slide}>
+                  <PublicStorageImage
+                    src={nextSlide.coverUrl!}
+                    alt=""
+                    fill
+                    sizes="(max-width: 900px) 88vw, 340px"
+                    quality={85}
+                    loading="eager"
+                    className={styles["poster-image"]}
+                  />
+                </div>
               ) : null}
             </div>
           </div>
 
-          <figure className={styles.posterCard}>
-            <div className={styles.poster}>
-              <div className={styles.stack} aria-hidden="true">
-                {count === 0 ? <div className={styles.backdropFallback} /> : null}
+          {featured ? (
+            <figcaption className={styles.caption}>
+              <span className={styles["caption-tag"]}>À l&apos;affiche</span>
+              <Link href={`/evenements/${featured.slug}`} className={styles["caption-link"]}>
+                {featured.title}
+              </Link>
+              <span className={styles["caption-meta"]}>
+                <CalendarDays aria-hidden="true" />
+                {shortDate(featured.startAt)}
+              </span>
+              <span className={styles["caption-meta"]}>
+                <MapPin aria-hidden="true" />
+                {featured.venueName ?? featured.city}
+              </span>
+            </figcaption>
+          ) : null}
 
-                {slides.map((slide, slideIndex) => {
-                  const isActive = slideIndex === safeIndex;
-                  const isOutgoing = slideIndex === outgoing;
-                  if (!isActive && !isOutgoing) return null;
-
-                  return (
-                    <div
-                      key={slide.id}
-                      className={`${styles.slide} ${isActive ? styles.slideActive : ""} ${
-                        isOutgoing ? styles.slideOutgoing : ""
-                      }`.trim()}
-                    >
-                      <PublicStorageImage
-                        src={slide.coverUrl!}
-                        alt=""
-                        fill
-                        sizes="(max-width: 760px) 92vw, 420px"
-                        quality={85}
-                        preload={slideIndex === 0}
-                        className={styles.posterImage}
-                      />
-                    </div>
-                  );
-                })}
-
-                {/* L'affiche suivante est chargée à l'avance, invisible. */}
-                {nextSlide ? (
-                  <div key={`next-${nextSlide.id}`} className={styles.slide}>
-                    <PublicStorageImage
-                      src={nextSlide.coverUrl!}
-                      alt=""
-                      fill
-                      sizes="(max-width: 760px) 92vw, 420px"
-                      quality={85}
-                      loading="eager"
-                      className={styles.posterImage}
-                    />
-                  </div>
-                ) : null}
-              </div>
-
-              <div className={styles.grain} aria-hidden="true" />
+          {count > 1 ? (
+            <div className={styles.rotation} role="group" aria-label="Affiches à la une">
+              <button
+                type="button"
+                className={styles["rotation-button"]}
+                aria-label="Affiche précédente"
+                onClick={() => goTo(safeIndex - 1)}
+              >
+                <ChevronLeft aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className={styles["rotation-button"]}
+                aria-label={
+                  paused ? "Reprendre le défilement des affiches" : "Mettre en pause les affiches"
+                }
+                aria-pressed={paused}
+                onClick={() => setPaused((value) => !value)}
+              >
+                {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+              </button>
+              <span className={styles["rotation-count"]} aria-live="off">
+                {String(safeIndex + 1).padStart(2, "0")}
+                <span aria-hidden="true"> / </span>
+                {String(count).padStart(2, "0")}
+              </span>
+              <button
+                type="button"
+                className={styles["rotation-button"]}
+                aria-label="Affiche suivante"
+                onClick={() => goTo(safeIndex + 1)}
+              >
+                <ChevronRight aria-hidden="true" />
+              </button>
             </div>
-
-            {featured ? (
-              <figcaption className={styles.caption}>
-                <span className={styles.captionTag}>À l&apos;affiche</span>
-                <Link href={`/evenements/${featured.slug}`} className={styles.captionLink}>
-                  {featured.title}
-                </Link>
-                <span className={styles.captionMeta}>
-                  <CalendarDays aria-hidden="true" />
-                  {shortDate(featured.startAt)}
-                </span>
-                <span className={styles.captionMeta}>
-                  <MapPin aria-hidden="true" />
-                  {featured.venueName ?? featured.city}
-                </span>
-              </figcaption>
-            ) : null}
-
-            {count > 1 ? (
-              <div className={styles.rotation} role="group" aria-label="Affiches à la une">
-                <button
-                  type="button"
-                  className={styles.rotationButton}
-                  aria-label="Affiche précédente"
-                  onClick={() => goTo(safeIndex - 1)}
-                >
-                  <ChevronLeft aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  className={styles.rotationButton}
-                  aria-label={
-                    paused ? "Reprendre le défilement des affiches" : "Mettre en pause les affiches"
-                  }
-                  aria-pressed={paused}
-                  onClick={() => setPaused((value) => !value)}
-                >
-                  {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-                </button>
-                <span className={styles.rotationCount} aria-live="off">
-                  {String(safeIndex + 1).padStart(2, "0")}
-                  <span aria-hidden="true"> / </span>
-                  {String(count).padStart(2, "0")}
-                </span>
-                <button
-                  type="button"
-                  className={styles.rotationButton}
-                  aria-label="Affiche suivante"
-                  onClick={() => goTo(safeIndex + 1)}
-                >
-                  <ChevronRight aria-hidden="true" />
-                </button>
-              </div>
-            ) : null}
-          </figure>
-        </div>
+          ) : null}
+        </figure>
 
         {upcoming.length ? (
-          <ol className={styles.upcoming} aria-label="Prochaines sorties">
-            {upcoming.map((event) => (
-              <li key={event.id}>
-                <Link href={`/evenements/${event.slug}`} className={styles.upcomingLink}>
-                  <span className={styles.upcomingDate} aria-hidden="true">
-                    <strong>{DAY.format(new Date(event.startAt))}</strong>
-                    <span>{MONTH.format(new Date(event.startAt)).replace(".", "")}</span>
-                  </span>
-                  <span className={styles.upcomingBody}>
-                    <span className={styles.upcomingTitle}>{event.title}</span>
-                    <span className={styles.upcomingMeta}>
-                      {event.categoryLabel} · {event.city} · {priceLabel(event)}
+          <div className={styles["upcoming-wrap"]}>
+            <p className={shell["mono-label"]}>Prochaines sorties</p>
+            <ol className={styles.upcoming} aria-label="Prochaines sorties">
+              {upcoming.map((event) => (
+                <li key={event.id}>
+                  <Link href={`/evenements/${event.slug}`} className={styles["upcoming-link"]}>
+                    <span className={styles["upcoming-date"]} aria-hidden="true">
+                      <span>{weekday(event.startAt)}</span>
+                      <strong>{DAY.format(new Date(event.startAt))}</strong>
+                      <span>{MONTH.format(new Date(event.startAt)).replace(/\./g, "")}</span>
                     </span>
-                  </span>
-                  <ArrowUpRight className={styles.upcomingArrow} aria-hidden="true" />
-                </Link>
-              </li>
-            ))}
-          </ol>
+                    <span className={styles["upcoming-body"]}>
+                      <span className={styles["upcoming-title"]}>{event.title}</span>
+                      <span className={styles["upcoming-meta"]}>
+                        {event.categoryLabel} · {event.venueName ?? event.city} ·{" "}
+                        {priceLabel(event)}
+                      </span>
+                    </span>
+                    <ArrowUpRight className={styles["upcoming-arrow"]} aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
         ) : null}
       </div>
-
-      <a href="#a-la-une" className={styles.scrollHint}>
-        <ChevronDown aria-hidden="true" />
-        <span>Défiler</span>
-      </a>
     </section>
   );
 }
