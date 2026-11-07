@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { ArrowLeft, ArrowRight, Check, CreditCard, LockKeyhole } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,9 +22,24 @@ import type { TicketTypeRow } from "@/types/database";
 import type { PaymentProviderName } from "@/lib/payments/types";
 
 import { QuantityPicker } from "./quantity-picker";
-import { OrderSummary } from "./order-summary";
+import styles from "./checkout-form.module.css";
 
-/* Formulaire de commande : quantités + coordonnées + récapitulatif temps réel. */
+/* =============================================================================
+   Tunnel de commande
+   ---------------------------------------------------------------------------
+   Trois étapes seulement : billets, coordonnées, paiement. Le récapitulatif et
+   le bouton de paiement vivent sur la dernière étape, une seule fois.
+
+   Sur mobile la barre d'action reste collée en bas de l'écran (au-dessus de la
+   barre d'onglets quand la PWA est installée) : le total et l'action principale
+   sont toujours atteignables sans faire défiler.
+
+   À chaque changement d'étape, la vue revient en haut du formulaire et le focus
+   suit, pour ne pas laisser l'utilisateur au milieu de la page.
+   ========================================================================== */
+
+const STEP_LABELS = ["Billets", "Coordonnées", "Paiement"] as const;
+const LAST_STEP = STEP_LABELS.length - 1;
 
 export function CheckoutForm({
   eventId,
@@ -48,6 +63,9 @@ export function CheckoutForm({
     fingerprint: string;
     key: string;
   } | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const stepRef = useRef<HTMLDivElement>(null);
+
   const initialTicket =
     ticketTypes.find(
       (ticket) =>
@@ -71,7 +89,7 @@ export function CheckoutForm({
     setValue,
     setFocus,
     trigger,
-    watch,
+    control,
     formState: { errors, isSubmitting: pending },
   } = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
@@ -94,7 +112,25 @@ export function CheckoutForm({
   );
 
   const pricing = useMemo(() => priceOrder(selectedLines), [selectedLines]);
-  const buyerPhone = watch("buyerPhone");
+  const buyerPhone = useWatch({ control, name: "buyerPhone" });
+  const buyerName = useWatch({ control, name: "buyerName" });
+  const buyerEmail = useWatch({ control, name: "buyerEmail" });
+  const promoCode = useWatch({ control, name: "promoCode" });
+
+  /* Change d'étape en ramenant la vue en haut du formulaire et en y portant le
+     focus : sans ça, « Continuer » laissait l'utilisateur au bas de la page. */
+  function goToStep(next: number) {
+    setServerError(null);
+    setStep(next);
+    window.requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      formRef.current?.scrollIntoView({
+        block: "start",
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+      stepRef.current?.focus({ preventScroll: true });
+    });
+  }
 
   async function continueToNextStep() {
     setServerError(null);
@@ -103,7 +139,7 @@ export function CheckoutForm({
         setServerError("Choisis au moins un billet pour continuer.");
         return;
       }
-      setStep(1);
+      goToStep(1);
       return;
     }
     if (step === 1) {
@@ -114,8 +150,8 @@ export function CheckoutForm({
         else if (errors.buyerPhone) setFocus("buyerPhone");
         return;
       }
+      goToStep(2);
     }
-    setStep((current) => Math.min(current + 1, 3));
   }
 
   const onSubmit = handleSubmit(
@@ -183,103 +219,315 @@ export function CheckoutForm({
     },
   );
 
-  const stepLabels = ["Billets", "Coordonnées", "Paiement", "Confirmation"];
+  const providerLabel =
+    paymentProvider === "geniuspay"
+      ? "GeniusPay"
+      : paymentProvider === "cinetpay"
+        ? "CinetPay"
+        : "Mode de simulation";
+  const providerHint =
+    paymentProvider === "geniuspay" || paymentProvider === "cinetpay"
+      ? "Wave, Orange Money ou une autre option proposée par le prestataire."
+      : "Aucun montant réel ne sera débité.";
+
+  const canPay = pricing.lines.length > 0 && !pending;
 
   return (
-    <form onSubmit={step === 3 ? onSubmit : (event) => event.preventDefault()} noValidate className={`mx-auto w-full max-w-3xl ${inDialog ? "checkout-form-dialog" : "space-y-5 sm:space-y-6"}`}>
-      <nav aria-label="Étapes de la commande" className="rounded-xl border border-border bg-surface p-4 sm:p-5">
-        <div className="mb-3 flex items-center justify-between gap-3 text-sm">
-          <span className="font-semibold">Étape {step + 1} sur {stepLabels.length}</span>
-          <span className="text-fg-muted">{stepLabels[step]}</span>
+    <form
+      ref={formRef}
+      onSubmit={step === LAST_STEP ? onSubmit : (event) => event.preventDefault()}
+      noValidate
+      className={`mx-auto w-full max-w-3xl ${inDialog ? "checkout-form-dialog" : ""}`}
+    >
+      <nav
+        aria-label="Étapes de la commande"
+        className="border-border bg-surface rounded-xl border px-3 py-3 sm:px-4"
+      >
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <p className="text-fg-muted text-sm">
+            Étape <span className="text-fg font-semibold tabular-nums">{step + 1}</span> sur{" "}
+            <span className="tabular-nums">{STEP_LABELS.length}</span>
+            <span className={styles.currentLabel}> · {STEP_LABELS[step]}</span>
+          </p>
+          <p aria-live="polite" className="text-fg-muted text-sm tabular-nums">
+            {pricing.ticketCount > 0
+              ? `${pricing.ticketCount} billet${pricing.ticketCount > 1 ? "s" : ""} · ${formatPrice(pricing.total)}`
+              : "Aucun billet sélectionné"}
+          </p>
         </div>
-        <div role="progressbar" aria-label="Avancement de la commande" aria-valuemin={1} aria-valuemax={stepLabels.length} aria-valuenow={step + 1} aria-valuetext={`Étape ${step + 1} sur ${stepLabels.length} : ${stepLabels[step]}`} className="h-1.5 overflow-hidden rounded-full bg-bg-muted">
-          <div className="h-full rounded-full bg-primary transition-[width] duration-300 " style={{ width: `${((step + 1) / stepLabels.length) * 100}%` }} />
-        </div>
-        <ol className="mt-4 hidden grid-cols-4 gap-2 sm:grid">
-          {stepLabels.map((label, index) => (
-            <li key={label}>
-              <button type="button" disabled={index > step || pending} onClick={() => setStep(index)} aria-current={step === index ? "step" : undefined} className={`flex min-h-12 w-full items-center gap-2 rounded-md border px-2 text-left text-xs font-semibold sm:px-3 sm:text-sm ${step === index ? "border-primary bg-primary-subtle text-primary" : index < step ? "border-border bg-surface text-fg" : "border-border bg-bg text-fg-subtle"}`}>
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full border text-[11px]">{index < step ? <Check className="size-3.5" aria-hidden="true" /> : index + 1}</span>
-                <span className="truncate">{label}</span>
+
+        <ol className={styles.stepper}>
+          {STEP_LABELS.map((label, index) => (
+            <li key={label} className="min-w-0 flex-1">
+              <button
+                type="button"
+                disabled={index > step || pending}
+                onClick={() => goToStep(index)}
+                aria-current={step === index ? "step" : undefined}
+                className={`${styles.step} ${index < step ? styles.stepDone : ""}`}
+              >
+                <span className={styles.stepNumber} aria-hidden="true">
+                  {index < step ? <Check className="size-3.5" /> : index + 1}
+                </span>
+                <span className={styles.stepLabel}>{label}</span>
               </button>
             </li>
           ))}
         </ol>
       </nav>
 
-      {serverError && step !== 3 ? <Alert tone="danger" title="Vérifie cette étape">{serverError}</Alert> : null}
-
-      {step === 0 ? (
-        <Card data-checkout-step={step} className="overflow-hidden rounded-xl">
-          <CardHeader className="pb-4"><CardTitle>Choisis tes billets</CardTitle>{!inDialog ? <p className="text-sm text-fg-muted">Ajuste les quantités avant de continuer.</p> : null}</CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            {ticketTypes.map((type) => <QuantityPicker key={type.id} ticketType={type} quantity={quantities[type.id] ?? 0} compact={inDialog} disabled={pending} onChange={(value) => {
-              const next = { ...quantities, [type.id]: value };
-              setQuantities(next);
-              setServerError(null);
-              setValue("items", checkoutItemsFromQuantities(ticketTypes, next), { shouldDirty: true, shouldValidate: true });
-            }} />)}
-            {selectedLines.length ? <p className="border-t border-border pt-3 text-right text-sm font-semibold">{pricing.ticketCount} billet{pricing.ticketCount > 1 ? "s" : ""} · {formatPrice(pricing.total)}</p> : null}
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {step === 1 ? (
-        <Card data-checkout-step={step} className="overflow-hidden rounded-xl">
-          <CardHeader className="pb-4"><CardTitle>Vérifie tes coordonnées</CardTitle>{!inDialog ? <p className="text-sm text-fg-muted">Elles sont reprises depuis ton compte et restent modifiables.</p> : null}</CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <Field label="Nom complet" htmlFor="buyerName" required error={errors.buyerName?.message}>
-              <Input id="buyerName" autoComplete="name" placeholder="Koffi Atta" required invalid={Boolean(errors.buyerName)} {...fieldAriaProps("buyerName", { error: errors.buyerName?.message })} {...register("buyerName")} />
-            </Field>
-            <Field label="Email" htmlFor="buyerEmail" hint="Facultatif" error={errors.buyerEmail?.message}>
-              <Input id="buyerEmail" type="email" autoComplete="email" placeholder="koffi@example.ci" invalid={Boolean(errors.buyerEmail)} {...fieldAriaProps("buyerEmail", { error: errors.buyerEmail?.message })} {...register("buyerEmail")} />
-            </Field>
-            <Field label="Téléphone" htmlFor="buyerPhone" required hint={inDialog ? undefined : initialBuyer.phone ? "Prérempli depuis ton profil · modifiable" : "Avec l'indicatif du pays"} description={inDialog ? undefined : "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée."} error={errors.buyerPhone?.message}>
-              <Input id="buyerPhone" type="tel" autoComplete="tel" inputMode="tel" placeholder="+225 07 00 00 00" required aria-required="true" invalid={Boolean(errors.buyerPhone)} {...fieldAriaProps("buyerPhone", { error: errors.buyerPhone?.message, description: inDialog ? undefined : "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée." })} {...register("buyerPhone")} />
-            </Field>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {step === 2 ? (
-        <div data-checkout-step={step} className="space-y-4">
+      <div
+        ref={stepRef}
+        data-checkout-step={step}
+        tabIndex={-1}
+        className="flex flex-col gap-4 outline-none"
+      >
+        {step === 0 ? (
           <Card className="overflow-hidden rounded-xl">
-            <CardHeader><CardTitle>Prépare ton paiement</CardTitle>{!inDialog ? <p className="text-sm text-fg-muted">Le paiement s’ouvrira sur la page sécurisée du prestataire.</p> : null}</CardHeader>
-            <CardContent className="flex items-start gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary"><CreditCard className="size-5" aria-hidden="true" /></span>
-              <div><p className="font-semibold">{paymentProvider === "geniuspay" ? "GeniusPay" : paymentProvider === "cinetpay" ? "CinetPay" : "Mode de simulation"}</p><p className="mt-1 text-sm text-fg-muted">{paymentProvider === "geniuspay" || paymentProvider === "cinetpay" ? "Wave, Orange Money ou une autre option disponible." : "Aucun montant réel ne sera débité."}</p></div>
+            <CardHeader className="pb-3">
+              <CardTitle>Choisis tes billets</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2.5">
+              {ticketTypes.map((type) => (
+                <QuantityPicker
+                  key={type.id}
+                  ticketType={type}
+                  quantity={quantities[type.id] ?? 0}
+                  compact={inDialog}
+                  disabled={pending}
+                  onChange={(value) => {
+                    const next = { ...quantities, [type.id]: value };
+                    setQuantities(next);
+                    setServerError(null);
+                    setValue("items", checkoutItemsFromQuantities(ticketTypes, next), {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    });
+                  }}
+                />
+              ))}
             </CardContent>
           </Card>
+        ) : null}
+
+        {step === 1 ? (
           <Card className="overflow-hidden rounded-xl">
-            <CardHeader><CardTitle>Numéro de téléphone</CardTitle>{!inDialog ? <p className="text-sm text-fg-muted">Utilisé pour préparer la demande de paiement.</p> : null}</CardHeader>
-            <CardContent><p className="text-lg font-semibold tabular-nums">{buyerPhone || "Non renseigné"}</p><button type="button" className="mt-2 min-h-10 text-sm font-semibold text-primary underline underline-offset-4" onClick={() => setStep(1)}>Modifier mes coordonnées</button></CardContent>
+            <CardHeader className="pb-3">
+              <CardTitle>Vérifie tes coordonnées</CardTitle>
+              {!inDialog ? (
+                <p className="text-fg-muted text-sm">
+                  Reprises depuis ton compte, modifiables avant le paiement.
+                </p>
+              ) : null}
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <Field
+                label="Nom complet"
+                htmlFor="buyerName"
+                required
+                error={errors.buyerName?.message}
+              >
+                <Input
+                  id="buyerName"
+                  autoComplete="name"
+                  placeholder="Koffi Atta"
+                  required
+                  invalid={Boolean(errors.buyerName)}
+                  {...fieldAriaProps("buyerName", { error: errors.buyerName?.message })}
+                  {...register("buyerName")}
+                />
+              </Field>
+              <Field
+                label="Email"
+                htmlFor="buyerEmail"
+                hint="Facultatif"
+                error={errors.buyerEmail?.message}
+              >
+                <Input
+                  id="buyerEmail"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="koffi@example.ci"
+                  invalid={Boolean(errors.buyerEmail)}
+                  {...fieldAriaProps("buyerEmail", { error: errors.buyerEmail?.message })}
+                  {...register("buyerEmail")}
+                />
+              </Field>
+              <Field
+                label="Téléphone"
+                htmlFor="buyerPhone"
+                required
+                hint={
+                  inDialog
+                    ? undefined
+                    : initialBuyer.phone
+                      ? "Prérempli depuis ton profil"
+                      : "Avec l'indicatif du pays"
+                }
+                description={
+                  inDialog
+                    ? undefined
+                    : "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée."
+                }
+                error={errors.buyerPhone?.message}
+              >
+                <Input
+                  id="buyerPhone"
+                  type="tel"
+                  autoComplete="tel"
+                  inputMode="tel"
+                  placeholder="+225 07 00 00 00"
+                  required
+                  aria-required="true"
+                  invalid={Boolean(errors.buyerPhone)}
+                  {...fieldAriaProps("buyerPhone", {
+                    error: errors.buyerPhone?.message,
+                    description: inDialog
+                      ? undefined
+                      : "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée.",
+                  })}
+                  {...register("buyerPhone")}
+                />
+              </Field>
+            </CardContent>
           </Card>
-          <Field label="Code promo" htmlFor="promoCode" hint="Facultatif" error={errors.promoCode?.message}>
-            <Input id="promoCode" placeholder="ABIDJAN10" className="uppercase" {...fieldAriaProps("promoCode", { error: errors.promoCode?.message })} {...register("promoCode")} />
-          </Field>
+        ) : null}
+
+        {step === LAST_STEP ? (
+          <div className="flex flex-col gap-4">
+            <Card className="overflow-hidden rounded-xl">
+              <CardHeader className="pb-3">
+                <CardTitle>Ta commande</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <ul className="divide-border divide-y">
+                  {pricing.lines.map((line) => (
+                    <li key={line.ticketTypeId} className="flex justify-between gap-3 py-2 text-sm">
+                      <span className="min-w-0">
+                        {line.quantity} × {line.name}
+                      </span>
+                      <span className="shrink-0 font-semibold tabular-nums">
+                        {formatPrice(line.lineTotal)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="bg-bg-muted flex items-baseline justify-between gap-3 rounded-lg px-3 py-3">
+                  <span className="text-sm font-semibold">Total à payer</span>
+                  <span className="font-display text-xl font-semibold tabular-nums">
+                    {formatPrice(pricing.total)}
+                  </span>
+                </div>
+
+                <div className="border-border flex flex-col gap-1 border-t pt-3 text-sm">
+                  <p className="font-semibold">{buyerName}</p>
+                  <p className="text-fg-muted break-words">
+                    {buyerEmail || "Aucun email renseigné"} · {buyerPhone}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => goToStep(1)}
+                    className="text-primary mt-1 min-h-11 self-start text-sm font-semibold underline underline-offset-4"
+                  >
+                    Modifier mes coordonnées
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden rounded-xl">
+              <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <span className="bg-primary-subtle text-primary flex size-9 shrink-0 items-center justify-center rounded-full">
+                    <CreditCard className="size-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold">{providerLabel}</p>
+                    <p className="text-fg-muted text-sm">{providerHint}</p>
+                  </div>
+                </div>
+
+                <Field
+                  label="Code promo"
+                  htmlFor="promoCode"
+                  hint="Facultatif"
+                  error={errors.promoCode?.message}
+                >
+                  <Input
+                    id="promoCode"
+                    placeholder="ABIDJAN10"
+                    className="uppercase"
+                    {...fieldAriaProps("promoCode", { error: errors.promoCode?.message })}
+                    {...register("promoCode")}
+                  />
+                </Field>
+
+                {promoCode?.trim() ? (
+                  <p className="text-fg-subtle text-xs">
+                    Le code sera vérifié au moment du paiement : le montant débité peut être
+                    inférieur au total affiché.
+                  </p>
+                ) : null}
+
+                <p className="text-fg-subtle flex items-start gap-2 text-xs">
+                  <LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                  Le paiement est traité sur la page sécurisée du prestataire. Event ne conserve ni
+                  code Mobile Money ni donnée de carte.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        ) : null}
+      </div>
+
+      {serverError ? (
+        <div role="alert" aria-live="assertive" className="mt-3">
+          <Alert tone="danger" title="Le paiement n’a pas démarré">
+            {serverError}
+          </Alert>
         </div>
       ) : null}
 
-      {step === 3 ? (
-        <div data-checkout-step={step} className="space-y-4">
-          <Card className="overflow-hidden rounded-xl">
-            <CardHeader className="pb-2"><CardTitle>Vérifie ta commande</CardTitle></CardHeader>
-            <CardContent className="space-y-2">
-              <ul className="divide-y divide-border">{pricing.lines.map((line) => <li key={line.ticketTypeId} className="flex justify-between gap-3 py-2 text-sm"><span>{line.quantity} × {line.name}</span><span className="shrink-0 font-semibold tabular-nums">{formatPrice(line.lineTotal)}</span></li>)}</ul>
-              <dl className="flex justify-between border-t border-border pt-2 text-base font-bold"><dt>Total à payer</dt><dd className="tabular-nums">{formatPrice(pricing.total)}</dd></dl>
-              <div className="rounded-md bg-bg-muted p-2.5 text-sm"><p className="font-semibold">{watch("buyerName")}</p><p className="text-fg-muted">{watch("buyerEmail") || "Aucun email renseigné"} · {buyerPhone}</p></div>
-            </CardContent>
-          </Card>
-          <OrderSummary pricing={pricing} pending={pending} error={serverError} paymentProvider={paymentProvider} compact={inDialog} />
-          {!inDialog ? <p className="flex items-center justify-center gap-2 text-center text-xs text-fg-subtle"><LockKeyhole className="size-3.5" aria-hidden="true" /> Le paiement est traité sur la page sécurisée du prestataire.</p> : null}
+      <div className={`${styles.bar} ${inDialog ? styles.barStatic : ""}`}>
+        <div className={styles.barMeta}>
+          <span className={styles.barCount}>
+            {pricing.ticketCount > 0
+              ? `${pricing.ticketCount} billet${pricing.ticketCount > 1 ? "s" : ""}`
+              : "Aucun billet"}
+          </span>
+          <span className={styles.barTotal}>{formatPrice(pricing.total)}</span>
         </div>
-      ) : null}
 
-      <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
-        <Button type="button" variant="secondary" disabled={step === 0 || pending} onClick={() => { setServerError(null); setStep((current) => Math.max(current - 1, 0)); }}>
-          <ArrowLeft className="mr-2 size-4" aria-hidden="true" /> Retour
-        </Button>
-        {step < 3 ? <Button type="button" disabled={pending} onClick={() => void continueToNextStep()}>Continuer <ArrowRight className="ml-2 size-4" aria-hidden="true" /></Button> : null}
+        <div className={styles.barActions}>
+          {step > 0 ? (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={pending}
+              onClick={() => goToStep(step - 1)}
+            >
+              <ArrowLeft className="mr-1.5 size-4" aria-hidden="true" />
+              <span className={step === 0 ? "" : "hidden sm:inline"}>Retour</span>
+            </Button>
+          ) : null}
+
+          {step < LAST_STEP ? (
+            <Button type="button" disabled={pending} onClick={() => void continueToNextStep()}>
+              Continuer
+              <ArrowRight className="ml-1.5 size-4" aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              loading={pending}
+              loadingLabel="Création de la commande…"
+              disabled={!canPay}
+            >
+              {pricing.total === 0 ? "Obtenir mes billets" : `Payer ${formatPrice(pricing.total)}`}
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   );

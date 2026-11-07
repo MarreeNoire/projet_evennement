@@ -1,0 +1,170 @@
+/* =============================================================================
+   Tunnel de commande — pièces de mise en page
+   ---------------------------------------------------------------------------
+   Le formulaire emprunte les composants du design system (Card, Field, Button)
+   et n'ajoute ici que ce que les utilitaires ne couvrent pas : la barre
+   d'action collante du mobile, son décalage au-dessus de la barre d'onglets
+   de la PWA installée, et les pastilles d'étapes.
+   ========================================================================== */
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  flex: 1 1 0;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--fg-muted);
+  text-align: left;
+}
+
+.step:disabled {
+  cursor: default;
+}
+
+.step[aria-current="step"] {
+  color: var(--fg);
+}
+
+.stepNumber {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.step[aria-current="step"] .stepNumber {
+  border-color: transparent;
+  background-color: var(--primary-solid);
+  color: var(--primary-solid-fg);
+}
+
+.stepDone .stepNumber {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.stepLabel {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nom de l'étape courante dans la ligne « Étape 1 sur 3 » : visible seulement
+   quand les libellés des pastilles sont masqués. */
+.currentLabel {
+  display: none;
+}
+
+/* Sous 420 px, les trois libellés ne tiennent pas : on ne garde que les
+   pastilles numérotées, et le nom de l'étape courante remonte dans la ligne
+   « Étape 1 sur 3 ». */
+@media (max-width: 420px) {
+  .stepLabel {
+    display: none;
+  }
+
+  .step {
+    justify-content: center;
+    gap: 0;
+  }
+
+  .currentLabel {
+    display: inline;
+  }
+}
+
+/* --- Barre d'action ------------------------------------------------------ */
+
+.bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background-color: color-mix(in srgb, var(--paper) 92%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.barStatic {
+  position: static;
+  background-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.barMeta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.barCount {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.barTotal {
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+
+.barActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .bar {
+    position: static;
+    margin-top: 8px;
+    padding: 16px 0 0;
+    background-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* --- PWA installée : la barre passe au-dessus des onglets ---------------- */
+@media (display-mode: standalone) and (max-width: 767px) {
+  .bar {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 12px;
+  }
+}

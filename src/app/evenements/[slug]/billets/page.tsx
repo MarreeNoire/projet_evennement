@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 
 import { CheckoutPanel } from "@/components/checkout/checkout-panel";
-import { EditorialFooter } from "@/components/layout/editorial/editorial-footer";
-import { EditorialScope } from "@/components/layout/editorial/editorial-shell";
-import { SiteHeader } from "@/components/layout/site-header";
-import { loadHeaderUser } from "@/lib/auth/viewer";
+import { EditorialShell } from "@/components/layout/editorial/editorial-shell";
+import shell from "@/components/layout/editorial/editorial-shell.module.css";
 
 export const metadata: Metadata = { title: "Commander des billets" };
 
-/* Page de commande : quantités + coordonnées (connexion requise). */
+/* Page de commande : quantités + coordonnées + paiement (connexion requise).
+
+   Elle vit dans le shell éditorial public, comme la fiche de l'événement :
+   même en-tête, même pied, même papier. Le tunnel n'est plus une bulle
+   applicative avec sa propre navigation. */
 
 export default async function CheckoutPage({
   params,
@@ -19,17 +21,12 @@ export default async function CheckoutPage({
 }) {
   const { slug } = await params;
   const { type } = await searchParams;
-  const viewer = await loadHeaderUser();
 
   return (
-    <EditorialScope>
-      <div className="flex min-h-dvh flex-col">
-        <SiteHeader />
-        <main id="contenu" className="container-page flex flex-col gap-6 py-8">
-          <CheckoutPanel slug={slug} type={typeof type === "string" ? type : undefined} />
-        </main>
-        <EditorialFooter viewer={viewer} />
+    <EditorialShell>
+      <div className={`${shell.wrap} ${shell.page}`}>
+        <CheckoutPanel slug={slug} type={typeof type === "string" ? type : undefined} />
       </div>
-    </EditorialScope>
+    </EditorialShell>
   );
 }
