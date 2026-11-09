@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { AdminUsersList } from "@/components/admin/admin-users-list";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
   title: "Gestion des utilisateurs | Administration | Event",
@@ -16,7 +16,9 @@ export default async function AdminUtilisateursPage({
 }) {
   const { q = "" } = await searchParams;
   const term = q.trim().slice(0, 100);
-  const supabase = await createSupabaseServerClient();
+  // L'email n'est plus lisible via la clé anonyme : page réservée aux admins
+  // par le layout, on utilise le client service_role pour l'annuaire.
+  const supabase = createSupabaseAdminClient();
   let query = supabase.from("profiles").select("id, display_name, full_name, email, username, is_verified, created_at").order("created_at", { ascending: false }).limit(100);
   if (term) {
     const safeTerm = term.replace(/[,%()]/g, " ").trim();

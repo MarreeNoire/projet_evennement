@@ -1,5 +1,7 @@
 import { OrgTeamManager, type TeamMember } from "@/components/events/org-team-manager";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isSupabaseAdminConfigured } from "@/lib/env";
 import { ORG_ROLE_LABELS, type OrgRole } from "@/lib/constants";
 
 export const metadata = {
@@ -54,6 +56,12 @@ export default async function OrgEquipePage() {
     return <OrgTeamManager initialMembers={[]} />;
   }
 
+  // L'email n'est plus lisible via la clé anonyme. Seuls le propriétaire et les
+  // gestionnaires de l'organisation y ont accès, via le client serveur.
+  const canSeeEmails =
+    (currentUserRole === "owner" || currentUserRole === "manager") &&
+    isSupabaseAdminConfigured;
+
   // Récupérer les membres et le propriétaire
   const [{ data: members }, { data: ownerProfile }] = await Promise.all([
     supabase
@@ -64,7 +72,7 @@ export default async function OrgEquipePage() {
     ownerId
       ? supabase
           .from("profiles")
-          .select("id, display_name, full_name, email, avatar_url")
+          .select("id, display_name, full_name, avatar_url")
           .eq("id", ownerId)
           .maybeSingle()
       : { data: null },
@@ -81,11 +89,27 @@ export default async function OrgEquipePage() {
   const { data: memberProfiles } = memberUserIds.length
     ? await supabase
         .from("profiles")
-        .select("id, display_name, full_name, email, avatar_url")
+        .select("id, display_name, full_name, avatar_url")
         .in("id", memberUserIds)
     : { data: [] };
 
   const profilesById = new Map((memberProfiles ?? []).map((p) => [p.id, p]));
+
+  const emailsById = new Map<string, string>();
+  if (canSeeEmails) {
+    const emailTargets = [
+      ...new Set([...memberUserIds, ...(ownerId ? [ownerId] : [])]),
+    ];
+    if (emailTargets.length) {
+      const { data: emailRows } = await createSupabaseAdminClient()
+        .from("profiles")
+        .select("id, email")
+        .in("id", emailTargets);
+      for (const row of emailRows ?? []) {
+        if (row.email) emailsById.set(row.id, row.email);
+      }
+    }
+  }
 
   const initialMembers: TeamMember[] = [
     ...(ownerProfile
@@ -94,7 +118,7 @@ export default async function OrgEquipePage() {
             id: `owner-${ownerProfile.id}`,
             userId: ownerProfile.id,
             name: ownerProfile.full_name || ownerProfile.display_name,
-            email: ownerProfile.email || "",
+            email: emailsById.get(ownerProfile.id) || "",
             avatarUrl: ownerProfile.avatar_url,
             role: "owner" as const,
             roleLabel: "Propriétaire",
@@ -113,7 +137,10 @@ export default async function OrgEquipePage() {
           profile?.display_name ||
           m.invited_email?.split("@")[0] ||
           "Collaborateur",
-        email: profile?.email || m.invited_email || "Utilisateur de l'application",
+        email:
+          (profile?.id ? emailsById.get(profile.id) : undefined) ||
+          m.invited_email ||
+          "Utilisateur de l'application",
         avatarUrl: profile?.avatar_url,
         role,
         roleLabel: ORG_ROLE_LABELS[role as OrgRole] || role,

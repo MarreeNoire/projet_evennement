@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 type ContactRequestResult = { success: true } | { success: false; error: string };
 
@@ -31,7 +32,9 @@ export async function requestConnectionPhone(connectionId: string): Promise<Cont
   if (!recipientId)
     return { success: false, error: "Cette personne n’est pas dans tes connexions." };
 
-  const { data: existingShare } = await supabase
+  // `profile_contacts` n'est lisible que par son propriétaire : la vérification
+  // passe par le client admin, sinon elle est toujours fausse.
+  const { data: existingShare } = await createSupabaseAdminClient()
     .from("profile_contacts")
     .select("user_id")
     .eq("user_id", recipientId)

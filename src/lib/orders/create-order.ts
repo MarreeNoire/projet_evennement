@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { generateReference } from "@/lib/utils";
 import { checkoutSchema, type CheckoutInput } from "@/lib/validation/checkout";
 import { checkQuantityBounds, checkSaleWindow, priceOrder } from "@/lib/orders/pricing";
@@ -34,10 +36,16 @@ export async function createOrder(
 
   const values = parsed.data;
   const supabase = await createSupabaseServerClient();
+  // Les écritures de commande sont réservées au serveur (cf. migration de
+  // durcissement : plus aucun GRANT d'écriture pour `authenticated`).
+  const admin = createSupabaseAdminClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Connecte-toi pour commander.");
+  if (!checkRateLimit(`checkout:${user.id}`, 12, 60_000)) {
+    throw new Error("Trop de tentatives de commande. Réessaie dans une minute.");
+  }
   const { data: maintenanceSetting } = await supabase
     .from("platform_settings")
     .select("value")
@@ -186,7 +194,7 @@ export async function createOrder(
 
   const reference = generateReference("CMD");
 
-  const { data: order, error } = await supabase
+  const { data: order, error } = await admin
     .from("orders")
     .insert({
       reference,
@@ -233,7 +241,7 @@ export async function createOrder(
   }
 
   // Lignes figées (prix du jour, quantités).
-  const { error: itemsError } = await supabase.from("order_items").insert(
+  const { error: itemsError } = await admin.from("order_items").insert(
     pricing.lines.map((line) => ({
       order_id: order.id,
       ticket_type_id: line.ticketTypeId,
@@ -244,13 +252,13 @@ export async function createOrder(
   );
 
   if (itemsError) {
-    await supabase.from("orders").delete().eq("id", order.id);
+    await admin.from("orders").delete().eq("id", order.id);
     throw new Error("Création de la commande impossible. Réessaie.");
   }
 
   // Gratuite : génère les billets immédiatement (fonction SQL idempotente).
   if (pricing.total === 0) {
-    const { error: ticketError } = await supabase.rpc("generate_tickets_for_order", {
+    const { error: ticketError } = await admin.rpc("generate_tickets_for_order", {
       target_order_id: order.id,
     });
     if (ticketError) {

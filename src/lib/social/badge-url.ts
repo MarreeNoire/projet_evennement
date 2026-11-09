@@ -8,6 +8,10 @@ export function getRequestOrigin(
   fallbackUrl: string,
   isProduction: boolean,
 ): string {
+  // En production, l'origine publique est fixée par la configuration : un
+  // en-tête `Host` / `X-Forwarded-Host` forgé ne doit pas la remplacer.
+  if (isProduction) return new URL(fallbackUrl).origin;
+
   const host = headers.get("x-forwarded-host") ?? headers.get("host");
   const forwardedProtocol = headers.get("x-forwarded-proto")?.split(",", 1)[0]?.trim();
 

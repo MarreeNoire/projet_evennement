@@ -5,6 +5,7 @@ import { env } from "@/lib/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { confirmPaidOrder } from "@/lib/orders/confirm-order";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 /* Confirmation simulée (mode mock). Refusée en production et en mode CinetPay. */
 
@@ -33,6 +34,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "Non authentifié." }, { status: 401 });
   }
 
+  if (!checkRateLimit(`mock-confirm:${user.id}`, 20, 60_000)) {
+    return NextResponse.json({ ok: false, error: "Trop de requêtes." }, { status: 429 });
+  }
+
   const admin = createSupabaseAdminClient();
 
   // La commande doit appartenir à l'utilisateur et être en attente.
@@ -54,7 +59,8 @@ export async function POST(request: NextRequest) {
       completed_at: new Date().toISOString(),
       payload: { simulated: true, transactionId, decision } as never,
     })
-    .eq("provider_transaction_id", transactionId);
+    .eq("provider_transaction_id", transactionId)
+    .eq("order_id", orderId);
 
   if (decision === "accepted") {
     try {

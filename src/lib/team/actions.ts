@@ -124,10 +124,11 @@ export async function inviteTeamMemberAction(input: {
       return { ok: false, error: "Cet utilisateur est déjà le propriétaire de l'organisation." };
     }
 
-    // Récupérer le profil du membre invité
+    // Récupérer le profil du membre invité. L'email n'est plus lisible par les
+    // clients : l'invitation se fait par identifiant, pas par adresse.
     const { data: targetProfile } = await supabase
       .from("profiles")
-      .select("id, display_name, full_name, email, avatar_url")
+      .select("id, display_name, full_name, avatar_url")
       .eq("id", input.targetUserId)
       .single();
 
@@ -180,7 +181,7 @@ export async function inviteTeamMemberAction(input: {
           role: input.role,
           status: "active",
           invited_by: user.id,
-          invited_email: targetProfile.email,
+          invited_email: null,
         })
         .select("id")
         .single();
@@ -222,7 +223,7 @@ export async function inviteTeamMemberAction(input: {
         id: memberId,
         userId: targetProfile.id,
         name: targetProfile.full_name || targetProfile.display_name,
-        email: targetProfile.email || "",
+        email: null,
         avatarUrl: targetProfile.avatar_url,
         role: input.role,
         roleLabel: ORG_ROLE_LABELS[input.role],

@@ -4,6 +4,26 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
   : undefined;
 
+/* Politique de sécurité du contenu : aucun script externe, aucun cadre
+   distant. `unsafe-inline` reste nécessaire pour les scripts d'amorçage
+   injectés par Next.js ; `unsafe-eval` n'est autorisé qu'en développement. */
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline'",
+  process.env.NODE_ENV === "production"
+    ? "script-src 'self' 'unsafe-inline'"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "connect-src 'self' https: wss:",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+].join("; ");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -37,8 +57,7 @@ const nextConfig: NextConfig = {
           ]
         : []),
     ],
-    // Autoriser les IPs locales/privées pour Supabase en dev (SSRF protection bypass)
-    dangerouslyAllowLocalIP: true,
+    // Les IP privées ne sont jamais joignables par l'optimiseur d'images (anti-SSRF).
     formats: ["image/avif", "image/webp"],
   },
 
@@ -47,6 +66,7 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
+          { key: "Content-Security-Policy", value: contentSecurityPolicy },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

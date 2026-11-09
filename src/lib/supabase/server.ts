@@ -76,7 +76,7 @@ export const getCurrentProfile = cache(async function getCurrentProfile() {
       supabase
         .from("profiles")
         .select(
-          "id, username, display_name, full_name, email, avatar_url, bio, city, country, interests, visibility, allow_search, allow_connections, allow_private_messages, is_verified, onboarding_completed, last_seen_at, created_at, updated_at",
+          "id, username, display_name, full_name, avatar_url, bio, city, country, interests, visibility, allow_search, allow_connections, allow_private_messages, is_verified, onboarding_completed, last_seen_at, created_at, updated_at",
         )
         .eq("id", user.id)
         .maybeSingle(),
@@ -96,6 +96,9 @@ export const getCurrentProfile = cache(async function getCurrentProfile() {
 
   return {
     ...profile,
+    // L'email vient de la session Supabase, pas de la table profiles (colonne
+    // volontairement non lisible par les clients authentifiés).
+    email: user.email ?? null,
     roles: rolesList,
   };
 });

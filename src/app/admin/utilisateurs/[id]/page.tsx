@@ -32,7 +32,9 @@ export default async function AdminUtilisateurDetailPage({
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
   const supabase = await createSupabaseServerClient();
-  const { data: profile, error } = await supabase
+  // L'email n'est plus exposé aux clients : la fiche admin passe par service_role.
+  const admin = createSupabaseAdminClient();
+  const { data: profile, error } = await admin
     .from("profiles")
     .select(
       "id, display_name, full_name, email, username, city, country, bio, is_verified, onboarding_completed, created_at, last_seen_at",
@@ -41,7 +43,6 @@ export default async function AdminUtilisateurDetailPage({
     .maybeSingle();
   if (error || !profile) notFound();
 
-  const admin = createSupabaseAdminClient();
   const [{ data: authUser }, { data: contact }] = await Promise.all([
     admin.auth.admin.getUserById(id),
     admin.from("profile_contacts").select("phone").eq("user_id", id).maybeSingle(),

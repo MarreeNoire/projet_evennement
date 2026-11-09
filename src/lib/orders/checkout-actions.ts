@@ -8,6 +8,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createOrder } from "@/lib/orders/create-order";
 import { checkoutSchema } from "@/lib/validation/checkout";
 import { env } from "@/lib/env";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 async function getPublicAppUrl() {
   const configuredUrl = env.appUrl;
@@ -15,8 +16,14 @@ async function getPublicAppUrl() {
     return configuredUrl;
   }
 
+  // En production, l'URL publique vient exclusivement de la configuration :
+  // un en-tête `Host` / `X-Forwarded-Host` forgé ne doit jamais la piloter.
+  if (env.isProduction) {
+    throw new Error("NEXT_PUBLIC_APP_URL doit être configuré en production.");
+  }
+
   const requestHeaders = await headers();
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const host = requestHeaders.get("host");
   if (!host || /[\s/@\\]/.test(host)) {
     throw new Error("Impossible de déterminer l’adresse publique de l’application.");
   }
@@ -35,6 +42,7 @@ async function getPublicAppUrl() {
 export interface StartCheckoutResult {
   ok: boolean;
   paymentUrl?: string;
+  orderId?: string;
   orderReference?: string;
   completed?: boolean;
   retryWithNewAttempt?: boolean;
@@ -82,7 +90,13 @@ export async function startCheckout(raw: unknown, idempotencyKey: string): Promi
     } catch {
       // La réservation est confirmée : un échec de recherche du salon ne doit pas la bloquer.
     }
-    return { ok: true, paymentUrl, orderReference: order.reference, completed: true };
+    return {
+      ok: true,
+      paymentUrl,
+      orderId: order.orderId,
+      orderReference: order.reference,
+      completed: true,
+    };
   }
 
   if (order.reused) {
@@ -95,7 +109,12 @@ export async function startCheckout(raw: unknown, idempotencyKey: string): Promi
       .limit(1)
       .maybeSingle();
     if (payment?.status === "initiated" && payment.provider_payment_url) {
-      return { ok: true, paymentUrl: payment.provider_payment_url, orderReference: order.reference };
+      return {
+        ok: true,
+        paymentUrl: payment.provider_payment_url,
+        orderId: order.orderId,
+        orderReference: order.reference,
+      };
     }
     return {
       ok: false,
@@ -133,7 +152,7 @@ export async function startCheckout(raw: unknown, idempotencyKey: string): Promi
     });
 
     // Journalise la transaction (règle métier n°12).
-    const { error: paymentError } = await supabase.from("payments").insert({
+    const { error: paymentError } = await createSupabaseAdminClient().from("payments").insert({
       order_id: order.orderId,
       provider: session.provider,
       provider_transaction_id: session.transactionId,
@@ -148,10 +167,15 @@ export async function startCheckout(raw: unknown, idempotencyKey: string): Promi
       throw new Error("Impossible de préparer le paiement. Aucune redirection n’a été effectuée.");
     }
 
-    return { ok: true, paymentUrl: session.paymentUrl, orderReference: order.reference };
+    return {
+      ok: true,
+      paymentUrl: session.paymentUrl,
+      orderId: order.orderId,
+      orderReference: order.reference,
+    };
   } catch (error) {
     if (supabase) {
-      const { error: cancelError } = await supabase
+      const { error: cancelError } = await createSupabaseAdminClient()
         .from("orders")
         .update({ status: "cancelled" })
         .eq("id", order.orderId)

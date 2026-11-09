@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { checkRateLimit, clientKeyFromHeaders } from "@/lib/rate-limit";
 
 /* =============================================================================
    GET /api/search/suggest?q=...
@@ -11,7 +12,14 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
    ========================================================================== */
 
 export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get("q")?.trim() ?? "";
+  const q = (request.nextUrl.searchParams.get("q")?.trim() ?? "").slice(0, 64);
+
+  if (!checkRateLimit(`suggest:${clientKeyFromHeaders(request.headers)}`, 40, 60_000)) {
+    return NextResponse.json([], {
+      status: 429,
+      headers: { "Retry-After": "60", "Cache-Control": "no-store" },
+    });
+  }
 
   if (q.length < 2) {
     return NextResponse.json([], {

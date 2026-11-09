@@ -3,6 +3,7 @@ import { ScrollText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/types/database";
 
 export const metadata = {
@@ -129,7 +130,8 @@ export default async function AdminJournalPage() {
 
   const [profileResult, eventResult] = await Promise.all([
     profileIds.length
-      ? supabase.from("profiles").select("id, display_name, full_name, email").in("id", profileIds)
+      // L'email n'est plus lisible via la clé anonyme : page réservée aux admins.
+      ? createSupabaseAdminClient().from("profiles").select("id, display_name, full_name, email").in("id", profileIds)
       : Promise.resolve({ data: [] }),
     eventIds.length
       ? supabase.from("events").select("id, title").in("id", eventIds)
