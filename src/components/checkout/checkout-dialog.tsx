@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { LockKeyhole, X } from "lucide-react";
+
+/* Confirmation avant fermeture : un panier rempli ne doit pas disparaître
+   sans avertissement (X, Esc ou clic sur l'arrière-plan). Le formulaire se
+   déclare « sale » via data-checkout-dirty ; la logique de commande reste
+   intacte (aucune donnée n'est supprimée par le dialog lui-même). */
+function hasUnsavedCart(dialog: HTMLDialogElement): boolean {
+  return Boolean(dialog.querySelector("[data-checkout-dirty='true']"));
+}
 
 export function CheckoutDialog({
   children,
@@ -17,7 +25,14 @@ export function CheckoutDialog({
     if (dialog && !dialog.open) dialog.showModal();
   }, []);
 
-  function closeDialog() {
+  function closeDialog({ force = false }: { force?: boolean } = {}) {
+    const dialog = dialogRef.current;
+    if (!force && dialog && hasUnsavedCart(dialog)) {
+      const leave = window.confirm(
+        "Ta commande n'est pas finalisée. Quitter et abandonner les billets choisis ?",
+      );
+      if (!leave) return;
+    }
     router.back();
   }
 
@@ -36,14 +51,20 @@ export function CheckoutDialog({
     >
       <div className="checkout-dialog-shell">
         <header className="checkout-dialog-header">
-          <h2 id="checkout-dialog-title" className="font-display text-xl font-bold sm:text-2xl">
-            Finaliser la réservation
-          </h2>
+          <div className="min-w-0">
+            <p className="text-fg-muted flex items-center gap-1.5 text-[0.6875rem] font-semibold tracking-[0.08em] uppercase">
+              <LockKeyhole className="size-3 shrink-0" aria-hidden="true" />
+              Paiement sécurisé
+            </p>
+            <h2 id="checkout-dialog-title" className="font-display text-xl font-bold sm:text-2xl">
+              Finaliser la réservation
+            </h2>
+          </div>
           <button
             type="button"
             className="checkout-dialog-close"
             aria-label="Fermer le paiement et revenir à l’événement"
-            onClick={closeDialog}
+            onClick={() => closeDialog()}
           >
             <X className="size-5" aria-hidden="true" />
           </button>

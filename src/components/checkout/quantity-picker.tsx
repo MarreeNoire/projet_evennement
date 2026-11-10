@@ -28,6 +28,12 @@ export function QuantityPicker({
   const remaining = ticketType.quantity - ticketType.sold_count;
   const max = Math.min(ticketType.max_per_order, Math.max(remaining, 0));
   const lowStock = remaining > 0 && remaining <= 20;
+  const plusBlockedReason =
+    remaining <= 0
+      ? "épuisé"
+      : quantity >= max
+        ? `maximum ${max} par commande`
+        : null;
 
   return (
     <div
@@ -55,8 +61,13 @@ export function QuantityPicker({
                   ? `plus que ${remaining}`
                   : `${remaining} dispo.`}
             </span>
+          ) : remaining <= 0 ? (
+            <span className="text-warning ml-1.5 whitespace-nowrap">· épuisé</span>
           ) : null}
         </p>
+        {plusBlockedReason && remaining > 0 ? (
+          <p className="text-fg-muted mt-0.5 text-xs">{plusBlockedReason}</p>
+        ) : null}
       </div>
 
       <div
@@ -74,13 +85,25 @@ export function QuantityPicker({
         >
           <Minus className="size-4" aria-hidden="true" />
         </Button>
-        <span
-          className="w-8 text-center text-base font-semibold tabular-nums"
-          role="status"
-          aria-live="polite"
-        >
-          {quantity}
-        </span>
+        <input
+          className="border-border w-9 border-0 bg-transparent text-center text-base font-semibold tabular-nums outline-none [appearance:textfield] focus-visible:ring-2 focus-visible:ring-border-focus/35 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={max}
+          value={quantity}
+          disabled={disabled || remaining <= 0}
+          aria-label={`Quantité pour ${ticketType.name}`}
+          onChange={(event) => {
+            const parsed = Number.parseInt(event.target.value, 10);
+            if (Number.isNaN(parsed)) return;
+            onChange(Math.min(Math.max(parsed, 0), max));
+          }}
+          onBlur={(event) => {
+            const parsed = Number.parseInt(event.target.value, 10);
+            if (event.target.value === "" || Number.isNaN(parsed)) onChange(0);
+          }}
+        />
         <Button
           type="button"
           variant="secondary"

@@ -136,6 +136,7 @@ export default async function PaymentReturnPage({
         ) : (
           <>
             <PaymentStatusPoller active={status === "pending" && Boolean(payment)} />
+            <span className="payment-pending-spinner" role="status" aria-label="Vérification du paiement en cours" />
             <p className="eyebrow">Commande {order.reference}</p>
             <h1 className="font-display text-4xl leading-[1.02] font-semibold">Paiement en cours…</h1>
             <Alert tone="info" title="Confirmation en attente">
@@ -143,6 +144,11 @@ export default async function PaymentReturnPage({
                 ? "Tu as annulé le paiement. Ta commande reste en attente."
                 : "Le prestataire traite encore ta transaction. Cette page vérifie automatiquement le statut pendant quelques minutes."}
             </Alert>
+            <p className="text-sm text-fg-muted">
+              Ne relance pas le paiement pendant cette attente : tu risquerais d’être débité deux
+              fois. Si le statut reste bloqué après quelques minutes, contacte-nous depuis la page
+              d’aide.
+            </p>
             <p className="text-sm text-fg-muted">
               Voir le statut dans <Link href={ROUTES.myTickets} className="text-primary hover:underline">mes billets</Link>.
             </p>

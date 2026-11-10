@@ -143,6 +143,15 @@
   color: var(--fg);
 }
 
+/* Détail des lignes de la barre (étape billets) : tronqué à deux tarifs. */
+.barLines {
+  overflow: hidden;
+  font-size: 11px;
+  color: var(--fg-subtle);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .barActions {
   display: flex;
   flex: none;
@@ -161,10 +170,16 @@
   }
 }
 
-/* --- PWA installée : la barre passe au-dessus des onglets ---------------- */
+/* --- PWA installée : la barre passe au-dessus des onglets ----------------
+   La hauteur de la barre d'onglets est externalisée ici : si le layout PWA
+   change, seule cette variable doit être ajustée (source unique). */
 @media (display-mode: standalone) and (max-width: 767px) {
+  :global(:root) {
+    --checkout-tabbar-height: 64px;
+  }
+
   .bar {
-    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(var(--checkout-tabbar-height, 64px) + env(safe-area-inset-bottom, 0px));
     padding-bottom: 12px;
   }
 }

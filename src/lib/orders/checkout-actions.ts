@@ -9,6 +9,7 @@ import { createOrder } from "@/lib/orders/create-order";
 import { checkoutSchema } from "@/lib/validation/checkout";
 import { env } from "@/lib/env";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { formatPrice } from "@/lib/utils";
 
 async function getPublicAppUrl() {
   const configuredUrl = env.appUrl;
@@ -38,6 +39,93 @@ async function getPublicAppUrl() {
    Retourne l'URL de redirection vers le prestataire (ou mes-billets si gratuit).
    Le formulaire client appelle cette action et redirige via `window.location`.
    ========================================================================== */
+
+export interface ValidatePromoResult {
+  ok: boolean;
+  /** Remise calculée par le serveur (0 si le code ne s'applique pas). */
+  discount: number;
+  /** Sous-total estimé côté serveur, pour cadrer la remise. */
+  message?: string;
+}
+
+/* Action : vérifier un code promo à la saisie (lecture seule).
+   Mêmes règles d'éligibilité que create-order ; la commande finale reste
+   revalidée intégralement par startCheckout, jamais approuvée sur cette base. */
+export async function validatePromoCode(
+  raw: { eventId: string; promoCode: string; items: Array<{ ticketTypeId: string; quantity: number }> },
+): Promise<ValidatePromoResult> {
+  const promoCode = raw.promoCode.trim().toUpperCase();
+  const empty: ValidatePromoResult = { ok: false, discount: 0 };
+  if (!promoCode) return empty;
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const [{ data: promo }, { data: ticketTypes }] = await Promise.all([
+      supabase
+        .from("promo_codes")
+        .select("*")
+        .eq("code", promoCode)
+        .eq("is_active", true)
+        .maybeSingle(),
+      supabase
+        .from("ticket_types")
+        .select("id, name, price")
+        .in("id", raw.items.map((item) => item.ticketTypeId))
+        .eq("event_id", raw.eventId)
+        .eq("is_active", true),
+    ]);
+
+    if (!promo) return { ...empty, message: "Ce code n'est pas reconnu." };
+
+    const now = new Date();
+    if (promo.event_id && promo.event_id !== raw.eventId) {
+      return { ...empty, message: "Ce code ne s'applique pas à cet événement." };
+    }
+    if (promo.starts_at && new Date(promo.starts_at) > now) {
+      return { ...empty, message: "Ce code n'est pas encore actif." };
+    }
+    if (promo.expires_at && new Date(promo.expires_at) < now) {
+      return { ...empty, message: "Ce code a expiré." };
+    }
+    if (promo.max_uses !== null && promo.used_count >= promo.max_uses) {
+      return { ...empty, message: "Ce code a atteint sa limite d'utilisation." };
+    }
+
+    const subtotal = (ticketTypes ?? []).reduce((sum, type) => {
+      const item = raw.items.find((line) => line.ticketTypeId === type.id);
+      return sum + (item ? type.price * item.quantity : 0);
+    }, 0);
+    if (subtotal < (promo.min_order_amount ?? 0)) {
+      return {
+        ...empty,
+        message: `Ce code exige un panier minimum de ${promo.min_order_amount} F.`,
+      };
+    }
+
+    const discount =
+      promo.discount_kind === "percentage"
+        ? Math.round((subtotal * promo.discount_value) / 100)
+        : Math.min(promo.discount_value, subtotal);
+
+    const pricedItems = raw.items.map((item) => {
+      const type = (ticketTypes ?? []).find((t) => t.id === item.ticketTypeId);
+      return type ? type.price * item.quantity : 0;
+    });
+    const subtotalAfterDiscount = Math.max(
+      pricedItems.reduce((sum, line) => sum + line, 0) - discount,
+      0,
+    );
+
+    return {
+      ok: true,
+      discount,
+      message: `Code ${promoCode} appliqué : −${formatPrice(discount)} sur ton total (soit ${formatPrice(subtotalAfterDiscount)} à payer).`,
+    };
+  } catch {
+    // Ne bloque jamais la commande : le code sera revérifié par create-order.
+    return { ...empty, message: "Vérification du code impossible pour le moment." };
+  }
+}
 
 export interface StartCheckoutResult {
   ok: boolean;

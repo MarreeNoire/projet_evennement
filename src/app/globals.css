@@ -914,13 +914,15 @@
   padding: 0;
   background: var(--bg);
   color: var(--fg);
-  box-shadow: var(--shadow-xl);
+  box-shadow:
+    0 24px 64px rgb(0 0 0 / 0.28),
+    0 4px 16px rgb(0 0 0 / 0.14);
   animation: checkout-dialog-enter 220ms var(--ease-out-soft) both;
 }
 
 .checkout-dialog::backdrop {
-  background: color-mix(in srgb, var(--void-950) 72%, transparent);
-  backdrop-filter: blur(3px);
+  background: color-mix(in srgb, var(--void-950) 78%, transparent);
+  backdrop-filter: blur(5px);
 }
 
 .checkout-dialog-shell {
@@ -1043,7 +1045,7 @@
   padding-top: 0.5rem;
 }
 
-.checkout-form-dialog > div:last-child {
+.checkout-form-dialog > .checkout-action-bar {
   flex: 0 0 auto;
   margin-top: auto;
   border-color: var(--border);
@@ -1066,16 +1068,40 @@
 }
 
 @media (max-width: 640px) {
+  /* Feuille ancrée en bas sur mobile : geste naturel, poignée en haut, plus
+     de marges perdues autour du tunnel. */
   .checkout-dialog {
-    width: min(calc(100vw - 1rem), 30rem);
-    height: min(40rem, calc(100dvh - 2rem));
-    max-height: calc(100dvh - 2rem);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: none;
+    height: min(46rem, calc(100dvh - 1.5rem));
+    max-height: calc(100dvh - 1.5rem);
+    margin: auto auto 0;
+    border: 0;
+    border-top: 1px solid var(--border-strong);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .checkout-dialog::after {
+    content: "";
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    width: 2.5rem;
+    height: 0.25rem;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: var(--border-strong);
+    pointer-events: none;
   }
 
   .checkout-dialog-header {
-    padding-block: max(0.75rem, env(safe-area-inset-top));
+    padding-block: max(1.25rem, env(safe-area-inset-top));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout-dialog {
+    animation: none;
   }
 }
 
@@ -1099,6 +1125,34 @@
   aspect-ratio: 1;
   place-self: center;
   color: var(--success);
+}
+
+/* Spinner d'attente sur la page de retour paiement : feedback pendant la
+   vérification automatique du statut (aria-label porte l'information). */
+.payment-pending-spinner {
+  display: block;
+  width: 2.25rem;
+  aspect-ratio: 1;
+  margin-inline: auto;
+  border: 3px solid color-mix(in srgb, var(--fg) 15%, transparent);
+  border-top-color: var(--primary);
+  border-radius: 999px;
+  animation: payment-pending-spin 900ms linear infinite;
+}
+
+@keyframes payment-pending-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payment-pending-spinner {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    border-top-color: var(--primary);
+    border-inline-start-color: color-mix(in srgb, var(--fg) 15%, transparent);
+  }
 }
 
 .payment-success-mark svg {
