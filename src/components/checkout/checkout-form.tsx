@@ -4,50 +4,58 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { ArrowLeft, ArrowRight, Check, CreditCard, LockKeyhole } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronDown,
+  LoaderCircle,
+  LockKeyhole,
+  Smartphone,
+  Ticket,
+} from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, Input, fieldAriaProps } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import { Field, Input, fieldAriaProps } from "@/components/ui/field";
 import { Alert } from "@/components/ui/states";
-import { formatPrice } from "@/lib/utils";
-import { startCheckout, validatePromoCode } from "@/lib/orders/checkout-actions";
+import { startCheckout } from "@/lib/orders/checkout-actions";
+import { clearPendingPayment, savePendingPayment } from "@/lib/orders/pending-payment";
 import { priceOrder } from "@/lib/orders/pricing";
+import { haptic } from "@/lib/ui/haptics";
+import { formatPrice } from "@/lib/utils";
 import {
   checkoutItemsFromQuantities,
   checkoutSchema,
   type CheckoutInput,
 } from "@/lib/validation/checkout";
-import type { TicketTypeRow } from "@/types/database";
 import type { PaymentProviderName } from "@/lib/payments/types";
+import type { TicketTypeRow } from "@/types/database";
 
+import { PendingPaymentBanner } from "./pending-payment-banner";
 import { QuantityPicker } from "./quantity-picker";
 import styles from "./checkout-form.module.css";
 
 /* =============================================================================
-   Tunnel de commande
+   Tunnel de commande — trois étapes : billets, coordonnées, paiement
    ---------------------------------------------------------------------------
-   Trois étapes seulement : billets, coordonnées, paiement. Le récapitulatif et
-   le bouton de paiement vivent sur la dernière étape, une seule fois.
-
-   Sur mobile la barre d'action reste collée en bas de l'écran (au-dessus de la
-   barre d'onglets quand la PWA est installée) : le total et l'action principale
-   sont toujours atteignables sans faire défiler.
-
-   À chaque changement d'étape, la vue revient en haut du formulaire et le focus
-   suit, pour ne pas laisser l'utilisateur au milieu de la page.
+   Principes appliqués (mobile d'abord, PWA comprise) :
+   - Une seule action principale par écran, toujours à portée de pouce : la
+     barre d'action reste en bas, au-dessus de la zone sûre des encoches.
+   - Le total n'est répété qu'une fois par étape (barre), plus le récapitulatif
+     final : pas de triple affichage du même montant.
+   - On explique ce qui va se passer avant de payer (confirmation sur le
+     téléphone), pour ne pas laisser croire à un blocage.
+   - Après « Payer », un écran de redirection explicite évite l'écran figé,
+     avec une issue de secours si le navigateur bloque la redirection.
+   - La commande lancée est mémorisée : si l'utilisateur revient par une autre
+     fenêtre (PWA), on lui propose de reprendre au bon endroit.
+   - Changement d'étape : retour en haut + focus déplacé + annonce vocale.
    ========================================================================== */
 
-const STEP_LABELS = ["Billets", "Coordonnées", "Paiement"] as const;
+const STEP_LABELS = ["Billets", "Coordonnées", "Email", "Paiement"] as const;
 const LAST_STEP = STEP_LABELS.length - 1;
 
-/* État de la vérification du code promo (action serveur en lecture seule ;
-   la commande finale reste revalidée intégralement côté serveur). */
-type PromoStatus =
-  | { kind: "idle" }
-  | { kind: "checking" }
-  | { kind: "applied"; code: string; discount: number; message: string }
-  | { kind: "invalid"; message: string };
+type Notice = { kind: "validation" | "payment"; message: string };
 
 export function CheckoutForm({
   eventId,
@@ -65,15 +73,20 @@ export function CheckoutForm({
   inDialog?: boolean;
 }) {
   const router = useRouter();
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [step, setStep] = useState(0);
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [redirectSlow, setRedirectSlow] = useState(false);
   const [checkoutAttempt, setCheckoutAttempt] = useState<{
     fingerprint: string;
     key: string;
   } | null>(null);
+
   const formRef = useRef<HTMLFormElement>(null);
   const stepRef = useRef<HTMLDivElement>(null);
-  const errorRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const redirectTimer = useRef<number | undefined>(undefined);
 
   const initialTicket =
     ticketTypes.find(
@@ -120,106 +133,101 @@ export function CheckoutForm({
     [ticketTypes, quantities],
   );
 
-  const [promoStatus, setPromoStatus] = useState<PromoStatus>({
-    kind: "idle",
-  });
-  const pricing = useMemo(
-    () =>
-      priceOrder(selectedLines, {
-        promoDiscount: promoStatus.kind === "applied" ? promoStatus.discount : 0,
-      }),
-    [selectedLines, promoStatus],
-  );
+  const pricing = useMemo(() => priceOrder(selectedLines), [selectedLines]);
   const buyerPhone = useWatch({ control, name: "buyerPhone" });
   const buyerName = useWatch({ control, name: "buyerName" });
   const buyerEmail = useWatch({ control, name: "buyerEmail" });
   const promoCode = useWatch({ control, name: "promoCode" });
 
-  /* Vérifie le code promo à la saisie (requête après une courte pause).
-     La remise affichée vient du serveur, jamais d'un calcul local. */
+  const busy = pending || redirectUrl !== null;
+  const countLabel =
+    pricing.ticketCount > 0
+      ? `${pricing.ticketCount} billet${pricing.ticketCount > 1 ? "s" : ""}`
+      : "Aucun billet";
+
+  /* Redirection : après 6 s sans changement de page, on propose un lien direct. */
   useEffect(() => {
-    const code = promoCode?.trim().toUpperCase() ?? "";
-    if (code.length < 3) return;
+    if (!redirectUrl) {
+      setRedirectSlow(false);
+      return;
+    }
+    const id = window.setTimeout(() => setRedirectSlow(true), 6000);
+    return () => window.clearTimeout(id);
+  }, [redirectUrl]);
 
-    let cancelled = false;
-    const timer = window.setTimeout(() => {
-      setPromoStatus((current) =>
-        current.kind === "applied" && current.code === code ? current : { kind: "checking" },
-      );
-      validatePromoCode({
-        eventId,
-        promoCode: code,
-        items: checkoutItemsFromQuantities(ticketTypes, quantities),
-      })
-        .then((result) => {
-          if (cancelled) return;
-          if (result.ok && result.discount > 0) {
-            setPromoStatus({
-              kind: "applied",
-              code,
-              discount: result.discount,
-              message: result.message ?? "Code appliqué.",
-            });
-          } else {
-            setPromoStatus({ kind: "invalid", message: result.message ?? "Code non applicable." });
-          }
-        })
-        .catch(() => {
-          if (!cancelled) setPromoStatus({ kind: "idle" });
-        });
-    }, 500);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
+  /* Retour par le bouton « précédent » (cache de navigation) : on réarme l'écran. */
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setRedirectUrl(null);
     };
-  }, [promoCode, eventId, ticketTypes, quantities]);
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.clearTimeout(redirectTimer.current);
+    };
+  }, []);
 
-  /* Change d'étape en ramenant la vue en haut du formulaire et en y portant le
-     focus : sans ça, « Continuer » laissait l'utilisateur au bas de la page. */
+  /* Change d'étape : revient en haut du formulaire et y porte le focus. */
   function goToStep(next: number) {
-    setServerError(null);
+    setNotice(null);
     setStep(next);
+    haptic("light");
     window.requestAnimationFrame(() => {
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      formRef.current?.scrollIntoView({
-        block: "start",
-        behavior: reduceMotion ? "auto" : "smooth",
-      });
+      const behavior = reduceMotion ? "auto" : "smooth";
+
+      if (inDialog) {
+        scrollRef.current?.scrollTo({ top: 0, behavior });
+      } else {
+        const top = formRef.current?.getBoundingClientRect().top ?? 0;
+        if (top < 0) formRef.current?.scrollIntoView({ block: "start", behavior });
+      }
       stepRef.current?.focus({ preventScroll: true });
     });
   }
 
   async function continueToNextStep() {
-    setServerError(null);
+    setNotice(null);
+
     if (step === 0) {
       if (selectedLines.length === 0) {
-        setServerError("Choisis au moins un billet pour continuer.");
+        setNotice({ kind: "validation", message: "Choisis au moins un billet pour continuer." });
         return;
       }
       goToStep(1);
       return;
     }
+
     if (step === 1) {
-      const valid = await trigger(["buyerName", "buyerEmail", "buyerPhone"]);
+      const valid = await trigger(["buyerName", "buyerPhone"]);
       if (!valid) {
         if (errors.buyerName) setFocus("buyerName");
-        else if (errors.buyerEmail) setFocus("buyerEmail");
         else if (errors.buyerPhone) setFocus("buyerPhone");
         return;
       }
       goToStep(2);
+      return;
+    }
+
+    if (step === 2) {
+      const valid = await trigger("buyerEmail");
+      if (!valid) {
+        setFocus("buyerEmail");
+        return;
+      }
+      goToStep(3);
     }
   }
 
   const onSubmit = handleSubmit(
     async (values) => {
-      setServerError(null);
+      setNotice(null);
       const items = values.items;
       if (items.length === 0) {
-        setServerError("Choisis au moins un billet.");
+        setNotice({ kind: "validation", message: "Choisis au moins un billet." });
         return;
       }
+
       try {
         const fingerprint = JSON.stringify({ ...values, eventId, items });
         let attempt = checkoutAttempt;
@@ -240,48 +248,62 @@ export function CheckoutForm({
           }
         }
         setCheckoutAttempt(attempt);
+
         const result = await startCheckout({ ...values, eventId, items }, attempt.key);
         if (!result.ok || !result.paymentUrl) {
           if (result.retryWithNewAttempt) {
             setCheckoutAttempt(null);
             window.sessionStorage.removeItem(`rassemble_checkout_${eventId}`);
           }
-          setServerError(result.error ?? "Commande impossible. Réessaie.");
+          haptic("medium");
+          setNotice({ kind: "payment", message: result.error ?? "Commande impossible. Réessaie." });
           return;
         }
-        if (result.paymentUrl.startsWith("/")) {
-          if (result.completed) {
-            setCheckoutAttempt(null);
-            window.sessionStorage.removeItem(`rassemble_checkout_${eventId}`);
-          }
-          router.push(result.paymentUrl);
-        } else {
-          window.location.assign(result.paymentUrl);
+
+        if (result.completed) {
+          setCheckoutAttempt(null);
+          window.sessionStorage.removeItem(`rassemble_checkout_${eventId}`);
+          clearPendingPayment();
+          haptic("success");
+        } else if (result.orderId) {
+          savePendingPayment({
+            orderId: result.orderId,
+            reference: result.orderReference ?? "",
+            eventId,
+            at: Date.now(),
+          });
         }
+
+        if (result.paymentUrl.startsWith("/")) {
+          router.push(result.paymentUrl);
+          return;
+        }
+
+        /* Page du prestataire : on affiche d'abord l'écran de redirection, puis on part. */
+        setRedirectUrl(result.paymentUrl);
+        const target = result.paymentUrl;
+        redirectTimer.current = window.setTimeout(() => window.location.assign(target), 450);
       } catch {
-        setServerError("La demande a échoué. Vérifie ta connexion puis réessaie.");
+        setNotice({
+          kind: "payment",
+          message: "La demande a échoué. Vérifie ta connexion puis réessaie.",
+        });
       }
     },
     (invalid) => {
       const message =
         invalid.items?.message ??
         invalid.buyerName?.message ??
-        invalid.buyerEmail?.message ??
         invalid.buyerPhone?.message ??
+        invalid.buyerEmail?.message ??
         "Vérifie les informations saisies avant de payer.";
-      setServerError(message);
+      setNotice({ kind: "validation", message });
 
       if (invalid.buyerName) setFocus("buyerName");
-      else if (invalid.buyerEmail) setFocus("buyerEmail");
       else if (invalid.buyerPhone) setFocus("buyerPhone");
+      else if (invalid.buyerEmail) setFocus("buyerEmail");
     },
   );
-
-  /* Porte le focus sur l'erreur dès son apparition (SC 3.3.1) : l'utilisateur
-     sait immédiatement ce qui bloque, où qu'il soit dans le formulaire. */
-  useEffect(() => {
-    if (serverError) errorRef.current?.focus();
-  }, [serverError]);
 
   const providerLabel =
     paymentProvider === "geniuspay"
@@ -289,410 +311,439 @@ export function CheckoutForm({
       : paymentProvider === "cinetpay"
         ? "CinetPay"
         : "Mode de simulation";
-  const providerHint =
-    paymentProvider === "geniuspay" || paymentProvider === "cinetpay"
-      ? "Wave, Orange Money ou une autre option proposée par le prestataire."
-      : "Aucun montant réel ne sera débité.";
+  const isReal = paymentProvider === "geniuspay" || paymentProvider === "cinetpay";
+  const free = pricing.total === 0;
 
-  const canPay = pricing.lines.length > 0 && !pending;
-
-  /* Bloc promo partagé entre le tunnel classique et la modal. En modal il vit
-     sur l'étape Paiement pour laisser l'étape Coordonnées tenir sans défilement. */
-  const promoBlock = (
-    <div className="flex flex-col gap-2">
-      <Field
-        label="Code promo"
-        htmlFor="promoCode"
-        hint="Facultatif"
-        error={promoStatus.kind === "invalid" ? promoStatus.message : errors.promoCode?.message}
-      >
-        <Input
-          id="promoCode"
-          placeholder="ABIDJAN10"
-          className="uppercase"
-          invalid={promoStatus.kind === "invalid"}
-          {...fieldAriaProps("promoCode", {
-            error: promoStatus.kind === "invalid" ? promoStatus.message : undefined,
-          })}
-          {...register("promoCode", {
-            onChange: (event) => {
-              if (!event.target.value.trim()) setPromoStatus({ kind: "idle" });
-            },
-          })}
-        />
-      </Field>
-      {promoStatus.kind === "checking" ? (
-        <p className="text-fg-muted text-xs" role="status">
-          Vérification du code…
-        </p>
-      ) : null}
-      {promoStatus.kind === "applied" ? (
-        <p className="text-success flex items-center gap-1.5 text-xs font-medium" role="status">
-          <Check className="size-3.5 shrink-0" aria-hidden="true" />
-          {promoStatus.message}
-        </p>
-      ) : null}
-      {promoStatus.kind === "idle" && promoCode?.trim() ? (
-        <p className="text-fg-subtle text-xs">Le code sera revérifié au moment du paiement.</p>
-      ) : null}
-    </div>
-  );
+  const padX = inDialog ? styles.padX : "";
 
   return (
     <form
       ref={formRef}
       onSubmit={step === LAST_STEP ? onSubmit : (event) => event.preventDefault()}
       noValidate
-      data-checkout-dirty={selectedLines.length > 0 ? "true" : undefined}
-      className={`mx-auto w-full max-w-3xl ${inDialog ? "checkout-form-dialog" : ""}`}
+      aria-busy={busy || undefined}
+      className={`${styles.root} ${inDialog ? styles.rootDialog : ""}`}
     >
-      <nav
-        aria-label="Étapes de la commande"
-        className="border-border bg-surface rounded-xl border px-3 py-3 sm:px-4"
-      >
-        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <p className="text-fg-muted text-sm">
-            Étape <span className="text-fg font-semibold tabular-nums">{step + 1}</span> sur{" "}
-            <span className="tabular-nums">{STEP_LABELS.length}</span>
-            <span className={styles.currentLabel}> · {STEP_LABELS[step]}</span>
+      {/* Progression : étape, nom de l'étape, segments cliquables pour revenir */}
+      <nav aria-label="Étapes de la commande" className={`${styles.progress} ${padX}`}>
+        <div className={styles.progressTop}>
+          <p className={styles.progressStep}>
+            Étape <span className="tabular-nums">{step + 1}</span> sur {STEP_LABELS.length}
           </p>
-          <p aria-live="polite" className="text-fg-muted text-sm tabular-nums">
-            {pricing.ticketCount > 0
-              ? `${pricing.ticketCount} billet${pricing.ticketCount > 1 ? "s" : ""} · ${formatPrice(pricing.total)}`
-              : "Aucun billet sélectionné"}
-          </p>
+          <p className={styles.progressName}>{STEP_LABELS[step]}</p>
         </div>
 
-        <ol className={styles.stepper}>
-          {STEP_LABELS.map((label, index) => (
-            <li key={label} className="min-w-0 flex-1">
-              <button
-                type="button"
-                disabled={index > step || pending}
-                onClick={() => goToStep(index)}
-                aria-current={step === index ? "step" : undefined}
-                className={`${styles.step} ${index < step ? styles.stepDone : ""}`}
-              >
-                <span className={styles.stepNumber} aria-hidden="true">
-                  {index < step ? <Check className="size-3.5" /> : index + 1}
-                </span>
-                <span className={styles.stepLabel}>{label}</span>
-              </button>
-            </li>
-          ))}
+        <ol className={styles.segments}>
+          {STEP_LABELS.map((label, index) => {
+            const reachable = index < step && !busy;
+            return (
+              <li key={label}>
+                <button
+                  type="button"
+                  disabled={!reachable}
+                  onClick={() => goToStep(index)}
+                  aria-current={step === index ? "step" : undefined}
+                  aria-label={
+                    index < step
+                      ? `Revenir à l’étape ${index + 1} : ${label}`
+                      : `Étape ${index + 1} : ${label}`
+                  }
+                  className={`${styles.segment} ${index < step ? styles.segmentDone : ""}`}
+                  data-current={step === index}
+                >
+                  <span className={styles.segmentBar} aria-hidden="true" />
+                  <span className={styles.segmentLabel}>
+                    {index < step ? <Check aria-hidden="true" /> : null}
+                    {label}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ol>
       </nav>
 
+      <p className="sr-only" aria-live="polite">
+        Étape {step + 1} sur {STEP_LABELS.length} : {STEP_LABELS[step]}
+      </p>
+
       <div
-        ref={stepRef}
-        data-checkout-step={step}
-        tabIndex={-1}
-        role="group"
-        aria-label={`Étape ${step + 1} : ${STEP_LABELS[step]}`}
-        className="flex flex-col gap-4 outline-none"
+        ref={scrollRef}
+        className={`${styles.scroll} ${inDialog ? styles.scrollDialog : ""}`}
       >
-        {serverError ? (
-          <div
-            ref={errorRef}
-            tabIndex={-1}
-            role="alert"
-            aria-live="assertive"
-            className="outline-none"
-          >
-            <Alert
-              tone="danger"
-              title="Le paiement n’a pas démarré"
-              className={inDialog ? "p-3 text-xs" : undefined}
-            >
-              {serverError}
-            </Alert>
-          </div>
-        ) : null}
+        <PendingPaymentBanner eventId={eventId} />
 
-        {step === 0 ? (
-          <Card className={inDialog ? "rounded-xl" : "overflow-hidden rounded-xl"}>
-            <CardHeader className={inDialog ? "p-4 pb-2" : "pb-3"}>
-              <CardTitle>Choisis tes billets</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2.5">
-              {ticketTypes.map((type) => (
-                <QuantityPicker
-                  key={type.id}
-                  ticketType={type}
-                  quantity={quantities[type.id] ?? 0}
-                  compact={inDialog}
-                  disabled={pending}
-                  onChange={(value) => {
-                    const next = { ...quantities, [type.id]: value };
-                    setQuantities(next);
-                    setServerError(null);
-                    setValue("items", checkoutItemsFromQuantities(ticketTypes, next), {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    });
-                  }}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        ) : null}
+        <div
+          ref={stepRef}
+          data-checkout-step={step}
+          tabIndex={-1}
+          className={`${styles.content} ${padX}`}
+        >
+          {/* --------------------------- 1. Billets --------------------------- */}
+          {step === 0 ? (
+            <section className={styles.card} aria-labelledby="step-tickets">
+              <h2 id="step-tickets" className={styles.cardTitle}>
+                Choisis tes billets
+              </h2>
+              <p className={styles.cardHint}>Tu pourras modifier ta sélection avant de payer.</p>
+              <div className={styles.stack}>
+                {ticketTypes.map((type) => (
+                  <QuantityPicker
+                    key={type.id}
+                    ticketType={type}
+                    quantity={quantities[type.id] ?? 0}
+                    compact={inDialog}
+                    disabled={busy}
+                    onChange={(value) => {
+                      const next = { ...quantities, [type.id]: value };
+                      setQuantities(next);
+                      setNotice(null);
+                      haptic("light");
+                      setValue("items", checkoutItemsFromQuantities(ticketTypes, next), {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
-        {step === 1 ? (
-          <Card className={inDialog ? "rounded-xl" : "overflow-hidden rounded-xl"}>
-            <CardHeader className={inDialog ? "p-4 pb-2" : "pb-3"}>
-              <CardTitle>Vérifie tes coordonnées</CardTitle>
-              {!inDialog ? (
-                <p className="text-fg-muted text-sm">
-                  Reprises depuis ton compte, modifiables avant le paiement.
-                </p>
-              ) : null}
-            </CardHeader>
-            <CardContent className={inDialog ? "flex flex-col gap-2 p-4 pt-0" : "flex flex-col gap-4"}>
-              <Field
-                label="Nom complet"
-                htmlFor="buyerName"
-                required
-                error={errors.buyerName?.message}
-              >
-                <Input
-                  id="buyerName"
-                  autoComplete="name"
-                  placeholder="Koffi Atta"
+          {/* ------------------------- 2. Coordonnées ------------------------- */}
+          {step === 1 ? (
+            <section className={styles.card} aria-labelledby="step-contact">
+              <h2 id="step-contact" className={styles.cardTitle}>
+                Tes coordonnées
+              </h2>
+              <p className={styles.cardHint}>
+                {initialBuyer.phone
+                  ? "Reprises depuis ton compte : vérifie-les, tu peux les modifier."
+                  : "Le téléphone sert à préparer ton paiement mobile money."}
+              </p>
+
+              <div className={styles.stack}>
+                <Field
+                  label="Nom complet"
+                  htmlFor="buyerName"
                   required
-                  invalid={Boolean(errors.buyerName)}
-                  {...fieldAriaProps("buyerName", { error: errors.buyerName?.message })}
-                  {...register("buyerName")}
-                />
-              </Field>
-              <Field
-                label="Email"
-                htmlFor="buyerEmail"
-                hint="Facultatif — tes billets restent dans ton compte"
-                error={errors.buyerEmail?.message}
-              >
-                <Input
-                  id="buyerEmail"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="koffi@example.ci"
-                  invalid={Boolean(errors.buyerEmail)}
-                  {...fieldAriaProps("buyerEmail", { error: errors.buyerEmail?.message })}
-                  {...register("buyerEmail")}
-                />
-              </Field>
-              <Field
-                label="Téléphone"
-                htmlFor="buyerPhone"
-                required
-                hint={
-                  inDialog
-                    ? undefined
-                    : initialBuyer.phone
-                      ? "Prérempli depuis ton profil"
-                      : "Avec l'indicatif du pays"
-                }
-                description={
-                  inDialog
-                    ? undefined
-                    : "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée."
-                }
-                error={errors.buyerPhone?.message}
-              >
-                <Input
-                  id="buyerPhone"
-                  type="tel"
-                  autoComplete="tel"
-                  inputMode="tel"
-                  placeholder="+225 07 00 00 00"
-                  required
-                  aria-required="true"
-                  invalid={Boolean(errors.buyerPhone)}
-                  {...fieldAriaProps("buyerPhone", {
-                    error: errors.buyerPhone?.message,
-                    description: inDialog
-                      ? undefined
-                      : "Transmis au prestataire pour préparer le paiement ; le débit est validé sur sa page sécurisée.",
-                  })}
-                  {...register("buyerPhone")}
-                />
-              </Field>
-
-            </CardContent>
-          </Card>
-        ) : null}
-
-        {step === LAST_STEP ? (
-          <div className="flex flex-col gap-4">
-            <Card className={inDialog ? "rounded-xl" : "overflow-hidden rounded-xl"}>
-              {!inDialog ? (
-                <CardHeader className="pb-3">
-                  <CardTitle>Ta commande</CardTitle>
-                </CardHeader>
-              ) : null}
-              <CardContent className={inDialog ? "flex flex-col gap-2 p-4 pt-0" : "flex flex-col gap-4"}>
-                {/* En modal : la liste détaillée est déjà résumée dans la barre
-                    d'action (nombre + total + lignes) ; on ne garde que le total
-                    pour que l'étape tienne sans défilement. */}
-                {!inDialog ? (
-                  <ul className="divide-border divide-y">
-                    {pricing.lines.map((line) => (
-                      <li key={line.ticketTypeId} className="flex justify-between gap-3 py-2 text-sm">
-                        <span className="min-w-0">
-                          {line.quantity} × {line.name}
-                        </span>
-                        <span className="shrink-0 font-semibold tabular-nums">
-                          {formatPrice(line.lineTotal)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-
-                {pricing.discount > 0 ? (
-                  <div className="flex items-baseline justify-between gap-3 text-sm">
-                    <span className="text-success flex items-center gap-1.5 font-medium">
-                      <Check className="size-3.5" aria-hidden="true" />
-                      Remise {promoStatus.kind === "applied" ? promoStatus.code : ""}
-                    </span>
-                    <span className="text-success font-semibold tabular-nums">
-                      −{formatPrice(pricing.discount)}
-                    </span>
-                  </div>
-                ) : null}
-
-                <div
-                  className={`bg-bg-muted flex items-baseline justify-between gap-3 rounded-lg px-3 ${inDialog ? "py-2" : "py-3"}`}
+                  error={errors.buyerName?.message}
                 >
-                  <span className="text-sm font-semibold">Total à payer</span>
-                  <span
-                    className={`font-display font-semibold tabular-nums ${inDialog ? "text-lg" : "text-xl"}`}
-                  >
-                    {formatPrice(pricing.total)}
-                  </span>
+                  <Input
+                    id="buyerName"
+                    autoComplete="name"
+                    placeholder="Koffi Atta"
+                    required
+                    invalid={Boolean(errors.buyerName)}
+                    {...fieldAriaProps("buyerName", { error: errors.buyerName?.message })}
+                    {...register("buyerName")}
+                  />
+                </Field>
+
+                <Field
+                  label="Téléphone"
+                  htmlFor="buyerPhone"
+                  required
+                  description="Numéro de ton compte mobile money, avec l’indicatif (+225)."
+                  error={errors.buyerPhone?.message}
+                >
+                  <Input
+                    id="buyerPhone"
+                    type="tel"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    placeholder="+225 07 00 00 00 00"
+                    required
+                    aria-required="true"
+                    invalid={Boolean(errors.buyerPhone)}
+                    {...fieldAriaProps("buyerPhone", {
+                      error: errors.buyerPhone?.message,
+                      description: "Numéro de ton compte mobile money, avec l’indicatif (+225).",
+                    })}
+                    {...register("buyerPhone")}
+                  />
+                </Field>
+
+              </div>
+            </section>
+          ) : null}
+
+          {/* -------------------------- 3. Email facultatif ------------------- */}
+          {step === 2 ? (
+            <section className={styles.card} aria-labelledby="step-email">
+              <h2 id="step-email" className={styles.cardTitle}>Recevoir mon billet par email</h2>
+              <p className={styles.cardHint}>
+                Facultatif. Ton billet reste aussi disponible dans Mes billets.
+              </p>
+              <div className={styles.stack}>
+                <Field
+                  label="Adresse email"
+                  htmlFor="buyerEmail"
+                  hint="Facultatif"
+                  error={errors.buyerEmail?.message}
+                >
+                  <Input
+                    id="buyerEmail"
+                    type="email"
+                    autoComplete="email"
+                    inputMode="email"
+                    placeholder="koffi@exemple.ci"
+                    invalid={Boolean(errors.buyerEmail)}
+                    {...fieldAriaProps("buyerEmail", { error: errors.buyerEmail?.message })}
+                    {...register("buyerEmail")}
+                  />
+                </Field>
+              </div>
+            </section>
+          ) : null}
+
+          {/* --------------------------- 4. Paiement -------------------------- */}
+          {step === LAST_STEP ? (
+            <>
+              <section className={styles.card} aria-labelledby="step-recap">
+                <h2 id="step-recap" className={styles.cardTitle}>
+                  Récapitulatif
+                </h2>
+
+                <ul className={styles.lines}>
+                  {pricing.lines.map((line) => (
+                    <li key={line.ticketTypeId} className={styles.line}>
+                      <span className="min-w-0">
+                        {line.quantity} × {line.name}
+                      </span>
+                      <span className="shrink-0 font-semibold tabular-nums">
+                        {free ? "Gratuit" : formatPrice(line.lineTotal)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className={styles.total}>
+                  <span>Total à payer</span>
+                  <strong className={styles.totalValue}>
+                    {free ? "Gratuit" : formatPrice(pricing.total)}
+                  </strong>
                 </div>
 
-                <div
-                  className={`border-border flex flex-col border-t pt-3 ${inDialog ? "gap-0.5 text-xs" : "gap-1 text-sm"}`}
-                >
-                  <p className="font-semibold">{buyerName}</p>
-                  <p className="text-fg-muted break-words">
-                    {buyerEmail || "Aucun email renseigné"} · {buyerPhone}
-                  </p>
+                <div className={styles.buyer}>
+                  <div className="min-w-0">
+                    <p className="font-semibold">{buyerName}</p>
+                    <p className="text-fg-muted break-words text-sm">
+                      {buyerPhone}
+                      {buyerEmail ? ` · ${buyerEmail}` : ""}
+                    </p>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => goToStep(1)}
-                    className={`text-primary mt-1 self-start font-semibold underline underline-offset-4 ${inDialog ? "min-h-9 text-xs" : "min-h-11 text-sm"}`}
+                    onClick={() => goToStep(2)}
+                    disabled={busy}
+                    className={styles.link}
                   >
-                    Modifier mes coordonnées
+                    Modifier
                   </button>
                 </div>
+              </section>
 
-                {/* Modal : le code promo vit sur cette étape, pas sur les
-                    coordonnées, pour que chaque étape tienne sans défilement. */}
-                {inDialog ? promoBlock : null}
+              {!free ? (
+                <section className={styles.card} aria-labelledby="step-how">
+                  <h2 id="step-how" className={styles.cardTitle}>
+                    Comment ça se passe
+                  </h2>
+                  <ol className={styles.flow}>
+                    <li>
+                      <span className={styles.flowIcon} aria-hidden="true">
+                        <LockKeyhole />
+                      </span>
+                      <div>
+                        <p className={styles.flowTitle}>Page de paiement sécurisée</p>
+                        <p className={styles.flowText}>
+                          {isReal
+                            ? `Tu choisis Wave, Orange Money, MTN ou Moov sur la page de ${providerLabel}.`
+                            : "Mode simulation : aucun montant réel ne sera débité."}
+                        </p>
+                      </div>
+                    </li>
+                    <li>
+                      <span className={styles.flowIcon} aria-hidden="true">
+                        <Smartphone />
+                      </span>
+                      <div>
+                        <p className={styles.flowTitle}>Tu confirmes sur ton téléphone</p>
+                        <p className={styles.flowText}>
+                          Une notification ou un message USSD s’affiche : valide avec ton code
+                          secret.
+                        </p>
+                      </div>
+                    </li>
+                    <li>
+                      <span className={styles.flowIcon} aria-hidden="true">
+                        <Ticket />
+                      </span>
+                      <div>
+                        <p className={styles.flowTitle}>Ton billet arrive ici</p>
+                        <p className={styles.flowText}>
+                          Tu reviens automatiquement dans l’application, avec ton QR code et l’accès
+                          au salon.
+                        </p>
+                      </div>
+                    </li>
+                  </ol>
+                </section>
+              ) : null}
 
-                {/* Modal : le prestataire tient sur une ligne, pas de carte
-                    dédiée — l'étape doit rester visible sans défilement. */}
-                {inDialog ? (
-                  <p className="text-fg-muted flex items-center gap-2 text-xs">
-                    <CreditCard className="size-3.5 shrink-0" aria-hidden="true" />
-                    Paiement sécurisé via {providerLabel}
+              <section className={styles.card} aria-labelledby="step-extra">
+                <h2 id="step-extra" className="sr-only">
+                  Options
+                </h2>
+
+                {promoOpen || promoCode?.trim() ? (
+                  <Field label="Code promo" htmlFor="promoCode" hint="Facultatif" error={errors.promoCode?.message}>
+                    <Input
+                      id="promoCode"
+                      placeholder="ABIDJAN10"
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      className="uppercase"
+                      {...fieldAriaProps("promoCode", { error: errors.promoCode?.message })}
+                      {...register("promoCode")}
+                    />
+                  </Field>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.promoToggle}
+                    aria-expanded={false}
+                    onClick={() => setPromoOpen(true)}
+                  >
+                    J’ai un code promo
+                    <ChevronDown aria-hidden="true" />
+                  </button>
+                )}
+
+                {promoCode?.trim() ? (
+                  <p className={styles.fine}>
+                    Le code est vérifié au moment du paiement : le montant débité peut être
+                    inférieur au total affiché.
                   </p>
                 ) : null}
-              </CardContent>
-            </Card>
 
-            {!inDialog ? (
-            <Card className="overflow-hidden rounded-xl">
-              <CardContent className="flex flex-col gap-4 p-4 sm:p-5">
-                <div className="flex items-start gap-3">
-                  <span className="bg-primary-subtle text-primary flex size-9 shrink-0 items-center justify-center rounded-full">
-                    <CreditCard className="size-4" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold">{providerLabel}</p>
-                    <p className="text-fg-muted text-sm">{providerHint}</p>
-                  </div>
-                </div>
-
-                {promoBlock}
-
-                <p
-                  className={`text-fg-subtle flex items-start gap-2 ${inDialog ? "text-[0.6875rem]" : "text-xs"}`}
-                >
-                  <LockKeyhole className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-                  Le paiement est traité sur la page sécurisée du prestataire. Event ne conserve ni
-                  code Mobile Money ni donnée de carte.
+                <p className={styles.secure}>
+                  <LockKeyhole aria-hidden="true" />
+                  Event ne conserve ni code Mobile Money ni donnée de carte : tout se passe chez le
+                  prestataire.
                 </p>
-              </CardContent>
-            </Card>
-            ) : null}
+              </section>
+            </>
+          ) : null}
+        </div>
+
+        {notice ? (
+          <div role="alert" aria-live="assertive" className={`${styles.notice} ${padX}`}>
+            <Alert
+              tone={notice.kind === "validation" ? "warning" : "danger"}
+              title={
+                notice.kind === "validation"
+                  ? "Il manque quelque chose"
+                  : "Le paiement n’a pas démarré"
+              }
+            >
+              {notice.message}
+            </Alert>
           </div>
         ) : null}
       </div>
 
-      <div
-        className={`${styles.bar} checkout-action-bar ${inDialog ? styles.barStatic : ""}`}
-        data-checkout-bar=""
-      >
-        {/* Modal : le récapitulatif est déjà dans la pastille d'étape, la barre
-            ne garde que les actions pour libérer de la hauteur. */}
-        {!inDialog ? (
-          <div className={styles.barMeta}>
-            <span className={styles.barCount}>
-              {pricing.ticketCount > 0
-                ? `${pricing.ticketCount} billet${pricing.ticketCount > 1 ? "s" : ""}`
-                : "Aucun billet"}
-            </span>
-            <span className={styles.barTotal}>{formatPrice(pricing.total)}</span>
-            {selectedLines.length > 0 ? (
-              <span className={styles.barLines}>
-                {selectedLines
-                  .slice(0, 2)
-                  .map((line) => `${line.quantity} × ${line.ticketType.name}`)
-                  .join(" · ")}
-                {selectedLines.length > 2 ? ` +${selectedLines.length - 2}` : ""}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
+      {/* Réserve la place de la barre fixe (page mobile) */}
+      {!inDialog ? <div className={styles.barSpacer} aria-hidden="true" /> : null}
 
-        <div className={styles.barActions}>
+      <div className={`${styles.bar} ${inDialog ? styles.barDialog : styles.barPage}`}>
+        <div className={styles.barInner}>
           {step > 0 ? (
             <Button
               type="button"
               variant="secondary"
-              disabled={pending}
+              size="icon"
+              disabled={busy}
               onClick={() => goToStep(step - 1)}
+              aria-label="Revenir à l’étape précédente"
             >
-              <ArrowLeft className="mr-1.5 size-4" aria-hidden="true" />
-              <span className={step === 0 ? "" : "hidden sm:inline"}>Retour</span>
+              <ArrowLeft aria-hidden="true" />
             </Button>
           ) : null}
 
           {step < LAST_STEP ? (
-            <Button type="button" disabled={pending} onClick={() => void continueToNextStep()}>
-              Continuer
-              <ArrowRight className="ml-1.5 size-4" aria-hidden="true" />
-            </Button>
+            <>
+              <div className={styles.barMeta} aria-live="polite">
+                <span className={styles.barCount}>{countLabel}</span>
+                <span className={styles.barTotal}>
+                  {pricing.ticketCount > 0 ? (free ? "Gratuit" : formatPrice(pricing.total)) : "—"}
+                </span>
+              </div>
+              <Button
+                type="button"
+                size="lg"
+                disabled={busy}
+                onClick={() => void continueToNextStep()}
+                className={styles.cta}
+              >
+                Continuer
+                <ArrowRight aria-hidden="true" />
+              </Button>
+            </>
           ) : (
             <Button
               type="submit"
+              size="lg"
+              fullWidth
               loading={pending}
               loadingLabel="Création de la commande…"
-              disabled={!canPay}
+              disabled={busy || pricing.lines.length === 0}
+              className={styles.ctaWide}
             >
-              {pricing.total === 0 ? "Obtenir mes billets" : `Payer ${formatPrice(pricing.total)}`}
+              <LockKeyhole aria-hidden="true" />
+              {free ? "Obtenir mes billets" : `Payer ${formatPrice(pricing.total)}`}
             </Button>
           )}
         </div>
       </div>
 
-      {step === LAST_STEP && paymentProvider !== "mock" ? (
-        <p className="text-fg-muted mt-2 flex items-center justify-center gap-1.5 text-xs">
-          <LockKeyhole className="size-3.5 shrink-0" aria-hidden="true" />
-          Tu vas être redirigé vers {providerLabel} pour régler en toute sécurité.
-        </p>
+      {/* Écran de redirection vers le prestataire */}
+      {redirectUrl ? (
+        <div
+          className={`${styles.overlay} ${inDialog ? styles.overlayDialog : ""}`}
+          role="status"
+          aria-live="polite"
+        >
+          <div className={styles.overlayCard}>
+            <span className={styles.spinner} aria-hidden="true">
+              <LoaderCircle />
+            </span>
+            <h2 className={styles.overlayTitle}>Ouverture du paiement sécurisé…</h2>
+            <p className={styles.overlayText}>
+              Tu vas confirmer avec Wave, Orange Money, MTN ou Moov. Ne ferme pas cette page : tu
+              reviens ici automatiquement après le paiement.
+            </p>
+
+            {redirectSlow ? (
+              <div className={styles.overlayRescue}>
+                <p className={styles.overlayText}>La page ne s’ouvre pas ?</p>
+                <a href={redirectUrl} className={styles.rescueLink}>
+                  Ouvrir la page de paiement
+                </a>
+                <button
+                  type="button"
+                  className={styles.link}
+                  onClick={() => {
+                    window.clearTimeout(redirectTimer.current);
+                    setRedirectUrl(null);
+                  }}
+                >
+                  Annuler et revenir à la commande
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
       ) : null}
     </form>
   );

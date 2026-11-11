@@ -23,7 +23,7 @@ export default async function CheckoutPage({
   const { type } = await searchParams;
 
   return (
-    <EditorialShell>
+    <EditorialShell hideBottomNav>
       <div className={`${shell.wrap} ${shell.page}`}>
         <CheckoutPanel slug={slug} type={typeof type === "string" ? type : undefined} />
       </div>

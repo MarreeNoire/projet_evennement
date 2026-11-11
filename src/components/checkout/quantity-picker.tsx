@@ -2,15 +2,21 @@
 
 import { Minus, Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { AccessLevelBadge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
 import type { TicketTypeRow } from "@/types/database";
 
-/* Sélecteur de quantité pour un type de billet.
-   Cibles tactiles de 44 px, hiérarchie nom > prix > disponibilité, et badge
-   d'accès affiché seulement quand il apporte une information (niveau premium
-   ou supérieur) : sur mobile, « Standard » sur chaque ligne encombrait le nom. */
+/* =============================================================================
+   Sélecteur de quantité d'un type de billet
+   --------------------------------------------------------------------------
+   - La ligne choisie se lit d'un coup d'œil : bordure et fond teintés, jamais
+     la couleur seule (le sous-total apparaît aussi).
+   - Boutons ronds de 44 px, séparés par le compteur : on ne touche pas « + »
+     en visant « − ».
+   - Hiérarchie nom > prix > disponibilité ; le badge d'accès n'est affiché que
+     s'il apporte une information (niveau supérieur à « standard »).
+   - Limite atteinte et épuisement expliqués en toutes lettres.
+   ========================================================================== */
 
 export function QuantityPicker({
   ticketType,
@@ -26,94 +32,94 @@ export function QuantityPicker({
   onChange: (value: number) => void;
 }) {
   const remaining = ticketType.quantity - ticketType.sold_count;
+  const soldOut = remaining <= 0;
   const max = Math.min(ticketType.max_per_order, Math.max(remaining, 0));
-  const lowStock = remaining > 0 && remaining <= 20;
-  const plusBlockedReason =
-    remaining <= 0
-      ? "épuisé"
-      : quantity >= max
-        ? `maximum ${max} par commande`
-        : null;
+  const lowStock = !soldOut && remaining <= 20;
+  const atMax = !soldOut && quantity >= max && max > 0;
+  const free = ticketType.price <= 0;
 
   return (
     <div
-      className={`border-border flex items-center gap-3 rounded-xl border ${compact ? "px-2.5 py-2" : "px-3 py-3 sm:px-4"}`}
+      data-selected={quantity > 0}
+      data-soldout={soldOut}
+      className={`border-border bg-surface data-[selected=true]:border-primary data-[selected=true]:bg-primary-subtle flex items-center gap-3 rounded-xl border transition-colors duration-150 data-[soldout=true]:opacity-60 ${
+        compact ? "px-3 py-2.5" : "px-3.5 py-3.5 sm:px-4"
+      }`}
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <p className="leading-tight font-medium">{ticketType.name}</p>
+          <p className="leading-tight font-semibold">{ticketType.name}</p>
           {ticketType.access_level !== "standard" ? (
             <AccessLevelBadge level={ticketType.access_level} />
           ) : null}
         </div>
-        <p className="mt-0.5 text-sm">
+
+        <p className="mt-1 text-sm">
           <span className="font-semibold whitespace-nowrap tabular-nums">
-            {ticketType.price <= 0 ? "Gratuit" : formatPrice(ticketType.price)}
+            {free ? "Gratuit" : formatPrice(ticketType.price)}
           </span>
-          {!compact ? (
-            <span
-              className={`ml-1.5 whitespace-nowrap ${lowStock ? "text-warning font-medium" : "text-fg-subtle"}`}
-            >
-              ·{" "}
-              {remaining <= 0
-                ? "épuisé"
-                : lowStock
-                  ? `plus que ${remaining}`
-                  : `${remaining} dispo.`}
-            </span>
-          ) : remaining <= 0 ? (
-            <span className="text-warning ml-1.5 whitespace-nowrap">· épuisé</span>
-          ) : null}
+          <span
+            className={`ml-1.5 text-xs whitespace-nowrap ${
+              soldOut ? "text-danger font-medium" : lowStock ? "text-warning font-medium" : "text-fg-subtle"
+            }`}
+          >
+            {soldOut
+              ? "· Épuisé"
+              : lowStock
+                ? `· Plus que ${remaining}`
+                : compact
+                  ? ""
+                  : `· ${remaining} disponibles`}
+          </span>
         </p>
-        {plusBlockedReason && remaining > 0 ? (
-          <p className="text-fg-muted mt-0.5 text-xs">{plusBlockedReason}</p>
+
+        {quantity > 0 && !free ? (
+          <p className="text-fg-muted mt-1 text-xs tabular-nums">
+            Sous-total{" "}
+            <span className="text-fg font-semibold">{formatPrice(ticketType.price * quantity)}</span>
+          </p>
+        ) : null}
+
+        {atMax ? (
+          <p className="text-fg-subtle mt-1 text-xs">
+            Maximum {max} par commande
+          </p>
         ) : null}
       </div>
 
       <div
-        className="flex flex-none items-center gap-1"
+        className="flex flex-none items-center gap-1.5"
         role="group"
         aria-label={`Quantité pour ${ticketType.name}`}
       >
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="icon"
           disabled={disabled || quantity <= 0}
           onClick={() => onChange(Math.max(quantity - 1, 0))}
           aria-label={`Retirer un billet ${ticketType.name}`}
+          className="border-border-strong bg-bg text-fg hover:border-fg focus-visible:outline-border-focus inline-flex size-11 items-center justify-center rounded-full border transition-[transform,border-color,opacity] duration-150 active:scale-90 disabled:pointer-events-none disabled:opacity-35"
         >
           <Minus className="size-4" aria-hidden="true" />
-        </Button>
-        <input
-          className="border-border w-9 border-0 bg-transparent text-center text-base font-semibold tabular-nums outline-none [appearance:textfield] focus-visible:ring-2 focus-visible:ring-border-focus/35 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={max}
-          value={quantity}
-          disabled={disabled || remaining <= 0}
-          aria-label={`Quantité pour ${ticketType.name}`}
-          onChange={(event) => {
-            const parsed = Number.parseInt(event.target.value, 10);
-            if (Number.isNaN(parsed)) return;
-            onChange(Math.min(Math.max(parsed, 0), max));
-          }}
-          onBlur={(event) => {
-            const parsed = Number.parseInt(event.target.value, 10);
-            if (event.target.value === "" || Number.isNaN(parsed)) onChange(0);
-          }}
-        />
-        <Button
+        </button>
+
+        <span
+          className="min-w-9 text-center text-lg font-bold tabular-nums"
+          role="status"
+          aria-live="polite"
+          aria-label={`${quantity} billet${quantity > 1 ? "s" : ""} ${ticketType.name}`}
+        >
+          {quantity}
+        </span>
+
+        <button
           type="button"
-          variant="secondary"
-          size="icon"
-          disabled={disabled || quantity >= max || remaining <= 0}
+          disabled={disabled || soldOut || quantity >= max}
           onClick={() => onChange(Math.min(quantity + 1, max))}
           aria-label={`Ajouter un billet ${ticketType.name}`}
+          className="bg-primary-solid text-primary-solid-fg hover:bg-primary-solid-hover focus-visible:outline-border-focus inline-flex size-11 items-center justify-center rounded-full transition-[transform,background-color,opacity] duration-150 active:scale-90 disabled:pointer-events-none disabled:opacity-35"
         >
           <Plus className="size-4" aria-hidden="true" />
-        </Button>
+        </button>
       </div>
     </div>
   );

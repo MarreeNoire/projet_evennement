@@ -74,7 +74,9 @@ export function CheckoutDialog({
             <X className="size-5" aria-hidden="true" />
           </button>
         </header>
-        <div className="checkout-dialog-body">{children}</div>
+        <div className="checkout-dialog-body">
+          {children}
+        </div>
       </div>
     </dialog>
   );

@@ -22,9 +22,11 @@ import styles from "./editorial-shell.module.css";
 export async function EditorialShell({
   children,
   nav,
+  hideBottomNav = false,
 }: {
   children: React.ReactNode;
   nav?: EditorialNavItem[];
+  hideBottomNav?: boolean;
 }) {
   const viewer = await loadHeaderUser();
 
@@ -34,7 +36,7 @@ export async function EditorialShell({
       <EditorialHeader viewer={viewer} nav={nav ?? EDITORIAL_NAV} />
       <main className={styles.main}>{children}</main>
       <EditorialFooter viewer={viewer} />
-      <BottomNavStandalone user={viewer} />
+      {hideBottomNav ? null : <BottomNavStandalone user={viewer} />}
     </div>
   );
 }

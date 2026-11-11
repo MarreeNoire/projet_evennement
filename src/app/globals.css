@@ -903,26 +903,28 @@
 .checkout-dialog {
   position: fixed;
   inset: 0;
-  width: min(46rem, calc(100vw - 2rem));
+  width: min(48rem, calc(100vw - 1.5rem));
   max-width: none;
-  height: min(46rem, calc(100dvh - 2rem));
-  max-height: calc(100dvh - 2rem);
+  height: min(52rem, calc(100dvh - 1.5rem));
+  max-height: calc(100dvh - 1.5rem);
   margin: auto;
   overflow: hidden;
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-2xl);
   padding: 0;
   background: var(--bg);
   color: var(--fg);
   box-shadow:
-    0 24px 64px rgb(0 0 0 / 0.28),
-    0 4px 16px rgb(0 0 0 / 0.14);
-  animation: checkout-dialog-enter 220ms var(--ease-out-soft) both;
+    0 32px 80px rgb(0 0 0 / 0.32),
+    0 8px 24px rgb(0 0 0 / 0.18),
+    0 0 0 1px rgb(255 255 255 / 0.02) inset;
+  animation: checkout-dialog-enter 280ms var(--ease-out-soft) both;
 }
 
 .checkout-dialog::backdrop {
-  background: color-mix(in srgb, var(--void-950) 78%, transparent);
-  backdrop-filter: blur(5px);
+  background: color-mix(in srgb, var(--void-950) 85%, transparent);
+  backdrop-filter: blur(8px);
+  animation: backdrop-in 280ms var(--ease-out-soft) both;
 }
 
 .checkout-dialog-shell {
@@ -930,6 +932,7 @@
   width: 100%;
   height: 100%;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .checkout-dialog-header {
@@ -942,18 +945,18 @@
   gap: 1rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface-overlay);
-  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) 1rem
-    max(1rem, env(safe-area-inset-left));
+  padding: max(1.25rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right)) 1rem
+    max(1.25rem, env(safe-area-inset-left));
 }
 
 .checkout-dialog-header .eyebrow {
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
 }
 
 .checkout-dialog-close {
   display: inline-flex;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
+  min-width: 3rem;
+  min-height: 3rem;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
@@ -962,18 +965,24 @@
   background: var(--bg-subtle);
   color: var(--fg);
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
+    background-color 150ms var(--ease-out-soft),
+    border-color 150ms var(--ease-out-soft),
+    transform 150ms var(--ease-out-soft);
 }
 
 .checkout-dialog-close:hover {
   border-color: var(--border-focus);
   background: var(--bg-muted);
+  transform: scale(1.05);
 }
 
 .checkout-dialog-close:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
+}
+
+.checkout-dialog-close:active {
+  transform: scale(0.95);
 }
 
 .checkout-dialog-body {
@@ -982,8 +991,7 @@
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden;
-  padding: 0.75rem max(1rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom))
-    max(1rem, env(safe-area-inset-left));
+  padding: 0;
 }
 
 .checkout-form-dialog {
@@ -991,7 +999,7 @@
   height: 100%;
   min-height: 0;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0;
   overflow: hidden;
 }
 
@@ -999,11 +1007,15 @@
   flex: 1 1 auto;
   min-height: 0;
   gap: 0.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .checkout-form-dialog > nav {
   flex: 0 0 auto;
-  padding: 0.625rem 0.875rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-overlay);
 }
 
 .checkout-form-dialog > nav .mb-3 {
@@ -1019,6 +1031,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  padding: 1rem;
 }
 
 .checkout-form-dialog > [data-checkout-step]::-webkit-scrollbar {
@@ -1026,44 +1039,49 @@
 }
 
 .checkout-form-dialog > [data-checkout-step].space-y-4 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .checkout-form-dialog [data-checkout-step] .flex.flex-col.gap-4 {
-  gap: 0.625rem;
+  gap: 1rem;
 }
 
 .checkout-form-dialog [data-checkout-step] .p-5 {
-  padding: 0.875rem;
+  padding: 1.25rem;
 }
 
 .checkout-form-dialog [data-checkout-step] .pb-4 {
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.75rem;
 }
 
 .checkout-form-dialog [data-checkout-step] .pt-0 {
-  padding-top: 0.5rem;
+  padding-top: 0.75rem;
 }
 
 .checkout-form-dialog > .checkout-action-bar {
   flex: 0 0 auto;
   margin-top: auto;
-  border-color: var(--border);
-  background: var(--bg);
-  padding: 0.5rem 0 max(0.5rem, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--surface-overlay);
+  padding: 0.75rem 1rem max(0.75rem, env(safe-area-inset-bottom));
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
 }
 
 @media (max-height: 720px) {
   .checkout-dialog-header {
-    padding-block: 0.625rem;
+    padding-block: 0.75rem;
   }
 
   .checkout-dialog-body {
-    padding-block: 0.5rem;
+    padding-block: 0;
   }
 
-  .checkout-form-dialog {
-    gap: 0.5rem;
+  .checkout-form-dialog > nav {
+    padding: 0.5rem 1rem;
+  }
+
+  .checkout-form-dialog > [data-checkout-step] {
+    padding: 0.75rem;
   }
 }
 
@@ -1073,12 +1091,12 @@
   .checkout-dialog {
     width: 100%;
     max-width: none;
-    height: min(46rem, calc(100dvh - 1.5rem));
+    height: min(52rem, calc(100dvh - 1.5rem));
     max-height: calc(100dvh - 1.5rem);
     margin: auto auto 0;
     border: 0;
     border-top: 1px solid var(--border-strong);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   }
 
   .checkout-dialog::after {
@@ -1097,10 +1115,18 @@
   .checkout-dialog-header {
     padding-block: max(1.25rem, env(safe-area-inset-top));
   }
+
+  .checkout-form-dialog > .checkout-action-bar {
+    border-radius: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .checkout-dialog {
+    animation: none;
+  }
+
+  .checkout-dialog::backdrop {
     animation: none;
   }
 }
@@ -1389,11 +1415,20 @@
 @keyframes checkout-dialog-enter {
   from {
     opacity: 0;
-    transform: translateY(0.5rem) scale(0.99);
+    transform: translateY(1rem) scale(0.98);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
