@@ -251,7 +251,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 11px;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid var(--line);
 }
 
 .cardDate {
@@ -264,17 +266,9 @@
   border-right: 1px solid var(--line);
 }
 
-.cardDate .dow {
-  font-size: 8.5px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
 .cardDate strong {
   font-family: var(--display);
-  font-size: 23px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.04em;
@@ -288,11 +282,15 @@
 }
 
 .cardMain h3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   margin: 0 0 3px;
   font-family: var(--display);
-  font-size: 19.5px;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 1.12;
+  line-height: 1.15;
   letter-spacing: -0.025em;
   text-wrap: balance;
 }
@@ -314,7 +312,7 @@
 .cardPrice {
   margin: 0;
   min-width: 0;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
@@ -322,30 +320,26 @@
   text-overflow: ellipsis;
 }
 
-.cardPrice span {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
 .cardGo {
   display: grid;
   place-items: center;
-  width: 25px;
-  height: 25px;
+  width: 26px;
+  height: 26px;
   border: 1px solid var(--line);
   border-radius: 50%;
   color: var(--ink);
-  opacity: 0;
-  transform: translateY(5px);
   transition:
-    opacity 0.2s ease,
     transform 0.24s var(--ease-out),
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cardLink:hover .cardGo {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translate(2px, -2px);
+  }
 }
 
 .cardGo svg {
@@ -490,6 +484,10 @@
 }
 
 .filtersAdvanced {
+  display: none;
+}
+
+.filterMobileOnly {
   display: none;
 }
 
@@ -1525,6 +1523,10 @@
 
   .filterDesktopOnly {
     display: none;
+  }
+
+  .filterMobileOnly {
+    display: block;
   }
 
   .speakerList {

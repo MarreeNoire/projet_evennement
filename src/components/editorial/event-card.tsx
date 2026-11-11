@@ -124,7 +124,6 @@ export function EditorialEventCard({
 
         <div className={styles.cardBody}>
           <div className={styles.cardDate} aria-hidden="true">
-            <span className={styles.dow}>{date.weekday}</span>
             <strong>{date.day}</strong>
             <span className={styles.month}>{date.month}</span>
           </div>
@@ -135,17 +134,13 @@ export function EditorialEventCard({
               {event.venue_name ? `${event.venue_name} · ` : ""}
               {event.city}
             </p>
-            <p>{event.organizer_name}</p>
           </div>
         </div>
 
-        {/* Pied de carte sur sa propre ligne : le prix ne se retrouve plus
-            comprimé entre la date et le bord de la carte. */}
+        {/* Pied de carte : prix à gauche, flèche à droite. Une seule info
+            forte par zone — le reste est sur la fiche de l'événement. */}
         <div className={styles.cardFoot}>
-          <p className={styles.cardPrice}>
-            <span>Entrée</span>
-            {priceLabel(event)}
-          </p>
+          <p className={styles.cardPrice}>{priceLabel(event)}</p>
           <span className={styles.cardGo} aria-hidden="true">
             <ArrowUpRight />
           </span>

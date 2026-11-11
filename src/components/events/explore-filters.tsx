@@ -215,32 +215,56 @@ function CategoryChoices({
   setCategory: (value: string) => void;
 }) {
   return (
-    <fieldset className={content.chipSet}>
-      <legend className={shell["field-label"]} style={{ marginBottom: 8 }}>
-        Type d’événement
-      </legend>
-      <div className={content.chips} role="group" aria-label="Filtrer par catégorie">
-        <button
-          type="button"
-          aria-pressed={!category}
-          onClick={() => setCategory("")}
-          className={content.chip}
-        >
-          Toutes
-        </button>
-        {CATEGORIES.map((item) => (
+    <>
+      {/* Puces sur grand écran : tout est visible d'un coup d'œil. */}
+      <fieldset className={cx(content.chipSet, content.filterDesktopOnly)}>
+        <legend className={shell["field-label"]} style={{ marginBottom: 8 }}>
+          Type d’événement
+        </legend>
+        <div className={content.chips} role="group" aria-label="Filtrer par catégorie">
           <button
-            key={item.slug}
             type="button"
-            aria-pressed={category === item.slug}
-            onClick={() => setCategory(item.slug)}
+            aria-pressed={!category}
+            onClick={() => setCategory("")}
             className={content.chip}
           >
-            {item.label}
+            Toutes
           </button>
-        ))}
-      </div>
-    </fieldset>
+          {CATEGORIES.map((item) => (
+            <button
+              key={item.slug}
+              type="button"
+              aria-pressed={category === item.slug}
+              onClick={() => setCategory(item.slug)}
+              className={content.chip}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      {/* Petit écran / PWA : un menu déroulant compact à la place des
+          douze puces qui écrasaient la page. */}
+      <fieldset className={cx(content.chipSet, content.filterMobileOnly)}>
+        <label className={shell.field} htmlFor="explorer-category-mobile">
+          <span className={shell["field-label"]}>Type d’événement</span>
+          <select
+            id="explorer-category-mobile"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            className={shell.select}
+          >
+            <option value="">Tous les types</option>
+            {CATEGORIES.map((item) => (
+              <option key={item.slug} value={item.slug}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </fieldset>
+    </>
   );
 }
 
