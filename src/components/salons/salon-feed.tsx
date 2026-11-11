@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useRouter } from "next/navigation";
 import {
   Inbox,
+  ChevronDown,
   LoaderCircle,
   Megaphone,
   MessageSquareDashed,
@@ -44,6 +45,7 @@ import { cn } from "@/lib/utils";
 const PAGE_SIZE = 20;
 
 type FeedFilter = "all" | "pinned" | "announcements" | "media" | "unanswered";
+type FeedFilterMenu = "filters" | "categories" | null;
 
 const FILTERS: { key: FeedFilter; label: string }[] = [
   { key: "all", label: "Tout" },
@@ -90,13 +92,55 @@ export function SalonFeed({
   const [exhausted, setExhausted] = useState(posts.length < PAGE_SIZE);
   const [filter, setFilter] = useState<FeedFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [openFilterMenu, setOpenFilterMenu] = useState<FeedFilterMenu>(null);
+  const [filterMenuAlign, setFilterMenuAlign] = useState<"left" | "right">("left");
   const [pendingNew, setPendingNew] = useState(0);
   const [online, setOnline] = useState(true);
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
   const sentinelRef = useRef<HTMLButtonElement>(null);
+  const filterControlsRef = useRef<HTMLDivElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const categoryButtonRef = useRef<HTMLButtonElement>(null);
   const loadedRef = useRef(loaded);
   const onlineRef = useRef(online);
+
+  useEffect(() => {
+    if (!openFilterMenu) return;
+
+    function onPointerDown(event: PointerEvent) {
+      if (!filterControlsRef.current?.contains(event.target as Node)) setOpenFilterMenu(null);
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setOpenFilterMenu(null);
+      const trigger = openFilterMenu === "filters" ? filterButtonRef : categoryButtonRef;
+      trigger.current?.focus();
+    }
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openFilterMenu]);
+
+  function toggleFilterMenu(menu: Exclude<FeedFilterMenu, null>) {
+    if (openFilterMenu === menu) {
+      setOpenFilterMenu(null);
+      return;
+    }
+
+    const trigger = menu === "filters" ? filterButtonRef.current : categoryButtonRef.current;
+    const triggerRect = trigger?.getBoundingClientRect();
+    if (triggerRect) {
+      const panelWidth = Math.min(224, window.innerWidth - 32);
+      setFilterMenuAlign(triggerRect.left + panelWidth > window.innerWidth - 16 ? "right" : "left");
+    }
+    setOpenFilterMenu(menu);
+  }
 
   /* ------------------------------ Synchro refs ------------------------------ */
 
@@ -185,9 +229,13 @@ export function SalonFeed({
     const client = createSupabaseBrowserClient();
     const channel = client.channel(`salon-posts:${salonId}`);
     channel
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "posts", filter: `salon_id=eq.${salonId}` }, () => {
-        setPendingNew((value) => value + 1);
-      })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "posts", filter: `salon_id=eq.${salonId}` },
+        () => {
+          setPendingNew((value) => value + 1);
+        },
+      )
       .subscribe();
     return () => {
       void client.removeChannel(channel);
@@ -309,46 +357,197 @@ export function SalonFeed({
       ) : null}
 
       {/* Puces de filtrage */}
-      <nav aria-label="Filtrer les publications" className="flex flex-col gap-2">
-        <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-1">
-          {FILTERS.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setFilter(item.key)}
-              aria-pressed={filter === item.key}
-              className={cn(
-                "press min-h-10 shrink-0 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors duration-150",
-                filter === item.key
-                  ? "border-primary-solid bg-primary-solid text-primary-solid-fg"
-                  : "border-border bg-surface text-fg-muted hover:text-fg",
-              )}
-            >
-              {item.key === "pinned" ? <Pin className="mr-1 inline size-3.5" aria-hidden="true" /> : null}
-              {item.key === "announcements" ? (
-                <Megaphone className="mr-1 inline size-3.5" aria-hidden="true" />
+      <nav
+        aria-label="Filtrer les publications"
+        className="flex min-w-0 flex-col items-start gap-2"
+      >
+        <div ref={filterControlsRef} className="flex min-w-0 flex-col items-start gap-2">
+          <div className="flex max-w-full flex-wrap items-center gap-1.5">
+            {FILTERS.filter((item) => item.key === "all" || item.key === "pinned").map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setFilter(item.key)}
+                aria-pressed={filter === item.key}
+                className={cn(
+                  "press inline-flex min-h-10 shrink-0 items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors duration-150",
+                  filter === item.key
+                    ? "border-primary-solid bg-primary-solid text-primary-solid-fg"
+                    : "border-border bg-surface text-fg-muted hover:text-fg",
+                )}
+              >
+                {item.key === "pinned" ? (
+                  <Pin className="mr-1 size-3.5" aria-hidden="true" />
+                ) : null}
+                {item.label}
+              </button>
+            ))}
+
+            <div className="relative shrink-0">
+              <button
+                ref={filterButtonRef}
+                type="button"
+                aria-expanded={openFilterMenu === "filters"}
+                aria-controls="salon-feed-filter-menu"
+                aria-label={
+                  filter !== "all" && filter !== "pinned"
+                    ? `Autres filtres, filtre actif : ${FILTERS.find((item) => item.key === filter)?.label}`
+                    : "Autres filtres"
+                }
+                className={cn(
+                  "inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition-colors",
+                  filter !== "all" && filter !== "pinned"
+                    ? "border-primary/40 bg-primary-subtle text-primary"
+                    : "border-border bg-surface text-fg-muted hover:text-fg",
+                )}
+                onClick={() => toggleFilterMenu("filters")}
+              >
+                <span>Filtres</span>
+                {filter !== "all" && filter !== "pinned" ? (
+                  <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+                ) : null}
+                <ChevronDown
+                  aria-hidden="true"
+                  className={cn(
+                    "size-3.5 transition-transform duration-150",
+                    openFilterMenu === "filters" && "rotate-180",
+                  )}
+                />
+              </button>
+
+              {openFilterMenu === "filters" ? (
+                <div
+                  id="salon-feed-filter-menu"
+                  className={cn(
+                    "border-border bg-surface fixed inset-x-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 max-h-[calc(100dvh-8rem)] overflow-y-auto rounded-2xl border p-2 shadow-xl md:absolute md:inset-x-auto md:top-full md:bottom-auto md:mt-2 md:max-h-none md:w-56 md:max-w-[calc(100vw-2rem)] md:overflow-visible",
+                    filterMenuAlign === "right" ? "md:right-0" : "md:left-0",
+                  )}
+                >
+                  <p className="text-fg-subtle px-2.5 py-2 text-[10px] font-bold tracking-[0.12em] uppercase">
+                    Autres filtres
+                  </p>
+                  <ul className="flex flex-col gap-1">
+                    {FILTERS.filter((item) => item.key !== "all" && item.key !== "pinned").map(
+                      (item) => (
+                        <li key={item.key}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFilter(item.key);
+                              setOpenFilterMenu(null);
+                            }}
+                            aria-pressed={filter === item.key}
+                            className={cn(
+                              "inline-flex min-h-11 w-full items-center rounded-xl px-3 text-left text-sm font-semibold transition-colors",
+                              filter === item.key
+                                ? "bg-primary-solid text-primary-solid-fg"
+                                : "text-fg-muted hover:bg-bg-muted hover:text-fg",
+                            )}
+                          >
+                            {item.key === "announcements" ? (
+                              <Megaphone className="mr-2 size-4" aria-hidden="true" />
+                            ) : null}
+                            {item.label}
+                          </button>
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                </div>
               ) : null}
-              {item.label}
-            </button>
-          ))}
-        </div>
-        <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-1">
-          {POST_CATEGORY_ORDER.map((key) => (
+            </div>
+          </div>
+
+          <div className="relative shrink-0">
             <button
-              key={key}
+              ref={categoryButtonRef}
               type="button"
-              onClick={() => setCategoryFilter(categoryFilter === key ? null : key)}
-              aria-pressed={categoryFilter === key}
+              aria-expanded={openFilterMenu === "categories"}
+              aria-controls="salon-feed-category-menu"
+              aria-label={
+                categoryFilter
+                  ? `Catégories, catégorie active : ${CATEGORY_LABELS[categoryFilter as keyof typeof CATEGORY_LABELS]}`
+                  : "Catégories"
+              }
               className={cn(
-                "press min-h-9 shrink-0 rounded-full border px-3 py-1.5 text-2xs font-semibold transition-colors duration-150",
-                categoryFilter === key
-                  ? "border-primary bg-primary/10 text-primary"
+                "inline-flex min-h-10 max-w-full items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition-colors",
+                categoryFilter
+                  ? "border-primary/40 bg-primary-subtle text-primary"
                   : "border-border bg-surface text-fg-muted hover:text-fg",
               )}
+              onClick={() => toggleFilterMenu("categories")}
             >
-              {CATEGORY_LABELS[key]}
+              <span>
+                {categoryFilter
+                  ? CATEGORY_LABELS[categoryFilter as keyof typeof CATEGORY_LABELS]
+                  : "Catégories"}
+              </span>
+              {categoryFilter ? (
+                <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+              ) : null}
+              <ChevronDown
+                aria-hidden="true"
+                className={cn(
+                  "size-3.5 transition-transform duration-150",
+                  openFilterMenu === "categories" && "rotate-180",
+                )}
+              />
             </button>
-          ))}
+
+            {openFilterMenu === "categories" ? (
+              <div
+                id="salon-feed-category-menu"
+                className={cn(
+                  "border-border bg-surface fixed inset-x-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 max-h-[calc(100dvh-8rem)] overflow-y-auto rounded-2xl border p-2 shadow-xl md:absolute md:inset-x-auto md:top-full md:bottom-auto md:mt-2 md:max-h-none md:w-56 md:max-w-[calc(100vw-2rem)] md:overflow-visible",
+                  filterMenuAlign === "right" ? "md:right-0" : "md:left-0",
+                )}
+              >
+                <p className="text-fg-subtle px-2.5 py-2 text-[10px] font-bold tracking-[0.12em] uppercase">
+                  Catégories du fil
+                </p>
+                <ul className="flex flex-col gap-1">
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCategoryFilter(null);
+                        setOpenFilterMenu(null);
+                      }}
+                      aria-pressed={categoryFilter === null}
+                      className={cn(
+                        "inline-flex min-h-11 w-full items-center rounded-xl px-3 text-left text-sm font-semibold transition-colors",
+                        categoryFilter === null
+                          ? "bg-primary-solid text-primary-solid-fg"
+                          : "text-fg-muted hover:bg-bg-muted hover:text-fg",
+                      )}
+                    >
+                      Toutes les catégories
+                    </button>
+                  </li>
+                  {POST_CATEGORY_ORDER.map((key) => (
+                    <li key={key}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCategoryFilter(key);
+                          setOpenFilterMenu(null);
+                        }}
+                        aria-pressed={categoryFilter === key}
+                        className={cn(
+                          "inline-flex min-h-11 w-full items-center rounded-xl px-3 text-left text-sm font-semibold transition-colors",
+                          categoryFilter === key
+                            ? "bg-primary-solid text-primary-solid-fg"
+                            : "text-fg-muted hover:bg-bg-muted hover:text-fg",
+                        )}
+                      >
+                        {CATEGORY_LABELS[key]}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
         </div>
       </nav>
 
@@ -358,7 +557,7 @@ export function SalonFeed({
           <button
             type="button"
             onClick={showNewPosts}
-            className="bg-accent-solid text-accent-solid-fg press shadow-xl inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-bold"
+            className="bg-accent-solid text-accent-solid-fg press inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-bold shadow-xl"
           >
             <MessageSquareDashed className="size-4" aria-hidden="true" />
             Voir les nouvelles publications
@@ -401,7 +600,7 @@ export function SalonFeed({
                 <span className="bg-accent-subtle-fg/30 h-px flex-1" aria-hidden="true" />
               </div>
             ) : null}
-            <div className={cn(focusedId === post.id && "rounded-2xl ring-2 ring-border-focus")}>
+            <div className={cn(focusedId === post.id && "ring-border-focus rounded-2xl ring-2")}>
               <SalonPostCard
                 post={post}
                 comments={commentsByPost[post.id] ?? []}
@@ -431,7 +630,9 @@ export function SalonFeed({
       </div>
 
       {/* Rejoueur des commentaires hors-ligne */}
-      {viewer.id ? <OfflineCommentsWatcher postIds={loaded.map((post) => post.id)} online={online} /> : null}
+      {viewer.id ? (
+        <OfflineCommentsWatcher postIds={loaded.map((post) => post.id)} online={online} />
+      ) : null}
     </div>
   );
 }
@@ -459,13 +660,7 @@ function matchFilter(
   };
 }
 
-function FeedEmpty({
-  filter,
-  onReset,
-}: {
-  filter: FeedFilter;
-  onReset: () => void;
-}) {
+function FeedEmpty({ filter, onReset }: { filter: FeedFilter; onReset: () => void }) {
   if (filter !== "all") {
     return (
       <div className="border-border bg-surface flex flex-col items-center gap-2 rounded-2xl border border-dashed px-6 py-12 text-center">
@@ -473,7 +668,9 @@ function FeedEmpty({
           <Inbox className="size-5" aria-hidden="true" />
         </span>
         <p className="text-fg text-sm font-semibold">Aucune publication ici pour l’instant</p>
-        <p className="text-fg-muted text-xs">Le reste du fil contient peut-être ce que tu cherches.</p>
+        <p className="text-fg-muted text-xs">
+          Le reste du fil contient peut-être ce que tu cherches.
+        </p>
         <button
           type="button"
           onClick={onReset}
@@ -545,7 +742,11 @@ function OfflineCommentsWatcher({ postIds, online }: { postIds: string[]; online
              leur salon actif. Après 4 échecs, l'entrée reste visible dans le
              compteur d'attente (aucune perte silencieuse). */
           if (!known.has(entry.postId)) continue;
-          const result = await createComment(entry.postId, entry.content, entry.parentId ?? undefined);
+          const result = await createComment(
+            entry.postId,
+            entry.content,
+            entry.parentId ?? undefined,
+          );
           if (result.success) {
             dequeueComment(entry.id);
             router.refresh();
