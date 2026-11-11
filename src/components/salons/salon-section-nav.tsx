@@ -10,6 +10,7 @@ const MOBILE_TABS: SalonTab[] = ["accueil", "fil"];
 
 export function SalonSectionNav({ salonId, activeTab }: { salonId: string; activeTab: SalonTab }) {
   const [open, setOpen] = useState(false);
+  const [menuAlign, setMenuAlign] = useState<"left" | "right">("left");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const primaryTabs = SALON_TABS.filter((tab) => MOBILE_TABS.includes(tab.slug));
@@ -55,9 +56,26 @@ export function SalonSectionNav({ salonId, activeTab }: { salonId: string; activ
     );
   }
 
+  function toggleMenu() {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+
+    const buttonRect = buttonRef.current?.getBoundingClientRect();
+    if (buttonRect) {
+      const panelWidth = Math.min(224, window.innerWidth - 32);
+      setMenuAlign(buttonRect.left + panelWidth > window.innerWidth - 16 ? "right" : "left");
+    }
+    setOpen(true);
+  }
+
   return (
-    <nav aria-label="Sections du salon" className="salon-section-nav min-w-0">
-      <div className="salon-section-mobile flex min-w-0 items-center gap-1.5 md:hidden">
+    <nav
+      aria-label="Sections du salon"
+      className="salon-section-nav w-full max-w-full min-w-0 flex-1 basis-full md:w-auto md:basis-auto"
+    >
+      <div className="salon-section-mobile flex w-full max-w-full min-w-0 flex-wrap items-center gap-1.5 md:hidden">
         {primaryTabs.map((tab) => tabLink(tab.slug, tab.label, activeTab === tab.slug))}
 
         <div className="relative shrink-0" ref={dropdownRef}>
@@ -66,15 +84,22 @@ export function SalonSectionNav({ salonId, activeTab }: { salonId: string; activ
             type="button"
             aria-expanded={open}
             aria-controls="salon-section-menu"
-            aria-label={activeExtra ? `Autres sections — ${activeExtra.label}` : "Autres sections"}
-            className={`inline-flex min-h-11 items-center gap-1 rounded-full border px-3 text-sm font-semibold transition-colors ${
+            aria-label={
+              activeExtra
+                ? `Autres sections, section active : ${activeExtra.label}`
+                : "Autres sections"
+            }
+            className={`inline-flex min-h-11 shrink-0 items-center gap-0.5 rounded-full border px-2 text-sm font-semibold whitespace-nowrap transition-colors ${
               activeExtra
                 ? "border-primary/40 bg-primary-subtle text-primary"
                 : "border-border text-fg-muted hover:bg-bg-muted hover:text-fg"
             }`}
-            onClick={() => setOpen((value) => !value)}
+            onClick={toggleMenu}
           >
-            <span>{activeExtra?.label ?? "Plus"}</span>
+            <span>Plus</span>
+            {activeExtra ? (
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+            ) : null}
             <ChevronDown
               aria-hidden="true"
               className={`size-4 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
@@ -84,16 +109,16 @@ export function SalonSectionNav({ salonId, activeTab }: { salonId: string; activ
           {open ? (
             <div
               id="salon-section-menu"
-              className="border-border bg-surface absolute top-full left-0 z-50 mt-2 w-56 rounded-2xl border p-2 shadow-xl"
+              className={`border-border bg-surface absolute top-full z-50 mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border p-2 shadow-xl ${
+                menuAlign === "right" ? "right-0" : "left-0"
+              }`}
             >
               <p className="text-fg-subtle px-2.5 py-2 text-[10px] font-bold tracking-[0.12em] uppercase">
                 Autres sections
               </p>
               <ul className="flex flex-col gap-1">
                 {extraTabs.map((tab) => (
-                  <li key={tab.slug}>
-                    {tabLink(tab.slug, tab.label, activeTab === tab.slug)}
-                  </li>
+                  <li key={tab.slug}>{tabLink(tab.slug, tab.label, activeTab === tab.slug)}</li>
                 ))}
               </ul>
             </div>
@@ -101,7 +126,7 @@ export function SalonSectionNav({ salonId, activeTab }: { salonId: string; activ
         </div>
       </div>
 
-      <div className="salon-section-desktop hidden flex-wrap items-center gap-1.5 md:flex">
+      <div className="salon-section-desktop hidden w-full max-w-full min-w-0 flex-wrap items-center gap-1.5 md:flex">
         {SALON_TABS.map((tab) => tabLink(tab.slug, tab.label, activeTab === tab.slug))}
       </div>
     </nav>
