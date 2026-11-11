@@ -264,17 +264,28 @@ export function HeroScreen({
 
 
 
-    /* Parallaxe pointeur (quickTo = lerp GSAP sans re-render React). */
+    /* Parallaxe très légère, limitée au pointeur qui survole la scène.
+       Les coordonnées restent bornées dans le cadre : un mouvement ailleurs
+       sur la page ne peut pas expédier la caméra hors du carrousel. */
     const toX = gsap.quickTo(state, "parallaxX", { duration: 0.7, ease: "power2.out" });
     const toY = gsap.quickTo(state, "parallaxY", { duration: 0.7, ease: "power2.out" });
     const onPointer = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
       const rect = host!.getBoundingClientRect();
-      const nx = (event.clientX - rect.left) / rect.width - 0.5;
-      const ny = (event.clientY - rect.top) / rect.height - 0.5;
-      toX(nx * layout.slotW * 0.12);
-      toY(ny * layout.slotH * 0.1);
+      const nx = Math.max(-0.5, Math.min(0.5, (event.clientX - rect.left) / rect.width - 0.5));
+      const ny = Math.max(-0.5, Math.min(0.5, (event.clientY - rect.top) / rect.height - 0.5));
+      toX(nx * layout.slotW * 0.04);
+      toY(ny * layout.slotH * 0.03);
     };
-    window.addEventListener("pointermove", onPointer, { passive: true });
+    const resetPointer = () => {
+      toX(0);
+      toY(0);
+    };
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    if (finePointer.matches) {
+      host.addEventListener("pointermove", onPointer, { passive: true });
+      host.addEventListener("pointerleave", resetPointer);
+    }
 
     /* Pause quand la scène sort de l'écran. */
     let inView = true;
@@ -306,7 +317,8 @@ export function HeroScreen({
       gsap.ticker.remove(tick);
       intro.kill();
       window.clearInterval(visibilityId);
-      window.removeEventListener("pointermove", onPointer);
+      host.removeEventListener("pointermove", onPointer);
+      host.removeEventListener("pointerleave", resetPointer);
       observer.disconnect();
       resizeObserver.disconnect();
       meshes.forEach((mesh) => group.remove(mesh));

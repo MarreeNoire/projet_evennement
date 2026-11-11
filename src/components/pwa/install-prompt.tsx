@@ -58,12 +58,12 @@ export function PwaInstallPrompt() {
 
       setInstructions(
         isIos
-          ? "Dans Safari, touche Partager, puis « Ajouter à l’écran d’accueil »."
+          ? "Dans Safari, touche Partager, puis « Ajouter à l’écran d’accueil ». Event sera installée comme une application PWA et s’ouvrira sans la barre de Safari."
           : isAndroid
-            ? "Dans Chrome, ouvre le menu ⋮ puis choisis « Installer l’application » ou « Ajouter à l’écran d’accueil »."
+            ? "Chrome n’a pas encore fourni sa confirmation d’installation PWA pour cet appareil. Quand la PWA est reconnue comme installable, ce bouton ouvre directement sa confirmation. Pour une vraie application Android, utilise Chrome avec Google Play Services ou Samsung Internet ; « Créer un raccourci » ne l’installe pas."
             : isSafari
               ? "Dans Safari, ouvre le menu Fichier puis choisis « Ajouter au Dock »."
-              : "Dans la barre d’adresse de ton navigateur, choisis « Installer Event ». Si cette option n’apparaît pas, ouvre le menu du navigateur puis choisis « Installer Event » ou « Ajouter à l’écran d’accueil ».",
+              : "Ce navigateur n’a pas encore proposé l’installation PWA d’Event. Ouvre Event dans Chrome ou Edge et utilise leur option « Installer Event » lorsqu’elle est disponible. N’utilise pas « Créer un raccourci », qui ne crée pas une application installée.",
       );
       setShowInstructions(true);
       return;
