@@ -113,7 +113,7 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
         <div className={styles["head-main"]}>
           <p className={shell.eyebrow}>Billetterie et communauté</p>
           <h1 id="hero-title" className={shell["page-title"]}>
-            Vos prochaines sorties, <em>en un tour.</em>
+            Fais-toi des amis <em>sur Event.</em>
           </h1>
         </div>
 

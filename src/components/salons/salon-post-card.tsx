@@ -222,7 +222,7 @@ function SalonPostCardImpl({
         {media.length > 0 ? (
           <div
             className={cn(
-              "bg-bg-subtle mt-3 grid gap-1 overflow-hidden rounded-xl",
+              "bg-bg-subtle mt-3 grid max-h-[360px] gap-1 overflow-hidden rounded-xl max-md:max-h-[260px]",
               media.length === 1 && "grid-cols-1",
               media.length === 2 && "grid-cols-2",
               media.length >= 3 && "grid-cols-2 sm:grid-cols-2",
@@ -235,7 +235,7 @@ function SalonPostCardImpl({
                 onClick={() => setLightboxIndex(index)}
                 aria-label={`Agrandir l’image ${index + 1} sur ${media.length}`}
                 className={cn(
-                  "bg-bg-subtle relative w-full overflow-hidden transition-opacity hover:opacity-95",
+                  "bg-bg-subtle relative max-h-[320px] w-full overflow-hidden transition-opacity hover:opacity-95 max-md:max-h-[250px]",
                   media.length === 1 ? "aspect-16/10" : "aspect-square",
                 )}
               >

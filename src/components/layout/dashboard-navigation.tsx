@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowLeft,
   BarChart3,
   Calendar,
+  ChevronUp,
   Flag,
   LayoutDashboard,
   Megaphone,
+  MoreHorizontal,
   QrCode,
   ScrollText,
   Settings,
@@ -90,19 +92,28 @@ export function DashboardNavigation({
   const items = variant === "admin" ? ADMIN_NAVIGATION_ITEMS : ORGANIZER_NAVIGATION_ITEMS;
   const SectionIcon = variant === "admin" ? LayoutDashboard : Calendar;
   const pathname = usePathname();
-  const activeMobileLinkRef = useRef<HTMLAnchorElement>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
   const current =
     [...items].sort((left, right) => right.href.length - left.href.length).find((item) =>
       isActive(pathname, item.href),
     ) ?? items[0]!;
 
+  useEffect(() => setMoreOpen(false), [current.href]);
   useEffect(() => {
-    activeMobileLinkRef.current?.scrollIntoView({
-      block: "nearest",
-      inline: "nearest",
-      behavior: "instant",
-    });
-  }, [current.href]);
+    if (!moreOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMoreOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [moreOpen]);
+
+  const primaryHrefs = variant === "organizer"
+    ? new Set(["/org", "/org/evenements", "/org/billetterie"])
+    : new Set(["/admin", "/admin/utilisateurs", "/admin/evenements"]);
+  const primaryItems = items.filter((item) => primaryHrefs.has(item.href));
+  const moreItems = items.filter((item) => !primaryHrefs.has(item.href));
+  const currentIsMore = !primaryHrefs.has(current.href);
 
   return (
     <>
@@ -160,13 +171,12 @@ export function DashboardNavigation({
         className={cn(styles.tabbar, styles.dashboardTabbar, "dashboard-mobile-tabbar lg:hidden")}
       >
         <ul className={styles.dashboardList}>
-          {items.map(({ href, label, mobileLabel, icon: Icon }) => {
+          {primaryItems.map(({ href, label, mobileLabel, icon: Icon }) => {
             const active = current.href === href;
             return (
               <li key={href} className={styles.dashboardItem}>
                 <Link
                   href={href}
-                  ref={active ? activeMobileLinkRef : undefined}
                   aria-current={active ? "page" : undefined}
                   onPointerDown={() => haptic("light")}
                   className={styles.tab}
@@ -179,7 +189,40 @@ export function DashboardNavigation({
               </li>
             );
           })}
+          <li className={cn(styles.dashboardItem, styles.moreItem)}>
+            <button
+              type="button"
+              aria-expanded={moreOpen}
+              aria-controls="dashboard-more-menu"
+              aria-label={currentIsMore ? `Plus, section actuelle : ${current.mobileLabel ?? current.label}` : "Plus de sections"}
+              onClick={() => setMoreOpen((open) => !open)}
+              className={cn(styles.tab, styles.moreButton, currentIsMore && styles.moreActive)}
+            >
+              <span className={styles.iconWrap}>
+                {moreOpen ? <ChevronUp className="size-5" aria-hidden="true" /> : <MoreHorizontal className="size-5" aria-hidden="true" />}
+              </span>
+              <span className={styles.label}>{currentIsMore ? (current.mobileLabel ?? current.label) : "Plus"}</span>
+            </button>
+          </li>
         </ul>
+        {moreOpen ? (
+          <div id="dashboard-more-menu" className={styles.moreMenu}>
+            {moreItems.map(({ href, label, mobileLabel, icon: Icon }) => {
+              const active = current.href === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(styles.moreLink, active && styles.moreLinkActive)}
+                >
+                  <Icon className="size-4 shrink-0" aria-hidden="true" />
+                  <span>{mobileLabel ?? label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
       </nav>
     </>
   );

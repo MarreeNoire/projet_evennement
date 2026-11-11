@@ -105,13 +105,13 @@ export default async function SalonDetailPage({
   return (
     <SocialShell active="salons">
       {/* Affiche du salon */}
-      <header className="bg-surface-raised border-border relative isolate min-h-64 overflow-hidden rounded-2xl border p-6 shadow-sm sm:min-h-80 sm:p-10">
+      <header className="bg-surface-raised border-border relative isolate min-h-48 overflow-hidden rounded-xl border p-5 shadow-sm sm:min-h-60 sm:p-7">
         {event?.cover_url ? (
           <PublicStorageImage
             src={event.cover_url}
             alt=""
             className="absolute inset-0 z-0 size-full object-cover"
-            sizes="100vw"
+            sizes="(max-width: 767px) 100vw, 72vw"
             fill
             quality={55}
           />
