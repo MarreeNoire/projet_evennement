@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CalendarDays, MapPin } from "lucide-react";
+
 import { EventInfoTabs } from "@/components/events/event-info-tabs";
 import { UnifiedEventHero } from "@/components/events/unified-event-hero";
 import { EventProgram, EventSpeakers } from "@/components/events/event-program";
@@ -8,9 +10,11 @@ import { SalonTeaser, TicketPicker } from "@/components/events/event-ticketing";
 import { EditorialShell } from "@/components/layout/editorial/editorial-shell";
 import { getPublishedEventBySlug } from "@/lib/events/queries";
 import { getCategoryLabel } from "@/lib/constants";
+import { formatDateRange } from "@/lib/utils";
 
 import styles from "@/components/editorial/editorial.module.css";
 import shell from "@/components/layout/editorial/editorial-shell.module.css";
+import heroStyles from "@/components/events/unified-event-hero.module.css";
 
 export async function generateMetadata({
   params,
@@ -68,7 +72,6 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
           <UnifiedEventHero
             mode="single"
             event={heroEvent}
-            showPracticalInfo={true}
           />
         </div>
 
@@ -80,6 +83,49 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
           }
           details={
             <div className={styles.eventDetailsPanel}>
+              <dl className={heroStyles.infoGrid}>
+                <div className={heroStyles.infoItem}>
+                  <dt className={heroStyles.infoLabel}>Date</dt>
+                  <dd className={heroStyles.infoValue}>
+                    <CalendarDays aria-hidden="true" />
+                    <span>{formatDateRange(event.start_at, event.end_at ?? event.start_at)}</span>
+                  </dd>
+                </div>
+                <div className={heroStyles.infoItem}>
+                  <dt className={heroStyles.infoLabel}>Lieu</dt>
+                  <dd className={heroStyles.infoValue}>
+                    <MapPin aria-hidden="true" />
+                    <span>
+                      {event.venue_name ? `${event.venue_name} · ` : ""}
+                      {event.city}
+                    </span>
+                  </dd>
+                </div>
+                <div className={heroStyles.infoItem}>
+                  <dt className={heroStyles.infoLabel}>Organisé par</dt>
+                  <dd className={heroStyles.infoValue}>
+                    <span>
+                      {event.organizer_name}
+                      {event.organizer_verified ? (
+                        <span
+                          style={{
+                            marginLeft: 8,
+                            color: "var(--accent)",
+                            fontSize: 10,
+                            fontWeight: 600,
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                          }}
+                          title="Organisateur vérifié"
+                        >
+                          vérifié
+                        </span>
+                      ) : null}
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+
               {description ? (
                 <section aria-labelledby="apropos" className={styles.block}>
                   <h2 id="apropos" className={styles.blockTitle}>

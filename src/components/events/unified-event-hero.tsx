@@ -20,7 +20,7 @@ import { ImageCarousel } from "@/components/ui/image-carousel";
 import { EventCountdown } from "@/components/events/event-countdown";
 import { Avatar } from "@/components/ui/avatar";
 import { ROUTES } from "@/lib/constants";
-import { formatNumber, formatDateRange } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 import { getCategoryLabel } from "@/lib/constants";
 import { priceLabel as eventPriceLabel } from "@/components/events/event-card";
 
@@ -86,8 +86,6 @@ interface UnifiedEventHeroProps {
   event?: BaseEvent;
   /** Pour mode featured : événements à venir affichés en bas */
   upcomingCount?: number;
-  /** Pour mode single : afficher les infos pratiques */
-  showPracticalInfo?: boolean;
   /** Callback lors du clic sur réserver */
   onReserve?: (eventId: string, ticketTypeId?: string) => void;
 }
@@ -103,7 +101,6 @@ export function UnifiedEventHero({
   events = [],
   event,
   upcomingCount = 3,
-  showPracticalInfo = true,
   onReserve,
 }: UnifiedEventHeroProps) {
   /* ==================== MODE FEATURED (homepage carousel) ==================== */
@@ -404,50 +401,6 @@ export function UnifiedEventHero({
           {event.summary ? <p className={styles.eventSummary}>{event.summary}</p> : null}
         </div>
 
-        {showPracticalInfo && (
-          <dl className={styles.infoGrid}>
-            <div className={styles.infoItem}>
-              <dt className={styles.infoLabel}>Date</dt>
-              <dd className={styles.infoValue}>
-                <CalendarDays aria-hidden="true" />
-                <span>{formatDateRange(event.startAt, event.endAt ?? event.startAt)}</span>
-              </dd>
-            </div>
-            <div className={styles.infoItem}>
-              <dt className={styles.infoLabel}>Lieu</dt>
-              <dd className={styles.infoValue}>
-                <MapPin aria-hidden="true" />
-                <span>
-                  {event.venueName ? `${event.venueName} · ` : ""}
-                  {event.city}
-                </span>
-              </dd>
-            </div>
-            <div className={styles.infoItem}>
-              <dt className={styles.infoLabel}>Organisé par</dt>
-              <dd className={styles.infoValue}>
-                <span>
-                  {event.organizerName}
-                  {event.organizerVerified && (
-                    <span
-                      style={{
-                        marginLeft: 8,
-                        color: "var(--accent)",
-                        fontSize: 10,
-                        fontWeight: 600,
-                        letterSpacing: "0.1em",
-                        textTransform: "uppercase",
-                      }}
-                      title="Organisateur vérifié"
-                    >
-                      vérifié
-                    </span>
-                  )}
-                </span>
-              </dd>
-            </div>
-          </dl>
-        )}
       </section>
     );
   }
