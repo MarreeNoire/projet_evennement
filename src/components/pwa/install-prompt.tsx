@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowDownToLine, Check } from "lucide-react";
+import { ArrowDownToLine } from "lucide-react";
 
 import {
   isStandaloneDisplay,
@@ -81,58 +81,51 @@ export function PwaInstallPrompt() {
     }
   }
 
+  if (isInstalled) return null;
+
   return (
     <div className="pwa-install-control">
-      {isInstalled ? (
-        <span className="pwa-install-status" aria-label="Event est installée">
-          <Check aria-hidden="true" />
-          <span>Installée</span>
-        </span>
-      ) : (
-        <>
+      <button
+        type="button"
+        className="pwa-install-control-button"
+        onClick={() => void install()}
+        aria-expanded={showInstructions}
+        aria-controls="pwa-install-dialog"
+        aria-haspopup="dialog"
+      >
+        <ArrowDownToLine aria-hidden="true" />
+        <span>Installer l’application</span>
+      </button>
+      <dialog
+        id="pwa-install-dialog"
+        ref={dialogRef}
+        className="pwa-install-dialog"
+        aria-labelledby="pwa-install-title"
+        onCancel={(event) => {
+          event.preventDefault();
+          setShowInstructions(false);
+        }}
+        onClose={() => setShowInstructions(false)}
+      >
+        <div className="pwa-install-dialog-content">
+          <div className="pwa-install-dialog-icon" aria-hidden="true">
+            <ArrowDownToLine />
+          </div>
+          <p className="pwa-install-dialog-eyebrow">Event, partout avec toi</p>
+          <h2 id="pwa-install-title">Installe l’application</h2>
+          <p className="pwa-install-dialog-copy">
+            Accède plus vite à tes événements et à tes salons depuis ton écran d’accueil.
+          </p>
+          <p className="pwa-install-dialog-help">{instructions}</p>
           <button
             type="button"
-            className="pwa-install-control-button"
-            onClick={() => void install()}
-            aria-expanded={showInstructions}
-            aria-controls="pwa-install-dialog"
-            aria-haspopup="dialog"
+            className="pwa-install-dialog-close"
+            onClick={() => setShowInstructions(false)}
           >
-            <ArrowDownToLine aria-hidden="true" />
-            <span>Installer l’application</span>
+            Compris
           </button>
-          <dialog
-            id="pwa-install-dialog"
-            ref={dialogRef}
-            className="pwa-install-dialog"
-            aria-labelledby="pwa-install-title"
-            onCancel={(event) => {
-              event.preventDefault();
-              setShowInstructions(false);
-            }}
-            onClose={() => setShowInstructions(false)}
-          >
-            <div className="pwa-install-dialog-content">
-              <div className="pwa-install-dialog-icon" aria-hidden="true">
-                <ArrowDownToLine />
-              </div>
-              <p className="pwa-install-dialog-eyebrow">Event, partout avec toi</p>
-              <h2 id="pwa-install-title">Installe l’application</h2>
-              <p className="pwa-install-dialog-copy">
-                Accède plus vite à tes événements et à tes salons depuis ton écran d’accueil.
-              </p>
-              <p className="pwa-install-dialog-help">{instructions}</p>
-              <button
-                type="button"
-                className="pwa-install-dialog-close"
-                onClick={() => setShowInstructions(false)}
-              >
-                Compris
-              </button>
-            </div>
-          </dialog>
-        </>
-      )}
+        </div>
+      </dialog>
     </div>
   );
 }

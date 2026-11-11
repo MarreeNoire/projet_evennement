@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronDown } from "lucide-react";
-
+import { EventInfoTabs } from "@/components/events/event-info-tabs";
 import { UnifiedEventHero } from "@/components/events/unified-event-hero";
 import { EventProgram, EventSpeakers } from "@/components/events/event-program";
 import { SalonTeaser, TicketPicker } from "@/components/events/event-ticketing";
@@ -73,39 +72,29 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
           />
         </div>
 
-        <div className={styles.eventLayout} style={{ marginTop: 34, paddingBottom: 40 }}>
-          <div>
+        <EventInfoTabs
+          tickets={
+            <div className={styles.eventTicketPanel}>
+              <TicketPicker ticketTypes={ticketTypes} slug={event.slug} />
+            </div>
+          }
+          details={
+            <div className={styles.eventDetailsPanel}>
+              {description ? (
+                <section aria-labelledby="apropos" className={styles.block}>
+                  <h2 id="apropos" className={styles.blockTitle}>
+                    À propos
+                  </h2>
+                  <p className={styles.blockText}>{description}</p>
+                </section>
+              ) : null}
 
-            <details className={styles.details}>
-              <summary className={styles.detailsSummary}>
-                <span className={styles.detailsTitle}>Détails de l’événement</span>
-                <span className={styles.detailsHint}>
-                  Description, programme et intervenants
-                </span>
-                <ChevronDown className={styles.detailsChevron} aria-hidden="true" />
-              </summary>
-
-              <div className={styles.detailsBody}>
-                {description ? (
-                  <section aria-labelledby="apropos" className={styles.block}>
-                    <h2 id="apropos" className={styles.blockTitle}>
-                      À propos
-                    </h2>
-                    <p className={styles.blockText}>{description}</p>
-                  </section>
-                ) : null}
-
-                <EventProgram sessions={sessions} />
-                <EventSpeakers speakers={speakers} />
-                <SalonTeaser slug={event.slug} privacy={event.salon_privacy} />
-              </div>
-            </details>
-          </div>
-
-          <aside className={styles.aside}>
-            <TicketPicker ticketTypes={ticketTypes} slug={event.slug} />
-          </aside>
-        </div>
+              <EventProgram sessions={sessions} />
+              <EventSpeakers speakers={speakers} />
+              <SalonTeaser slug={event.slug} privacy={event.salon_privacy} />
+            </div>
+          }
+        />
       </div>
     </EditorialShell>
   );

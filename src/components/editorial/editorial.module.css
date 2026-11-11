@@ -505,6 +505,83 @@
   gap: clamp(24px, 3.4vw, 48px);
 }
 
+.eventTabs {
+  margin-top: clamp(24px, 3vw, 38px);
+  padding-bottom: 40px;
+}
+
+.eventTabList {
+  display: flex;
+  gap: clamp(22px, 4vw, 42px);
+  border-bottom: 1px solid var(--line);
+}
+
+.eventTab {
+  position: relative;
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.eventTab::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms ease-out;
+}
+
+.eventTab[aria-selected="true"] {
+  color: var(--ink);
+}
+
+.eventTab[aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.eventTab:focus-visible,
+.eventTabPanel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.eventTabPanel {
+  min-width: 0;
+  padding-top: 24px;
+}
+
+.eventTabPanel[hidden] {
+  display: none;
+}
+
+.eventTicketPanel {
+  max-width: 920px;
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.eventDetailsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
 .eventCover {
   position: relative;
   aspect-ratio: 16 / 9;

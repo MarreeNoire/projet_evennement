@@ -1586,8 +1586,7 @@ body:has(#app-side-rail) {
   align-items: center;
 }
 
-.pwa-install-control-button,
-.pwa-install-status {
+.pwa-install-control-button {
   display: inline-flex;
   min-height: 38px;
   align-items: center;
@@ -1618,17 +1617,10 @@ body:has(#app-side-rail) {
   transform: translateY(1px);
 }
 
-.pwa-install-control-button svg,
-.pwa-install-status svg {
+.pwa-install-control-button svg {
   width: 15px;
   height: 15px;
   flex: 0 0 auto;
-}
-
-.pwa-install-status {
-  min-height: 34px;
-  color: var(--fg-muted);
-  font-size: 11px;
 }
 
 .pwa-install-instructions {
@@ -1743,16 +1735,14 @@ body:has(#app-side-rail) {
 }
 
 @media (max-width: 640px) {
-  .pwa-install-control-button,
-  .pwa-install-status {
+  .pwa-install-control-button {
     width: 38px;
     min-width: 38px;
     min-height: 38px;
     padding: 0;
   }
 
-  .pwa-install-control-button span,
-  .pwa-install-status span {
+  .pwa-install-control-button span {
     position: absolute;
     width: 1px;
     height: 1px;
