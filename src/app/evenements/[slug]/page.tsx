@@ -14,7 +14,6 @@ import { formatDateRange } from "@/lib/utils";
 
 import styles from "@/components/editorial/editorial.module.css";
 import shell from "@/components/layout/editorial/editorial-shell.module.css";
-import heroStyles from "@/components/events/unified-event-hero.module.css";
 
 export async function generateMetadata({
   params,
@@ -83,60 +82,75 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
           }
           details={
             <div className={styles.eventDetailsPanel}>
-              <dl className={heroStyles.infoGrid}>
-                <div className={heroStyles.infoItem}>
-                  <dt className={heroStyles.infoLabel}>Date</dt>
-                  <dd className={heroStyles.infoValue}>
-                    <CalendarDays aria-hidden="true" />
-                    <span>{formatDateRange(event.start_at, event.end_at ?? event.start_at)}</span>
-                  </dd>
-                </div>
-                <div className={heroStyles.infoItem}>
-                  <dt className={heroStyles.infoLabel}>Lieu</dt>
-                  <dd className={heroStyles.infoValue}>
-                    <MapPin aria-hidden="true" />
-                    <span>
-                      {event.venue_name ? `${event.venue_name} · ` : ""}
-                      {event.city}
-                    </span>
-                  </dd>
-                </div>
-                <div className={heroStyles.infoItem}>
-                  <dt className={heroStyles.infoLabel}>Organisé par</dt>
-                  <dd className={heroStyles.infoValue}>
-                    <span>
-                      {event.organizer_name}
-                      {event.organizer_verified ? (
-                        <span
-                          style={{
-                            marginLeft: 8,
-                            color: "var(--accent)",
-                            fontSize: 10,
-                            fontWeight: 600,
-                            letterSpacing: "0.1em",
-                            textTransform: "uppercase",
-                          }}
-                          title="Organisateur vérifié"
-                        >
-                          vérifié
-                        </span>
-                      ) : null}
-                    </span>
-                  </dd>
-                </div>
-              </dl>
+              <section className={styles.eventPractical} aria-labelledby="event-practical-title">
+                <header className={styles.eventPracticalHeader}>
+                  <div>
+                    <p className={styles.eventDetailsEyebrow}>À retenir</p>
+                    <h2 id="event-practical-title" className={styles.eventPracticalTitle}>
+                      Informations pratiques
+                    </h2>
+                  </div>
+                  <span className={styles.eventPracticalHint}>Prépare ta venue</span>
+                </header>
+
+                <dl className={styles.eventPracticalGrid}>
+                  <div className={styles.eventPracticalItem}>
+                    <dt className={styles.eventPracticalLabel}>Date</dt>
+                    <dd className={styles.eventPracticalValue}>
+                      <CalendarDays aria-hidden="true" />
+                      <span>{formatDateRange(event.start_at, event.end_at ?? event.start_at)}</span>
+                    </dd>
+                  </div>
+                  <div className={styles.eventPracticalItem}>
+                    <dt className={styles.eventPracticalLabel}>Lieu</dt>
+                    <dd className={styles.eventPracticalValue}>
+                      <MapPin aria-hidden="true" />
+                      <span>
+                        {event.venue_name ? `${event.venue_name} · ` : ""}
+                        {event.city}
+                      </span>
+                    </dd>
+                  </div>
+                  <div className={styles.eventPracticalItem}>
+                    <dt className={styles.eventPracticalLabel}>Organisé par</dt>
+                    <dd className={styles.eventPracticalValue}>
+                      <span>
+                        {event.organizer_name}
+                        {event.organizer_verified ? (
+                          <span className={styles.eventVerified} title="Organisateur vérifié">
+                            Vérifié
+                          </span>
+                        ) : null}
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </section>
 
               {description ? (
-                <section aria-labelledby="apropos" className={styles.block}>
-                  <h2 id="apropos" className={styles.blockTitle}>
-                    À propos
-                  </h2>
+                <section aria-labelledby="apropos" className={styles.eventAbout}>
+                  <div>
+                    <p className={styles.eventDetailsEyebrow}>Présentation</p>
+                    <h2 id="apropos" className={styles.blockTitle}>
+                      À propos de l’événement
+                    </h2>
+                  </div>
                   <p className={styles.blockText}>{description}</p>
                 </section>
               ) : null}
 
-              <EventProgram sessions={sessions} />
-              <EventSpeakers speakers={speakers} />
+              {sessions.length > 0 && speakers.length > 0 ? (
+                <div className={styles.eventDetailsColumns}>
+                  <EventProgram sessions={sessions} />
+                  <EventSpeakers speakers={speakers} />
+                </div>
+              ) : sessions.length > 0 || speakers.length > 0 ? (
+                <div className={styles.eventDetailsSingle}>
+                  <EventProgram sessions={sessions} />
+                  <EventSpeakers speakers={speakers} />
+                </div>
+              ) : null}
+
               <SalonTeaser slug={event.slug} privacy={event.salon_privacy} />
             </div>
           }

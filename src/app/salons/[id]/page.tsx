@@ -5,6 +5,7 @@ import { CalendarDays, MapPin, Users } from "lucide-react";
 import { SalonPolls } from "@/components/salons/salon-polls";
 import { SalonFeed } from "@/components/salons/salon-feed";
 import { SalonMuteButton } from "@/components/salons/salon-mute-button";
+import { SalonSectionNav } from "@/components/salons/salon-section-nav";
 import { SalonPostCard } from "@/components/salons/salon-post-card";
 import { PhaseTag } from "@/components/social/phase-tag";
 import { SocialShell } from "@/components/social/social-shell";
@@ -174,29 +175,7 @@ export default async function SalonDetailPage({
 
       {/* Onglets + notifications */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <nav
-          aria-label="Sections du salon"
-          className="no-scrollbar flex max-w-full gap-2 overflow-x-auto pb-2"
-        >
-          {SALON_TABS.map((item) => {
-            const isActive = item.slug === activeTab;
-            return (
-              <Link
-                key={item.slug}
-                href={`/salons/${id}?tab=${item.slug}`}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "inline-flex min-h-11 shrink-0 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
-                  isActive
-                    ? "bg-primary-solid text-primary-solid-fg shadow-sm"
-                    : "text-fg-muted hover:bg-bg-muted hover:text-fg",
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <SalonSectionNav salonId={id} activeTab={activeTab} />
         {context.userId ? (
           <SalonMuteButton salonId={id} muted={context.isMuted} />
         ) : null}
