@@ -277,9 +277,3 @@
   }
 }
 
-/* --- Version installée (PWA) : hero retiré de l'accueil ------------------ */
-@media (display-mode: standalone) {
-  .hero {
-    display: none;
-  }
-}

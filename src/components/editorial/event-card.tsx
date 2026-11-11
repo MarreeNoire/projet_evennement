@@ -137,16 +137,18 @@ export function EditorialEventCard({
             </p>
             <p>{event.organizer_name}</p>
           </div>
+        </div>
 
-          <div className={styles.cardSide}>
-            <p className={styles.cardPrice}>
-              <span>Entrée</span>
-              {priceLabel(event)}
-            </p>
-            <span className={styles.cardGo} aria-hidden="true">
-              <ArrowUpRight />
-            </span>
-          </div>
+        {/* Pied de carte sur sa propre ligne : le prix ne se retrouve plus
+            comprimé entre la date et le bord de la carte. */}
+        <div className={styles.cardFoot}>
+          <p className={styles.cardPrice}>
+            <span>Entrée</span>
+            {priceLabel(event)}
+          </p>
+          <span className={styles.cardGo} aria-hidden="true">
+            <ArrowUpRight />
+          </span>
         </div>
       </Link>
     </article>
