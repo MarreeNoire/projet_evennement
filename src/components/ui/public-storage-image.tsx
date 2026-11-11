@@ -1,5 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 
 interface PublicStorageImageProps {
   src: string;
@@ -32,7 +34,13 @@ function isPublicSupabaseImage(src: string): boolean {
   }
 }
 
-/** Optimise les images publiques Supabase et conserve les autres URL externes. */
+/**
+ * Image publique Supabase, optimisée par Next (`/_next/image`).
+ *
+ * Si l'optimiseur échoue (quota, upstream indisponible, 5xx), l'image bascule
+ * silencieusement sur l'URL Storage brute : une image s'affiche toujours,
+ * même dégradée, plutôt qu'un cadre vide.
+ */
 export function PublicStorageImage({
   src,
   alt,
@@ -49,7 +57,37 @@ export function PublicStorageImage({
     ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
     : undefined;
 
-  if (isPublicSupabaseImage(src)) {
+  /* Repli actif seulement pour les images Supabase optimisables, et une seule
+     fois : dès que l'optimiseur a échoué, on reste sur l'URL brute.
+     `src` en clé de dérivation : pas d'effet, l'état suit le prop. */
+  const [imageKey, setImageKey] = useState(src);
+  const [fallback, setFallback] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const optimizable = isPublicSupabaseImage(src);
+  if (imageKey !== src) {
+    setImageKey(src);
+    setFallback(false);
+    setFailed(false);
+  }
+
+  if (fallback && !failed) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        width={fill ? undefined : width}
+        height={fill ? undefined : height}
+        loading={preload || loading === "eager" ? "eager" : "lazy"}
+        decoding="async"
+        onError={() => setFailed(true)}
+        style={fillStyle}
+      />
+    );
+  }
+
+  if (optimizable) {
     return (
       <Image
         src={src}
@@ -62,6 +100,8 @@ export function PublicStorageImage({
         quality={quality}
         preload={preload}
         loading={preload ? undefined : loading}
+        onError={() => setFallback(true)}
+        style={fillStyle}
       />
     );
   }

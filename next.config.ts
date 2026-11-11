@@ -59,6 +59,10 @@ const nextConfig: NextConfig = {
     ],
     // Les IP privées ne sont jamais joignables par l'optimiseur d'images (anti-SSRF).
     formats: ["image/avif", "image/webp"],
+    // Supabase Storage renvoie `max-age=3600` : sans ce plancher, l'optimiseur
+    // re-télécharge et re-traverse chaque image toutes les heures. Un mois
+    // laisse le CDN de Vercel servir les vignettes sans aller chercher upstream.
+    minimumCacheTTL: 2_678_400,
   },
 
   async headers() {

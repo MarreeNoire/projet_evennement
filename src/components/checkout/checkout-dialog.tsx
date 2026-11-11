@@ -14,8 +14,11 @@ function hasUnsavedCart(dialog: HTMLDialogElement): boolean {
 
 export function CheckoutDialog({
   children,
+  eventTitle,
 }: {
   children: ReactNode;
+  /** Nom de l'événement, rappelé dans l'en-tête de la modal. */
+  eventTitle?: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const router = useRouter();
@@ -52,9 +55,11 @@ export function CheckoutDialog({
       <div className="checkout-dialog-shell">
         <header className="checkout-dialog-header">
           <div className="min-w-0">
-            <p className="text-fg-muted flex items-center gap-1.5 text-[0.6875rem] font-semibold tracking-[0.08em] uppercase">
+            <p className="text-fg-muted flex min-w-0 items-center gap-1.5 text-[0.6875rem] font-semibold tracking-[0.08em] uppercase">
               <LockKeyhole className="size-3 shrink-0" aria-hidden="true" />
-              Paiement sécurisé
+              <span className="truncate">
+                {eventTitle ? `${eventTitle} · Paiement sécurisé` : "Paiement sécurisé"}
+              </span>
             </p>
             <h2 id="checkout-dialog-title" className="font-display text-xl font-bold sm:text-2xl">
               Finaliser la réservation

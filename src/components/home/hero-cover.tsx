@@ -1,40 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  MapPin,
-  Pause,
-  Play,
-} from "lucide-react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { ArrowRight, ArrowUpRight, CalendarDays, MapPin, Pause, Play } from "lucide-react";
 
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
+import { HeroScreen } from "@/components/home/hero-screen";
 import { ROUTES } from "@/lib/constants";
-import { formatNumber } from "@/lib/utils";
 import shell from "@/components/layout/editorial/editorial-shell.module.css";
 
 import styles from "./hero-cover.module.css";
 
 /* =============================================================================
-   Hero « affiche cadrée »
+   Hero de l'accueil
    ---------------------------------------------------------------------------
    Le titre, le surtitre et le chapô utilisent les primitives éditoriales du
    site (`page-head`, `page-title`, `page-lead`) : l'accueil parle la même langue
    que l'agenda et les fiches événement.
 
-   L'affiche n'est plus un fond sous un voile : elle est présentée comme une
-   affiche, dans un cadre portrait, image entière (aucun recadrage) et sans
-   filtre. Le fil des prochaines sorties reprend la colonne de date des cartes
-   éditoriales.
+   Le carrousel reprend la mécanique du hero de DG Cinema : une bande pleine
+   largeur d'affiches portrait qui défile en continu, bord à bord. Chaque
+   affiche est recadrée pour remplir sa vignette (aucune bande vide), et les
+   données restent celles des prochaines sorties du site.
 
    Rotation maîtrisée : pause au survol et à la prise de focus, pause explicite,
-   navigation manuelle, et aucune rotation automatique sous
-   `prefers-reduced-motion`.
+   et aucune animation automatique sous `prefers-reduced-motion`.
    ========================================================================== */
 
 export type HeroCoverEvent = {
@@ -58,28 +48,12 @@ export type HeroCoverEvent = {
   } | null;
 };
 
-const WEEKDAY = new Intl.DateTimeFormat("fr-FR", {
-  weekday: "short",
-  timeZone: "Africa/Abidjan",
-});
 const DAY = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", timeZone: "Africa/Abidjan" });
 const MONTH = new Intl.DateTimeFormat("fr-FR", { month: "short", timeZone: "Africa/Abidjan" });
 
-const MAX_SLIDES = 5;
-const ROTATION_MS = 7000;
-/* L'affiche sortante survit au fondu (700 ms) avec une marge : aucun intervalle
-   où le cadre pourrait apparaître vide. */
-const TRANSITION_MS = 1100;
-
-function priceLabel(event: Pick<HeroCoverEvent, "minPrice" | "maxPrice">) {
-  if (event.minPrice <= 0 && event.maxPrice <= 0) return "Gratuit";
-  if (event.minPrice <= 0) return "Gratuit / payant";
-  return `Dès ${formatNumber(event.minPrice)} FCFA`;
-}
-
-function weekday(value: string) {
-  return WEEKDAY.format(new Date(value)).replace(/\./g, "");
-}
+const MAX_SLIDES = 6;
+/* Temps de traversée d'une affiche dans la bande. */
+const SLIDE_SECONDS = 6;
 
 function shortDate(value: string) {
   const date = new Date(value);
@@ -93,19 +67,13 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
     [events],
   );
 
-  const [index, setIndex] = useState(0);
-  const [outgoing, setOutgoing] = useState<number | null>(null);
   const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [tabHidden, setTabHidden] = useState(false);
-  const cleanupRef = useRef<number | null>(null);
 
   const count = slides.length;
-  const safeIndex = count > 0 ? index % count : 0;
-  const featured = slides[safeIndex] ?? events[0] ?? null;
-  /* Fil stable, indépendant de l'affiche affichée. */
-  const upcoming = events.slice(0, 3);
+  const featured = slides[0] ?? events[0] ?? null;
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -116,8 +84,15 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  /* Onglet masqué : la rotation s'arrête, aucun changement d'affiche ne peut
-     se retrouver figé au retour. */
+  /* Deux copies de la bande : la seconde prend le relais pendant que la
+     première sort de l'écran, ce qui rend la boucle invisible. */
+  const loop = count > 1 ? [...slides, ...slides] : slides;
+  const marqueeDuration = count > 1 ? count * SLIDE_SECONDS : 0;
+  const animationPaused = paused || hovered || tabHidden || count < 2;
+  const screenPaused = paused || reduceMotion || tabHidden;
+
+  /* Onglet masqué : le défilement s'arrête, aucun mouvement ne se retrouve
+     figé au retour. */
   useEffect(() => {
     const update = () => setTabHidden(document.visibilityState === "hidden");
 
@@ -126,44 +101,14 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
     return () => document.removeEventListener("visibilitychange", update);
   }, []);
 
-  const goTo = useCallback(
-    (next: number) => {
-      if (count < 2) return;
-
-      setOutgoing(safeIndex);
-      setIndex(((next % count) + count) % count);
-
-      if (cleanupRef.current !== null) window.clearTimeout(cleanupRef.current);
-      cleanupRef.current = window.setTimeout(() => setOutgoing(null), TRANSITION_MS);
-    },
-    [count, safeIndex],
-  );
-
-  useEffect(
-    () => () => {
-      if (cleanupRef.current !== null) window.clearTimeout(cleanupRef.current);
-    },
-    [],
-  );
-
-  useEffect(() => {
-    if (count < 2 || paused || hovered || reduceMotion || tabHidden) return;
-
-    const id = window.setInterval(() => goTo(safeIndex + 1), ROTATION_MS);
-    return () => window.clearInterval(id);
-  }, [count, paused, hovered, reduceMotion, tabHidden, safeIndex, goTo]);
-
-  const nextSlide = count > 1 ? slides[(safeIndex + 1) % count] : null;
+  function ticketHref(event: HeroCoverEvent) {
+    return event.firstTicketType
+      ? `/evenements/${event.slug}/billets?type=${event.firstTicketType.id}`
+      : `/evenements/${event.slug}/billets`;
+  }
 
   return (
-    <section
-      className={styles.hero}
-      aria-labelledby="hero-title"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocusCapture={() => setHovered(true)}
-      onBlurCapture={() => setHovered(false)}
-    >
+    <section className={styles.hero} aria-labelledby="hero-title">
       <header className={`${shell["page-head"]} ${shell["page-head--split"]}`}>
         <div className={styles["head-main"]}>
           <p className={shell.eyebrow}>Billetterie et communauté</p>
@@ -178,13 +123,7 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
           </p>
           <div className={styles.actions}>
             <Link
-              href={
-                featured?.firstTicketType
-                  ? `/evenements/${featured.slug}/billets?type=${featured.firstTicketType.id}`
-                  : featured
-                    ? `/evenements/${featured.slug}/billets`
-                    : ROUTES.explore
-              }
+              href={featured ? ticketHref(featured) : ROUTES.explore}
               className={`${shell.btn} ${shell["btn-primary"]}`}
             >
               {featured ? "Voir les billets" : "Explorer l'agenda"}
@@ -200,52 +139,55 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
       </header>
 
       <div className={styles.showcase}>
-        <figure className={styles["poster-card"]}>
-          <div className={styles.poster}>
-            <div className={styles.stack} aria-hidden="true">
-              {count === 0 ? <div className={styles["backdrop-fallback"]} /> : null}
+        <figure
+          className={styles["strip-figure"]}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          onFocusCapture={() => setHovered(true)}
+          onBlurCapture={() => setHovered(false)}
+        >
+          {/* Mur courbé three.js (repli : bande tactile sans WebGL). */}
+          {count > 1 ? (
+            <HeroScreen
+              posters={slides.map((slide) => ({ id: slide.id, src: slide.coverUrl! }))}
+              paused={screenPaused}
+            />
+          ) : (
+            <div className={styles["strip-bleed"]}>
+              <div className={styles.strip} data-paused={animationPaused ? "true" : undefined}>
+                <div
+                  className={styles.track}
+                  style={{ "--marquee-duration": `${marqueeDuration}s` } as CSSProperties}
+                >
+                  {count === 0 ? <div className={styles["backdrop-fallback"]} /> : null}
+                  {loop.map((slide, slideIndex) => {
+                    const duplicate = slideIndex >= count;
 
-              {slides.map((slide, slideIndex) => {
-                const isActive = slideIndex === safeIndex;
-                const isOutgoing = slideIndex === outgoing;
-                if (!isActive && !isOutgoing) return null;
-
-                return (
-                  <div
-                    key={slide.id}
-                    className={`${styles.slide} ${isActive ? styles["slide-active"] : ""} ${
-                      isOutgoing ? styles["slide-outgoing"] : ""
-                    }`.trim()}
-                  >
-                    <PublicStorageImage
-                      src={slide.coverUrl!}
-                      alt=""
-                      fill
-                      sizes="(max-width: 900px) 88vw, 340px"
-                      quality={85}
-                      preload={slideIndex === 0}
-                      className={styles["poster-image"]}
-                    />
-                  </div>
-                );
-              })}
-
-              {/* L'affiche suivante est chargée à l'avance, invisible. */}
-              {nextSlide ? (
-                <div key={`next-${nextSlide.id}`} className={styles.slide}>
-                  <PublicStorageImage
-                    src={nextSlide.coverUrl!}
-                    alt=""
-                    fill
-                    sizes="(max-width: 900px) 88vw, 340px"
-                    quality={85}
-                    loading="eager"
-                    className={styles["poster-image"]}
-                  />
+                    return (
+                      <Link
+                        key={`${slide.id}-${slideIndex}`}
+                        href={`/evenements/${slide.slug}`}
+                        className={styles["strip-slide"]}
+                        aria-hidden={duplicate ? "true" : undefined}
+                        tabIndex={duplicate ? -1 : undefined}
+                        aria-label={duplicate ? undefined : slide.title}
+                      >
+                        <PublicStorageImage
+                          src={slide.coverUrl!}
+                          alt=""
+                          fill
+                          sizes="(max-width: 767px) 45vw, 22vw"
+                          quality={85}
+                          preload={slideIndex === 0}
+                          className={styles["strip-image"]}
+                        />
+                      </Link>
+                    );
+                  })}
                 </div>
-              ) : null}
+              </div>
             </div>
-          </div>
+          )}
 
           {featured ? (
             <figcaption className={styles.caption}>
@@ -261,19 +203,15 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
                 <MapPin aria-hidden="true" />
                 {featured.venueName ?? featured.city}
               </span>
+              <Link href={ROUTES.explore} className={styles["caption-explore"]}>
+                Tout l&apos;agenda
+                <ArrowUpRight aria-hidden="true" />
+              </Link>
             </figcaption>
           ) : null}
 
           {count > 1 ? (
             <div className={styles.rotation} role="group" aria-label="Affiches à la une">
-              <button
-                type="button"
-                className={styles["rotation-button"]}
-                aria-label="Affiche précédente"
-                onClick={() => goTo(safeIndex - 1)}
-              >
-                <ChevronLeft aria-hidden="true" />
-              </button>
               <button
                 type="button"
                 className={styles["rotation-button"]}
@@ -285,49 +223,13 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
               >
                 {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
               </button>
-              <span className={styles["rotation-count"]} aria-live="off">
-                {String(safeIndex + 1).padStart(2, "0")}
-                <span aria-hidden="true"> / </span>
-                {String(count).padStart(2, "0")}
+              <span className={styles["rotation-hint"]}>
+                {paused ? "Défilement en pause" : "Affiches des prochaines sorties"}
               </span>
-              <button
-                type="button"
-                className={styles["rotation-button"]}
-                aria-label="Affiche suivante"
-                onClick={() => goTo(safeIndex + 1)}
-              >
-                <ChevronRight aria-hidden="true" />
-              </button>
             </div>
           ) : null}
         </figure>
 
-        {upcoming.length ? (
-          <div className={styles["upcoming-wrap"]}>
-            <p className={shell["mono-label"]}>Prochaines sorties</p>
-            <ol className={styles.upcoming} aria-label="Prochaines sorties">
-              {upcoming.map((event) => (
-                <li key={event.id}>
-                  <Link href={`/evenements/${event.slug}`} className={styles["upcoming-link"]}>
-                    <span className={styles["upcoming-date"]} aria-hidden="true">
-                      <span>{weekday(event.startAt)}</span>
-                      <strong>{DAY.format(new Date(event.startAt))}</strong>
-                      <span>{MONTH.format(new Date(event.startAt)).replace(/\./g, "")}</span>
-                    </span>
-                    <span className={styles["upcoming-body"]}>
-                      <span className={styles["upcoming-title"]}>{event.title}</span>
-                      <span className={styles["upcoming-meta"]}>
-                        {event.categoryLabel} · {event.venueName ?? event.city} ·{" "}
-                        {priceLabel(event)}
-                      </span>
-                    </span>
-                    <ArrowUpRight className={styles["upcoming-arrow"]} aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          </div>
-        ) : null}
       </div>
     </section>
   );

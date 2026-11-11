@@ -84,7 +84,7 @@ export default async function OrganizersPage() {
                           width={108}
                           height={108}
                           sizes="54px"
-                          quality={70}
+                          quality={72}
                         />
                       ) : (
                         <span>{getInitials(organizer.name)}</span>

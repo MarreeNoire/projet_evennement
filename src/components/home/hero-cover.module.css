@@ -1,10 +1,10 @@
 /* =============================================================================
    Hero de l'accueil
    ---------------------------------------------------------------------------
-   Le hero ne définit plus sa typographie ni sa palette : il emprunte les
-   primitives du shell éditorial (`page-head`, `page-title`, `page-lead`, `btn`)
-   et ne garde ici que la mise en page de l'affiche et du fil des prochaines
-   sorties. Les affiches restent montrées entières (aucun recadrage).
+   Le hero ne définit pas sa typographie ni sa palette : il emprunte les
+   primitives du shell éditorial (`page-head`, `page-title`, `page-lead`, `btn`).
+   La bande d'affiches reprend la mécanique du hero de DG Cinema (défilement
+   continu bord à bord, vignettes portrait) avec les données du site.
    ========================================================================== */
 
 .hero {
@@ -37,54 +37,86 @@
   gap: 10px;
 }
 
-/* --- Affiche + prochaines sorties ---------------------------------------- */
+/* --- Bande d'affiches + fil des prochaines sorties ----------------------- */
 
 .showcase {
-  display: grid;
-  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-  align-items: start;
-  gap: clamp(24px, 4vw, 56px);
-}
-
-.poster-card {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 14px;
+  align-items: center;
+  gap: clamp(22px, 3vw, 36px);
+}
+
+.strip-figure {
+  display: flex;
+  min-width: 0;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   margin: 0;
 }
 
-.poster {
+/* Sort de la colonne éditoriale (1240px) pour occuper toute la largeur. */
+.strip-bleed {
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+}
+
+/* Scène three.js : même gabarit que la bande de repli. */
+.screen {
+  width: 100%;
+  height: clamp(240px, 27vw, 460px);
+  cursor: default;
+}
+
+.strip {
   position: relative;
+  width: 100%;
+  height: clamp(240px, 27vw, 420px);
   overflow: hidden;
-  aspect-ratio: 5 / 7;
+}
+
+.track {
+  --strip-gap: clamp(16px, 3.5vw, 50px);
+
+  display: flex;
+  width: max-content;
+  height: 100%;
+  gap: var(--strip-gap);
+  animation: strip-marquee var(--marquee-duration, 36s) linear infinite;
+  will-change: transform;
+}
+
+.strip[data-paused="true"] .track {
+  animation-play-state: paused;
+}
+
+.strip-slide {
+  position: relative;
+  flex: 0 0 auto;
+  height: 100%;
+  aspect-ratio: 248 / 392;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 14px;
   background-color: var(--surface);
 }
 
-.stack {
-  position: absolute;
-  inset: 0;
+.strip-image {
+  object-fit: cover;
 }
 
-.slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 700ms var(--ease-spring, ease);
-}
+@keyframes strip-marquee {
+  from {
+    transform: translateX(0);
+  }
 
-.slide-active {
-  opacity: 1;
-}
-
-.slide-outgoing {
-  opacity: 0;
-}
-
-.poster-image {
-  object-fit: contain;
+  to {
+    /* Une demi-bande + la moitié d'un espace : la seconde copie démarre
+       exactement là où la première s'arrête, sans saut visible. */
+    transform: translateX(calc(-50% - var(--strip-gap) / 2));
+  }
 }
 
 .backdrop-fallback {
@@ -100,6 +132,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  justify-content: center;
   gap: 5px 12px;
   margin: 0;
   color: var(--muted);
@@ -139,10 +172,31 @@
   opacity: 0.7;
 }
 
+.caption-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.caption-explore svg {
+  width: 12px;
+  height: 12px;
+}
+
+.caption-explore:hover {
+  color: var(--primary);
+}
+
 .rotation {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 10px;
 }
 
 .rotation-button {
@@ -170,120 +224,10 @@
   height: 15px;
 }
 
-.rotation-count {
-  margin-inline: 4px;
+.rotation-hint {
   color: var(--muted);
   font-size: 11px;
-  font-variant-numeric: tabular-nums;
   letter-spacing: 0.08em;
-}
-
-/* --- Fil des prochaines sorties ----------------------------------------- */
-
-.upcoming-wrap {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.upcoming {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.upcoming li {
-  border-top: 1px solid var(--line);
-}
-
-.upcoming li:last-child {
-  border-bottom: 1px solid var(--line);
-}
-
-.upcoming-link {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 16px;
-  align-items: center;
-  gap: clamp(12px, 1.6vw, 20px);
-  padding: 14px 2px;
-}
-
-.upcoming-date {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-.upcoming-date strong {
-  font-family: var(--display);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  color: var(--ink);
-}
-
-.upcoming-body {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.upcoming-title {
-  overflow: hidden;
-  font-family: var(--display);
-  font-size: clamp(16px, 1.6vw, 19px);
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-  color: var(--ink);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.upcoming-meta {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.upcoming-arrow {
-  width: 15px;
-  height: 15px;
-  color: var(--muted);
-  transition:
-    transform 0.2s var(--ease-spring, ease),
-    color 0.2s ease;
-}
-
-.upcoming-link:hover .upcoming-title {
-  color: var(--primary);
-}
-
-.upcoming-link:hover .upcoming-arrow {
-  transform: translate(2px, -2px);
-  color: var(--primary);
-}
-
-@media (max-width: 900px) {
-  .showcase {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .poster-card {
-    width: 100%;
-    max-width: 24rem;
-  }
 }
 
 @media (max-width: 767px) {
@@ -294,10 +238,39 @@
   .actions :global(.btn) {
     flex: 1 1 auto;
   }
+
+  .strip {
+    height: clamp(220px, 62vw, 320px);
+  }
 }
 
+/* Mouvement réduit : la bande devient une simple rail tactile, sans défilement
+   automatique ni copie invisible. */
 @media (prefers-reduced-motion: reduce) {
-  .slide,
+  .strip {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .strip .track {
+    animation: none;
+  }
+
+  .strip .strip-slide {
+    scroll-snap-align: start;
+  }
+
+  .strip .strip-slide[aria-hidden="true"] {
+    display: none;
+  }
+
+  .rotation-button,
   .upcoming-arrow,
   .caption-link {
     transition: none;

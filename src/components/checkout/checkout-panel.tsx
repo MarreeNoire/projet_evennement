@@ -78,11 +78,7 @@ export async function CheckoutPanel({
             </span>
           </div>
         </header>
-      ) : (
-        <p className="text-fg-muted border-border border-b pb-4 text-sm">
-          Billets pour <span className="text-fg font-semibold">{data.event.title}</span>
-        </p>
-      )}
+      ) : null}
 
       {ticketTypes.length === 0 ? (
         <Alert tone="warning" title="Billetterie indisponible">

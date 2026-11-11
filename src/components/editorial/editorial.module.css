@@ -13,7 +13,7 @@
 .grid {
   display: flex;
   min-width: 0;
-  gap: 24px;
+  gap: 20px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scroll-snap-type: x mandatory;
@@ -34,7 +34,7 @@
 }
 
 .card {
-  flex: 0 0 clamp(18rem, 32vw, 25rem);
+  flex: 0 0 clamp(14.5rem, 21vw, 18.5rem);
   min-width: 0;
   scroll-snap-align: start;
 }
@@ -1540,11 +1540,12 @@
 
 @media (max-width: 620px) {
   .grid {
-    gap: 30px;
+    gap: 14px;
   }
 
+  /* Deux cartes visibles sur petit écran : la suivante affleure. */
   .card {
-    flex-basis: min(82vw, 330px);
+    flex-basis: min(58vw, 250px);
   }
 
   .planGrid {

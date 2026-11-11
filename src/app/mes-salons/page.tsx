@@ -165,7 +165,7 @@ function SalonStub({
   return (
     <Link
       href={`/salons/${salon.id}`}
-      className="group border-border bg-surface hover:border-primary/50 flex min-h-64 flex-col overflow-hidden border transition-colors duration-150"
+      className="group border-border bg-surface hover:border-primary/60 flex min-h-64 flex-col overflow-hidden rounded-2xl border shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="bg-bg-muted border-border relative h-36 overflow-hidden border-b">
         {event?.cover_url ? (

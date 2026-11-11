@@ -296,6 +296,48 @@ export function CheckoutForm({
 
   const canPay = pricing.lines.length > 0 && !pending;
 
+  /* Bloc promo partagé entre le tunnel classique et la modal. En modal il vit
+     sur l'étape Paiement pour laisser l'étape Coordonnées tenir sans défilement. */
+  const promoBlock = (
+    <div className="flex flex-col gap-2">
+      <Field
+        label="Code promo"
+        htmlFor="promoCode"
+        hint="Facultatif"
+        error={promoStatus.kind === "invalid" ? promoStatus.message : errors.promoCode?.message}
+      >
+        <Input
+          id="promoCode"
+          placeholder="ABIDJAN10"
+          className="uppercase"
+          invalid={promoStatus.kind === "invalid"}
+          {...fieldAriaProps("promoCode", {
+            error: promoStatus.kind === "invalid" ? promoStatus.message : undefined,
+          })}
+          {...register("promoCode", {
+            onChange: (event) => {
+              if (!event.target.value.trim()) setPromoStatus({ kind: "idle" });
+            },
+          })}
+        />
+      </Field>
+      {promoStatus.kind === "checking" ? (
+        <p className="text-fg-muted text-xs" role="status">
+          Vérification du code…
+        </p>
+      ) : null}
+      {promoStatus.kind === "applied" ? (
+        <p className="text-success flex items-center gap-1.5 text-xs font-medium" role="status">
+          <Check className="size-3.5 shrink-0" aria-hidden="true" />
+          {promoStatus.message}
+        </p>
+      ) : null}
+      {promoStatus.kind === "idle" && promoCode?.trim() ? (
+        <p className="text-fg-subtle text-xs">Le code sera revérifié au moment du paiement.</p>
+      ) : null}
+    </div>
+  );
+
   return (
     <form
       ref={formRef}
@@ -368,8 +410,8 @@ export function CheckoutForm({
         ) : null}
 
         {step === 0 ? (
-          <Card className="overflow-hidden rounded-xl">
-            <CardHeader className="pb-3">
+          <Card className={inDialog ? "rounded-xl" : "overflow-hidden rounded-xl"}>
+            <CardHeader className={inDialog ? "p-4 pb-2" : "pb-3"}>
               <CardTitle>Choisis tes billets</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-2.5">
@@ -396,21 +438,16 @@ export function CheckoutForm({
         ) : null}
 
         {step === 1 ? (
-          <Card className="overflow-hidden rounded-xl">
-            <CardHeader className="pb-3">
+          <Card className={inDialog ? "rounded-xl" : "overflow-hidden rounded-xl"}>
+            <CardHeader className={inDialog ? "p-4 pb-2" : "pb-3"}>
               <CardTitle>Vérifie tes coordonnées</CardTitle>
-              {inDialog ? (
-                <p className="text-fg-muted text-sm">
-                  Modifiables avant le paiement. Ajoute un code promo si tu en as un.
-                </p>
-              ) : null}
               {!inDialog ? (
                 <p className="text-fg-muted text-sm">
                   Reprises depuis ton compte, modifiables avant le paiement.
                 </p>
               ) : null}
             </CardHeader>
-            <CardContent className="flex flex-col gap-4">
+            <CardContent className={inDialog ? "flex flex-col gap-2 p-4 pt-0" : "flex flex-col gap-4"}>
               <Field
                 label="Nom complet"
                 htmlFor="buyerName"
@@ -480,60 +517,19 @@ export function CheckoutForm({
                 />
               </Field>
 
-              {inDialog ? (
-                <div className="border-border border-t pt-3">
-                  <Field
-                    label="Code promo"
-                    htmlFor="promoCode"
-                    hint="Facultatif"
-                    error={promoStatus.kind === "invalid" ? promoStatus.message : errors.promoCode?.message}
-                  >
-                    <Input
-                      id="promoCode"
-                      placeholder="ABIDJAN10"
-                      className="uppercase"
-                      invalid={promoStatus.kind === "invalid"}
-                      {...fieldAriaProps("promoCode", {
-                        error: promoStatus.kind === "invalid" ? promoStatus.message : undefined,
-                      })}
-                      {...register("promoCode", {
-                        onChange: (event) => {
-                          if (!event.target.value.trim()) setPromoStatus({ kind: "idle" });
-                        },
-                      })}
-                    />
-                  </Field>
-                  {promoStatus.kind === "checking" ? (
-                    <p className="text-fg-muted text-xs" role="status">
-                      Vérification du code…
-                    </p>
-                  ) : null}
-                  {promoStatus.kind === "applied" ? (
-                    <p className="text-success flex items-center gap-1.5 text-xs font-medium" role="status">
-                      <Check className="size-3.5 shrink-0" aria-hidden="true" />
-                      {promoStatus.message}
-                    </p>
-                  ) : null}
-                  {promoStatus.kind === "idle" && promoCode?.trim() ? (
-                    <p className="text-fg-subtle text-xs">
-                      Le code sera revérifié au moment du paiement.
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
             </CardContent>
           </Card>
         ) : null}
 
         {step === LAST_STEP ? (
           <div className="flex flex-col gap-4">
-            <Card className="overflow-hidden rounded-xl">
+            <Card className={inDialog ? "rounded-xl" : "overflow-hidden rounded-xl"}>
               {!inDialog ? (
                 <CardHeader className="pb-3">
                   <CardTitle>Ta commande</CardTitle>
                 </CardHeader>
               ) : null}
-              <CardContent className="flex flex-col gap-4">
+              <CardContent className={inDialog ? "flex flex-col gap-2 p-4 pt-0" : "flex flex-col gap-4"}>
                 {/* En modal : la liste détaillée est déjà résumée dans la barre
                     d'action (nombre + total + lignes) ; on ne garde que le total
                     pour que l'étape tienne sans défilement. */}
@@ -591,6 +587,10 @@ export function CheckoutForm({
                   </button>
                 </div>
 
+                {/* Modal : le code promo vit sur cette étape, pas sur les
+                    coordonnées, pour que chaque étape tienne sans défilement. */}
+                {inDialog ? promoBlock : null}
+
                 {/* Modal : le prestataire tient sur une ligne, pas de carte
                     dédiée — l'étape doit rester visible sans défilement. */}
                 {inDialog ? (
@@ -615,50 +615,7 @@ export function CheckoutForm({
                   </div>
                 </div>
 
-                {!inDialog ? (
-                  <Field
-                    label="Code promo"
-                    htmlFor="promoCode"
-                    hint="Facultatif"
-                    error={promoStatus.kind === "invalid" ? promoStatus.message : errors.promoCode?.message}
-                  >
-                    <Input
-                      id="promoCode"
-                      placeholder="ABIDJAN10"
-                      className="uppercase"
-                      invalid={promoStatus.kind === "invalid"}
-                      {...fieldAriaProps("promoCode", {
-                        error: promoStatus.kind === "invalid" ? promoStatus.message : undefined,
-                      })}
-                      {...register("promoCode", {
-                        onChange: (event) => {
-                          // Saisie vidée : on repart d'un état neutre sans effet de bord.
-                          if (!event.target.value.trim()) setPromoStatus({ kind: "idle" });
-                        },
-                      })}
-                    />
-                  </Field>
-                ) : null}
-
-                {promoStatus.kind === "checking" ? (
-                  <p className="text-fg-muted text-xs" role="status">
-                    Vérification du code…
-                  </p>
-                ) : null}
-                {promoStatus.kind === "applied" ? (
-                  <p
-                    className="text-success flex items-center gap-1.5 text-xs font-medium"
-                    role="status"
-                  >
-                    <Check className="size-3.5 shrink-0" aria-hidden="true" />
-                    {promoStatus.message}
-                  </p>
-                ) : null}
-                {promoStatus.kind === "idle" && promoCode?.trim() ? (
-                  <p className="text-fg-subtle text-xs">
-                    Le code sera revérifié au moment du paiement.
-                  </p>
-                ) : null}
+                {promoBlock}
 
                 <p
                   className={`text-fg-subtle flex items-start gap-2 ${inDialog ? "text-[0.6875rem]" : "text-xs"}`}
@@ -678,9 +635,9 @@ export function CheckoutForm({
         className={`${styles.bar} checkout-action-bar ${inDialog ? styles.barStatic : ""}`}
         data-checkout-bar=""
       >
-        {/* Modal + dernière étape : le total est déjà dans la carte « Ta commande »,
-            la barre ne garde que les actions pour libérer de la hauteur. */}
-        {!inDialog || step < LAST_STEP ? (
+        {/* Modal : le récapitulatif est déjà dans la pastille d'étape, la barre
+            ne garde que les actions pour libérer de la hauteur. */}
+        {!inDialog ? (
           <div className={styles.barMeta}>
             <span className={styles.barCount}>
               {pricing.ticketCount > 0
