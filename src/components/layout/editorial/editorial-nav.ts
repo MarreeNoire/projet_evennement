@@ -10,6 +10,7 @@ export interface EditorialNavItem {
 
 export const EDITORIAL_NAV: EditorialNavItem[] = [
   { label: "Événements", href: ROUTES.explore },
+  { label: "Salons", href: ROUTES.mySalons },
   { label: "Organisateurs", href: "/organisateurs" },
   { label: "Aide", href: "/aide" },
   { label: "Organiser", href: "/devenir-organisateur" },

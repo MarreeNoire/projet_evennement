@@ -14,6 +14,7 @@ import {
 import { useTheme } from "@/components/providers/app-providers";
 import type { HeaderUser } from "@/components/layout/header-types";
 import { PublicStorageImage } from "@/components/ui/public-storage-image";
+import { PwaInstallPrompt } from "@/components/pwa/install-prompt";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -229,6 +230,7 @@ export function EditorialHeader({
           </nav>
 
           <div className={cx("head-actions")}>
+            <PwaInstallPrompt />
             <Link href={ROUTES.explore} className={cx("icon-btn", "search-btn")} aria-label="Rechercher un événement">
               <Search className={cx("icon")} aria-hidden="true" />
             </Link>

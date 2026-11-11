@@ -1583,6 +1583,95 @@ body:has(#app-side-rail) {
   outline-offset: 2px;
 }
 
+.pwa-install-control {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.pwa-install-control-button,
+.pwa-install-status {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.pwa-install-control-button {
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.pwa-install-control-button:hover {
+  border-color: var(--accent);
+  background: var(--surface-raised);
+}
+
+.pwa-install-control-button:active {
+  transform: translateY(1px);
+}
+
+.pwa-install-control-button svg,
+.pwa-install-status svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+.pwa-install-status {
+  min-height: 34px;
+  color: var(--fg-muted);
+  font-size: 11px;
+}
+
+.pwa-install-instructions {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(280px, calc(100vw - 24px));
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  color: var(--fg);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .pwa-install-control-button,
+  .pwa-install-status {
+    width: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+  }
+
+  .pwa-install-control-button span,
+  .pwa-install-status span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 @keyframes pwa-card-in {
   from {
     opacity: 0;

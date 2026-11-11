@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ArrowDownToLine, X } from "lucide-react";
+import { ArrowDownToLine, Check } from "lucide-react";
 
 import {
   isStandaloneDisplay,
@@ -14,25 +14,13 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
 
-function subscribeToPointer(onChange: () => void) {
-  const media = window.matchMedia("(pointer: coarse)");
-  media.addEventListener("change", onChange);
-  return () => media.removeEventListener("change", onChange);
-}
-
-function hasCoarsePointer() {
-  return window.matchMedia("(pointer: coarse)").matches;
-}
-
 export function PwaInstallPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [installedFromEvent, setInstalledFromEvent] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
   const isInstalled =
     useSyncExternalStore(subscribeToStandalone, isStandaloneDisplay, serverStandaloneSnapshot) ||
     installedFromEvent;
-  const isTouchDevice = useSyncExternalStore(subscribeToPointer, hasCoarsePointer, () => false);
-  const [showInstructions, setShowInstructions] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const onBeforeInstall = (event: Event) => {
@@ -46,14 +34,11 @@ export function PwaInstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
-
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
-
-  if (isInstalled || dismissed || (!installEvent && !isTouchDevice)) return null;
 
   async function install() {
     if (!installEvent) {
@@ -73,31 +58,33 @@ export function PwaInstallPrompt() {
   }
 
   return (
-    <aside className="pwa-install-card" aria-label="Installer l’application Event">
-      <span className="pwa-install-icon" aria-hidden="true">
-        <ArrowDownToLine className="size-5" />
-      </span>
-      <div className="pwa-install-copy">
-        <strong>Event, toujours à portée de main</strong>
-        <span>Ajoute l’application à ton écran d’accueil.</span>
-        {showInstructions ? (
-          <span className="pwa-install-instructions">
-            Dans le menu de ton navigateur, choisis « Installer » ou « Ajouter à l’écran d’accueil
-            ».
-          </span>
-        ) : null}
-      </div>
-      <button type="button" className="pwa-install-button" onClick={() => void install()}>
-        {installEvent ? "Installer" : showInstructions ? "Masquer" : "Comment faire"}
-      </button>
-      <button
-        type="button"
-        className="pwa-install-dismiss"
-        aria-label="Masquer le conseil d’installation"
-        onClick={() => setDismissed(true)}
-      >
-        <X className="size-4" aria-hidden="true" />
-      </button>
-    </aside>
+    <div className="pwa-install-control">
+      {isInstalled ? (
+        <span className="pwa-install-status" aria-label="Event est installée">
+          <Check aria-hidden="true" />
+          <span>Installée</span>
+        </span>
+      ) : (
+        <>
+          <button
+            type="button"
+            className="pwa-install-control-button"
+            onClick={() => void install()}
+            aria-expanded={showInstructions}
+            aria-controls="pwa-install-instructions"
+          >
+            <ArrowDownToLine aria-hidden="true" />
+            <span>Télécharger</span>
+          </button>
+          {showInstructions ? (
+            <p className="pwa-install-instructions" id="pwa-install-instructions" role="status">
+              {installEvent
+                ? "L’installation va s’ouvrir. Suis les instructions de ton navigateur."
+                : "Dans le menu de ton navigateur, choisis « Installer Event » ou « Ajouter à l’écran d’accueil »."}
+            </p>
+          ) : null}
+        </>
+      )}
+    </div>
   );
 }

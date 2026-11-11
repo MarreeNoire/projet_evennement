@@ -20,6 +20,7 @@ import type { HeaderUser } from "./header-types";
 import { getMobileHeaderTitle, useSideCollapsed } from "./app-nav";
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
+import { PwaInstallPrompt } from "@/components/pwa/install-prompt";
 
 /* =============================================================================
    Barre supérieure adaptative
@@ -288,6 +289,7 @@ export function HeaderShell({
             <Search className="size-5" aria-hidden="true" />
           </button>
 
+          <PwaInstallPrompt />
           <ThemeToggle className="hidden md:inline-flex" />
 
           {user ? (
