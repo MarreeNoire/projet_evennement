@@ -1475,11 +1475,7 @@ body:has(#app-side-rail) {
 }
 
 /* ============================================================================
-   Invitation à installer la PWA
-   --------------------------------------------------------------------------
-   La carte n'avait aucun style : elle s'affichait en flux, sans fond, au bas
-   de l'accueil. Elle flotte maintenant au-dessus de la barre d'onglets, dans
-   la matière braise, en respectant les zones sûres des encoches.
+   Invitation native à installer la PWA
    ========================================================================== */
 
 .pwa-install-card {
@@ -1636,20 +1632,114 @@ body:has(#app-side-rail) {
 }
 
 .pwa-install-instructions {
-  position: absolute;
-  z-index: 60;
-  top: calc(100% + 8px);
-  right: 0;
-  width: min(280px, calc(100vw - 24px));
   margin: 0;
-  padding: 12px 14px;
+}
+
+.pwa-install-dialog {
+  width: min(420px, calc(100vw - 28px));
+  max-width: none;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 28px);
+  overflow: hidden;
+  padding: 0;
   border: 1px solid var(--border-strong);
-  border-radius: 12px;
-  background: var(--surface-raised);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  border-radius: 26px;
+  background:
+    radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--accent-solid) 16%, transparent), transparent 65%),
+    var(--surface-raised);
   color: var(--fg);
-  font-size: 12px;
-  line-height: 1.45;
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.pwa-install-dialog::backdrop {
+  background: rgba(5, 7, 10, 0.64);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.pwa-install-dialog-content {
+  display: flex;
+  max-height: inherit;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(22px, 5vw, 30px);
+  padding-bottom: max(clamp(22px, 5vw, 30px), env(safe-area-inset-bottom, 0px));
+}
+
+.pwa-install-dialog-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid rgba(230, 171, 85, 0.35);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(230, 171, 85, 0.2), rgba(199, 133, 47, 0.08));
+  color: #e6ab55;
+}
+
+.pwa-install-dialog-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.pwa-install-dialog-eyebrow {
+  margin: 2px 0 -8px;
+  color: #e6ab55;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pwa-install-dialog h2 {
+  margin: 0;
+  font-family: var(--font-display, inherit);
+  font-size: clamp(22px, 5vw, 28px);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.pwa-install-dialog-copy,
+.pwa-install-dialog-help {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pwa-install-dialog-copy {
+  color: var(--fg-muted);
+}
+
+.pwa-install-dialog-help {
+  width: 100%;
+  margin-top: 4px;
+  padding: 13px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.pwa-install-dialog-close {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 2px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(105deg, #c7852f, #e6ab55);
+  color: #1b1310;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.pwa-install-dialog-close:focus-visible {
+  outline: 2px solid #e6ab55;
+  outline-offset: 3px;
 }
 
 @media (max-width: 640px) {
@@ -1669,6 +1759,32 @@ body:has(#app-side-rail) {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  .pwa-install-dialog {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    max-height: min(76dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 12px));
+    margin: 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .pwa-install-dialog-content {
+    gap: 10px;
+    padding: 24px 22px max(22px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .pwa-install-dialog-content::before {
+    width: 34px;
+    height: 4px;
+    margin: -12px auto 2px;
+    border-radius: 999px;
+    background: var(--border-strong);
+    content: "";
   }
 }
 
