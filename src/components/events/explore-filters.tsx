@@ -39,23 +39,21 @@ function ExploreFiltersInner({
   const [city, setCity] = useState(current.get("ville") ?? "");
   const [sort, setSort] = useState(current.get("tri") ?? "date_asc");
   const [freeOnly, setFreeOnly] = useState(current.get("gratuit") === "1");
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const mobileFiltersRef = useRef<HTMLDivElement>(null);
-  const mobileFiltersButtonRef = useRef<HTMLButtonElement>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersPopoverRef = useRef<HTMLDivElement>(null);
+  const filtersButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!mobileFiltersOpen) return;
+    if (!filtersOpen) return;
 
     function onPointerDown(event: PointerEvent) {
-      if (!mobileFiltersRef.current?.contains(event.target as Node)) {
-        setMobileFiltersOpen(false);
-      }
+      if (!filtersPopoverRef.current?.contains(event.target as Node)) setFiltersOpen(false);
     }
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
-      setMobileFiltersOpen(false);
-      mobileFiltersButtonRef.current?.focus();
+      setFiltersOpen(false);
+      filtersButtonRef.current?.focus();
     }
 
     document.addEventListener("pointerdown", onPointerDown);
@@ -64,14 +62,13 @@ function ExploreFiltersInner({
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [mobileFiltersOpen]);
+  }, [filtersOpen]);
 
   const activeFilterCount = [category, city, freeOnly, sort !== "date_asc"].filter(Boolean).length;
-  const mobileFilterCount = [Boolean(city), sort !== "date_asc"].filter(Boolean).length;
 
   function apply(event?: React.FormEvent) {
     event?.preventDefault();
-    setMobileFiltersOpen(false);
+    setFiltersOpen(false);
     const next = new URLSearchParams();
     if (query.trim()) next.set("q", query.trim());
     if (category) next.set("categorie", category);
@@ -83,7 +80,7 @@ function ExploreFiltersInner({
   }
 
   function reset() {
-    setMobileFiltersOpen(false);
+    setFiltersOpen(false);
     setQuery("");
     setCategory("");
     setCity("");
@@ -119,40 +116,40 @@ function ExploreFiltersInner({
             </span>
           </label>
 
-          <div className={content.mobileFilterControl} ref={mobileFiltersRef}>
+          <div className={content.filterControl} ref={filtersPopoverRef}>
             <button
-              ref={mobileFiltersButtonRef}
+              ref={filtersButtonRef}
               type="button"
-              className={content.mobileFilterButton}
-              aria-label={`Filtres de ville et de tri${mobileFilterCount ? ` (${mobileFilterCount} actif${mobileFilterCount > 1 ? "s" : ""})` : ""}`}
-              aria-expanded={mobileFiltersOpen}
-              aria-controls="explorer-mobile-filters"
-              onClick={() => setMobileFiltersOpen((open) => !open)}
+              className={content.filterButton}
+              aria-label={`Filtres${activeFilterCount ? ` (${activeFilterCount} actif${activeFilterCount > 1 ? "s" : ""})` : ""}`}
+              aria-expanded={filtersOpen}
+              aria-controls="explorer-filters-menu"
+              onClick={() => setFiltersOpen((open) => !open)}
             >
               <Filter aria-hidden="true" />
-              {mobileFilterCount ? (
-                <span className={content.mobileFilterBadge} aria-hidden="true">
-                  {mobileFilterCount}
+              {activeFilterCount ? (
+                <span className={content.filterBadge} aria-hidden="true">
+                  {activeFilterCount}
                 </span>
               ) : null}
             </button>
 
-            {mobileFiltersOpen ? (
+            {filtersOpen ? (
               <div
-                id="explorer-mobile-filters"
-                className={content.mobileFilterPanel}
+                id="explorer-filters-menu"
+                className={content.filterPanel}
                 role="group"
-                aria-label="Filtres de ville et de tri"
+                aria-label="Filtres des événements"
               >
-                <label className={shell.field} htmlFor="explorer-city-mobile">
+                <label className={shell.field} htmlFor="explorer-city-filter">
                   <span className={shell["field-label"]}>Ville</span>
                   <select
-                    id="explorer-city-mobile"
+                    id="explorer-city-filter"
                     value={city}
                     onChange={(event) => setCity(event.target.value)}
                     className={shell.select}
                   >
-                    <option value="">Toutes villes</option>
+                    <option value="">Toutes les villes</option>
                     {cities.map((value) => (
                       <option key={value} value={value}>
                         {value}
@@ -160,10 +157,11 @@ function ExploreFiltersInner({
                     ))}
                   </select>
                 </label>
-                <label className={shell.field} htmlFor="explorer-sort-mobile">
+
+                <label className={shell.field} htmlFor="explorer-sort-filter">
                   <span className={shell["field-label"]}>Trier par</span>
                   <select
-                    id="explorer-sort-mobile"
+                    id="explorer-sort-filter"
                     value={sort}
                     onChange={(event) => setSort(event.target.value)}
                     className={shell.select}
@@ -175,43 +173,36 @@ function ExploreFiltersInner({
                     ))}
                   </select>
                 </label>
+
+                <label className={shell.field} htmlFor="explorer-category-filter">
+                  <span className={shell["field-label"]}>Type d’événement</span>
+                  <select
+                    id="explorer-category-filter"
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    className={shell.select}
+                  >
+                    <option value="">Tous les types</option>
+                    {CATEGORIES.map((item) => (
+                      <option key={item.slug} value={item.slug}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className={shell.check}>
+                  <input
+                    type="checkbox"
+                    checked={freeOnly}
+                    onChange={(event) => setFreeOnly(event.target.checked)}
+                  />
+                  Gratuits uniquement
+                </label>
               </div>
             ) : null}
           </div>
         </div>
-
-        <label className={cx(shell.field, content.filterDesktopOnly)} htmlFor="explorer-city">
-          <span className={shell["field-label"]}>Ville</span>
-          <select
-            id="explorer-city"
-            value={city}
-            onChange={(event) => setCity(event.target.value)}
-            className={shell.select}
-          >
-            <option value="">Toutes villes</option>
-            {cities.map((value) => (
-              <option key={value} value={value}>
-                {value}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className={cx(shell.field, content.filterDesktopOnly)} htmlFor="explorer-sort">
-          <span className={shell["field-label"]}>Trier par</span>
-          <select
-            id="explorer-sort"
-            value={sort}
-            onChange={(event) => setSort(event.target.value)}
-            className={shell.select}
-          >
-            {EVENT_SORTS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
 
         <button
           type="submit"
@@ -226,17 +217,6 @@ function ExploreFiltersInner({
           {pending ? "Recherche…" : "Rechercher"}
         </button>
       </div>
-
-      <CategoryChoices category={category} setCategory={setCategory} />
-
-      <label className={shell.check}>
-        <input
-          type="checkbox"
-          checked={freeOnly}
-          onChange={(event) => setFreeOnly(event.target.checked)}
-        />
-        Gratuits uniquement
-      </label>
 
       <div className={content.filtersFoot}>
         <span className={content.filtersCount} role="status">
@@ -255,67 +235,6 @@ function ExploreFiltersInner({
         ) : null}
       </div>
     </form>
-  );
-}
-
-function CategoryChoices({
-  category,
-  setCategory,
-}: {
-  category: string;
-  setCategory: (value: string) => void;
-}) {
-  return (
-    <>
-      {/* Puces sur grand écran : tout est visible d'un coup d'œil. */}
-      <fieldset className={cx(content.chipSet, content.filterDesktopOnly)}>
-        <legend className={shell["field-label"]} style={{ marginBottom: 8 }}>
-          Type d’événement
-        </legend>
-        <div className={content.chips} role="group" aria-label="Filtrer par catégorie">
-          <button
-            type="button"
-            aria-pressed={!category}
-            onClick={() => setCategory("")}
-            className={content.chip}
-          >
-            Toutes
-          </button>
-          {CATEGORIES.map((item) => (
-            <button
-              key={item.slug}
-              type="button"
-              aria-pressed={category === item.slug}
-              onClick={() => setCategory(item.slug)}
-              className={content.chip}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
-      {/* Petit écran / PWA : un menu déroulant compact à la place des
-          douze puces qui écrasaient la page. */}
-      <fieldset className={cx(content.chipSet, content.filterMobileOnly)}>
-        <label className={shell.field} htmlFor="explorer-category-mobile">
-          <span className={shell["field-label"]}>Type d’événement</span>
-          <select
-            id="explorer-category-mobile"
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            className={shell.select}
-          >
-            <option value="">Tous les types</option>
-            {CATEGORIES.map((item) => (
-              <option key={item.slug} value={item.slug}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </fieldset>
-    </>
   );
 }
 
