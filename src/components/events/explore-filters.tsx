@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState, useTransition } from "react";
-import { LoaderCircle, Search, X } from "lucide-react";
+import { Suspense, useEffect, useRef, useState, useTransition } from "react";
+import { Filter, LoaderCircle, Search, X } from "lucide-react";
 
 import { CATEGORIES, EVENT_SORTS } from "@/lib/constants";
 
@@ -39,11 +39,39 @@ function ExploreFiltersInner({
   const [city, setCity] = useState(current.get("ville") ?? "");
   const [sort, setSort] = useState(current.get("tri") ?? "date_asc");
   const [freeOnly, setFreeOnly] = useState(current.get("gratuit") === "1");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const mobileFiltersRef = useRef<HTMLDivElement>(null);
+  const mobileFiltersButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+
+    function onPointerDown(event: PointerEvent) {
+      if (!mobileFiltersRef.current?.contains(event.target as Node)) {
+        setMobileFiltersOpen(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setMobileFiltersOpen(false);
+      mobileFiltersButtonRef.current?.focus();
+    }
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [mobileFiltersOpen]);
 
   const activeFilterCount = [category, city, freeOnly, sort !== "date_asc"].filter(Boolean).length;
+  const mobileFilterCount = [Boolean(city), sort !== "date_asc"].filter(Boolean).length;
 
   function apply(event?: React.FormEvent) {
     event?.preventDefault();
+    setMobileFiltersOpen(false);
     const next = new URLSearchParams();
     if (query.trim()) next.set("q", query.trim());
     if (category) next.set("categorie", category);
@@ -55,6 +83,7 @@ function ExploreFiltersInner({
   }
 
   function reset() {
+    setMobileFiltersOpen(false);
     setQuery("");
     setCategory("");
     setCity("");
@@ -73,21 +102,83 @@ function ExploreFiltersInner({
       className={content.filters}
     >
       <div className={content.filterRow}>
-        <label className={shell.field} htmlFor="explorer-q">
-          <span className={shell["field-label"]}>Mot-clé</span>
-          <span className={content.inputWrap}>
-            <Search className={content.inputIcon} aria-hidden="true" />
-            <input
-              id="explorer-q"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Concert, conférence, Abidjan…"
-              className={`${shell.input} ${content.inputSearch}`}
-              style={{ paddingLeft: 34 }}
-            />
-          </span>
-        </label>
+        <div className={content.keywordRow}>
+          <label className={shell.field} htmlFor="explorer-q">
+            <span className={shell["field-label"]}>Mot-clé</span>
+            <span className={content.inputWrap}>
+              <Search className={content.inputIcon} aria-hidden="true" />
+              <input
+                id="explorer-q"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Concert, conférence, Abidjan…"
+                className={`${shell.input} ${content.inputSearch}`}
+                style={{ paddingLeft: 34 }}
+              />
+            </span>
+          </label>
+
+          <div className={content.mobileFilterControl} ref={mobileFiltersRef}>
+            <button
+              ref={mobileFiltersButtonRef}
+              type="button"
+              className={content.mobileFilterButton}
+              aria-label={`Filtres de ville et de tri${mobileFilterCount ? ` (${mobileFilterCount} actif${mobileFilterCount > 1 ? "s" : ""})` : ""}`}
+              aria-expanded={mobileFiltersOpen}
+              aria-controls="explorer-mobile-filters"
+              onClick={() => setMobileFiltersOpen((open) => !open)}
+            >
+              <Filter aria-hidden="true" />
+              {mobileFilterCount ? (
+                <span className={content.mobileFilterBadge} aria-hidden="true">
+                  {mobileFilterCount}
+                </span>
+              ) : null}
+            </button>
+
+            {mobileFiltersOpen ? (
+              <div
+                id="explorer-mobile-filters"
+                className={content.mobileFilterPanel}
+                role="group"
+                aria-label="Filtres de ville et de tri"
+              >
+                <label className={shell.field} htmlFor="explorer-city-mobile">
+                  <span className={shell["field-label"]}>Ville</span>
+                  <select
+                    id="explorer-city-mobile"
+                    value={city}
+                    onChange={(event) => setCity(event.target.value)}
+                    className={shell.select}
+                  >
+                    <option value="">Toutes villes</option>
+                    {cities.map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={shell.field} htmlFor="explorer-sort-mobile">
+                  <span className={shell["field-label"]}>Trier par</span>
+                  <select
+                    id="explorer-sort-mobile"
+                    value={sort}
+                    onChange={(event) => setSort(event.target.value)}
+                    className={shell.select}
+                  >
+                    {EVENT_SORTS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            ) : null}
+          </div>
+        </div>
 
         <label className={cx(shell.field, content.filterDesktopOnly)} htmlFor="explorer-city">
           <span className={shell["field-label"]}>Ville</span>
@@ -135,46 +226,6 @@ function ExploreFiltersInner({
           {pending ? "Recherche…" : "Rechercher"}
         </button>
       </div>
-
-      <details className={content.filtersAdvanced}>
-        <summary>
-          Filtres supplémentaires
-          {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
-        </summary>
-        <div className={content.filterRow} style={{ marginTop: 12 }}>
-          <label className={shell.field} htmlFor="explorer-city-mobile">
-            <span className={shell["field-label"]}>Ville</span>
-            <select
-              id="explorer-city-mobile"
-              value={city}
-              onChange={(event) => setCity(event.target.value)}
-              className={shell.select}
-            >
-              <option value="">Toutes villes</option>
-              {cities.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={shell.field} htmlFor="explorer-sort-mobile">
-            <span className={shell["field-label"]}>Trier par</span>
-            <select
-              id="explorer-sort-mobile"
-              value={sort}
-              onChange={(event) => setSort(event.target.value)}
-              className={shell.select}
-            >
-              {EVENT_SORTS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </details>
 
       <CategoryChoices category={category} setCategory={setCategory} />
 
