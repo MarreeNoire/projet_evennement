@@ -66,14 +66,20 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
     () => events.filter((event) => event.coverUrl).slice(0, MAX_SLIDES),
     [events],
   );
+  const posters = useMemo(
+    () => slides.map((slide) => ({ id: slide.id, src: slide.coverUrl! })),
+    [slides],
+  );
 
   const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [tabHidden, setTabHidden] = useState(false);
+  const [activeEventId, setActiveEventId] = useState<string | null>(null);
 
   const count = slides.length;
-  const featured = slides[0] ?? events[0] ?? null;
+  const featured =
+    slides.find((slide) => slide.id === activeEventId) ?? slides[0] ?? events[0] ?? null;
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -109,7 +115,7 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
 
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
-      <header className={`${shell["page-head"]} ${shell["page-head--split"]}`}>
+      <header className={`${shell["page-head"]} ${shell["page-head--split"]} ${styles.header}`}>
         <div className={styles["head-main"]}>
           <p className={shell.eyebrow}>Billetterie et communauté</p>
           <h1 id="hero-title" className={shell["page-title"]}>
@@ -148,10 +154,7 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
         >
           {/* Mur courbé three.js (repli : bande tactile sans WebGL). */}
           {count > 1 ? (
-            <HeroScreen
-              posters={slides.map((slide) => ({ id: slide.id, src: slide.coverUrl! }))}
-              paused={screenPaused}
-            />
+            <HeroScreen posters={posters} paused={screenPaused} onActiveChange={setActiveEventId} />
           ) : (
             <div className={styles["strip-bleed"]}>
               <div className={styles.strip} data-paused={animationPaused ? "true" : undefined}>
@@ -229,7 +232,6 @@ export function HeroCover({ events }: { events: HeroCoverEvent[] }) {
             </div>
           ) : null}
         </figure>
-
       </div>
     </section>
   );

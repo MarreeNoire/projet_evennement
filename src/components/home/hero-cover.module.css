@@ -10,8 +10,13 @@
 .hero {
   display: flex;
   flex-direction: column;
-  gap: clamp(26px, 4vw, 44px);
-  padding-block: clamp(24px, 3.2vw, 38px) clamp(12px, 1.8vw, 22px);
+  gap: clamp(18px, 2.6vw, 30px);
+  padding-block: clamp(8px, 1.3vw, 16px) clamp(10px, 1.5vw, 18px);
+}
+
+.header {
+  padding-top: 0 !important;
+  border-top: 0 !important;
 }
 
 .head-main {
@@ -19,7 +24,7 @@
   min-width: 0;
   flex-direction: column;
   align-items: flex-start;
-  gap: 14px;
+  gap: 10px;
 }
 
 .head-aside {
@@ -28,7 +33,7 @@
   flex-direction: column;
   align-items: flex-start;
   justify-self: end;
-  gap: 18px;
+  gap: 14px;
 }
 
 .actions {
@@ -40,11 +45,26 @@
 /* --- Bande d'affiches + fil des prochaines sorties ----------------------- */
 
 .showcase {
+  position: relative;
+  isolation: isolate;
   display: flex;
   min-width: 0;
   flex-direction: column;
   align-items: center;
-  gap: clamp(22px, 3vw, 36px);
+  gap: clamp(12px, 2vw, 22px);
+}
+
+.showcase::before {
+  position: absolute;
+  z-index: -1;
+  inset: 10% 8% 18%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 20% 76%, rgba(231, 141, 50, 0.15), transparent 46%),
+    radial-gradient(ellipse at 78% 10%, rgba(75, 104, 151, 0.14), transparent 50%);
+  content: "";
+  filter: blur(30px);
+  pointer-events: none;
 }
 
 .strip-figure {
@@ -53,7 +73,7 @@
   width: 100%;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   margin: 0;
 }
 
@@ -66,8 +86,9 @@
 /* Scène three.js : même gabarit que la bande de repli. */
 .screen {
   width: 100%;
-  height: clamp(240px, 27vw, 460px);
+  height: clamp(260px, 28vw, 420px);
   cursor: default;
+  filter: drop-shadow(0 26px 28px rgba(32, 24, 14, 0.23));
 }
 
 .strip {
@@ -134,6 +155,15 @@
   align-items: baseline;
   justify-content: center;
   gap: 5px 12px;
+  max-width: min(100%, 920px);
+  padding: 10px 18px;
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  box-shadow:
+    0 10px 28px -22px rgba(18, 21, 30, 0.4),
+    inset 0 1px rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(12px) saturate(140%);
   margin: 0;
   color: var(--muted);
   font-size: 12px;
@@ -231,8 +261,18 @@
 }
 
 @media (max-width: 767px) {
+  .hero {
+    gap: 14px;
+    padding-block: 2px 8px;
+  }
+
+  .head-main {
+    gap: 8px;
+  }
+
   .head-aside {
     justify-self: start;
+    gap: 11px;
   }
 
   .actions :global(.btn) {
@@ -240,7 +280,17 @@
   }
 
   .strip {
-    height: clamp(220px, 62vw, 320px);
+    height: clamp(210px, 56vw, 300px);
+  }
+
+  .screen {
+    height: clamp(230px, 64vw, 340px);
+  }
+
+  .caption {
+    justify-content: flex-start;
+    border-radius: 15px;
+    padding: 10px 13px;
   }
 }
 
@@ -275,5 +325,8 @@
   .caption-link {
     transition: none;
   }
-}
 
+  .screen {
+    filter: none;
+  }
+}

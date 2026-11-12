@@ -47,13 +47,17 @@ const SLOT_SPEED = 7; // secondes par affiche (rythme calme, lisible)
 export function HeroScreen({
   posters,
   paused,
+  onActiveChange,
 }: {
   posters: HeroScreenPoster[];
   paused: boolean;
+  onActiveChange?: (posterId: string) => void;
 }) {
   /* Sonde reportée hors du rendu : jamais de setState pendant un effet. */
   const setWebglFailedSafe = () => queueMicrotask(() => setWebglFailed(true));
   const hostRef = useRef<HTMLDivElement>(null);
+  const onActiveChangeRef = useRef(onActiveChange);
+  const activePosterRef = useRef<string | null>(null);
   const [webglFailed, setWebglFailed] = useState(false);
   /* La sonde WebGL s'exécute au premier rendu client uniquement. */
 
@@ -73,6 +77,10 @@ export function HeroScreen({
   }, [paused]);
 
   useEffect(() => {
+    onActiveChangeRef.current = onActiveChange;
+  }, [onActiveChange]);
+
+  useEffect(() => {
     const host = hostRef.current;
     if (!host || webglFailed || loop.length < 2) return;
 
@@ -82,8 +90,9 @@ export function HeroScreen({
     canvas.style.display = "block";
     host.appendChild(canvas);
 
-    const gl = canvas.getContext("webgl2", { alpha: true, antialias: true })
-      ?? canvas.getContext("webgl", { alpha: true, antialias: true });
+    const gl =
+      canvas.getContext("webgl2", { alpha: true, antialias: true }) ??
+      canvas.getContext("webgl", { alpha: true, antialias: true });
     if (!gl) {
       canvas.remove();
       setWebglFailedSafe();
@@ -150,11 +159,7 @@ export function HeroScreen({
           material.color.set("#ffffff");
           material.needsUpdate = true;
           textures.push(loaded);
-          gsap.fromTo(
-            material,
-            { opacity: 0 },
-            { opacity: 1, duration: 0.8, ease: "power2.out" },
-          );
+          gsap.fromTo(material, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" });
         },
         undefined,
         () => {
@@ -232,6 +237,8 @@ export function HeroScreen({
       const dt = Math.min(deltaTime, 250) / 1000;
       state.speed += (state.targetSpeed - state.speed) * Math.min(deltaTime / 180, 1);
       state.rot += layout.omega * state.speed * dt;
+      let nearestPosterId: string | null = null;
+      let nearestDistance = Number.POSITIVE_INFINITY;
 
       meshes.forEach((mesh, index) => {
         const base = baseAngles[index] ?? 0;
@@ -245,7 +252,20 @@ export function HeroScreen({
         if (!visible) return;
         mesh.position.set(Math.sin(a) * layout.radius, 0, Math.cos(a) * layout.radius);
         mesh.rotation.y = a;
+        const distance = Math.abs(a);
+        const focus = Math.max(0, 1 - distance / Math.max(layout.angleStep, 0.001));
+        const scale = 1 + focus * 0.055;
+        mesh.scale.set(layout.slotW * scale, layout.slotH * scale, 1);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestPosterId = loop[index % loop.length]?.id ?? null;
+        }
       });
+
+      if (nearestPosterId && nearestPosterId !== activePosterRef.current) {
+        activePosterRef.current = nearestPosterId;
+        onActiveChangeRef.current?.(nearestPosterId);
+      }
 
       applyLayout();
       renderer.render(scene, camera);
@@ -261,8 +281,6 @@ export function HeroScreen({
       .fromTo(state, { dolly: 320 }, { dolly: 0, duration: 1.6, ease: "power3.out" }, 0);
 
     gsap.ticker.add(tick);
-
-
 
     /* Parallaxe très légère, limitée au pointeur qui survole la scène.
        Les coordonnées restent bornées dans le cadre : un mouvement ailleurs
